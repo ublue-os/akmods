@@ -7,7 +7,7 @@ on:
       - '**.md'
       - '**.txt'
   schedule:
-    - cron: '20 20 * * *'  # 8:20pm everyday
+    - cron: '7 30 * * *'  # 7:30am everyday
   push:
     branches:
       - main
@@ -22,7 +22,6 @@ env:
 jobs:
   build-others-akmod:
     name: Build others
-    needs: build-main
     runs-on: ubuntu-22.04
     permissions:
       contents: read
