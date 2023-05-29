@@ -1,20 +1,10 @@
 name: build-ublue
 on:
   pull_request:
-    branches:
-      - main
-    paths-ignore:
-      - '**.md'
-      - '**.txt'
+  merge_group:
   schedule:
     - cron: '0 6 * * *'  # 6am everyday (1h after 'config')
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - '**.md'
-      - '**.txt'
 env:
     IMAGE_NAME: akmods
     IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
