@@ -11,6 +11,8 @@ Add this to your Containerfile to install all the RPM packages, replacing `RELEA
     COPY --from=ghcr.io/ublue-os/akmods:RELEASE /rpms/ /tmp/rpms
     RUN rpm-ostree install /tmp/rpms/*.rpm
 
+It is also required that rpmfusion repos are installed and available to provide dependencies for these kmod RPMs.
+
 # Features
 
 Feel free to PR more kmod build scripts into this repo!
