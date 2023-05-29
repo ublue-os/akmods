@@ -28,11 +28,3 @@ These images are signed with sisgstore's [cosign](https://docs.sigstore.dev/cosi
 
     cosign verify --key cosign.pub ghcr.io/ublue-os/akmods
 
-## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Recent activity [![Time period](https://images.repography.com/35181738/ublue-os/akmods/recent-activity/T0Pa2apPYwHMixrcCV3Uqb0q0CYYEtoNogUxrGLx_44/ktMjGfqYgbIT8oaj-vwafgnfXyAGRUbKQkejtxhCscI_badge.svg)](https://repography.com)
-[![Timeline graph](https://images.repography.com/35181738/ublue-os/akmods/recent-activity/T0Pa2apPYwHMixrcCV3Uqb0q0CYYEtoNogUxrGLx_44/ktMjGfqYgbIT8oaj-vwafgnfXyAGRUbKQkejtxhCscI_timeline.svg)](https://github.com/ublue-os/akmods/commits)
-[![Issue status graph](https://images.repography.com/35181738/ublue-os/akmods/recent-activity/T0Pa2apPYwHMixrcCV3Uqb0q0CYYEtoNogUxrGLx_44/ktMjGfqYgbIT8oaj-vwafgnfXyAGRUbKQkejtxhCscI_issues.svg)](https://github.com/ublue-os/akmods/issues)
-[![Pull request status graph](https://images.repography.com/35181738/ublue-os/akmods/recent-activity/T0Pa2apPYwHMixrcCV3Uqb0q0CYYEtoNogUxrGLx_44/ktMjGfqYgbIT8oaj-vwafgnfXyAGRUbKQkejtxhCscI_prs.svg)](https://github.com/ublue-os/akmods/pulls)
-[![Trending topics](https://images.repography.com/35181738/ublue-os/akmods/recent-activity/T0Pa2apPYwHMixrcCV3Uqb0q0CYYEtoNogUxrGLx_44/ktMjGfqYgbIT8oaj-vwafgnfXyAGRUbKQkejtxhCscI_words.svg)](https://github.com/ublue-os/akmods/commits)
-[![Top contributors](https://images.repography.com/35181738/ublue-os/akmods/recent-activity/T0Pa2apPYwHMixrcCV3Uqb0q0CYYEtoNogUxrGLx_44/ktMjGfqYgbIT8oaj-vwafgnfXyAGRUbKQkejtxhCscI_users.svg)](https://github.com/ublue-os/akmods/graphs/contributors)
-[![Activity map](https://images.repography.com/35181738/ublue-os/akmods/recent-activity/T0Pa2apPYwHMixrcCV3Uqb0q0CYYEtoNogUxrGLx_44/ktMjGfqYgbIT8oaj-vwafgnfXyAGRUbKQkejtxhCscI_map.svg)](https://github.com/ublue-os/akmods/commits)
-
