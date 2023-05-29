@@ -6,9 +6,9 @@ A layer for adding extra kernel modules to your image. Use for better hardware s
 
 # Usage
 
-Add this to your Containerfile to install all the RPM packages:
+Add this to your Containerfile to install all the RPM packages, replacing `RELEASE` with either `37` or `38`:
 
-    COPY --from=ghcr.io/ublue-os/akmods:latest /rpms/ /tmp/rpms
+    COPY --from=ghcr.io/ublue-os/akmods:RELEASE /rpms/ /tmp/rpms
     RUN rpm-ostree install /tmp/rpms/*.rpm
 
 # Features

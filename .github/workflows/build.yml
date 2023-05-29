@@ -8,6 +8,7 @@ on:
       - '**.txt'
   schedule:
     - cron: '0 6 * * *'  # 6am everyday (1h after 'config')
+  workflow_dispatch:
   push:
     branches:
       - main
