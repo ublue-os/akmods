@@ -29,5 +29,5 @@ install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/pki/akmods/certs
 %attr(0644,root,root) %{_sysconfdir}/pki/akmods/certs/akmods-ublue.der
 
 %changelog
-* Fri Mar 17 2034 David Hoell - 0.1
-- Add key for inrolling ublue kernel modules with new build infrastucture
+* Fri May 18 2023 David Hoell - 0.1
+- Add key for enrolling ublue kernel modules for secure boot
