@@ -15,5 +15,6 @@ rpm-ostree install \
 V4L2LOOP_AKMOD_VERSION="$(basename "$(rpm -q "akmod-v4l2loopback" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')" ".fc${RELEASE%%.*}")"
 akmods --force --kernels "${KERNEL}" --kmod "v4l2loopback"
 modinfo /usr/lib/modules/${KERNEL}/extra/v4l2loopback/v4l2loopback.ko.xz > /dev/null \
-|| (cat /var/cache/akmods/v4l2loopback/.last.log /var/cache/akmods/v4l2loopback/${V4L2LOOP_AKMOD_VERSION}.failed.log && exit 1)
+|| (find /var/cache/akmods/v4l2loopback/ -name \*.log -print -exec cat {} \; && exit 1)
+#|| (cat /var/cache/akmods/v4l2loopback/${V4L2LOOP_AKMOD_VERSION}.failed.log && exit 1)
 
