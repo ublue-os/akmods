@@ -14,6 +14,7 @@ RUN /tmp/build-prep.sh
 RUN /tmp/build-ublue-os-akmods-key.sh
 
 RUN /tmp/build-kmod-v4l2loopback.sh
+RUN /tmp/build-kmod-wl.sh
 
 RUN mkdir /var/cache/rpms && \
     for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
