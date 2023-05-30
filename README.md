@@ -19,6 +19,7 @@ Feel free to PR more kmod build scripts into this repo!
 
 - ublue-os-akmods-key - installs our kmods signing key; install and import to allow SecureBoot systems to use these kmods
 - [v4l2loopback](https://github.com/umlaeute/v4l2loopback) - allows creating "virtual video devices"
+- [broadcom-wl](https://github.com/rpmfusion/broadcom-wl/) - support for some legacy broadcom wifi devices
 
 # Adding kmods
 
