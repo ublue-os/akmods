@@ -15,6 +15,8 @@ RUN /tmp/build-ublue-os-akmods-key.sh
 
 RUN /tmp/build-kmod-v4l2loopback.sh
 RUN /tmp/build-kmod-wl.sh
+RUN /tmp/build-kmod-xone.sh
+RUN /tmp/build-kmod-xpadneo.sh
 
 RUN mkdir /var/cache/rpms && \
     for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
@@ -23,6 +25,10 @@ RUN mkdir /var/cache/rpms && \
     done && \
     cp /tmp/ublue-os-akmods-key/rpmbuild/RPMS/noarch/ublue-os-akmods-key*.rpm /var/cache/rpms/
 
+RUN find /var/cache/repos
+RUN find /var/cache/rpms
+
 FROM scratch
 
+COPY --from=builder /var/cache/repos /repos
 COPY --from=builder /var/cache/rpms /rpms
