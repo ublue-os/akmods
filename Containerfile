@@ -7,28 +7,29 @@ FROM ${BASE_IMAGE}:${FEDORA_MAJOR_VERSION} AS builder
 
 COPY build*.sh /tmp
 COPY certs /tmp/certs
-COPY ublue-os-akmods-key.spec /tmp/ublue-os-akmods-key/ublue-os-akmods-key.spec
+COPY ublue-os-akmods-addons.spec /tmp/ublue-os-akmods-addons/ublue-os-akmods-addons.spec
+
+ADD https://negativo17.org/repos/fedora-steam.repo \
+    /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-steam.repo
 
 RUN /tmp/build-prep.sh
 
-RUN /tmp/build-ublue-os-akmods-key.sh
+RUN /tmp/build-ublue-os-akmods-addons.sh
 
 RUN /tmp/build-kmod-v4l2loopback.sh
 RUN /tmp/build-kmod-wl.sh
 RUN /tmp/build-kmod-xone.sh
 RUN /tmp/build-kmod-xpadneo.sh
 
-RUN mkdir /var/cache/rpms && \
-    for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
-        echo ${RPM}; \
-        cp "${RPM}" /var/cache/rpms/; \
-    done && \
-    cp /tmp/ublue-os-akmods-key/rpmbuild/RPMS/noarch/ublue-os-akmods-key*.rpm /var/cache/rpms/
+RUN mkdir -p /var/cache/rpms/{kmods,ublue-os}
+RUN cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
+        /var/cache/rpms/ublue-os/
+RUN for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
+        cp "${RPM}" /var/cache/rpms/kmods/; \
+    done
 
-RUN find /var/cache/repos
 RUN find /var/cache/rpms
 
 FROM scratch
 
-COPY --from=builder /var/cache/repos /repos
 COPY --from=builder /var/cache/rpms /rpms

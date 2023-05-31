@@ -2,11 +2,8 @@
 
 set -oeux pipefail
 
-mkdir -p /var/cache/repos
 
-wget https://negativo17.org/repos/fedora-steam.repo -O /var/cache/repos/fedora-steam.repo
-
-cp /var/cache/repos/fedora-steam.repo /etc/yum.repos.d/
+cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-steam.repo /etc/yum.repos.d/
 
 ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q kernel --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"

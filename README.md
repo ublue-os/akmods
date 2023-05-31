@@ -8,17 +8,23 @@ A layer for adding extra kernel modules to your image. Use for better hardware s
 
 Add this to your Containerfile to install all the RPM packages, replacing `RELEASE` with either `37` or `38`:
 
-    COPY --from=ghcr.io/ublue-os/akmods:RELEASE /repos/ /etc/yum.repos.d/
     COPY --from=ghcr.io/ublue-os/akmods:RELEASE /rpms/ /tmp/rpms
-    RUN rpm-ostree install /tmp/rpms/*.rpm
+    RUN rpm-ostree install /tmp/rpms/ublue-os/*.rpm
+    RUN rpm-ostree install /tmp/rpms/kmods/*.rpm
 
-This example shows copying/enabling any custom repos from `akmods` into the target environment, but building also requires that rpmfusion repos are installed and available to provide dependencies for these kmod RPMs.
+This example shows:
+1. copying all the rpms from the akmods image
+2. installing the ublue specific RPM, providing any extra repos and the akmod signing key
+3. installing the kmods RPMs, providing the actual kmods built in this repo
+
+The rpmfusion and extra repos provide dependencies which are required by the kmods RPMs.
+
 
 # Features
 
 Feel free to PR more kmod build scripts into this repo!
 
-- ublue-os-akmods-key - installs our kmods signing key; install and import to allow SecureBoot systems to use these kmods
+- ublue-os-akmods-addons - installs extra repos and our kmods signing key; install and import to allow SecureBoot systems to use these kmods
 - [v4l2loopback](https://github.com/umlaeute/v4l2loopback) - allows creating "virtual video devices"
 - [wl (broadcom)](https://github.com/rpmfusion/broadcom-wl/) - support for some legacy broadcom wifi devices
 - [xone](https://github.com/medusalix/xone) - xbox one controller USB wired/RF driver (akmod from [negativo17 steam repo](https://negativo17.org/steam/)
