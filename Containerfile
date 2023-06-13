@@ -16,8 +16,7 @@ RUN /tmp/build-prep.sh
 
 RUN /tmp/build-ublue-os-akmods-addons.sh
 
-RUN /tmp/build-kmod-v4l2loopback.sh; exit 0
-RUN cat /var/cache/akmods/v4l2loopback/*.failed.log
+RUN /tmp/build-kmod-v4l2loopback.sh
 RUN /tmp/build-kmod-wl.sh
 # disabled until has kernel 6.3 support
 #RUN /tmp/build-kmod-xone.sh
