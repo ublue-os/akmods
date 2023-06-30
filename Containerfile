@@ -17,7 +17,6 @@ RUN /tmp/build-prep.sh
 RUN /tmp/build-ublue-os-akmods-addons.sh
 
 RUN /tmp/build-kmod-v4l2loopback.sh
-RUN /tmp/build-kmod-xone.sh
 RUN /tmp/build-kmod-xpadneo.sh
 
 RUN mkdir -p /var/cache/rpms/{kmods,ublue-os}
