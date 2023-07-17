@@ -2,11 +2,11 @@
 
 set -oeux pipefail
 
-wget https://copr.fedorainfracloud.org/coprs/kylegospo/steamdeck-kmod/repo/fedora-$(rpm -E %fedora)/kylegospo-steamdeck-kmod-fedora-$(rpm -E %fedora).repo -O /etc/yum.repos.d/_copr_kylegospo-steamdeck-kmod.repo
-
 ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q kernel --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
+
+wget https://copr.fedorainfracloud.org/coprs/kylegospo/steamdeck-kmod/repo/fedora-${RELEASE}/kylegospo-steamdeck-kmod-fedora-${RELEASE}.repo -O /etc/yum.repos.d/_copr_kylegospo-steamdeck-kmod.repo
 
 rpm-ostree install \
     akmod-steamdeck-*.fc${RELEASE}.${ARCH}

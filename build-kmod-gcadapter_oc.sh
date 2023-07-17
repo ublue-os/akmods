@@ -2,11 +2,11 @@
 
 set -oeux pipefail
 
-wget https://copr.fedorainfracloud.org/coprs/kylegospo/gcadapter_oc-dkms/repo/fedora-$(rpm -E %fedora)/kylegospo-gcadapter_oc-dkms-fedora-$(rpm -E %fedora).repo -O /etc/yum.repos.d/_copr_kylegospo-gcadapter_oc-dkms.repo
-
 ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q kernel --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
+
+wget https://copr.fedorainfracloud.org/coprs/kylegospo/gcadapter_oc-dkms/repo/fedora-${RELEASE}/kylegospo-gcadapter_oc-dkms-fedora-${RELEASE}.repo -O /etc/yum.repos.d/_copr_kylegospo-gcadapter_oc-dkms.repo
 
 rpm-ostree install \
     akmod-gcadapter_oc-*.fc${RELEASE}.${ARCH}
