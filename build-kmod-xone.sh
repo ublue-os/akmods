@@ -17,4 +17,4 @@ akmods --force --kernels "${KERNEL}" --kmod xone
 modinfo /usr/lib/modules/${KERNEL}/extra/xone/xone-{dongle,gip-chatpad,gip-gamepad,gip-guitar,gip-headset,gip,wired}.ko.xz > /dev/null \
 || (find /var/cache/akmods/xone/ -name \*.log -print -exec cat {} \; && exit 1)
 
-rm -f /etc/yum.repos.d/fedora-steam.repo
+rm -f /etc/yum.repos.d/negativo17-fedora-steam.repo

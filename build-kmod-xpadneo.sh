@@ -17,4 +17,4 @@ akmods --force --kernels "${KERNEL}" --kmod xpadneo
 modinfo /usr/lib/modules/${KERNEL}/extra/xpadneo/hid-xpadneo.ko.xz > /dev/null \
 || (find /var/cache/akmods/xpadneo/ -name \*.log -print -exec cat {} \; && exit 1)
 
-rm -f /etc/yum.repos.d/fedora-steam.repo
+rm -f /etc/yum.repos.d/negativo17-fedora-steam.repo
