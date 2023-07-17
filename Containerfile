@@ -18,6 +18,7 @@ RUN /tmp/build-ublue-os-akmods-addons.sh
 
 RUN /tmp/build-kmod-v4l2loopback.sh
 RUN /tmp/build-kmod-xpadneo.sh
+RUN /tmp/build-kmod-steamdeck.sh
 
 RUN mkdir -p /var/cache/rpms/{kmods,ublue-os}
 RUN cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
