@@ -9,6 +9,9 @@ COPY build*.sh /tmp
 COPY certs /tmp/certs
 COPY ublue-os-akmods-addons.spec /tmp/ublue-os-akmods-addons/ublue-os-akmods-addons.spec
 
+ADD https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${FEDORA_MAJOR_VERSION}/ublue-os-akmods-fedora-${FEDORA_MAJOR_VERSION}.repo \
+    /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo
+
 ADD https://negativo17.org/repos/fedora-steam.repo \
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-steam.repo
 
@@ -18,6 +21,8 @@ RUN /tmp/build-ublue-os-akmods-addons.sh
 
 RUN /tmp/build-kmod-v4l2loopback.sh
 RUN /tmp/build-kmod-xpadneo.sh
+RUN /tmp/build-kmod-steamdeck.sh
+RUN /tmp/build-kmod-gcadapter_oc.sh
 
 RUN mkdir -p /var/cache/rpms/{kmods,ublue-os}
 RUN cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
