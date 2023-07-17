@@ -2,11 +2,11 @@
 
 set -oeux pipefail
 
+cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo /etc/yum.repos.d/
+
 ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q kernel --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
-
-wget https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${RELEASE}/ublue-os-akmods-fedora-${RELEASE}.repo -O /etc/yum.repos.d/_copr_ublue-os-akmods.repo
 
 rpm-ostree install \
     akmod-gcadapter_oc-*.fc${RELEASE}.${ARCH}
