@@ -21,7 +21,7 @@ RUN /tmp/build-ublue-os-akmods-addons.sh
 
 RUN /tmp/build-kmod-v4l2loopback.sh
 RUN /tmp/build-kmod-xpadneo.sh
-RUN /tmp/build-kmod-steamdeck.sh
+RUN /tmp/build-kmod-jupiter.sh
 RUN /tmp/build-kmod-gcadapter_oc.sh
 RUN /tmp/build-kmod-gasket.sh
 
