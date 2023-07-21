@@ -19,6 +19,7 @@ RUN /tmp/build-prep.sh
 
 RUN /tmp/build-ublue-os-akmods-addons.sh
 
+RUN /tmp/build-kmod-gasket.sh
 RUN /tmp/build-kmod-gcadapter_oc.sh
 RUN /tmp/build-kmod-steamdeck.sh
 RUN /tmp/build-kmod-v4l2loopback.sh
