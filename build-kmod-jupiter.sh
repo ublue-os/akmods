@@ -9,9 +9,9 @@ KERNEL="$(rpm -q kernel --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
 
 rpm-ostree install \
-    akmod-steamdeck-*.fc${RELEASE}.${ARCH}
-akmods --force --kernels "${KERNEL}" --kmod steamdeck
-modinfo /usr/lib/modules/${KERNEL}/extra/steamdeck/steamdeck.ko.xz > /dev/null \
-|| (find /var/cache/akmods/steamdeck/ -name \*.log -print -exec cat {} \; && exit 1)
+    akmod-jupiter-*.fc${RELEASE}.${ARCH}
+akmods --force --kernels "${KERNEL}" --kmod jupiter
+modinfo /usr/lib/modules/${KERNEL}/extra/jupiter/jupiter.ko.xz > /dev/null \
+|| (find /var/cache/akmods/jupiter/ -name \*.log -print -exec cat {} \; && exit 1)
 
 rm -f /etc/yum.repos.d/_copr_ublue-os-akmods.repo
