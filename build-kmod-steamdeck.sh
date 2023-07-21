@@ -13,5 +13,9 @@ rpm-ostree install \
 akmods --force --kernels "${KERNEL}" --kmod steamdeck
 modinfo /usr/lib/modules/${KERNEL}/extra/steamdeck/steamdeck.ko.xz > /dev/null \
 || (find /var/cache/akmods/steamdeck/ -name \*.log -print -exec cat {} \; && exit 1)
+modinfo /usr/lib/modules/${KERNEL}/extra/steamdeck/steamdeck-hwmon.ko.xz > /dev/null \
+|| (find /var/cache/akmods/steamdeck/ -name \*.log -print -exec cat {} \; && exit 1)
+modinfo /usr/lib/modules/${KERNEL}/extra/steamdeck/{extcon,leds}-steamdeck.ko.xz > /dev/null \
+|| (find /var/cache/akmods/steamdeck/ -name \*.log -print -exec cat {} \; && exit 1)
 
 rm -f /etc/yum.repos.d/_copr_ublue-os-akmods.repo
