@@ -24,6 +24,7 @@ RUN /tmp/build-kmod-gcadapter_oc.sh
 RUN /tmp/build-kmod-openrgb.sh
 RUN /tmp/build-kmod-steamdeck.sh
 RUN /tmp/build-kmod-v4l2loopback.sh
+RUN /tmp/build-kmod-wl.sh
 RUN /tmp/build-kmod-xpadneo.sh
 
 RUN mkdir -p /var/cache/rpms/{kmods,ublue-os}
