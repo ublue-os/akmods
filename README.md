@@ -30,6 +30,7 @@ Feel free to PR more kmod build scripts into this repo!
 - [openrgb](https://gitlab.com/CalcProgrammer1/OpenRGB/-/raw/master/OpenRGB.patch) - kernel module with i2c-nct6775 and patched i2c-piix4 for use with OpenRGB (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [steamdeck](https://lkml.org/lkml/2022/2/5/391) - platform driver for Valve's Steam Deck handheld PC (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [v4l2loopback](https://github.com/umlaeute/v4l2loopback) - allows creating "virtual video devices"
+- [wl (broadcom)](https://github.com/rpmfusion/broadcom-wl/) - support for some legacy broadcom wifi devices
 - [xpadneo](https://github.com/atar-axis/xpadneo) - xbox one controller bluetooth driver (akmod from [negativo17 steam repo](https://negativo17.org/steam/)
 
 Temporarily disabled due to disabling other controllers:
