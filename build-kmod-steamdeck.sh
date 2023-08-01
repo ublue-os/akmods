@@ -19,7 +19,5 @@ modinfo /usr/lib/modules/${KERNEL}/extra/steamdeck/{extcon,leds}-steamdeck.ko.xz
 || (find /var/cache/akmods/steamdeck/ -name \*.log -print -exec cat {} \; && exit 1)
 modinfo /usr/lib/modules/${KERNEL}/extra/steamdeck/dwc3-pci.ko.xz > /dev/null \
 || (find /var/cache/akmods/steamdeck/ -name \*.log -print -exec cat {} \; && exit 1)
-modinfo /usr/lib/modules/${KERNEL}/extra/steamdeck/ltrf216a.ko.xz > /dev/null \
-|| (find /var/cache/akmods/steamdeck/ -name \*.log -print -exec cat {} \; && exit 1)
 
 rm -f /etc/yum.repos.d/_copr_ublue-os-akmods.repo
