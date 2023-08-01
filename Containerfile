@@ -15,10 +15,14 @@ ADD https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${FEDORA
 ADD https://negativo17.org/repos/fedora-steam.repo \
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-steam.repo
 
+ADD https://negativo17.org/repos/fedora-multimedia.repo \
+    /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo    
+
 RUN /tmp/build-prep.sh
 
 RUN /tmp/build-ublue-os-akmods-addons.sh
 
+RUN /tmp/build-kmod-evdi.sh
 RUN /tmp/build-kmod-gasket.sh
 RUN /tmp/build-kmod-gcadapter_oc.sh
 RUN /tmp/build-kmod-openrgb.sh
