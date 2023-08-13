@@ -4,6 +4,9 @@ ARG BASE_IMAGE="quay.io/fedora-ostree-desktops/${SOURCE_IMAGE}"
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-37}"
 
 FROM ${BASE_IMAGE}:${FEDORA_MAJOR_VERSION} AS builder
+
+ARG FEDORA_MAJOR_VERSION
+
 RUN ln -s /usr/bin/rpm-ostree /usr/bin/dnf
 COPY build*.sh /tmp
 COPY certs /tmp/certs
