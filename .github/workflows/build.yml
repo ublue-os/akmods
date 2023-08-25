@@ -117,7 +117,7 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           containerfiles: |
-            ./Containerfile-${{ matrix.cfile_suffix }}
+            ./Containerfile.${{ matrix.cfile_suffix }}
           image: ${{ 'nvidia' == matrix.cfile_suffix && format('{0}-nvidia', env.IMAGE_NAME) || format('{0}', env.IMAGE_NAME) }}
           tags: |
             ${{ steps.generate-tags.outputs.alias_tags }}
