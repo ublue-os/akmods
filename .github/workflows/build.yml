@@ -21,7 +21,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        cfile_suffix: [common, nvidia]
         major_version: [37, 38]
+        nvidia_version: [0, 470, 535]
+        exclude:
+          - cfile_suffix: common
+            nvidia_version: 470
+          - cfile_suffix: common
+            nvidia_version: 535
+          - cfile_suffix: nvidia
+            nvidia_version: 0
     steps:
       # Checkout push-to-registry action GitHub repository
       - name: Checkout Push to Registry action
@@ -33,7 +42,11 @@ jobs:
         run: |
           # Generate a timestamp for creating an image version history
           TIMESTAMP="$(date +%Y%m%d)"
-          VARIANT="${{ matrix.major_version }}"
+          if [[ "${{ matrix.cfile_suffix }}" == "nvidia" ]]; then
+              VARIANT="${{ matrix.major_version }}-${{ matrix.nvidia_version }}"
+          else
+              VARIANT="${{ matrix.major_version }}"
+          fi
 
           COMMIT_TAGS=()
           BUILD_TAGS=()
@@ -89,7 +102,7 @@ jobs:
         id: meta
         with:
           images: |
-            ${{ env.IMAGE_NAME }}
+            ${{ 'nvidia' == matrix.cfile_suffix && format('{0}-nvidia', env.IMAGE_NAME) || format('{0}', env.IMAGE_NAME) }}`
           labels: |
             org.opencontainers.image.title=${{ env.IMAGE_NAME }}
             org.opencontainers.image.description=A caching layer for pre-built akmod RPMs
@@ -104,13 +117,14 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           containerfiles: |
-            ./Containerfile
-          image: ${{ env.IMAGE_NAME }}
+            ./Containerfile-${{ matrix.cfile_suffix }}
+          image: ${{ 'nvidia' == matrix.cfile_suffix && format('{0}-nvidia', env.IMAGE_NAME) || format('{0}', env.IMAGE_NAME) }}`
           tags: |
             ${{ steps.generate-tags.outputs.alias_tags }}
           build-args: |
             SOURCE_IMAGE=${{ env.SOURCE_IMAGE }}
             FEDORA_MAJOR_VERSION=${{ matrix.major_version }}
+            NVIDIA_MAJOR_VERSION=${{ matrix.nvidia_version }}
           labels: ${{ steps.meta.outputs.labels }}
           oci: false
 

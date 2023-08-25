@@ -7,24 +7,25 @@ set -oeux pipefail
 ARCH="$(rpm -E '%_arch')"
 RELEASE="$(rpm -E '%fedora')"
 
-sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/fedora-{cisco-openh264,modular,updates-modular}.repo
 
-wget -P /tmp/rpms \
-    https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-${RELEASE}.noarch.rpm \
-    https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-${RELEASE}.noarch.rpm
+sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/fedora-{cisco-openh264,modular,updates-modular}.repo
 
 # enable RPMs with alternatives to create them in this image build
 mkdir -p /var/lib/alternatives
 
+# allow simple `dnf install` style commands to work (in some spec scripts)
+ln -s /usr/bin/rpm-ostree /usr/bin/dnf
+
+# enable more repos
 rpm-ostree install \
-    /tmp/rpms/*.rpm \
+    https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-${RELEASE}.noarch.rpm \
+    https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-${RELEASE}.noarch.rpm \
     fedora-repos-archive
 
 
 ### PREPARE BUILD ENV
 rpm-ostree install \
     akmods \
-    dnf \
     mock
 
 if [[ ! -s "/tmp/certs/private_key.priv" ]]; then
