@@ -29,6 +29,7 @@ rpm-ostree install \
 ### PREPARE BUILD ENV
 rpm-ostree install \
     akmods \
+    dnf \
     mock
 
 if [[ ! -s "/tmp/certs/private_key.priv" ]]; then
@@ -42,3 +43,6 @@ install -Dm644 /tmp/certs/private_key.priv /etc/pki/akmods/private/private_key.p
 
 # protect against incorrect permissions in tmp dirs which can break akmods builds
 chmod 1777 /tmp /var/tmp
+
+# create directories for later copying resulting artifacts
+mkdir -p /var/cache/rpms/{kmods,ublue-os}
