@@ -102,7 +102,7 @@ jobs:
         id: meta
         with:
           images: |
-            ${{ 'nvidia' == matrix.cfile_suffix && format('{0}-nvidia', env.IMAGE_NAME) || format('{0}', env.IMAGE_NAME) }}`
+            ${{ 'nvidia' == matrix.cfile_suffix && format('{0}-nvidia', env.IMAGE_NAME) || format('{0}', env.IMAGE_NAME) }}
           labels: |
             org.opencontainers.image.title=${{ env.IMAGE_NAME }}
             org.opencontainers.image.description=A caching layer for pre-built akmod RPMs
@@ -118,7 +118,7 @@ jobs:
         with:
           containerfiles: |
             ./Containerfile-${{ matrix.cfile_suffix }}
-          image: ${{ 'nvidia' == matrix.cfile_suffix && format('{0}-nvidia', env.IMAGE_NAME) || format('{0}', env.IMAGE_NAME) }}`
+          image: ${{ 'nvidia' == matrix.cfile_suffix && format('{0}-nvidia', env.IMAGE_NAME) || format('{0}', env.IMAGE_NAME) }}
           tags: |
             ${{ steps.generate-tags.outputs.alias_tags }}
           build-args: |
