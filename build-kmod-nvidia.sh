@@ -18,7 +18,7 @@ else
     NVIDIA_PACKAGE_NAME="nvidia-${NVIDIA_MAJOR_VERSION}xx"
 fi
 
-dnf install -y \
+rpm-ostree install \
     akmod-${NVIDIA_PACKAGE_NAME}*:${NVIDIA_MAJOR_VERSION}.*.fc${RELEASE} \
     xorg-x11-drv-${NVIDIA_PACKAGE_NAME}-{,cuda,devel,kmodsrc,power}*:${NVIDIA_MAJOR_VERSION}.*.fc${RELEASE}
 
@@ -44,7 +44,3 @@ NVIDIA_AKMOD_VERSION=${NVIDIA_AKMOD_VERSION}
 NVIDIA_LIB_VERSION=${NVIDIA_LIB_VERSION}
 EOF
 
-# cleanup for other nvidia builds
-dnf remove -y \
-    akmod-${NVIDIA_PACKAGE_NAME}*:${NVIDIA_MAJOR_VERSION}.*.fc${RELEASE} \
-    xorg-x11-drv-${NVIDIA_PACKAGE_NAME}-{,cuda,devel,kmodsrc,power}*:${NVIDIA_MAJOR_VERSION}.*.fc${RELEASE}
