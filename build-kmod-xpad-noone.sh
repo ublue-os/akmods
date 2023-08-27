@@ -13,7 +13,7 @@ RELEASE="$(rpm -E '%fedora')"
 rpm-ostree install \
     akmod-xpad-noone-*.fc${RELEASE}.${ARCH}
 akmods --force --kernels "${KERNEL}" --kmod xpad-noone
-modinfo /usr/lib/modules/${KERNEL}/extra/xpad-noone/xpad.ko.xz > /dev/null \
+modinfo /usr/lib/modules/${KERNEL}/extra/xpad-noone/xpad-noone.ko.xz > /dev/null \
 || (find /var/cache/akmods/xpad-noone/ -name \*.log -print -exec cat {} \; && exit 1)
 
 rm -f /etc/yum.repos.d/_copr_ublue-os-akmods.repo
