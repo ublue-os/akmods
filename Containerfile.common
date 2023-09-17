@@ -29,6 +29,7 @@ RUN /tmp/build-ublue-os-akmods-addons.sh
 RUN /tmp/build-kmod-evdi.sh
 RUN /tmp/build-kmod-gasket.sh
 RUN /tmp/build-kmod-gcadapter_oc.sh
+RUN /tmp/build-kmod-nct6687d.sh
 RUN /tmp/build-kmod-openrazer.sh
 RUN /tmp/build-kmod-openrgb.sh
 RUN /tmp/build-kmod-ryzen-smu.sh
