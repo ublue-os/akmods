@@ -37,7 +37,7 @@ RUN /tmp/build-kmod-v4l2loopback.sh
 RUN /tmp/build-kmod-wl.sh
 
 # Exclude negativo17 kmods from Fedora 39
-RUN if grep -q ${FEDORA_MAJOR_VERSION}; then \
+RUN if grep -qv "39" <<< ${FEDORA_MAJOR_VERSION}; then \
         /tmp/build-kmod-evdi.sh && \
         /tmp/build-kmod-xpadneo.sh && \
         /tmp/build-kmod-xpad-noone.sh && \
