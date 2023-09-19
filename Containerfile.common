@@ -26,7 +26,6 @@ RUN /tmp/build-prep.sh
 
 RUN /tmp/build-ublue-os-akmods-addons.sh
 
-RUN /tmp/build-kmod-evdi.sh
 RUN /tmp/build-kmod-gasket.sh
 RUN /tmp/build-kmod-gcadapter_oc.sh
 RUN /tmp/build-kmod-nct6687d.sh
@@ -36,9 +35,14 @@ RUN /tmp/build-kmod-ryzen-smu.sh
 RUN /tmp/build-kmod-steamdeck.sh
 RUN /tmp/build-kmod-v4l2loopback.sh
 RUN /tmp/build-kmod-wl.sh
-RUN /tmp/build-kmod-xpadneo.sh
-RUN /tmp/build-kmod-xpad-noone.sh
-RUN /tmp/build-kmod-xone.sh
+
+# Exclude negativo17 kmods from Fedora 39
+RUN if grep -qv "39" <<< ${FEDORA_MAJOR_VERSION}; then \
+        /tmp/build-kmod-evdi.sh && \
+        /tmp/build-kmod-xpadneo.sh && \
+        /tmp/build-kmod-xpad-noone.sh && \
+        /tmp/build-kmod-xone.sh \
+    ; fi
 
 RUN cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
       /var/cache/rpms/ublue-os/
