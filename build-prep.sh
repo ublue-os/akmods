@@ -29,8 +29,8 @@ rpm-ostree install \
 # force use of single rpmfusion mirror
 sed -i.bak 's%^metalink=%#metalink=%' /etc/yum.repos.d/rpmfusion-*.repo
 sed -i 's%^#baseurl=http://download1.rpmfusion.org%baseurl=http://mirrors.ocf.berkeley.edu/rpmfusion%' /etc/yum.repos.d/rpmfusion-*.repo
-# after F39 launches, don't do this
-if [[ "${FEDORA_MAJOR_VERSION}" -eq 39 ]]; then
+# after F39 launches, bump to 40
+if [[ "${FEDORA_MAJOR_VERSION}" -ge 39 ]]; then
     sed -i 's%free/fedora/releases%free/fedora/development%' /etc/yum.repos.d/rpmfusion-*.repo
 fi
 
