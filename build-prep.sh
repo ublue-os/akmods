@@ -26,6 +26,9 @@ rpm-ostree install \
     https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-${RELEASE}.noarch.rpm \
     fedora-repos-archive
 
+# force use of single rpmfusion mirror
+sed -i.bak 's%^#baseurl=http://download1.rpmfusion.org%baseurl=http://mirrors.ocf.berkeley.edu/rpmfusion%' /etc/yum.repos.d/rpmfusion-*.repo
+sed -i 's%^metalink=%#metalink=%' /etc/yum.repos.d/rpmfusion-*.repo
 
 ### PREPARE BUILD ENV
 rpm-ostree install \
