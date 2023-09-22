@@ -27,8 +27,14 @@ rpm-ostree install \
     fedora-repos-archive
 
 # force use of single rpmfusion mirror
-sed -i.bak 's%^#baseurl=http://download1.rpmfusion.org%baseurl=http://mirrors.ocf.berkeley.edu/rpmfusion%' /etc/yum.repos.d/rpmfusion-*.repo
-sed -i 's%^metalink=%#metalink=%' /etc/yum.repos.d/rpmfusion-*.repo
+sed -i.bak 's%^metalink=%#metalink=%' /etc/yum.repos.d/rpmfusion-*.repo
+sed -i 's%^#baseurl=http://download1.rpmfusion.org%baseurl=http://mirrors.ocf.berkeley.edu/rpmfusion%' /etc/yum.repos.d/rpmfusion-*.repo
+# after F39 launches, don't do this
+if [[ "${FEDORA_MAJOR_VERSION}" -eq 39 ]]; then
+    sed -i 's%free/fedora/releases%free/fedora/development%' /etc/yum.repos.d/rpmfusion-*.repo
+fi
+
+
 
 ### PREPARE BUILD ENV
 rpm-ostree install \
