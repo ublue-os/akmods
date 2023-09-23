@@ -8,7 +8,7 @@ ARCH="$(rpm -E '%_arch')"
 RELEASE="$(rpm -E '%fedora')"
 
 # Modularity repositories are not available on Fedora 39 and above, so don't try to disable them
-if [[ "${FEDORA_MAJOR_VERSION}" -le 38 ]]; then
+if [[ "${RELEASE}" -le 38 ]]; then
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/fedora-{cisco-openh264,modular,updates-modular}.repo
 else
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/fedora-cisco-openh264.repo
@@ -30,7 +30,7 @@ rpm-ostree install \
 sed -i.bak 's%^metalink=%#metalink=%' /etc/yum.repos.d/rpmfusion-*.repo
 sed -i 's%^#baseurl=http://download1.rpmfusion.org%baseurl=http://mirrors.ocf.berkeley.edu/rpmfusion%' /etc/yum.repos.d/rpmfusion-*.repo
 # after F39 launches, bump to 40
-if [[ "${FEDORA_MAJOR_VERSION}" == "rawhide" ]] || [[ "${FEDORA_MAJOR_VERSION}" -ge 39 ]]; then
+if [[ "${FEDORA_MAJOR_VERSION}" -ge 39 ]]; then
     sed -i 's%free/fedora/releases%free/fedora/development%' /etc/yum.repos.d/rpmfusion-*.repo
 fi
 
