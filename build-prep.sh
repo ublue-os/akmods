@@ -37,9 +37,27 @@ fi
 
 ### PREPARE CUSTOM KERNEL SUPPORT
 if [[ "asus" == "${KERNEL_FLAVOR}" ]]; then
-    echo "Configure Asus specific kernel here..."
+    echo "Installing ASUS Kernel:" && \
+    rpm-ostree override replace \
+    --experimental \
+    --from repo=copr:copr.fedorainfracloud.org:lukenukem:asus-kernel \
+        kernel \
+        kernel-core \
+        kernel-modules \
+        kernel-modules-core \
+        kernel-modules-extra \
+        kernel-uki-virt
 elif [[ "surface" == "${KERNEL_FLAVOR}" ]]; then
-    echo "Configure Surface specific kernel here..."
+    echo "Installing Surface Kernel:" && \
+    wget https://github.com/linux-surface/linux-surface/releases/download/silverblue-20201215-1/kernel-20201215-1.x86_64.rpm -O \
+    /tmp/surface-kernel.rpm && \
+    rpm-ostree cliwrap install-to-root / && \
+    rpm-ostree override replace /tmp/surface-kernel.rpm \
+        --remove kernel-core \
+        --remove kernel-devel-matched \
+        --remove kernel-modules \
+        --remove kernel-modules-extra \
+        --install kernel-surface
 else
     echo "Default main kernel needs no customization."
 fi
