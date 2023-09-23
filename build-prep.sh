@@ -30,10 +30,19 @@ rpm-ostree install \
 sed -i.bak 's%^metalink=%#metalink=%' /etc/yum.repos.d/rpmfusion-*.repo
 sed -i 's%^#baseurl=http://download1.rpmfusion.org%baseurl=http://mirrors.ocf.berkeley.edu/rpmfusion%' /etc/yum.repos.d/rpmfusion-*.repo
 # after F39 launches, bump to 40
-if [[ "${FEDORA_MAJOR_VERSION}" -ge 39 ]]; then
+if [[ "${FEDORA_MAJOR_VERSION}" == "rawhide" ]] || [[ "${FEDORA_MAJOR_VERSION}" -ge 39 ]]; then
     sed -i 's%free/fedora/releases%free/fedora/development%' /etc/yum.repos.d/rpmfusion-*.repo
 fi
 
+
+### PREPARE CUSTOM KERNEL SUPPORT
+if [[ "asus" == "${KERNEL_FLAVOR}" ]]; then
+    echo "Configure Asus specific kernel here..."
+elif [[ "surface" == "${KERNEL_FLAVOR}" ]]; then
+    echo "Configure Surface specific kernel here..."
+else
+    echo "Default main kernel needs no customization."
+fi
 
 
 ### PREPARE BUILD ENV

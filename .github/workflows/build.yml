@@ -21,6 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        kernel_flavor: [main, asus, surface]
         cfile_suffix: [common, nvidia]
         major_version: [37, 38, 39]
         nvidia_version: [0, 470, 535]
@@ -43,9 +44,9 @@ jobs:
           # Generate a timestamp for creating an image version history
           TIMESTAMP="$(date +%Y%m%d)"
           if [[ "${{ matrix.cfile_suffix }}" == "nvidia" ]]; then
-              VARIANT="${{ matrix.major_version }}-${{ matrix.nvidia_version }}"
+              VARIANT="${{ matrix.kernel_flavor }}-${{ matrix.major_version }}-${{ matrix.nvidia_version }}"
           else
-              VARIANT="${{ matrix.major_version }}"
+              VARIANT="${{ matrix.kernel_flavor }}-${{ matrix.major_version }}"
           fi
 
           COMMIT_TAGS=()
