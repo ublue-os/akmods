@@ -8,7 +8,7 @@ ARCH="$(rpm -E '%_arch')"
 RELEASE="$(rpm -E '%fedora')"
 
 # Modularity repositories are not available on Fedora 39 and above, so don't try to disable them
-if [[ "${FEDORA_MAJOR_VERSION}" -le 38 ]]; then
+if [[ "${RELEASE}" -le 38 ]]; then
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/fedora-{cisco-openh264,modular,updates-modular}.repo
 else
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/fedora-cisco-openh264.repo
@@ -34,6 +34,34 @@ if [[ "${FEDORA_MAJOR_VERSION}" -ge 39 ]]; then
     sed -i 's%free/fedora/releases%free/fedora/development%' /etc/yum.repos.d/rpmfusion-*.repo
 fi
 
+
+### PREPARE CUSTOM KERNEL SUPPORT
+if [[ "asus" == "${KERNEL_FLAVOR}" ]]; then
+    echo "Installing ASUS Kernel:" && \
+    rpm-ostree cliwrap install-to-root / && \
+    rpm-ostree override replace \
+    --experimental \
+    --from repo=copr:copr.fedorainfracloud.org:lukenukem:asus-kernel \
+        kernel \
+        kernel-core \
+        kernel-modules \
+        kernel-modules-core \
+        kernel-modules-extra \
+        kernel-uki-virt
+elif [[ "surface" == "${KERNEL_FLAVOR}" ]]; then
+    echo "Installing Surface Kernel:" && \
+    wget https://github.com/linux-surface/linux-surface/releases/download/silverblue-20201215-1/kernel-20201215-1.x86_64.rpm -O \
+    /tmp/surface-kernel.rpm && \
+    rpm-ostree cliwrap install-to-root / && \
+    rpm-ostree override replace /tmp/surface-kernel.rpm \
+        --remove kernel-core \
+        --remove kernel-devel-matched \
+        --remove kernel-modules \
+        --remove kernel-modules-extra \
+        --install kernel-surface
+else
+    echo "Default main kernel needs no customization."
+fi
 
 
 ### PREPARE BUILD ENV
