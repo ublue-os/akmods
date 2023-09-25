@@ -38,6 +38,7 @@ fi
 ### PREPARE CUSTOM KERNEL SUPPORT
 if [[ "asus" == "${KERNEL_FLAVOR}" ]]; then
     echo "Installing ASUS Kernel:" && \
+    rpm-ostree cliwrap install-to-root / && \
     rpm-ostree override replace \
     --experimental \
     --from repo=copr:copr.fedorainfracloud.org:lukenukem:asus-kernel \
