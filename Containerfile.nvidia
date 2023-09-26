@@ -11,6 +11,7 @@ FROM ${BASE_IMAGE}:${FEDORA_MAJOR_VERSION} AS builder
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-38}"
 ARG NVIDIA_MAJOR_VERSION="${NVIDIA_MAJOR_VERSION:-535}"
 ARG KERNEL_FLAVOR="{KERNEL_FLAVOR:-main}"
+ARG KERNEL_NAME="kernel"
 
 COPY build*.sh /tmp
 COPY certs /tmp/certs
@@ -32,7 +33,12 @@ RUN /tmp/build-prep.sh
 
 RUN /tmp/build-ublue-os-nvidia-addons.sh
 
-RUN /tmp/build-kmod-nvidia.sh ${NVIDIA_MAJOR_VERSION}
+RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
+       KERNEL_NAME="kernel" \
+    ; else \
+       KERNEL_NAME="kernel-surface" \
+    ; fi && \
+    /tmp/build-kmod-nvidia.sh ${NVIDIA_MAJOR_VERSION}
 
 RUN cp /tmp/ublue-os-nvidia-addons/rpmbuild/RPMS/noarch/ublue-os-nvidia-addons*.rpm \
       /var/cache/rpms/ublue-os/

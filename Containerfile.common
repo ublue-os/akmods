@@ -10,6 +10,7 @@ ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-38}"
 FROM ${BASE_IMAGE}:${FEDORA_MAJOR_VERSION} AS builder
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-38}"
 ARG KERNEL_FLAVOR="{KERNEL_FLAVOR:-main}"
+ARG KERNEL_NAME="kernel"
 
 COPY build*.sh /tmp
 COPY certs /tmp/certs
@@ -27,18 +28,23 @@ RUN /tmp/build-prep.sh
 
 RUN /tmp/build-ublue-os-akmods-addons.sh
 
-RUN /tmp/build-kmod-gasket.sh
-RUN /tmp/build-kmod-gcadapter_oc.sh
-RUN /tmp/build-kmod-nct6687d.sh
-RUN /tmp/build-kmod-openrazer.sh
-RUN /tmp/build-kmod-openrgb.sh
-RUN /tmp/build-kmod-ryzen-smu.sh
-RUN /tmp/build-kmod-steamdeck.sh
-RUN /tmp/build-kmod-v4l2loopback.sh
-RUN /tmp/build-kmod-wl.sh
-
+# Set kernel name
 # Exclude negativo17 kmods from Fedora 39
-RUN if grep -qv "39" <<< ${FEDORA_MAJOR_VERSION}; then \
+RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
+        KERNEL_NAME="kernel" \
+    ; else \
+        KERNEL_NAME="kernel-surface" \
+    ; fi && \
+    /tmp/build-kmod-gasket.sh && \
+    /tmp/build-kmod-gcadapter_oc.sh && \
+    /tmp/build-kmod-nct6687d.sh && \
+    /tmp/build-kmod-openrazer.sh && \
+    /tmp/build-kmod-openrgb.sh && \
+    /tmp/build-kmod-ryzen-smu.sh && \
+    /tmp/build-kmod-steamdeck.sh && \
+    /tmp/build-kmod-v4l2loopback.sh && \
+    /tmp/build-kmod-wl.sh && \
+    if grep -qv "39" <<< ${FEDORA_MAJOR_VERSION}; then \
         /tmp/build-kmod-evdi.sh && \
         /tmp/build-kmod-xpadneo.sh && \
         /tmp/build-kmod-xpad-noone.sh && \
