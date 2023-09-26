@@ -56,7 +56,11 @@ elif [[ "surface" == "${KERNEL_FLAVOR}" ]]; then
         --remove kernel-core \
         --remove kernel-modules \
         --remove kernel-modules-extra \
-        --install kernel-surface
+        --install kernel-surface \
+        --install kernel-surface-core \
+        --install kernel-surface-modules \
+        --install kernel-surface-modules-core \
+        --install kernel-surface-modules-extra
 else
     echo "Default main kernel needs no customization."
 fi
