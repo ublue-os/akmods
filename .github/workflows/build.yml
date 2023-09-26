@@ -32,6 +32,10 @@ jobs:
             nvidia_version: 535
           - cfile_suffix: nvidia
             nvidia_version: 0
+          - kernel_flavor: asus
+            major_version: 37
+          - kernel_flavor: surface
+            major_version: 37
           - kernel_flavor: surface
             major_version: 39
     steps:
