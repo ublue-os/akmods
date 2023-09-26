@@ -32,7 +32,12 @@ RUN /tmp/build-prep.sh
 
 RUN /tmp/build-ublue-os-nvidia-addons.sh
 
-RUN /tmp/build-kmod-nvidia.sh ${NVIDIA_MAJOR_VERSION}
+RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
+       export KERNEL_NAME="kernel" \
+    ; else \
+       export KERNEL_NAME="kernel-surface" \
+    ; fi && \
+    /tmp/build-kmod-nvidia.sh ${NVIDIA_MAJOR_VERSION}
 
 RUN cp /tmp/ublue-os-nvidia-addons/rpmbuild/RPMS/noarch/ublue-os-nvidia-addons*.rpm \
       /var/cache/rpms/ublue-os/

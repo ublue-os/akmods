@@ -18,7 +18,9 @@ fi
 mkdir -p /var/lib/alternatives
 
 # allow simple `dnf install` style commands to work (in some spec scripts)
-ln -s /usr/bin/rpm-ostree /usr/bin/dnf
+if [[ "${RELEASE}" -eq "37" ]]; then
+    ln -s /usr/bin/rpm-ostree /usr/bin/dnf
+fi
 
 # enable more repos
 rpm-ostree install \
@@ -37,28 +39,37 @@ fi
 
 ### PREPARE CUSTOM KERNEL SUPPORT
 if [[ "asus" == "${KERNEL_FLAVOR}" ]]; then
-    echo "Installing ASUS Kernel:" && \
-    rpm-ostree cliwrap install-to-root / && \
+    echo "Installing ASUS Kernel:"
+    wget https://copr.fedorainfracloud.org/coprs/lukenukem/asus-kernel/repo/fedora-$(rpm -E %fedora)/lukenukem-asus-kernel-fedora-$(rpm -E %fedora).repo -O /etc/yum.repos.d/_copr_lukenukem-asus-kernel.repo
+    rpm-ostree cliwrap install-to-root /
     rpm-ostree override replace \
     --experimental \
     --from repo=copr:copr.fedorainfracloud.org:lukenukem:asus-kernel \
         kernel \
         kernel-core \
+        kernel-devel \
+        kernel-devel-matched \
         kernel-modules \
         kernel-modules-core \
-        kernel-modules-extra \
-        kernel-uki-virt
+        kernel-modules-extra
 elif [[ "surface" == "${KERNEL_FLAVOR}" ]]; then
-    echo "Installing Surface Kernel:" && \
+    echo "Installing Surface Kernel:"
+    # Add Linux Surface repo
+    wget https://pkg.surfacelinux.com/fedora/linux-surface.repo -P /etc/yum.repos.d
     wget https://github.com/linux-surface/linux-surface/releases/download/silverblue-20201215-1/kernel-20201215-1.x86_64.rpm -O \
-    /tmp/surface-kernel.rpm && \
-    rpm-ostree cliwrap install-to-root / && \
+    /tmp/surface-kernel.rpm
+    rpm-ostree cliwrap install-to-root /
     rpm-ostree override replace /tmp/surface-kernel.rpm \
         --remove kernel-core \
-        --remove kernel-devel-matched \
         --remove kernel-modules \
         --remove kernel-modules-extra \
-        --install kernel-surface
+        --install kernel-surface \
+        --install kernel-surface-core \
+        --install kernel-surface-devel \
+        --install kernel-surface-devel-matched \
+        --install kernel-surface-modules \
+        --install kernel-surface-modules-core \
+        --install kernel-surface-modules-extra
 else
     echo "Default main kernel needs no customization."
 fi

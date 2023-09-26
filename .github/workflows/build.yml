@@ -32,6 +32,14 @@ jobs:
             nvidia_version: 535
           - cfile_suffix: nvidia
             nvidia_version: 0
+          - kernel_flavor: asus
+            major_version: 37
+          - kernel_flavor: surface
+            major_version: 37
+          - kernel_flavor: surface
+            major_version: 39
+          - kernel_flavor: surface
+            nvidia_version: 470
     steps:
       # Checkout push-to-registry action GitHub repository
       - name: Checkout Push to Registry action
