@@ -30,9 +30,9 @@ RUN /tmp/build-ublue-os-akmods-addons.sh
 # Set kernel name
 # Exclude negativo17 kmods from Fedora 39
 RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
-        KERNEL_NAME="kernel" \
+        export KERNEL_NAME="kernel" \
     ; else \
-        KERNEL_NAME="kernel-surface" \
+        export KERNEL_NAME="kernel-surface" \
     ; fi && \
     /tmp/build-kmod-gasket.sh && \
     /tmp/build-kmod-gcadapter_oc.sh && \

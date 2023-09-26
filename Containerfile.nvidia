@@ -33,9 +33,9 @@ RUN /tmp/build-prep.sh
 RUN /tmp/build-ublue-os-nvidia-addons.sh
 
 RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
-       KERNEL_NAME="kernel" \
+       export KERNEL_NAME="kernel" \
     ; else \
-       KERNEL_NAME="kernel-surface" \
+       export KERNEL_NAME="kernel-surface" \
     ; fi && \
     /tmp/build-kmod-nvidia.sh ${NVIDIA_MAJOR_VERSION}
 
