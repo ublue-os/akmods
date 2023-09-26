@@ -42,6 +42,8 @@ if [[ "asus" == "${KERNEL_FLAVOR}" ]]; then
     --from repo=copr:copr.fedorainfracloud.org:lukenukem:asus-kernel \
         kernel \
         kernel-core \
+        kernel-devel \
+        kernel-devel-matched \
         kernel-modules \
         kernel-modules-core \
         kernel-modules-extra
@@ -58,6 +60,8 @@ elif [[ "surface" == "${KERNEL_FLAVOR}" ]]; then
         --remove kernel-modules-extra \
         --install kernel-surface \
         --install kernel-surface-core \
+        --install kernel-surface-devel \
+        --install kernel-surface-devel-matched \
         --install kernel-surface-modules \
         --install kernel-surface-modules-core \
         --install kernel-surface-modules-extra
