@@ -35,9 +35,8 @@ fi
 ### PREPARE CUSTOM KERNEL SUPPORT
 if [[ "asus" == "${KERNEL_FLAVOR}" ]]; then
     echo "Installing ASUS Kernel:"
-    wget https://copr.fedorainfracloud.org/coprs/lukenukem/asus-linux/repo/fedora-$(rpm -E %fedora)/lukenukem-asus-linux-fedora-$(rpm -E %fedora).repo -O /etc/yum.repos.d/_copr_lukenukem-asus-linux.repo && \
     wget https://copr.fedorainfracloud.org/coprs/lukenukem/asus-kernel/repo/fedora-$(rpm -E %fedora)/lukenukem-asus-kernel-fedora-$(rpm -E %fedora).repo -O /etc/yum.repos.d/_copr_lukenukem-asus-kernel.repo
-    rpm-ostree cliwrap install-to-root / && \
+    rpm-ostree cliwrap install-to-root /
     rpm-ostree override replace \
     --experimental \
     --from repo=copr:copr.fedorainfracloud.org:lukenukem:asus-kernel \
@@ -52,7 +51,7 @@ elif [[ "surface" == "${KERNEL_FLAVOR}" ]]; then
     wget https://pkg.surfacelinux.com/fedora/linux-surface.repo -P /etc/yum.repos.d
     wget https://github.com/linux-surface/linux-surface/releases/download/silverblue-20201215-1/kernel-20201215-1.x86_64.rpm -O \
     /tmp/surface-kernel.rpm
-    rpm-ostree cliwrap install-to-root / && \
+    rpm-ostree cliwrap install-to-root /
     rpm-ostree override replace /tmp/surface-kernel.rpm \
         --remove kernel-core \
         --remove kernel-modules \
