@@ -28,7 +28,6 @@ RUN /tmp/build-prep.sh
 RUN /tmp/build-ublue-os-akmods-addons.sh
 
 # Set kernel name
-# Exclude negativo17 kmods from Fedora 39
 RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
         export KERNEL_NAME="kernel" \
     ; else \
@@ -43,12 +42,10 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     /tmp/build-kmod-steamdeck.sh && \
     /tmp/build-kmod-v4l2loopback.sh && \
     /tmp/build-kmod-wl.sh && \
-    if grep -qv "39" <<< ${FEDORA_MAJOR_VERSION}; then \
-        /tmp/build-kmod-evdi.sh && \
-        /tmp/build-kmod-xpadneo.sh && \
-        /tmp/build-kmod-xpad-noone.sh && \
-        /tmp/build-kmod-xone.sh \
-    ; fi
+    /tmp/build-kmod-evdi.sh && \
+    /tmp/build-kmod-xpadneo.sh && \
+    /tmp/build-kmod-xpad-noone.sh && \
+    /tmp/build-kmod-xone.sh
 
 RUN cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
       /var/cache/rpms/ublue-os/
