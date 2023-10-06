@@ -24,6 +24,8 @@ ADD https://copr.fedorainfracloud.org/coprs/eyecantcu/supergfxctl/repo/fedora-${
 ADD https://raw.githubusercontent.com/NVIDIA/dgx-selinux/master/bin/RHEL9/nvidia-container.pp \
     /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/nvidia-container.pp
 ADD files/etc/sway/environment /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/environment
+ADD files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/ublue-nvctk-cdi.service
+ADD files/usr/lib/systemd/system-preset/70-ublue-nvctk-cdi.preset /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/70-ublue-nvctk-cdi.preset
 
 
 RUN /tmp/build-prep.sh
