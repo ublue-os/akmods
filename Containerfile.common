@@ -42,6 +42,7 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     /tmp/build-kmod-ryzen-smu.sh && \
     /tmp/build-kmod-steamdeck.sh && \
     /tmp/build-kmod-v4l2loopback.sh && \
+    /tmp/build-kmod-winesync.sh && \
     /tmp/build-kmod-wl.sh && \
     if grep -qv "39" <<< ${FEDORA_MAJOR_VERSION}; then \
         /tmp/build-kmod-evdi.sh && \
