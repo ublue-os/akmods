@@ -38,7 +38,7 @@ We do our best to support all current builds of Fedora, current versions of the 
 
 The majority of the drivers are tagged with `KERNEL_TYPE-FEDORA_RELEASE`. NVIDIA drivers are bundled distinctly with tag `KERNEL_TYPE-FEDORA_RELEASE-NVIDIA_VERSION`.
 
-| KERNEL/SYSTEM | RELEASE | TAG |
+| KERNEL_TYPE | FEDORA_RELEASE | TAG |
 | - | - | - |
 | Fedora stock kernel | 37 | `main-37`, `main-37-470` `main-37-535` |
 | | 38 | `main-38`, `main-38-470` `main-38-535` |
