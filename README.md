@@ -4,27 +4,12 @@
 
 A layer for adding extra kernel modules to your image. Use for better hardware support and a few other features!
 
-# Usage
-
-Add this to your Containerfile to install all the RPM packages, replacing `RELEASE` with either `37` or `38`:
-
-    COPY --from=ghcr.io/ublue-os/akmods:RELEASE /rpms/ /tmp/rpms
-    RUN rpm-ostree install /tmp/rpms/ublue-os/*.rpm
-    RUN rpm-ostree install /tmp/rpms/kmods/*.rpm
-
-This example shows:
-1. copying all the rpms from the akmods image
-2. installing the ublue specific RPM, providing any extra repos and the akmod signing key
-3. installing the kmods RPMs, providing the actual kmods built in this repo
-
-The rpmfusion and extra repos provide dependencies which are required by the kmods RPMs.
-
-
 # Features
 
 Feel free to PR more kmod build scripts into this repo!
 
 - ublue-os-akmods-addons - installs extra repos and our kmods signing key; install and import to allow SecureBoot systems to use these kmods
+- ublue-os-nvidia-addons - installs extra repos enabling our nvidia support
     - [nvidia container selinux policy](https://github.com/NVIDIA/dgx-selinux/tree/master/src/nvidia-container-selinux) - uses RHEL9 policy as the closest match
     - [nvidia-container-tookkit repo](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#installing-with-yum-or-dnf) - version 1.14 (and newer) provide CDI for podman use of nvidia gpus
 - [evdi](www.displaylink.com) - kernel module required for use of displaylink (akmod from [negativo17 multimedia repo](https://negativo17.org/multimedia/)
@@ -42,6 +27,54 @@ Feel free to PR more kmod build scripts into this repo!
 - [xpadneo](https://github.com/atar-axis/xpadneo) - xbox one controller bluetooth driver (akmod from [negativo17 steam repo](https://negativo17.org/steam/)
 - [xpad-noone](https://github.com/ublue-os/xpad-noone) - xbox/xbox 360 controller driver (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [xone](https://github.com/medusalix/xone) - xbox one controller USB wired/RF driver (akmod from [negativo17 steam repo](https://negativo17.org/steam/)
+
+# How it's organized
+
+The [`akmods` image](https://github.com/orgs/ublue-os/packages/container/package/akmods) is built and published daily. However, there's not a single image but several, given various kernel support we now provide.
+
+Here's a rundown on how it's organized.
+
+We do our best to support all current builds of Fedora, current versions of the kernel modules listed, and in the case of NVIDIA, current (535) and the 470 legacy driver.
+
+The majority of the drivers are tagged with `KERNEL_TYPE-FEDORA_RELEASE`. NVIDIA drivers are bundled distinctly with tag `KERNEL_TYPE-FEDORA_RELEASE-NVIDIA_VERSION`.
+
+| KERNEL/SYSTEM | RELEASE | TAG |
+| - | - | - |
+| Fedora stock kernel | 37 | `main-37`, `main-37-470` `main-37-535` |
+| | 38 | `main-38`, `main-38-470` `main-38-535` |
+| | 39 | `main-38`, `main-38-470` `main-38-535` |
+| [patched for ASUS devices](https://copr.fedorainfracloud.org/coprs/lukenukem/asus-kernel) | 37 | `asus-37`, `asus-37-470` `asus-37-535` |
+| | 38 | `asus-38`, `asus-38-470` `asus-38-535` |
+| | 39 | `asus-39`, `asus-39-470` `asus-39-535` |
+| [patched Microsoft Surface devices](https://github.com/linux-surface/linux-surface/) | 37 | `surface-37`, `surface-37-470` `surface-37-535` |
+| | 38 | `surface-38`, `surface-38-470` `surface-38-535` |
+| | 39 | `surface-39`, `surface-39-470` `surface-39-535` |
+
+
+
+# Usage
+
+To install one of these kmods, you'll need to install any of their specific dependencies (checkout the `build-prep.sh` and the specific `build-FOO.sh` script for details.
+
+For common images, add something like this to your Containerfile, replacing `TAG` with one of the `something-FR` tags above:
+
+    COPY --from=ghcr.io/ublue-os/akmods:TAG /rpms/ /tmp/rpms
+    RUN find /tmp/rpms
+    RUN rpm-ostree install /tmp/rpms/ublue-os/ublue-os-akmods*.rpm
+    RUN rpm-ostree install /tmp/rpms/kmods/kmod-v4l2loopback*.rpm
+
+For NVIDIA images, add something like this to your Containerfile, replacing `TAG` with one of the `something-FR-NVV` tags above:
+
+    COPY --from=ghcr.io/ublue-os/akmods:TAG /rpms/ /tmp/rpms
+    RUN find /tmp/rpms
+    RUN rpm-ostree install /tmp/rpms/ublue-os/ublue-os-nvidia*.rpm
+    RUN rpm-ostree install /tmp/rpms/kmods/kmod-nvidia.rpm
+
+These examples show:
+1. copying all the rpms from the respective akmods images
+2. installing the respective ublue specific RPM
+3. installing a kmods RPM.
+
 
 # Adding kmods
 
