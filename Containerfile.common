@@ -44,11 +44,11 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     /tmp/build-kmod-v4l2loopback.sh && \
     /tmp/build-kmod-winesync.sh && \
     /tmp/build-kmod-wl.sh && \
-    if grep -qv "39" <<< ${FEDORA_MAJOR_VERSION}; then \
-        /tmp/build-kmod-evdi.sh && \
-        /tmp/build-kmod-xpadneo.sh && \
-        /tmp/build-kmod-xpad-noone.sh && \
-        /tmp/build-kmod-xone.sh \
+    /tmp/build-kmod-xpadneo.sh && \
+    /tmp/build-kmod-xpad-noone.sh && \
+    /tmp/build-kmod-xone.sh && \
+    if [[ "${FEDORA_MAJOR_VERSION}" -le "38" ]]; then \
+        /tmp/build-kmod-evdi.sh \
     ; fi
 
 RUN cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
