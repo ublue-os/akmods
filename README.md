@@ -43,12 +43,10 @@ The majority of the drivers are tagged with `KERNEL_TYPE-FEDORA_RELEASE`. NVIDIA
 | Fedora stock kernel | 37 | `main-37`, `main-37-470` `main-37-535` |
 | | 38 | `main-38`, `main-38-470` `main-38-535` |
 | | 39 | `main-38`, `main-38-470` `main-38-535` |
-| [patched for ASUS devices](https://copr.fedorainfracloud.org/coprs/lukenukem/asus-kernel) | 37 | `asus-37`, `asus-37-470` `asus-37-535` |
-| | 38 | `asus-38`, `asus-38-470` `asus-38-535` |
+| [patched for ASUS devices](https://copr.fedorainfracloud.org/coprs/lukenukem/asus-kernel) | 38 | `asus-38`, `asus-38-470` `asus-38-535` |
 | | 39 | `asus-39`, `asus-39-470` `asus-39-535` |
-| [patched Microsoft Surface devices](https://github.com/linux-surface/linux-surface/) | 37 | `surface-37`, `surface-37-470` `surface-37-535` |
-| | 38 | `surface-38`, `surface-38-470` `surface-38-535` |
-| | 39 | `surface-39`, `surface-39-470` `surface-39-535` |
+| [patched Microsoft Surface devices](https://github.com/linux-surface/linux-surface/) | 38 | `surface-38`, `surface-38-535` |
+| | 39 | `surface-39`, `surface-39-535` |
 
 
 
