@@ -37,8 +37,6 @@ jobs:
           - kernel_flavor: surface
             major_version: 37
           - kernel_flavor: surface
-            major_version: 39
-          - kernel_flavor: surface
             nvidia_version: 470
     steps:
       # Checkout push-to-registry action GitHub repository
