@@ -25,13 +25,22 @@ jobs:
         cfile_suffix: [common, nvidia]
         major_version: [37, 38, 39]
         nvidia_version: [0, 470, 535]
+        nvidia_variant: [none, proprietary, open]
         exclude:
+          - cfile_suffix: common
+            nvidia_variant: proprietary
+          - cfile_suffix: common
+            nvidia_variant: open
           - cfile_suffix: common
             nvidia_version: 470
           - cfile_suffix: common
             nvidia_version: 535
           - cfile_suffix: nvidia
+            nvidia_variant: none
+          - cfile_suffix: nvidia
             nvidia_version: 0
+          - nvidia_variant: open
+            nvidia_version: 470
           - kernel_flavor: asus
             major_version: 37
           - kernel_flavor: surface
@@ -50,7 +59,11 @@ jobs:
           # Generate a timestamp for creating an image version history
           TIMESTAMP="$(date +%Y%m%d)"
           if [[ "${{ matrix.cfile_suffix }}" == "nvidia" ]]; then
-              VARIANT="${{ matrix.kernel_flavor }}-${{ matrix.major_version }}-${{ matrix.nvidia_version }}"
+              if [[ "${{ matrix.nvidia_variant }}" == "proprietary" ]]; then
+                  VARIANT="${{ matrix.kernel_flavor }}-${{ matrix.major_version }}-${{ matrix.nvidia_version }}"
+              else
+                  VARIANT="${{ matrix.kernel_flavor }}-${{ matrix.major_version }}-${{ matrix.nvidia_variant }}"
+              fi
           else
               VARIANT="${{ matrix.kernel_flavor }}-${{ matrix.major_version }}"
           fi
@@ -133,6 +146,7 @@ jobs:
             KERNEL_FLAVOR=${{ matrix.kernel_flavor }}
             FEDORA_MAJOR_VERSION=${{ matrix.major_version }}
             NVIDIA_MAJOR_VERSION=${{ matrix.nvidia_version }}
+            NVIDIA_DRIVER_VARIANT=${{ matrix.nvidia_variant }}
           labels: ${{ steps.meta.outputs.labels }}
           oci: false
 
