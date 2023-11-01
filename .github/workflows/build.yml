@@ -3,7 +3,7 @@ on:
   pull_request:
   merge_group:
   schedule:
-    - cron: '0 6 * * *'  # 6am everyday (1h after 'config')
+    - cron: '0 14 * * *'  # 2pm UTC everyday (timed against official fedora container pushes, and after 'config')
   workflow_dispatch:
 env:
     IMAGE_NAME: akmods
@@ -12,7 +12,7 @@ env:
 
 jobs:
   push-ghcr:
-    name: Build and push akmods image
+    name: akmods image
     runs-on: ubuntu-22.04
     permissions:
       contents: read
