@@ -3,16 +3,15 @@ on:
   pull_request:
   merge_group:
   schedule:
-    - cron: '0 6 * * *'  # 6am everyday (1h after 'config')
+    - cron: '0 14 * * *'  # 2pm UTC everyday (timed against official fedora container pushes, and after 'config')
   workflow_dispatch:
 env:
     IMAGE_NAME: akmods
     IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
-    SOURCE_IMAGE: base
 
 jobs:
   push-ghcr:
-    name: Build and push akmods image
+    name: akmods image
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -42,6 +41,17 @@ jobs:
       # Checkout push-to-registry action GitHub repository
       - name: Checkout Push to Registry action
         uses: actions/checkout@v4
+
+      - name: Matrix Variables
+        shell: bash
+        run: |
+          if [[ "${{ matrix.major_version }}" -ge "39" ]]; then
+              echo "SOURCE_IMAGE=fedora-silverblue" >> $GITHUB_ENV
+              echo "SOURCE_ORG=fedora" >> $GITHUB_ENV
+          else
+              echo "SOURCE_IMAGE=base" >> $GITHUB_ENV
+              echo "SOURCE_ORG=fedora-ostree-desktops" >> $GITHUB_ENV
+          fi
 
       - name: Generate tags
         id: generate-tags
@@ -97,7 +107,7 @@ jobs:
       - name: Get current versions
         id: labels
         run: |
-          skopeo inspect docker://quay.io/fedora-ostree-desktops/${{ env.SOURCE_IMAGE }}:${{ matrix.major_version }} > inspect.json
+          skopeo inspect docker://quay.io/${{ env.SOURCE_ORG }}/${{ env.SOURCE_IMAGE }}:${{ matrix.major_version }} > inspect.json
           version=$(jq -r '.Labels["org.opencontainers.image.version"]' inspect.json)
           linux=$(jq -r '.Labels["ostree.linux"]' inspect.json)
           echo "VERSION=$version" >> $GITHUB_OUTPUT
@@ -130,6 +140,7 @@ jobs:
             ${{ steps.generate-tags.outputs.alias_tags }}
           build-args: |
             SOURCE_IMAGE=${{ env.SOURCE_IMAGE }}
+            SOURCE_ORG=${{ env.SOURCE_ORG }}
             KERNEL_FLAVOR=${{ matrix.kernel_flavor }}
             FEDORA_MAJOR_VERSION=${{ matrix.major_version }}
             NVIDIA_MAJOR_VERSION=${{ matrix.nvidia_version }}
