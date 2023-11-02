@@ -35,7 +35,9 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     ; else \
         export KERNEL_NAME="kernel-surface" \
     ; fi && \
-    /tmp/build-kmod-evdi.sh && \
+    if grep -qv "asus" <<< "${KERNEL_FLAVOR}"; then \
+        /tmp/build-kmod-evdi.sh \
+    ; fi && \
     /tmp/build-kmod-gasket.sh && \
     /tmp/build-kmod-gcadapter_oc.sh && \
     /tmp/build-kmod-nct6687d.sh && \
@@ -49,7 +51,7 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     /tmp/build-kmod-xpadneo.sh && \
     /tmp/build-kmod-xpad-noone.sh && \
     /tmp/build-kmod-xone.sh
-    
+
 RUN cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
       /var/cache/rpms/ublue-os/
 RUN for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
