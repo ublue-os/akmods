@@ -38,13 +38,15 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     if grep -qv "asus" <<< "${KERNEL_FLAVOR}"; then \
         /tmp/build-kmod-evdi.sh \
     ; fi && \
+    if grep -qv "fsync" <<< "${KERNEL_FLAVOR}"; then \
+        /tmp/build-kmod-steamdeck.sh \
+    ; fi && \
     /tmp/build-kmod-gasket.sh && \
     /tmp/build-kmod-gcadapter_oc.sh && \
     /tmp/build-kmod-nct6687d.sh && \
     /tmp/build-kmod-openrazer.sh && \
     /tmp/build-kmod-openrgb.sh && \
     /tmp/build-kmod-ryzen-smu.sh && \
-    /tmp/build-kmod-steamdeck.sh && \
     /tmp/build-kmod-v4l2loopback.sh && \
     /tmp/build-kmod-winesync.sh && \
     /tmp/build-kmod-wl.sh && \
