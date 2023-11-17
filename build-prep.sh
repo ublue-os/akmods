@@ -14,6 +14,11 @@ else
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/fedora-cisco-openh264.repo
 fi
 
+# Disable gpg on negativo until fixed.
+if [[ -f /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo  ]]; then
+  sed -i 's@gpgcheck=1@gpgcheck=0@g' /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo 
+fi
+
 # enable RPMs with alternatives to create them in this image build
 mkdir -p /var/lib/alternatives
 
