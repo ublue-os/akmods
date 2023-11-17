@@ -39,8 +39,7 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
         /tmp/build-kmod-evdi.sh \
     ; fi && \
     if grep -qv "fsync" <<< "${KERNEL_FLAVOR}"; then \
-        /tmp/build-kmod-steamdeck.sh && \
-        /tmp/build-kmod-steamdeck-dwc3.sh \
+        /tmp/build-kmod-steamdeck.sh \
     ; fi && \
     /tmp/build-kmod-gasket.sh && \
     /tmp/build-kmod-gcadapter_oc.sh && \
