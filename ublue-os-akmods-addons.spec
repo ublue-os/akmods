@@ -42,7 +42,7 @@ install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nega
 
 %changelog
 * Mon Nov 20 2023 RJ Trujillo <eyecantcu@pm.me> - 0.4
-- Remove negativo17 fedora-steam repo
+- Migrate xpadneo/xone modules from negativo17 fedora-steam to negativo17 fedora-multimedia
 
 * Mon Jul 17 2023 Kyle Gospodnetich <me@kylegospodneti.ch> - 0.3
 - Add ublue-os/akmods copr repo for modules not available upstream/elsewhere
