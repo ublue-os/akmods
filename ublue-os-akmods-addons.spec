@@ -1,5 +1,5 @@
 Name:           ublue-os-akmods-addons
-Version:        0.3
+Version:        0.4
 Release:        1%{?dist}
 Summary:        Signing key and repos for ublue os akmods
 
