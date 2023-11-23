@@ -4,7 +4,8 @@
 
 #Build from base, simpley because it's the smallest image
 ARG SOURCE_IMAGE="${SOURCE_IMAGE:-base}"
-ARG BASE_IMAGE="quay.io/fedora-ostree-desktops/${SOURCE_IMAGE}"
+ARG SOURCE_ORG="${SOURCE_ORG:-fedora-ostree-desktops}"
+ARG BASE_IMAGE="quay.io/${SOURCE_ORG}/${SOURCE_IMAGE}"
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-39}"
 
 FROM ${BASE_IMAGE}:${FEDORA_MAJOR_VERSION} AS builder
@@ -18,8 +19,6 @@ COPY certs /tmp/certs
 COPY ublue-os-akmods-addons.spec /tmp/ublue-os-akmods-addons/ublue-os-akmods-addons.spec
 ADD https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${FEDORA_MAJOR_VERSION}/ublue-os-akmods-fedora-${FEDORA_MAJOR_VERSION}.repo \
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo
-ADD https://negativo17.org/repos/fedora-steam.repo \
-    /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-steam.repo
 ADD https://negativo17.org/repos/fedora-multimedia.repo \
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo    
 
@@ -34,22 +33,24 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     ; else \
         export KERNEL_NAME="kernel-surface" \
     ; fi && \
+    if grep -qv "asus" <<< "${KERNEL_FLAVOR}"; then \
+        /tmp/build-kmod-evdi.sh \
+    ; fi && \
+    if grep -qv "fsync" <<< "${KERNEL_FLAVOR}"; then \
+        /tmp/build-kmod-steamdeck.sh \
+    ; fi && \
     /tmp/build-kmod-gasket.sh && \
     /tmp/build-kmod-gcadapter_oc.sh && \
     /tmp/build-kmod-nct6687d.sh && \
     /tmp/build-kmod-openrazer.sh && \
     /tmp/build-kmod-openrgb.sh && \
     /tmp/build-kmod-ryzen-smu.sh && \
-    /tmp/build-kmod-steamdeck.sh && \
     /tmp/build-kmod-v4l2loopback.sh && \
     /tmp/build-kmod-winesync.sh && \
     /tmp/build-kmod-wl.sh && \
     /tmp/build-kmod-xpadneo.sh && \
     /tmp/build-kmod-xpad-noone.sh && \
-    /tmp/build-kmod-xone.sh && \
-    if [[ "${FEDORA_MAJOR_VERSION}" -le "38" ]]; then \
-        /tmp/build-kmod-evdi.sh \
-    ; fi
+    /tmp/build-kmod-xone.sh
 
 RUN cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
       /var/cache/rpms/ublue-os/

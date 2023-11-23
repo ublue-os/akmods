@@ -28,14 +28,6 @@ rpm-ostree install \
     https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-${RELEASE}.noarch.rpm \
     fedora-repos-archive
 
-# force use of single rpmfusion mirror
-sed -i.bak 's%^metalink=%#metalink=%' /etc/yum.repos.d/rpmfusion-*.repo
-sed -i 's%^#baseurl=http://download1.rpmfusion.org%baseurl=http://mirrors.ocf.berkeley.edu/rpmfusion%' /etc/yum.repos.d/rpmfusion-*.repo
-# after F39 launches, bump to 40
-if [[ "${FEDORA_MAJOR_VERSION}" -ge 39 ]]; then
-    sed -i 's%free/fedora/releases%free/fedora/development%' /etc/yum.repos.d/rpmfusion-*.repo
-fi
-
 
 ### PREPARE CUSTOM KERNEL SUPPORT
 if [[ "asus" == "${KERNEL_FLAVOR}" ]]; then
@@ -45,6 +37,20 @@ if [[ "asus" == "${KERNEL_FLAVOR}" ]]; then
     rpm-ostree override replace \
     --experimental \
     --from repo=copr:copr.fedorainfracloud.org:lukenukem:asus-kernel \
+        kernel \
+        kernel-core \
+        kernel-devel \
+        kernel-devel-matched \
+        kernel-modules \
+        kernel-modules-core \
+        kernel-modules-extra
+elif [[ "fsync" == "${KERNEL_FLAVOR}" ]]; then
+    echo "Installing kernel-fsync:"
+    wget https://copr.fedorainfracloud.org/coprs/sentry/kernel-fsync/repo/fedora-$(rpm -E %fedora)/sentry-kernel-fsync-fedora-$(rpm -E %fedora).repo -O /etc/yum.repos.d/_copr_sentry-kernel-fsync.repo
+    rpm-ostree cliwrap install-to-root /
+    rpm-ostree override replace \
+    --experimental \
+    --from repo=copr:copr.fedorainfracloud.org:sentry:kernel-fsync \
         kernel \
         kernel-core \
         kernel-devel \
