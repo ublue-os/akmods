@@ -34,19 +34,19 @@ The [`akmods` image](https://github.com/orgs/ublue-os/packages/container/package
 
 Here's a rundown on how it's organized.
 
-We do our best to support all current builds of Fedora, current versions of the kernel modules listed, and in the case of NVIDIA, current (535) and the 470 legacy driver.
+We do our best to support all current builds of Fedora, current versions of the kernel modules listed, and in the case of NVIDIA, current (545) and the 470 legacy driver.
 
 The majority of the drivers are tagged with `KERNEL_TYPE-FEDORA_RELEASE`. NVIDIA drivers are bundled distinctly with tag `KERNEL_TYPE-FEDORA_RELEASE-NVIDIA_VERSION`.
 
 | KERNEL_TYPE | FEDORA_RELEASE | TAG |
 | - | - | - |
-| Fedora stock kernel | 37 | `main-37`, `main-37-470` `main-37-535` |
-| | 38 | `main-38`, `main-38-470` `main-38-535` |
-| | 39 | `main-38`, `main-38-470` `main-38-535` |
-| [patched for ASUS devices](https://copr.fedorainfracloud.org/coprs/lukenukem/asus-kernel) | 38 | `asus-38`, `asus-38-470` `asus-38-535` |
-| | 39 | `asus-39`, `asus-39-470` `asus-39-535` |
-| [patched Microsoft Surface devices](https://github.com/linux-surface/linux-surface/) | 38 | `surface-38`, `surface-38-535` |
-| | 39 | `surface-39`, `surface-39-535` |
+| Fedora stock kernel | 37 | `main-37`, `main-37-470` `main-37-545` |
+| | 38 | `main-38`, `main-38-470` `main-38-545` |
+| | 39 | `main-38`, `main-38-470` `main-38-545` |
+| [patched for ASUS devices](https://copr.fedorainfracloud.org/coprs/lukenukem/asus-kernel) | 38 | `asus-38`, `asus-38-470` `asus-38-545` |
+| | 39 | `asus-39`, `asus-39-470` `asus-39-545` |
+| [patched Microsoft Surface devices](https://github.com/linux-surface/linux-surface/) | 38 | `surface-38`, `surface-38-545` |
+| | 39 | `surface-39`, `surface-39-545` |
 
 
 
