@@ -17,11 +17,6 @@ fi
 # enable RPMs with alternatives to create them in this image build
 mkdir -p /var/lib/alternatives
 
-# allow simple `dnf install` style commands to work (in some spec scripts)
-if [[ "${RELEASE}" -eq "37" ]]; then
-    ln -s /usr/bin/rpm-ostree /usr/bin/dnf
-fi
-
 # enable more repos
 rpm-ostree install \
     https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-${RELEASE}.noarch.rpm \

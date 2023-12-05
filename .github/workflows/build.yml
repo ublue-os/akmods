@@ -22,7 +22,7 @@ jobs:
       matrix:
         kernel_flavor: [main, asus, fsync, surface]
         cfile_suffix: [common, nvidia]
-        major_version: [37, 38, 39]
+        major_version: [38, 39]
         nvidia_version: [0, 470, 545]
         exclude:
           - cfile_suffix: common
@@ -31,14 +31,8 @@ jobs:
             nvidia_version: 545
           - cfile_suffix: nvidia
             nvidia_version: 0
-          - kernel_flavor: asus
-            major_version: 37
-          - kernel_flavor: fsync
-            major_version: 37
           - kernel_flavor: fsync
             major_version: 38
-          - kernel_flavor: surface
-            major_version: 37
           - kernel_flavor: surface
             nvidia_version: 470
     steps:
