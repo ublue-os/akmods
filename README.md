@@ -40,9 +40,8 @@ The majority of the drivers are tagged with `KERNEL_TYPE-FEDORA_RELEASE`. NVIDIA
 
 | KERNEL_TYPE | FEDORA_RELEASE | TAG |
 | - | - | - |
-| Fedora stock kernel | 37 | `main-37`, `main-37-470` `main-37-545` |
-| | 38 | `main-38`, `main-38-470` `main-38-545` |
-| | 39 | `main-38`, `main-38-470` `main-38-545` |
+| Fedora stock kernel | 38 | `main-38`, `main-38-470` `main-38-545` |
+| | 39 | `main-39`, `main-39-470` `main-39-545` |
 | [patched for ASUS devices](https://copr.fedorainfracloud.org/coprs/lukenukem/asus-kernel) | 38 | `asus-38`, `asus-38-470` `asus-38-545` |
 | | 39 | `asus-39`, `asus-39-470` `asus-39-545` |
 | [patched Microsoft Surface devices](https://github.com/linux-surface/linux-surface/) | 38 | `surface-38`, `surface-38-545` |
@@ -80,7 +79,7 @@ If you have a kmod you want to contribute send a pull request by adding a script
 
 # Verification
 
-These images are signed with sisgstore's [cosign](https://docs.sigstore.dev/cosign/overview/). You can verify the signature by downloading the `cosign.pub` key from this repo and running the following command, replacing `RELEASE` with either `37` or `38`:
+These images are signed with sisgstore's [cosign](https://docs.sigstore.dev/cosign/overview/). You can verify the signature by downloading the `cosign.pub` key from this repo and running the following command, replacing `RELEASE` with either `38` or `39`:
 
     cosign verify --key cosign.pub ghcr.io/ublue-os/akmods:RELEASE
 
