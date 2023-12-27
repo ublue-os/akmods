@@ -13,7 +13,7 @@ RELEASE="$(rpm -E '%fedora')"
 rpm-ostree install \
     akmod-VirtualBox-*.fc${RELEASE}.${ARCH}
 akmods --force --kernels "${KERNEL}" --kmod VirtualBox
-modinfo /usr/lib/modules/${KERNEL}/extra/VirtualBox/VirtualBox.ko.xz > /dev/null \
+modinfo /usr/lib/modules/${KERNEL}/extra/VirtualBox/vboxdrv.ko.xz > /dev/null \
 || (find /var/cache/akmods/VirtualBox/ -name \*.log -print -exec cat {} \; && exit 1)
 
 rm -f /etc/yum.repos.d/_copr_ublue-os-akmods.repo
