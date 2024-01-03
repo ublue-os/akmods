@@ -22,11 +22,12 @@ Feel free to PR more kmod build scripts into this repo!
 - [ryzen_smu](https://gitlab.com/leogx9r/ryzen_smu) - A Linux kernel driver that exposes access to the SMU (System Management Unit) for certain AMD Ryzen Processors (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [steamdeck](https://lkml.org/lkml/2022/2/5/391) - platform driver for Valve's Steam Deck handheld PC (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [v4l2loopback](https://github.com/umlaeute/v4l2loopback) - allows creating "virtual video devices"
-- [winesync](https://repo.or.cz/linux/zf.git/shortlog/refs/heads/winesync4) - Support for Winesync/Fastsync/NTSync primitives
+- [winesync](https://repo.or.cz/linux/zf.git/shortlog/refs/heads/winesync4) - Support for Winesync/Fastsync/NTSync primitives (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [wl (broadcom)](https://github.com/rpmfusion/broadcom-wl/) - support for some legacy broadcom wifi devices
 - [xpadneo](https://github.com/atar-axis/xpadneo) - xbox one controller bluetooth driver (akmod from [negativo17 steam repo](https://negativo17.org/steam/)
 - [xpad-noone](https://github.com/ublue-os/xpad-noone) - xbox/xbox 360 controller driver (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [xone](https://github.com/medusalix/xone) - xbox one controller USB wired/RF driver (akmod from [negativo17 steam repo](https://negativo17.org/steam/)
+- [zenpower3](https://github.com/Ta180m/zenpower3) - Zenpower3 is a Linux kernel driver for reading temperature, voltage(SVI2), current(SVI2) and power(SVI2) for AMD Zen family CPUs (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 
 # How it's organized
 

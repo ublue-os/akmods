@@ -51,7 +51,8 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     /tmp/build-kmod-wl.sh && \
     /tmp/build-kmod-xpadneo.sh && \
     /tmp/build-kmod-xpad-noone.sh && \
-    /tmp/build-kmod-xone.sh
+    /tmp/build-kmod-xone.sh && \
+    /tmp/build-kmod-zenpower3.sh
 
 RUN cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
       /var/cache/rpms/ublue-os/
