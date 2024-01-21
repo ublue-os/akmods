@@ -41,6 +41,7 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
         /tmp/build-kmod-openrgb.sh && \
         /tmp/build-kmod-steamdeck.sh \
     ; fi && \
+    /tmp/build-kmod-ayn-platform.sh && \
     /tmp/build-kmod-bmi260.sh && \
     /tmp/build-kmod-gasket.sh && \
     /tmp/build-kmod-gcadapter_oc.sh && \
