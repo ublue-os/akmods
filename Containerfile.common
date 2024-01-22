@@ -41,6 +41,7 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
         /tmp/build-kmod-openrgb.sh && \
         /tmp/build-kmod-steamdeck.sh \
     ; fi && \
+    /tmp/build-kmod-ayn-platform.sh && \
     /tmp/build-kmod-bmi260.sh && \
     /tmp/build-kmod-gasket.sh && \
     /tmp/build-kmod-gcadapter_oc.sh && \
@@ -55,6 +56,7 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     /tmp/build-kmod-xpadneo.sh && \
     /tmp/build-kmod-xpad-noone.sh && \
     /tmp/build-kmod-xone.sh && \
+    /tmp/build-kmod-zenergy.sh && \
     /tmp/build-kmod-zenpower3.sh
 
 RUN cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \

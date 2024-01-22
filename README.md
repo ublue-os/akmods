@@ -12,6 +12,7 @@ Feel free to PR more kmod build scripts into this repo!
 - ublue-os-nvidia-addons - installs extra repos enabling our nvidia support
     - [nvidia container selinux policy](https://github.com/NVIDIA/dgx-selinux/tree/master/src/nvidia-container-selinux) - uses RHEL9 policy as the closest match
     - [nvidia-container-tookkit repo](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#installing-with-yum-or-dnf) - version 1.14 (and newer) provide CDI for podman use of nvidia gpus
+- [ayn-platform](https://github.com/ShadowBlip/ayn-platform) - Linux drivers for AYN x86 handhelds (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [bmi260](https://github.com/hhd-dev/bmi260) - kernel module driver for the Bosch BMI260 IMU (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [evdi](www.displaylink.com) - kernel module required for use of displaylink (akmod from [negativo17 multimedia repo](https://negativo17.org/multimedia/)
 - [gasket/apex](https://github.com/google/gasket-driver) - kernel module for Coral Gasket Driver, allowing usage of the Coral EdgeTPU on Linux systems (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
@@ -30,6 +31,7 @@ Feel free to PR more kmod build scripts into this repo!
 - [xpadneo](https://github.com/atar-axis/xpadneo) - xbox one controller bluetooth driver (akmod from [negativo17 steam repo](https://negativo17.org/steam/)
 - [xpad-noone](https://github.com/ublue-os/xpad-noone) - xbox/xbox 360 controller driver (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [xone](https://github.com/medusalix/xone) - xbox one controller USB wired/RF driver (akmod from [negativo17 steam repo](https://negativo17.org/steam/)
+- [zenergy](https://github.com/BoukeHaarsma23/zenergy) - Based on AMD_ENERGY driver, but with some jiffies added so non-root users can read it safely. (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [zenpower3](https://git.exozy.me/a/zenpower3) - Zenpower3 is a Linux kernel driver for reading temperature, voltage(SVI2), current(SVI2) and power(SVI2) for AMD Zen family CPUs (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 
 # How it's organized
