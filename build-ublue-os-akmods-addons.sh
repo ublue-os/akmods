@@ -4,7 +4,8 @@ set -oeux pipefail
 
 
 ### BUILD UBLUE AKMODS-ADDONS RPM
-#sed -i "s@gpgcheck=0@gpgcheck=1@" /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-steam.repo
+# ensure a higher priority is set for our ublue akmods COPR to pull deps from it over other sources (99 is default)
+echo "priority=90" >> /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo
 
 install -D /etc/pki/akmods/certs/public_key.der /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/public_key.der
 rpmbuild -ba \
