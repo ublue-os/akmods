@@ -14,6 +14,7 @@ Feel free to PR more kmod build scripts into this repo!
     - [nvidia-container-tookkit repo](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#installing-with-yum-or-dnf) - version 1.14 (and newer) provide CDI for podman use of nvidia gpus
 - [ayaneo-platform](https://github.com/ShadowBlip/ayaneo-platform) - Linux drivers for AYANEO x86 handhelds (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [ayn-platform](https://github.com/ShadowBlip/ayn-platform) - Linux drivers for AYN x86 handhelds (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
+- [bmi160](https://github.com/hhd-dev/bmi160) - kernel module driver for the BMI160 IMU (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [bmi260](https://github.com/hhd-dev/bmi260) - kernel module driver for the Bosch BMI260 IMU (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [bmi323](https://github.com/hhd-dev/bmi260) - kernel module driver for the Bosch BMI323 IMU (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [evdi](www.displaylink.com) - kernel module required for use of displaylink (akmod from [negativo17 multimedia repo](https://negativo17.org/multimedia/)
