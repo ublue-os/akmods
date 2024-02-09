@@ -18,23 +18,21 @@ fi
 mkdir -p /var/lib/alternatives
 
 # enable more repos
-#rpm-ostree install \
-#    http://mirrors.ocf.berkeley.edu/rpmfusion/free/fedora/rpmfusion-free-release-${RELEASE}.noarch.rpm \
-#    http://mirrors.ocf.berkeley.edu/rpmfusion/nonfree/fedora/rpmfusion-nonfree-release-${RELEASE}.noarch.rpm \
-#    fedora-repos-archive
 rpm-ostree install \
-     https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-${RELEASE}.noarch.rpm \
-     https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-${RELEASE}.noarch.rpm \
-     fedora-repos-archive
+    https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-${RELEASE}.noarch.rpm \
+    https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-${RELEASE}.noarch.rpm \
+    fedora-repos-archive
 
-# force use of single rpmfusion mirror
-#sed -i.bak 's%^metalink=%#metalink=%' /etc/yum.repos.d/rpmfusion-*.repo
-#sed -i 's%^#baseurl=http://download1.rpmfusion.org%baseurl=http://mirrors.ocf.berkeley.edu/rpmfusion%' /etc/yum.repos.d/rpmfusion-*.repo
-# after F40 launches, bump to 41
-if [[ "${FEDORA_MAJOR_VERSION}" -ge 40 ]]; then
-    sed -i 's%free/fedora/releases%free/fedora/development%' /etc/yum.repos.d/rpmfusion-*.repo
+if [ -n "${RPMFUSION_MIRROR}" ]; then
+    # force use of single rpmfusion mirror
+    echo "Using single rpmfusion mirror: ${RPMFUSION_MIRROR}"
+    sed -i.bak "s%^metalink=%#metalink=%" /etc/yum.repos.d/rpmfusion-*.repo
+    sed -i "s%^#baseurl=http://download1.rpmfusion.org%baseurl=${RPMFUSION_MIRROR}%" /etc/yum.repos.d/rpmfusion-*.repo
+    # after F40 launches, bump to 41
+    if [[ "${FEDORA_MAJOR_VERSION}" -ge 40 ]]; then
+        sed -i "s%free/fedora/releases%free/fedora/development%" /etc/yum.repos.d/rpmfusion-*.repo
+    fi
 fi
-
 
 ### PREPARE CUSTOM KERNEL SUPPORT
 if [[ "asus" == "${KERNEL_FLAVOR}" ]]; then
