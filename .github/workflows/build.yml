@@ -23,7 +23,7 @@ jobs:
         kernel_flavor: [main, asus, fsync, surface]
         cfile_suffix: [common, nvidia]
         major_version: [38, 39]
-        nvidia_version: [0, 470, 545]
+        nvidia_version: [0, 470, 545, 550]
         exclude:
           - cfile_suffix: common
             nvidia_version: 470
