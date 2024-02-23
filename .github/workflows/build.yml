@@ -124,10 +124,6 @@ jobs:
             echo "VERSION=$ver" >> $GITHUB_OUTPUT
             echo "LINUX=$linux" >> $GITHUB_OUTPUT
 
-      - name: Get current versions
-        id: labels
-        run: |
-
       # Build metadata
       - name: Image Metadata
         uses: docker/metadata-action@v5
