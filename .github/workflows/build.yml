@@ -35,6 +35,8 @@ jobs:
             major_version: 38
           - kernel_flavor: surface
             nvidia_version: 470
+          - major_version: 40
+            nvidia_version: 470
     steps:
       # Checkout push-to-registry action GitHub repository
       - name: Checkout Push to Registry action
