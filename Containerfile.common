@@ -43,6 +43,7 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
         /tmp/build-kmod-steamdeck.sh \
     ; fi && \
     /tmp/build-kmod-ayaneo-platform.sh && \
+    /tmp/build-framework-laptop-tests.sh && \
     /tmp/build-kmod-ayn-platform.sh && \
     /tmp/build-kmod-bmi160.sh && \
     /tmp/build-kmod-bmi260.sh && \
