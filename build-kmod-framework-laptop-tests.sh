@@ -9,9 +9,9 @@ KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')
 RELEASE="$(rpm -E '%fedora')"
 
 rpm-ostree install \
-    akmod-ayaneo-platform-*.fc${RELEASE}.${ARCH}
-akmods --force --kernels "${KERNEL}" --kmod ayaneo-platform
-modinfo /usr/lib/modules/${KERNEL}/extra/framework-laptop-tests/framework-laptop-kmod.ko.xz > /dev/null \
+    framework_laptop-*.fc${RELEASE}.${ARCH}
+akmods --force --kernels "${KERNEL}" --kmod framework_laptop
+modinfo /usr/lib/modules/${KERNEL}/extra/framework-laptop-tests/framework_laptop.ko.xz > /dev/null \
 || (find /var/cache/akmods/framework-laptop-tests/ -name \*.log -print -exec cat {} \; && exit 1)
 
 rm -f /etc/yum.repos.d/_copr_ublue-os-akmods.repo
