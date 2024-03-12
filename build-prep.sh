@@ -53,7 +53,7 @@ if [[ "asus" == "${KERNEL_FLAVOR}" ]]; then
         kernel-modules \
         kernel-modules-core \
         kernel-modules-extra
-elif [[ "fsync" =~ "${KERNEL_FLAVOR}" ]]; then
+elif [[ "${KERNEL_FLAVOR}" =~ "fsync" ]]; then
     echo "Installing kernel-fsync-${KERNEL_FLAVOR}:"
     wget https://copr.fedorainfracloud.org/coprs/sentry/kernel-fsync/repo/fedora-$(rpm -E %fedora)/sentry-kernel-fsync-fedora-$(rpm -E %fedora).repo -O /etc/yum.repos.d/_copr_sentry-kernel-fsync.repo
     rpm-ostree cliwrap install-to-root /
