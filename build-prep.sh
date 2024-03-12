@@ -60,13 +60,13 @@ elif [[ "${KERNEL_FLAVOR}" =~ "fsync" ]]; then
     rpm-ostree override replace \
     --experimental \
     --from repo=copr:copr.fedorainfracloud.org:sentry:kernel-fsync \
-        kernel-"${KERNEL_FLAVOR}" \
-        kernel-core-"${KERNEL_FLAVOR}" \
-        kernel-devel-"${KERNEL_FLAVOR}" \
-        kernel-devel-matched-"${KERNEL_FLAVOR}" \
-        kernel-modules-"${KERNEL_FLAVOR}" \
-        kernel-modules-core-"${KERNEL_FLAVOR}" \
-        kernel-modules-extra-"${KERNEL_FLAVOR}"
+        kernel-"${KERNEL_FLAVOR}".fc"${RELEASE}".x86_64 \
+        kernel-core-"${KERNEL_FLAVOR}".fc"${RELEASE}".x86_64 \
+        kernel-devel-"${KERNEL_FLAVOR}".fc"${RELEASE}".x86_64 \
+        kernel-devel-matched-"${KERNEL_FLAVOR}".fc"${RELEASE}".x86_64 \
+        kernel-modules-"${KERNEL_FLAVOR}".fc"${RELEASE}".x86_64 \
+        kernel-modules-core-"${KERNEL_FLAVOR}".fc"${RELEASE}".x86_64 \
+        kernel-modules-extra-"${KERNEL_FLAVOR}".fc"${RELEASE}".x86_64
 elif [[ "surface" == "${KERNEL_FLAVOR}" ]]; then
     echo "Installing Surface Kernel:"
     # Add Linux Surface repo
