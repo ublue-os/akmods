@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kernel_flavor: [main, asus, 6.7.9-204.fsync, surface]
+        kernel_flavor: [main, asus, 6.7.9-204.fsync, 6.7.4-200.fsync, surface]
         cfile_suffix: [common, nvidia]
         major_version: [38, 39]
         nvidia_version: [0, 470, 550]
