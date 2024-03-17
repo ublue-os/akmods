@@ -21,14 +21,13 @@ COPY ublue-os-akmods-addons.spec /tmp/ublue-os-akmods-addons/ublue-os-akmods-add
 ADD https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${FEDORA_MAJOR_VERSION}/ublue-os-akmods-fedora-${FEDORA_MAJOR_VERSION}.repo \
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo
 ADD https://negativo17.org/repos/fedora-multimedia.repo \
-    /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo    
+    /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo
 
 RUN /tmp/build-prep.sh
 
 RUN /tmp/build-ublue-os-akmods-addons.sh
 
 # Set kernel name
-# Exclude negativo17 kmods from Fedora 39
 RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
         export KERNEL_NAME="kernel" \
     ; else \
