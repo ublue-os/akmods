@@ -108,7 +108,7 @@ jobs:
 
       - name: Get current version
         id: labels
-        uses: Wandalen/wretry.action@v1.4.4
+        uses: Wandalen/wretry.action@v1.4.9
         with:
           attempt_limit: 3
           attempt_delay: 15000
@@ -144,7 +144,7 @@ jobs:
             io.artifacthub.package.logo-url=https://avatars.githubusercontent.com/u/1728152?s=200&v=4
 
       - name: Pull build image
-        uses: Wandalen/wretry.action@v1.4.4
+        uses: Wandalen/wretry.action@v1.4.9
         with:
           attempt_limit: 3
           attempt_delay: 15000
@@ -183,7 +183,7 @@ jobs:
 
 
       - name: Push To GHCR
-        uses: Wandalen/wretry.action@v1.4.4
+        uses: Wandalen/wretry.action@v1.4.9
         id: push
         if: github.event_name != 'pull_request'
         env:
