@@ -8,6 +8,11 @@ KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')
 RELEASE="$(rpm -E '%fedora')"
 
 
+if [ "40" == "${RELEASE}" ]; then
+  echo "SKIPPED BUILD of v4l2loopback: compile failure on F40 as of 2024-03-17"
+  exit 0
+fi
+
 ### BUILD v4l2loopbak (succeed or fail-fast with debug output)
 rpm-ostree install \
     akmod-v4l2loopback-*.fc${RELEASE}.${ARCH}
