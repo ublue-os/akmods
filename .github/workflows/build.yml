@@ -22,7 +22,7 @@ jobs:
       matrix:
         kernel_flavor: [main, asus, 6.7.9-204.fsync, surface]
         cfile_suffix: [common, nvidia]
-        major_version: [38, 39]
+        major_version: [38, 39, 40]
         nvidia_version: [0, 470, 550]
         exclude:
           - cfile_suffix: common
@@ -37,6 +37,11 @@ jobs:
             major_version: 38
           - kernel_flavor: surface
             nvidia_version: 470
+          - major_version: 40
+            nvidia_version: 470 # rpmfusion packages nvidia 470 for F40 but won't compile yet.
+          - major_version: 40
+            kernel_flavor: 6.7.9-204.fsync # kernel-fsync packages are not being built for F40 yet.
+          
     steps:
       # Checkout push-to-registry action GitHub repository
       - name: Checkout Push to Registry action
@@ -45,7 +50,8 @@ jobs:
       - name: Matrix Variables
         shell: bash
         run: |
-          if [[ "${{ matrix.major_version }}" -ge "40" ]]; then
+          if [[ "${{ matrix.major_version }}" -ge "41" ]]; then
+              # when we are confident of official fedora images we can switch to them
               echo "SOURCE_IMAGE=fedora-silverblue" >> $GITHUB_ENV
               echo "SOURCE_ORG=fedora" >> $GITHUB_ENV
           else

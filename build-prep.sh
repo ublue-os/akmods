@@ -27,15 +27,19 @@ rpm-ostree install \
     ${RPMFUSION_MIRROR_RPMS}/nonfree/fedora/rpmfusion-nonfree-release-${RELEASE}.noarch.rpm \
     fedora-repos-archive
 
+# after F40 launches, bump to 41
+if [[ "${FEDORA_MAJOR_VERSION}" -ge 40 ]]; then
+    # pre-release rpmfusion is in a different location
+    sed -i "s%free/fedora/releases%free/fedora/development%" /etc/yum.repos.d/rpmfusion-*.repo
+    # pre-release rpmfusion needs to enable testing
+    sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/rpmfusion-*-updates-testing.repo
+fi
+
 if [ -n "${RPMFUSION_MIRROR}" ]; then
     # force use of single rpmfusion mirror
     echo "Using single rpmfusion mirror: ${RPMFUSION_MIRROR}"
     sed -i.bak "s%^metalink=%#metalink=%" /etc/yum.repos.d/rpmfusion-*.repo
     sed -i "s%^#baseurl=http://download1.rpmfusion.org%baseurl=${RPMFUSION_MIRROR}%" /etc/yum.repos.d/rpmfusion-*.repo
-    # after F40 launches, bump to 41
-    if [[ "${FEDORA_MAJOR_VERSION}" -ge 40 ]]; then
-        sed -i "s%free/fedora/releases%free/fedora/development%" /etc/yum.repos.d/rpmfusion-*.repo
-    fi
 fi
 
 ### PREPARE CUSTOM KERNEL SUPPORT
