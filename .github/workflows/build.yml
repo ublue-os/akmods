@@ -33,7 +33,7 @@ jobs:
             nvidia_version: 0
           - kernel_flavor: 6.7.9-204.fsync
             major_version: 38
-          - kernel_flavor: 6.7.4-204.fsync
+          - kernel_flavor: 6.7.4-200.fsync
             major_version: 38
           - kernel_flavor: asus
             major_version: 38
