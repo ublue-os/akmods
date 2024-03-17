@@ -37,6 +37,15 @@ jobs:
             major_version: 38
           - kernel_flavor: surface
             nvidia_version: 470
+          - major_version: 40
+            nvidia_version: 470 # This driver version is not packaged for Fedora 40.
+          - major_version: 40
+            cfile_suffix: common # negativo17's multimedia repo is not branched yet.
+          - major_version: 40
+            kernel_flavor: surface # linux-surface is not branched for F40 yet.
+          - major_version: 40
+            kernel_flavor: fsync # kernel-fsync packages are not being built for F40 yet.
+          
     steps:
       # Checkout push-to-registry action GitHub repository
       - name: Checkout Push to Registry action
