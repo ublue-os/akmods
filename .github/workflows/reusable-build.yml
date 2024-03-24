@@ -1,16 +1,17 @@
 name: build-ublue
 on:
-  pull_request:
-  merge_group:
-  schedule:
-    - cron: '0 14 * * *'  # 2pm UTC everyday (timed against official fedora container pushes, and after 'config')
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      fedora_version:
+        description: 'The Fedora release version: 38, 39, 40, etc'
+        required: true
+        type: string
 env:
     IMAGE_NAME: akmods
     IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
 
 jobs:
-  push-ghcr:
+  build_ublue:
     name: akmods
     runs-on: ubuntu-22.04
     permissions:
@@ -20,10 +21,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kernel_flavor: [main, asus, 6.7.9-204.fsync, surface]
-        cfile_suffix: [common, nvidia]
-        major_version: [38, 39, 40]
-        nvidia_version: [0, 470, 550]
+        fedora_version:
+          - ${{ inputs.fedora_version }}
+        kernel_flavor:
+          - main
+          - asus
+          - 6.7.9-204.fsync
+          - surface
+        cfile_suffix:
+          - common
+          - nvidia
+        nvidia_version:
+          - 0
+          - 470
+          - 550
         exclude:
           - cfile_suffix: common
             nvidia_version: 470
@@ -32,14 +43,14 @@ jobs:
           - cfile_suffix: nvidia
             nvidia_version: 0
           - kernel_flavor: 6.7.9-204.fsync
-            major_version: 38
+            fedora_version: 38
           - kernel_flavor: asus
-            major_version: 38
+            fedora_version: 38
           - kernel_flavor: surface
             nvidia_version: 470
-          - major_version: 40
+          - fedora_version: 40
             nvidia_version: 470 # rpmfusion packages nvidia 470 for F40 but won't compile yet.
-          - major_version: 40
+          - fedora_version: 40
             kernel_flavor: 6.7.9-204.fsync # kernel-fsync packages are not being built for F40 yet.
           
     steps:
@@ -50,7 +61,7 @@ jobs:
       - name: Matrix Variables
         shell: bash
         run: |
-          if [[ "${{ matrix.major_version }}" -ge "41" ]]; then
+          if [[ "${{ matrix.fedora_version }}" -ge "41" ]]; then
               # when we are confident of official fedora images we can switch to them
               echo "SOURCE_IMAGE=fedora-silverblue" >> $GITHUB_ENV
               echo "SOURCE_ORG=fedora" >> $GITHUB_ENV
@@ -66,9 +77,9 @@ jobs:
           # Generate a timestamp for creating an image version history
           TIMESTAMP="$(date +%Y%m%d)"
           if [[ "${{ matrix.cfile_suffix }}" == "nvidia" ]]; then
-              VARIANT="${{ matrix.kernel_flavor }}-${{ matrix.major_version }}-${{ matrix.nvidia_version }}"
+              VARIANT="${{ matrix.kernel_flavor }}-${{ matrix.fedora_version }}-${{ matrix.nvidia_version }}"
           else
-              VARIANT="${{ matrix.kernel_flavor }}-${{ matrix.major_version }}"
+              VARIANT="${{ matrix.kernel_flavor }}-${{ matrix.fedora_version }}"
           fi
 
           COMMIT_TAGS=()
@@ -118,7 +129,7 @@ jobs:
           attempt_delay: 15000
           command: |
             set -eo pipefail
-            skopeo inspect docker://quay.io/${{ env.SOURCE_ORG }}/${{ env.SOURCE_IMAGE }}:${{ matrix.major_version }} > inspect.json
+            skopeo inspect docker://quay.io/${{ env.SOURCE_ORG }}/${{ env.SOURCE_IMAGE }}:${{ matrix.fedora_version }} > inspect.json
             ver=$(jq -r '.Labels["org.opencontainers.image.version"]' inspect.json)
             linux=$(jq -r '.Labels["ostree.linux"]' inspect.json)
             if [ -z "$ver" ] || [ "null" = "$ver" ]; then
@@ -155,7 +166,7 @@ jobs:
           command: |
             # pull the base image used for FROM in containerfile so
             # we can retry on that unfortunately common failure case
-            podman pull quay.io/${{ env.SOURCE_ORG }}/${{ env.SOURCE_IMAGE }}:${{ matrix.major_version }}
+            podman pull quay.io/${{ env.SOURCE_ORG }}/${{ env.SOURCE_IMAGE }}:${{ matrix.fedora_version }}
 
       # Build image using Buildah action
       - name: Build Image
@@ -171,7 +182,7 @@ jobs:
             SOURCE_IMAGE=${{ env.SOURCE_IMAGE }}
             SOURCE_ORG=${{ env.SOURCE_ORG }}
             KERNEL_FLAVOR=${{ matrix.kernel_flavor }}
-            FEDORA_MAJOR_VERSION=${{ matrix.major_version }}
+            FEDORA_MAJOR_VERSION=${{ matrix.fedora_version }}
             NVIDIA_MAJOR_VERSION=${{ matrix.nvidia_version }}
             RPMFUSION_MIRROR=${{ vars.RPMFUSION_MIRROR }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -233,10 +244,14 @@ jobs:
           echo "${{ toJSON(steps.push.outputs) }}"
 
   check:
-    name: Check all builds successful
+    name: Check all ${{ inputs.fedora_version }} builds successful
     runs-on: ubuntu-latest
-    needs: [push-ghcr]
+    needs: [build_ublue]
     steps:
+      - name: Exit on failure
+        if: ${{ needs.build_ublue.result == 'failure' }}
+        shell: bash
+        run: exit 1
       - name: Exit
         shell: bash
         run: exit 0
