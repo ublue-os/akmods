@@ -129,8 +129,8 @@ jobs:
               echo "inspected image linux version must not be empty or null"
               exit 1
             fi
-            echo "VERSION=$ver" >> $GITHUB_OUTPUT
-            echo "LINUX=$linux" >> $GITHUB_OUTPUT
+            echo "SOURCE_IMAGE_VERSION=$ver" >> $GITHUB_ENV
+            echo "SOURCE_IMAGE_LINUX=$linux" >> $GITHUB_ENV
 
       # Build metadata
       - name: Image Metadata
@@ -142,8 +142,8 @@ jobs:
           labels: |
             org.opencontainers.image.title=${{ env.IMAGE_NAME }}
             org.opencontainers.image.description=A caching layer for pre-built akmod RPMs
-            org.opencontainers.image.version=${{ steps.labels.outputs.VERSION }}
-            ostree.linux=${{ steps.labels.outputs.LINUX }}
+            org.opencontainers.image.version=${{ env.SOURCE_IMAGE_VERSION }}
+            ostree.linux=${{ env.SOURCE_IMAGE_LINUX }}
             io.artifacthub.package.readme-url=https://raw.githubusercontent.com/${{ github.repository }}/main/README.md
             io.artifacthub.package.logo-url=https://avatars.githubusercontent.com/u/1728152?s=200&v=4
 
