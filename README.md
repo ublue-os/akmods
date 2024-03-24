@@ -1,4 +1,4 @@
-[![build-ublue](https://github.com/ublue-os/akmods/actions/workflows/build.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build.yml)
+[![ublue-38](https://github.com/ublue-os/akmods/actions/workflows/build-38.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-38.yml) [![ublue-39](https://github.com/ublue-os/akmods/actions/workflows/build-39.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-39.yml) [![ublue-40](https://github.com/ublue-os/akmods/actions/workflows/build-40.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-40.yml)
 
 # ublue-os akmods
 
