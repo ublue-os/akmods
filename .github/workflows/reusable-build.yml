@@ -42,7 +42,7 @@ jobs:
             nvidia_version: 550
           - cfile_suffix: nvidia
             nvidia_version: 0
-          - kernel_flavor: 6.7.9-204.fsync
+          - kernel_flavor: 6.7.9-207.fsync
             fedora_version: 38
           - kernel_flavor: asus
             fedora_version: 38
