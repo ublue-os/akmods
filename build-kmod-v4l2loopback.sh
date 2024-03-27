@@ -7,11 +7,6 @@ ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
 
-if [[ "${KERNEL}" =~ "6.8" ]]; then
-  echo "SKIPPED BUILD of v4l2loopback: compile failure on kernel 6.8 as of 2024-03-17"
-  exit 0
-fi
-
 ### BUILD v4l2loopbak (succeed or fail-fast with debug output)
 rpm-ostree install \
     akmod-v4l2loopback-*.fc${RELEASE}.${ARCH}
