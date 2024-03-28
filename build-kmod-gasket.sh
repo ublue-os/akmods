@@ -7,7 +7,7 @@ KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')
 RELEASE="$(rpm -E '%fedora')"
 
 if [[ "${KERNEL}" =~ "6.8" ]]; then
-  echo "SKIPPED BUILD of rtl8814au: compile failure on kernel 6.8 as of 2024-03-17"
+  echo "SKIPPED BUILD of gasket: compile failure on kernel 6.8 as of 2024-03-17"
   exit 0
 fi
 

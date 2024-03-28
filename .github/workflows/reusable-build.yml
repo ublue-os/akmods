@@ -51,6 +51,8 @@ jobs:
           - kernel_flavor: asus
             fedora_version: 38
           - kernel_flavor: surface
+            fedora_version: 38
+          - kernel_flavor: surface
             nvidia_version: 470
           - fedora_version: 40
             nvidia_version: 470 # rpmfusion packages nvidia 470 for F40 but won't compile yet.
