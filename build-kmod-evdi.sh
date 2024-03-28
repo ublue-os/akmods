@@ -7,11 +7,6 @@ ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
 
-if [ "40" == "${RELEASE}" ]; then
-  echo "SKIPPED BUILD of evdi: negativo17 not supporting F40 yet"
-  exit 0
-fi
-
 cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo /etc/yum.repos.d/
 
 ### BUILD evdi (succeed or fail-fast with debug output)
