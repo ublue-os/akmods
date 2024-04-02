@@ -30,7 +30,7 @@ jobs:
         kernel_flavor:
           - main
           - asus
-          - 6.7.9-207.fsync
+          - fsync
           - surface
         cfile_suffix:
           - common
