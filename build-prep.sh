@@ -57,20 +57,20 @@ if [[ "asus" == "${KERNEL_FLAVOR}" ]]; then
         kernel-modules \
         kernel-modules-core \
         kernel-modules-extra
-elif [[ "${KERNEL_FLAVOR}" =~ "fsync" ]]; then
-    echo "Installing kernel-fsync-${KERNEL_FLAVOR}:"
+elif [[ "fsync" == "${KERNEL_FLAVOR}" ]]; then
+    echo "Installing fsync kernel:"
     wget https://copr.fedorainfracloud.org/coprs/sentry/kernel-fsync/repo/fedora-$(rpm -E %fedora)/sentry-kernel-fsync-fedora-$(rpm -E %fedora).repo -O /etc/yum.repos.d/_copr_sentry-kernel-fsync.repo
     rpm-ostree cliwrap install-to-root /
     rpm-ostree override replace \
     --experimental \
     --from repo=copr:copr.fedorainfracloud.org:sentry:kernel-fsync \
-        kernel-"${KERNEL_FLAVOR}".fc"${RELEASE}".x86_64 \
-        kernel-core-"${KERNEL_FLAVOR}".fc"${RELEASE}".x86_64 \
-        kernel-devel-"${KERNEL_FLAVOR}".fc"${RELEASE}".x86_64 \
-        kernel-devel-matched-"${KERNEL_FLAVOR}".fc"${RELEASE}".x86_64 \
-        kernel-modules-"${KERNEL_FLAVOR}".fc"${RELEASE}".x86_64 \
-        kernel-modules-core-"${KERNEL_FLAVOR}".fc"${RELEASE}".x86_64 \
-        kernel-modules-extra-"${KERNEL_FLAVOR}".fc"${RELEASE}".x86_64
+        kernel \
+        kernel-core \
+        kernel-devel \
+        kernel-devel-matched \
+        kernel-modules \
+        kernel-modules-core \
+        kernel-modules-extra
 elif [[ "surface" == "${KERNEL_FLAVOR}" ]]; then
     echo "Installing Surface Kernel:"
     # Add Linux Surface repo
