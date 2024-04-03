@@ -2,11 +2,16 @@
 
 set -oeux pipefail
 
-cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo /etc/yum.repos.d/
-
 ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
+
+if [[ "${KERNEL}" =~ "6.8" ]]; then
+  echo "SKIPPED BUILD of gasket: compile failure on kernel 6.8 as of 2024-03-17"
+  exit 0
+fi
+
+cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo /etc/yum.repos.d/
 
 rpm-ostree install \
     akmod-gasket-*.fc${RELEASE}.${ARCH}

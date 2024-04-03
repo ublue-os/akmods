@@ -1,4 +1,4 @@
-[![build-ublue](https://github.com/ublue-os/akmods/actions/workflows/build.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build.yml)
+[![build-38](https://github.com/ublue-os/akmods/actions/workflows/build-38.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-38.yml) [![build-39](https://github.com/ublue-os/akmods/actions/workflows/build-39.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-39.yml) [![build-40](https://github.com/ublue-os/akmods/actions/workflows/build-40.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-40.yml)
 
 # ublue-os akmods
 
@@ -18,7 +18,6 @@ Feel free to PR more kmod build scripts into this repo!
 - [bmi260](https://github.com/hhd-dev/bmi260) - kernel module driver for the Bosch BMI260 IMU (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [bmi323](https://github.com/hhd-dev/bmi260) - kernel module driver for the Bosch BMI323 IMU (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [evdi](www.displaylink.com) - kernel module required for use of displaylink (akmod from [negativo17 multimedia repo](https://negativo17.org/multimedia/)
-- [gasket/apex](https://github.com/google/gasket-driver) - kernel module for Coral Gasket Driver, allowing usage of the Coral EdgeTPU on Linux systems (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [gcadapter_oc](https://github.com/hannesmann/gcadapter-oc-kmod) - kernel module for overclocking the Nintendo Wii U/Mayflash GameCube adapter (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [nct6687d](https://github.com/Fred78290/nct6687d) - Linux kernel module for Nuvoton NCT6687-R found on AMD B550 chipset motherboards (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [nvidia](https://rpmfusion.org/Howto/NVIDIA) - nvidia GPU drivers built from rpmfusion
@@ -89,4 +88,8 @@ If you have a kmod you want to contribute send a pull request by adding a script
 These images are signed with sisgstore's [cosign](https://docs.sigstore.dev/cosign/overview/). You can verify the signature by downloading the `cosign.pub` key from this repo and running the following command, replacing `RELEASE` with either `38` or `39`:
 
     cosign verify --key cosign.pub ghcr.io/ublue-os/akmods:RELEASE
+
+# Metrics
+
+![Alt](https://repobeats.axiom.co/api/embed/a7ddeb1a3d2e0ce534ccf7cfa75c33b35183b106.svg "Repobeats analytics image")
 
