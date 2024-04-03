@@ -10,7 +10,7 @@ RELEASE="$(rpm -E '%fedora')"
 
 rpm-ostree install \
     framework_laptop-*.fc${RELEASE}.${ARCH}
-akmods --force --kernels "${KERNEL}" --kmod framework_laptop
+akmods --force --kernels "${KERNEL}" --kmod framework-laptop
 modinfo /usr/lib/modules/${KERNEL}/extra/framework-laptop-tests/framework_laptop.ko.xz > /dev/null \
 || (find /var/cache/akmods/framework-laptop-tests/ -name \*.log -print -exec cat {} \; && exit 1)
 
