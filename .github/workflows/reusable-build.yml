@@ -57,7 +57,7 @@ jobs:
           - fedora_version: 40
             nvidia_version: 470 # rpmfusion packages nvidia 470 for F40 but won't compile yet.
           - fedora_version: 40
-            kernel_flavor: 6.7.9-207.fsync # kernel-fsync packages are not being built for F40 yet.
+            kernel_flavor: fsync # kernel-fsync packages are not being built for F40 yet.
           
     steps:
       # Checkout push-to-registry action GitHub repository
