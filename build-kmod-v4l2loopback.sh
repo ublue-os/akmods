@@ -7,8 +7,8 @@ ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
 
-if [[ "${KERNEL_FLAVOR}" =~ "surface" ]]; then
-  echo "SKIPPED BUILD of v4l2loopback: compile failure on surface kernel as of 2024-03-27"
+if [[ "${RELEASE}" -eq "39" ]] && [[ "${KERNEL_FLAVOR}" != "main" ]]; then
+  echo "SKIPPED BUILD of v4l2loopback: compile failure on F39 w/ 6.8 kernels as of 2024-03-27"
   exit 0
 fi
 
