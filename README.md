@@ -17,7 +17,8 @@ Feel free to PR more kmod build scripts into this repo!
 - [bmi160](https://github.com/hhd-dev/bmi160) - kernel module driver for the BMI160 IMU (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [bmi260](https://github.com/hhd-dev/bmi260) - kernel module driver for the Bosch BMI260 IMU (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [bmi323](https://github.com/hhd-dev/bmi260) - kernel module driver for the Bosch BMI323 IMU (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
-- [evdi](www.displaylink.com) - kernel module required for use of displaylink (akmod from [negativo17 multimedia repo](https://negativo17.org/multimedia/)
+- [evdi](www.displaylink.com) - kernel module required for use of displaylink (akmod from [negativo17 multimedia repo](https://negativo17.org/multimedia/))
+- [facetimehd](https://github.com/patjak/facetimehd/) - kernel module Linux driver for the FacetimeHD (Broadcom 1570) PCIe webcam (akmod from [mulderje/facetimehd-kmod copr](https://copr.fedorainfracloud.org/coprs/mulderje/facetimehd-kmod/))
 - [gcadapter_oc](https://github.com/hannesmann/gcadapter-oc-kmod) - kernel module for overclocking the Nintendo Wii U/Mayflash GameCube adapter (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [nct6687d](https://github.com/Fred78290/nct6687d) - Linux kernel module for Nuvoton NCT6687-R found on AMD B550 chipset motherboards (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [nvidia](https://rpmfusion.org/Howto/NVIDIA) - nvidia GPU drivers built from rpmfusion
