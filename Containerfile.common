@@ -57,6 +57,7 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     /tmp/build-kmod-v4l2loopback.sh && \
     /tmp/build-kmod-VirtualBox.sh && \
     /tmp/build-kmod-wl.sh && \
+    /tmp/build-kmod-vhba.sh && \
     /tmp/build-kmod-xpadneo.sh && \
     /tmp/build-kmod-xone.sh && \
     /tmp/build-kmod-zenergy.sh
