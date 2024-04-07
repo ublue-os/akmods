@@ -2,11 +2,18 @@
 
 set -oeux pipefail
 
-cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo /etc/yum.repos.d/
+
 
 ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
+
+if [[ "${RELEASE}" -lt "39" ]] && [[ "${KERNEL_FLAVOR}" != "main" ]]; then
+  echo "SKIPPED BUILD of framework-kmod: I don't believe this is suppose to work on 38?"
+  exit 0
+fi
+
+cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo /etc/yum.repos.d/
 
 rpm-ostree install \
     framework_laptop-*.fc${RELEASE}.${ARCH}
