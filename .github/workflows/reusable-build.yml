@@ -37,27 +37,16 @@ jobs:
           - nvidia
         nvidia_version:
           - 0
-          - 470
           - 550
         exclude:
-          - cfile_suffix: common
-            nvidia_version: 470
           - cfile_suffix: common
             nvidia_version: 550
           - cfile_suffix: nvidia
             nvidia_version: 0
-          - cfile_suffix: nvidia
-            fedora_version: 39
-            kernel_flavor: asus
-            nvidia_version: 470 # nvidia 470 no longer builds on 6.8 asus kernel
           - kernel_flavor: asus
             fedora_version: 38
           - kernel_flavor: surface
             fedora_version: 38
-          - kernel_flavor: surface
-            nvidia_version: 470
-          - fedora_version: 40
-            nvidia_version: 470 # rpmfusion packages nvidia 470 for F40 but won't compile yet.
           - fedora_version: 38
             kernel_flavor: fsync # kernel-fsync not required for ublue-os F38
           - fedora_version: 40
