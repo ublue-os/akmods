@@ -139,23 +139,25 @@ jobs:
 
       - name: Get current version
         id: labels
-        uses: docker://${{ FQ_SOURCE_IMAGE }}
-        shell: bash
-        run: |
-          set -eo pipefail
-          skopeo inspect docker://${{ env.FQ_SOURCE_IMAGE }} > inspect.json
-          ver=$(jq -r '.Labels["org.opencontainers.image.version"]' inspect.json)
-          linux=$(jq -r '.Labels["ostree.linux"]' inspect.json)
-          if [ -z "$ver" ] || [ "null" = "$ver" ]; then
-            echo "inspected image version must not be empty or null"
-            exit 1
-          fi
-          if [ -z "$linux" ] || [ "null" = "$linux" ]; then
-            echo "inspected image linux version must not be empty or null"
-            exit 1
-          fi
-          echo "SOURCE_IMAGE_VERSION=$ver" >> $GITHUB_ENV
-          echo "SOURCE_IMAGE_LINUX=$linux" >> $GITHUB_ENV
+        uses: addnab/docker-run-action@v3
+        with:
+          image: ${{ FQ_SOURCE_IMAGE }}
+          shell: bash
+          run: |
+            set -eo pipefail
+            skopeo inspect docker://${{ env.FQ_SOURCE_IMAGE }} > inspect.json
+            ver=$(jq -r '.Labels["org.opencontainers.image.version"]' inspect.json)
+            linux=$(jq -r '.Labels["ostree.linux"]' inspect.json)
+            if [ -z "$ver" ] || [ "null" = "$ver" ]; then
+              echo "inspected image version must not be empty or null"
+              exit 1
+            fi
+            if [ -z "$linux" ] || [ "null" = "$linux" ]; then
+              echo "inspected image linux version must not be empty or null"
+              exit 1
+            fi
+            echo "SOURCE_IMAGE_VERSION=$ver" >> $GITHUB_ENV
+            echo "SOURCE_IMAGE_LINUX=$linux" >> $GITHUB_ENV
 
       # Build metadata
       - name: Image Metadata
