@@ -73,7 +73,7 @@ jobs:
               echo "SOURCE_IMAGE=base" >> $GITHUB_ENV
               echo "SOURCE_ORG=fedora-ostree-desktops" >> $GITHUB_ENV
           fi
-          echo "FQ_SOURCE_IMAGE=quay.io/${{ SOURCE_ORG }}/${{ SOURCE_IMAGE }}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
+          echo "FQ_SOURCE_IMAGE=quay.io/${SOURCE_ORG}/${SOURCE_IMAGE}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
 
 
       - name: Generate tags
