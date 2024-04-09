@@ -141,7 +141,7 @@ jobs:
         id: labels
         uses: addnab/docker-run-action@v3
         with:
-          image: ${{ FQ_SOURCE_IMAGE }}
+          image: ${{ env.FQ_SOURCE_IMAGE }}
           shell: bash
           run: |
             set -eo pipefail
