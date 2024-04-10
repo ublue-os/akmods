@@ -47,6 +47,7 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     /tmp/build-kmod-bmi260.sh && \
     /tmp/build-kmod-bmi323.sh && \
     /tmp/build-kmod-gcadapter_oc.sh && \
+    /tmp/build-kmod-kvmfr.sh && \
     /tmp/build-kmod-nct6687d.sh && \
     /tmp/build-kmod-openrazer.sh && \
     /tmp/build-kmod-ryzen-smu.sh && \
