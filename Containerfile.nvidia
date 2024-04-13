@@ -1,8 +1,8 @@
 ###
-### Containerfile.nvidia - used to build ONLY NVIDIA kmods (one driver version per build)
+### Containerfile.nvidia - used to build ONLY NVIDIA kmods
 ###
 
-#Build from base, simpley because it's the smallest image
+#Build from base, simply because it's the smallest image
 ARG SOURCE_IMAGE="${SOURCE_IMAGE:-base}"
 ARG SOURCE_ORG="${SOURCE_ORG:-fedora-ostree-desktops}"
 ARG BASE_IMAGE="quay.io/${SOURCE_ORG}/${SOURCE_IMAGE}"
@@ -10,7 +10,6 @@ ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-39}"
 
 FROM ${BASE_IMAGE}:${FEDORA_MAJOR_VERSION} AS builder
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-39}"
-ARG NVIDIA_MAJOR_VERSION="${NVIDIA_MAJOR_VERSION:-550}"
 ARG KERNEL_FLAVOR="{KERNEL_FLAVOR:-main}"
 ARG RPMFUSION_MIRROR=""
 
@@ -19,15 +18,9 @@ COPY certs /tmp/certs
 
 # files for nvidia
 COPY ublue-os-nvidia-addons.spec /tmp/ublue-os-nvidia-addons/ublue-os-nvidia-addons.spec
-ADD https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo \
-    /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/nvidia-container-toolkit.repo
-ADD https://copr.fedorainfracloud.org/coprs/eyecantcu/supergfxctl/repo/fedora-${FEDORA_MAJOR_VERSION}/eyecantcu-supergfxctl-fedora-${FEDORA_MAJOR_VERSION}.repo \
-    /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/eyecantcu-supergfxctl.repo
-ADD https://raw.githubusercontent.com/NVIDIA/dgx-selinux/master/bin/RHEL9/nvidia-container.pp \
-    /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/nvidia-container.pp
-ADD files/etc/sway/environment /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/environment
-ADD files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/ublue-nvctk-cdi.service
-ADD files/usr/lib/systemd/system-preset/70-ublue-nvctk-cdi.preset /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/70-ublue-nvctk-cdi.preset
+COPY files/etc/sway/environment /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/environment
+COPY files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/ublue-nvctk-cdi.service
+COPY files/usr/lib/systemd/system-preset/70-ublue-nvctk-cdi.preset /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/70-ublue-nvctk-cdi.preset
 
 
 RUN /tmp/build-prep.sh
@@ -43,6 +36,7 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
 
 RUN cp /tmp/ublue-os-nvidia-addons/rpmbuild/RPMS/noarch/ublue-os-nvidia-addons*.rpm \
       /var/cache/rpms/ublue-os/
+
 RUN for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
         cp "${RPM}" /var/cache/rpms/kmods/; \
     done
