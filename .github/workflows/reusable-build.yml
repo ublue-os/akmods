@@ -142,7 +142,7 @@ jobs:
         id: meta
         with:
           images: |
-            ${{ env.IMAGE_NAME) }}
+            ${{ env.IMAGE_NAME }}
           labels: |
             org.opencontainers.image.title=${{ env.IMAGE_BASE_NAME }}
             org.opencontainers.image.description=A caching layer for pre-built akmod RPMs
@@ -168,7 +168,7 @@ jobs:
         with:
           containerfiles: |
             ./Containerfile.${{ matrix.cfile_suffix }}
-          image: ${{ env.IMAGE_NAME) }}
+          image: ${{ env.IMAGE_NAME }}
           tags: |
             ${{ steps.generate-tags.outputs.alias_tags }}
           build-args: |
