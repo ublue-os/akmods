@@ -31,6 +31,7 @@ jobs:
           - main
           - asus
           - fsync
+          - fsync-lts
           - surface
         cfile_suffix:
           - common
@@ -49,8 +50,12 @@ jobs:
             fedora_version: 38
           - fedora_version: 38
             kernel_flavor: fsync # kernel-fsync not required for ublue-os F38
+          - fedora_version: 38
+            kernel_flavor: fsync-lts
           - fedora_version: 40
             kernel_flavor: fsync # kernel-fsync packages are not being built for F40 yet.
+          - fedora_version: 40
+            kernel_flavor: fsync-lts
           
     steps:
       # Checkout push-to-registry action GitHub repository
