@@ -142,12 +142,34 @@ jobs:
         run: |
           set -eo pipefail
 
-          # Get kernel version with podman
+          # Start container and install dnf
           container_name="fq-$(uuidgen)"
           podman run --entrypoint /bin/bash --name "$container_name" -dt "${{ env.FQ_SOURCE_IMAGE }}"
-          installed_packages=$(podman exec "$container_name" rpm -qa)
-          kernel_suffix="linux"
-          linux=$(echo $installed_packages | grep -P 'kernel-(|'"$kernel_suffix"'-)(\d+\.\d+\.\d+)' | sed -E 's/kernel-(|'"$kernel_suffix"'-)//')
+          podman exec $container_name rpm-ostree install dnf dnf-plugins-core
+
+          # Fetch kernel version
+          dnf="podman exec $container_name dnf"
+          case "${{ matrix.kernel_flavor }}" in
+            "asus")
+              $dnf copr enable -y lukenukem/asus-kernel
+              linux=$($dnf repoquery --repoid copr:copr.fedorainfracloud.org:lukenukem:asus-kernel --whatprovides kernel | tail -n1 | sed 's/.*://')
+              ;;
+            "fsync")
+              $dnf copr enable -y sentry/kernel-fsync
+              linux=$($dnf repoquery --repoid copr:copr.fedorainfracloud.org:sentry:kernel-fsync --whatprovides kernel | tail -n1 | sed 's/.*://')
+              ;;
+            "fsync-lts")
+              $dnf copr enable -y sentry/kernel-fsync-lts
+              linux=$($dnf repoquery --repoid copr:copr.fedorainfracloud.org:sentry:kernel-fsync-lts --whatprovides kernel | tail -n1 | sed 's/.*://')
+              ;;
+            "surface")
+              $dnf config-manager --add-repo=https://pkg.surfacelinux.com/fedora/linux-surface.repo
+              linux=$($dnf repoquery --repoid linux-surface --whatprovides kernel-surface | tail -n1 | sed 's/.*://')
+              ;;
+            *)
+              linux=$($dnf repoquery --installed --whatprovides kernel | tail -n1 | sed 's/.*://')
+              ;;
+          esac
 
           skopeo inspect docker://${{ env.FQ_SOURCE_IMAGE }} > inspect.json
           ver=$(jq -r '.Labels["org.opencontainers.image.version"]' inspect.json)
