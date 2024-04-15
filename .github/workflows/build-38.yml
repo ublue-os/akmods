@@ -1,6 +1,6 @@
 name: ublue akmods 38
 on:
-  #pull_request:
+  pull_request:
   merge_group:
   schedule:
     - cron: '10 14 * * *'  # 2pm-ish UTC everyday (timed against official fedora container pushes, and after 'config')
