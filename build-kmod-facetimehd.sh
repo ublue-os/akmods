@@ -16,8 +16,7 @@ wget "https://copr.fedorainfracloud.org/coprs/mulderje/facetimehd-kmod/repo/fedo
 
 ### BUILD facetimehd (succeed or fail-fast with debug output)
 rpm-ostree install \
-    "akmod-facetimehd-*.fc${RELEASE}.${ARCH}" \
-    facetimehd-firmware
+    akmod-facetimehd-*.fc${RELEASE}.${ARCH}
 akmods --force --kernels "${KERNEL}" --kmod facetimehd
 modinfo "/usr/lib/modules/${KERNEL}/extra/facetimehd/facetimehd.ko.xz" > /dev/null \
 || (find /var/cache/akmods/facetimehd/ -name \*.log -print -exec cat {} \; && exit 1)
