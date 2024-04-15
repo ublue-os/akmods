@@ -103,8 +103,17 @@ elif [[ "surface" == "${KERNEL_FLAVOR}" ]]; then
         --install kernel-surface-modules \
         --install kernel-surface-modules-core \
         --install kernel-surface-modules-extra
+elif [[ "main" == "${KERNEL_FLAVOR}" ]] && \
+     [[ "" != "${KERNEL_VERSION}" ]]; then
+    echo "main kernel with version to avoid upgrading kernel beyond what is in the image."
+    curl -L https://raw.githubusercontent.com/coreos/fedora-coreos-config/testing-devel/fedora-coreos-pool.repo \
+        -o /etc/yum.repos.d/fedora-coreos-pool.repo
+    rpm-ostree cliwrap install-to-root /
+    rpm-ostree install \
+        kernel-devel-${KERNEL_VERSION} \
+        kernel-devel-matched-${KERNEL_VERSION}
 else
-    echo "Default main kernel needs no customization."
+    echo "Default main kernel without a specific version."
 fi
 
 
