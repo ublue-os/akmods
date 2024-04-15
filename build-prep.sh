@@ -42,6 +42,10 @@ if [ -n "${RPMFUSION_MIRROR}" ]; then
     sed -i "s%^#baseurl=http://download1.rpmfusion.org%baseurl=${RPMFUSION_MIRROR}%" /etc/yum.repos.d/rpmfusion-*.repo
 fi
 
+# required for main and surface when fedora repo has updated kernel beyond what was in the image
+curl -L https://raw.githubusercontent.com/coreos/fedora-coreos-config/testing-devel/fedora-coreos-pool.repo \
+    -o /etc/yum.repos.d/fedora-coreos-pool.repo
+
 ### PREPARE CUSTOM KERNEL SUPPORT
 if [[ "asus" == "${KERNEL_FLAVOR}" ]]; then
     echo "Installing ASUS Kernel:"
@@ -106,8 +110,6 @@ elif [[ "surface" == "${KERNEL_FLAVOR}" ]]; then
 elif [[ "main" == "${KERNEL_FLAVOR}" ]] && \
      [[ "" != "${KERNEL_VERSION}" ]]; then
     echo "main kernel with version to avoid upgrading kernel beyond what is in the image."
-    curl -L https://raw.githubusercontent.com/coreos/fedora-coreos-config/testing-devel/fedora-coreos-pool.repo \
-        -o /etc/yum.repos.d/fedora-coreos-pool.repo
     rpm-ostree cliwrap install-to-root /
     rpm-ostree install \
         kernel-devel-${KERNEL_VERSION} \
