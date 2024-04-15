@@ -15,6 +15,7 @@ Source2:        nvidia-container.pp
 Source3:        environment
 Source4:        ublue-nvctk-cdi.service
 Source5:        70-ublue-nvctk-cdi.preset
+Source6:        negativo17-fedora-nvidia.repo
 
 %description
 Adds various runtime files for nvidia support.
@@ -24,6 +25,7 @@ Adds various runtime files for nvidia support.
 
 
 %build
+install -Dm0644 %{SOURCE6} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo
 install -Dm0644 %{SOURCE0} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
 install -Dm0644 %{SOURCE1} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/eyecantcu-supergfxctl.repo
 install -Dm0644 %{SOURCE2} %{buildroot}%{_datadir}/ublue-os/%{_datadir}/selinux/packages/nvidia-container.pp
@@ -31,17 +33,24 @@ install -Dm0644 %{SOURCE3} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/sway/
 install -Dm0644 %{SOURCE4} %{buildroot}%{_datadir}/ublue-os/%{_unitdir}/ublue-nvctk-cdi.service
 install -Dm0644 %{SOURCE5} %{buildroot}%{_presetdir}/70-ublue-nvctk-cdi.preset
 
+sed -i 's@enabled=1@enabled=0@g' %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo
+sed -i 's@enabled=1@enabled=0@g' %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
+sed -i 's@enabled=1@enabled=0@g' %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/eyecantcu-supergfxctl.repo
+
+install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo     %{buildroot}%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo     %{buildroot}%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/eyecantcu-supergfxctl.repo        %{buildroot}%{_sysconfdir}/yum.repos.d/eyecantcu-supergfxctl.repo
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_datadir}/selinux/packages/nvidia-container.pp             %{buildroot}%{_datadir}/selinux/packages/nvidia-container.pp
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_unitdir}/ublue-nvctk-cdi.service                          %{buildroot}%{_unitdir}/ublue-nvctk-cdi.service
 
 %files
+%attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo
 %attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
 %attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/eyecantcu-supergfxctl.repo
 %attr(0644,root,root) %{_datadir}/ublue-os/%{_datadir}/selinux/packages/nvidia-container.pp
 %attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/sway/environment
 %attr(0644,root,root) %{_datadir}/ublue-os/%{_unitdir}/ublue-nvctk-cdi.service
+%attr(0644,root,root) %{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo
 %attr(0644,root,root) %{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
 %attr(0644,root,root) %{_sysconfdir}/yum.repos.d/eyecantcu-supergfxctl.repo
 %attr(0644,root,root) %{_datadir}/selinux/packages/nvidia-container.pp
@@ -49,6 +58,10 @@ install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_unitdir}/ublue-nvctk-cdi.ser
 %attr(0644,root,root) %{_presetdir}/70-ublue-nvctk-cdi.preset
 
 %changelog
+* Sat Apr 13 Benjamin Sherman <benjamin@holyarmy.org> - 0.11
+- Add negativo17 fedora-nvidia repo for switch of NVIDIA driver source
+- Provided third-party repos are no longer enabled by default
+
 * Fri Oct 6 2023 Benjamin Sherman <benjamin@holyarmy.org> - 0.10
 - add ublue-nvctk-cdi service to auto-generate NVIDIA CDI GPU definitions
 

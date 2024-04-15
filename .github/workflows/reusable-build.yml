@@ -7,7 +7,7 @@ on:
         required: true
         type: string
 env:
-    IMAGE_NAME: akmods
+    IMAGE_BASE_NAME: akmods
     IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
 
 concurrency:
@@ -36,14 +36,7 @@ jobs:
         cfile_suffix:
           - common
           - nvidia
-        nvidia_version:
-          - 0
-          - 550
         exclude:
-          - cfile_suffix: common
-            nvidia_version: 550
-          - cfile_suffix: nvidia
-            nvidia_version: 0
           - kernel_flavor: asus
             fedora_version: 38
           - kernel_flavor: surface
@@ -73,6 +66,11 @@ jobs:
               echo "SOURCE_IMAGE=base" >> $GITHUB_ENV
               echo "SOURCE_ORG=fedora-ostree-desktops" >> $GITHUB_ENV
           fi
+          if [ "common" == "${{ matrix.cfile_suffix }}" ]; then
+              echo "IMAGE_NAME=${{ env.IMAGE_BASE_NAME }}" >> $GITHUB_ENV
+          else
+              echo "IMAGE_NAME=${{ env.IMAGE_BASE_NAME }}-${{ matrix.cfile_suffix }}" >> $GITHUB_ENV
+          fi
 
       - name: Generate tags
         id: generate-tags
@@ -80,11 +78,7 @@ jobs:
         run: |
           # Generate a timestamp for creating an image version history
           TIMESTAMP="$(date +%Y%m%d)"
-          if [[ "${{ matrix.cfile_suffix }}" == "nvidia" ]]; then
-              VARIANT="${{ matrix.kernel_flavor }}-${{ matrix.fedora_version }}-${{ matrix.nvidia_version }}"
-          else
-              VARIANT="${{ matrix.kernel_flavor }}-${{ matrix.fedora_version }}"
-          fi
+          VARIANT="${{ matrix.kernel_flavor }}-${{ matrix.fedora_version }}"
 
           COMMIT_TAGS=()
           BUILD_TAGS=()
@@ -153,9 +147,9 @@ jobs:
         id: meta
         with:
           images: |
-            ${{ 'nvidia' == matrix.cfile_suffix && format('{0}-nvidia', env.IMAGE_NAME) || format('{0}', env.IMAGE_NAME) }}
+            ${{ env.IMAGE_NAME }}
           labels: |
-            org.opencontainers.image.title=${{ env.IMAGE_NAME }}
+            org.opencontainers.image.title=${{ env.IMAGE_BASE_NAME }}
             org.opencontainers.image.description=A caching layer for pre-built akmod RPMs
             org.opencontainers.image.version=${{ env.SOURCE_IMAGE_VERSION }}
             ostree.linux=${{ env.SOURCE_IMAGE_LINUX }}
@@ -179,7 +173,7 @@ jobs:
         with:
           containerfiles: |
             ./Containerfile.${{ matrix.cfile_suffix }}
-          image: ${{ 'nvidia' == matrix.cfile_suffix && format('{0}-nvidia', env.IMAGE_NAME) || format('{0}', env.IMAGE_NAME) }}
+          image: ${{ env.IMAGE_NAME }}
           tags: |
             ${{ steps.generate-tags.outputs.alias_tags }}
           build-args: |
@@ -187,7 +181,6 @@ jobs:
             SOURCE_ORG=${{ env.SOURCE_ORG }}
             KERNEL_FLAVOR=${{ matrix.kernel_flavor }}
             FEDORA_MAJOR_VERSION=${{ matrix.fedora_version }}
-            NVIDIA_MAJOR_VERSION=${{ matrix.nvidia_version }}
             RPMFUSION_MIRROR=${{ vars.RPMFUSION_MIRROR }}
           labels: ${{ steps.meta.outputs.labels }}
           oci: false

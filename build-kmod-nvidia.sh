@@ -2,45 +2,38 @@
 
 set -oeux pipefail
 
-NVIDIA_MAJOR_VERSION=${1}
-
 RELEASE="$(rpm -E '%fedora.%_arch')"
-echo NVIDIA_MAJOR_VERSION=${NVIDIA_MAJOR_VERSION}
 
 cd /tmp
 
 ### BUILD nvidia
-# nvidia 520.xxx and newer currently don't have a -$VERSIONxx suffix in their
-# package names
-if [[ "${NVIDIA_MAJOR_VERSION}" -ge 520 ]]; then
-    NVIDIA_PACKAGE_NAME="nvidia"
-else
-    NVIDIA_PACKAGE_NAME="nvidia-${NVIDIA_MAJOR_VERSION}xx"
-fi
+
+# disable rpmfusion and enable negativo17
+sed -i 's/enabled=1/enabled=0/' /etc/yum.repos.d/rpmfusion-*.repo
+cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-fedora-nvidia.repo /etc/yum.repos.d/
 
 rpm-ostree install \
-    akmod-${NVIDIA_PACKAGE_NAME}*:${NVIDIA_MAJOR_VERSION}.*.fc${RELEASE} \
-    xorg-x11-drv-${NVIDIA_PACKAGE_NAME}-{,cuda,devel,kmodsrc,power}*:${NVIDIA_MAJOR_VERSION}.*.fc${RELEASE}
+    akmod-nvidia*.fc${RELEASE}
 
 # Either successfully build and install the kernel modules, or fail early with debug output
+rpm -qa |grep nvidia
 KERNEL_VERSION="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
-NVIDIA_AKMOD_VERSION="$(basename "$(rpm -q "akmod-${NVIDIA_PACKAGE_NAME}" --queryformat '%{VERSION}-%{RELEASE}')" ".fc${RELEASE%%.*}")"
-NVIDIA_LIB_VERSION="$(basename "$(rpm -q "xorg-x11-drv-${NVIDIA_PACKAGE_NAME}" --queryformat '%{VERSION}-%{RELEASE}')" ".fc${RELEASE%%.*}")"
-NVIDIA_FULL_VERSION="$(rpm -q "xorg-x11-drv-${NVIDIA_PACKAGE_NAME}" --queryformat '%{EPOCH}:%{VERSION}-%{RELEASE}.%{ARCH}')"
+NVIDIA_AKMOD_VERSION="$(basename "$(rpm -q "akmod-nvidia" --queryformat '%{VERSION}-%{RELEASE}')" ".fc${RELEASE%%.*}")"
 
 
-akmods --force --kernels "${KERNEL_VERSION}" --kmod "${NVIDIA_PACKAGE_NAME}"
+akmods --force --kernels "${KERNEL_VERSION}" --kmod "nvidia"
 
-modinfo /usr/lib/modules/${KERNEL_VERSION}/extra/${NVIDIA_PACKAGE_NAME}/nvidia{,-drm,-modeset,-peermem,-uvm}.ko.xz > /dev/null || \
-(cat /var/cache/akmods/${NVIDIA_PACKAGE_NAME}/${NVIDIA_AKMOD_VERSION}-for-${KERNEL_VERSION}.failed.log && exit 1)
+modinfo /usr/lib/modules/${KERNEL_VERSION}/extra/nvidia/nvidia{,-drm,-modeset,-peermem,-uvm}.ko.xz > /dev/null || \
+(cat /var/cache/akmods/nvidia/${NVIDIA_AKMOD_VERSION}-for-${KERNEL_VERSION}.failed.log && exit 1)
 
-cat <<EOF > /var/cache/rpms/kmods/nvidia-vars.${NVIDIA_MAJOR_VERSION}
+
+# create a directory for later copying of resulting nvidia specific artifacts
+mkdir -p /var/cache/rpms/kmods/nvidia
+
+
+cat <<EOF > /var/cache/rpms/kmods/nvidia-vars
 KERNEL_VERSION=${KERNEL_VERSION}
 RELEASE=${RELEASE}
-NVIDIA_PACKAGE_NAME=${NVIDIA_PACKAGE_NAME}
-NVIDIA_MAJOR_VERSION=${NVIDIA_MAJOR_VERSION}
-NVIDIA_FULL_VERSION=${NVIDIA_FULL_VERSION}
 NVIDIA_AKMOD_VERSION=${NVIDIA_AKMOD_VERSION}
-NVIDIA_LIB_VERSION=${NVIDIA_LIB_VERSION}
 EOF
 
