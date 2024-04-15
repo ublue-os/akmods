@@ -109,7 +109,7 @@ elif [[ "surface" == "${KERNEL_FLAVOR}" ]]; then
         --install kernel-surface-modules-extra
 elif [[ "main" == "${KERNEL_FLAVOR}" ]] && \
      [[ "" != "${KERNEL_VERSION}" ]]; then
-    echo "main kernel with version to avoid upgrading kernel beyond what is in the image."
+    echo "main kernel version ${KERNEL_VERSION} to avoid upgrading kernel beyond what is in the image."
     rpm-ostree cliwrap install-to-root /
     rpm-ostree install \
         kernel-devel-${KERNEL_VERSION} \

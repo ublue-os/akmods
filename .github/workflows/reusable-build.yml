@@ -171,8 +171,8 @@ jobs:
                 linux=$($dnf repoquery --repoid copr:copr.fedorainfracloud.org:sentry:kernel-fsync --whatprovides kernel | tail -n1 | sed 's/.*://')
                 ;;
               "fsync-lts")
-                $dnf copr enable -y sentry/kernel-fsync-lts
-                linux=$($dnf repoquery --repoid copr:copr.fedorainfracloud.org:sentry:kernel-fsync-lts --whatprovides kernel | tail -n1 | sed 's/.*://')
+                $dnf copr enable -y sentry/kernel-ba
+                linux=$($dnf repoquery --repoid copr:copr.fedorainfracloud.org:sentry:kernel-ba --whatprovides kernel | tail -n1 | sed 's/.*://')
                 ;;
               "surface")
                 $dnf config-manager --add-repo=https://pkg.surfacelinux.com/fedora/linux-surface.repo
