@@ -57,6 +57,20 @@ if [[ "asus" == "${KERNEL_FLAVOR}" ]]; then
         kernel-modules \
         kernel-modules-core \
         kernel-modules-extra
+elif [[ "fsync-lts" == "${KERNEL_FLAVOR}" ]]; then
+    echo "Installing fsync-lts kernel:"
+    wget https://copr.fedorainfracloud.org/coprs/sentry/kernel-ba/repo/fedora-$(rpm -E %fedora)/sentry-kernel-ba-fedora-$(rpm -E %fedora).repo -O /etc/yum.repos.d/_copr_sentry-kernel-ba.repo
+    rpm-ostree cliwrap install-to-root /
+    rpm-ostree override replace \
+    --experimental \
+    --from repo=copr:copr.fedorainfracloud.org:sentry:kernel-ba \
+        kernel \
+        kernel-core \
+        kernel-devel \
+        kernel-devel-matched \
+        kernel-modules \
+        kernel-modules-core \
+        kernel-modules-extra
 elif [[ "fsync" == "${KERNEL_FLAVOR}" ]]; then
     echo "Installing fsync kernel:"
     wget https://copr.fedorainfracloud.org/coprs/sentry/kernel-fsync/repo/fedora-$(rpm -E %fedora)/sentry-kernel-fsync-fedora-$(rpm -E %fedora).repo -O /etc/yum.repos.d/_copr_sentry-kernel-fsync.repo
