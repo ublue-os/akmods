@@ -12,7 +12,8 @@ else
     COPR_RELEASE="${RELEASE}"
 fi
 
-wget "https://copr.fedorainfracloud.org/coprs/mulderje/facetimehd-kmod/repo/fedora-${COPR_RELEASE}/mulderje-facetimehd-kmod-fedora-${COPR_RELEASE}.repo" -O /etc/yum.repos.d/_copr_mulderje-facetimehd-kmod.repo
+curl -L "https://copr.fedorainfracloud.org/coprs/mulderje/facetimehd-kmod/repo/fedora-${COPR_RELEASE}/mulderje-facetimehd-kmod-fedora-${COPR_RELEASE}.repo" \
+     -o /etc/yum.repos.d/_copr_mulderje-facetimehd-kmod.repo
 
 ### BUILD facetimehd (succeed or fail-fast with debug output)
 rpm-ostree install \
