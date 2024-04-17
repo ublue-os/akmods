@@ -43,6 +43,8 @@ jobs:
         exclude:
           - cfile_suffix: common
             nvidia_version: 550
+          - cfile_suffix: extra
+            nvidia_version: 550
           - cfile_suffix: nvidia
             nvidia_version: 0
           - kernel_flavor: asus
