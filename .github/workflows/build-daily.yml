@@ -1,0 +1,17 @@
+name: ublue akmods daily cron
+on:
+  schedule:
+    - cron: '0 14 * * *'  # 2pm-ish UTC everyday (timed against official fedora container pushes, and after 'config')
+  workflow_dispatch:
+
+jobs:
+  akmods_daily_cron:
+    strategy:
+      matrix:
+        fedora_version: [38, 39, 40]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: build
+        uses: ./.github/workflows/reusable-build.yml
+        with:
+          fedora_version: ${{ matrix.fedora_version }}
