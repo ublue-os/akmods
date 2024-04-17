@@ -35,6 +35,7 @@ jobs:
           - surface
         cfile_suffix:
           - common
+          - extra
           - nvidia
         nvidia_version:
           - 0
