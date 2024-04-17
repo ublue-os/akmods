@@ -14,7 +14,7 @@ ARG NVIDIA_MAJOR_VERSION="${NVIDIA_MAJOR_VERSION:-550}"
 ARG KERNEL_FLAVOR="{KERNEL_FLAVOR:-main}"
 ARG RPMFUSION_MIRROR=""
 
-COPY build*.sh /tmp
+COPY build_files/build*.sh /tmp
 COPY certs /tmp/certs
 
 # files for nvidia
