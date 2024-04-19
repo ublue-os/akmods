@@ -41,21 +41,21 @@ The [`akmods` image](https://github.com/orgs/ublue-os/packages/container/package
 
 Here's a rundown on how it's organized.
 
-We do our best to support all current builds of Fedora, current versions of the kernel modules listed, and in the case of NVIDIA current (550).
-**Note: NVIDIA legacy driver version 470 is no longer provided as RPMfusion has ceased updates to the package and it no longer builds with kernel 6.8 which has now released for Fedora 38 and 39.**
+We do our best to support all current builds of Fedora, current versions of the kernel modules listed, and the latest NVIDIA driver.
+**Note: NVIDIA legacy driver version 470 is no longer provided as RPMfusion has ceased updates to the package and it no longer builds with kernel 6.8 which has now released for Fedora 38 and 39. Also the `-550` extra driver version tag has been removed as the latest driver will always be included.**
 
 The majority of the drivers are tagged with `KERNEL_TYPE-FEDORA_RELEASE`. NVIDIA drivers are bundled distinctly with tag `KERNEL_TYPE-FEDORA_RELEASE-NVIDIA_VERSION`.
 
 | KERNEL_TYPE | FEDORA_RELEASE | TAG |
 | - | - | - |
-| Fedora stock kernel | 38 | `main-38`, `main-38-550` |
-| | 39 | `main-39`, `main-39-550` |
-| | 40 | `main-40`, `main-40-550` |
-| [patched for ASUS devices](https://copr.fedorainfracloud.org/coprs/lukenukem/asus-kernel) | 39 | `asus-39`, `asus-39-550` |
-| | 40 | `asus-40`, `asus-40-550` |
-| [patched fsync](https://copr.fedorainfracloud.org/coprs/sentry/kernel-fsync) | 39 | `fsync-39`, `fsync-39-550` |
-| [patched Microsoft Surface devices](https://github.com/linux-surface/linux-surface/) | 39 | `surface-39`, `surface-39-550` |
-| | 40 | `surface-40`, `surface-40-550` |
+| Fedora stock kernel | 38 | `main-38` |
+| | 39 | `main-39` |
+| | 40 | `main-40` |
+| [patched for ASUS devices](https://copr.fedorainfracloud.org/coprs/lukenukem/asus-kernel) | 39 | `asus-39`|
+| | 40 | `asus-40` |
+| [patched fsync](https://copr.fedorainfracloud.org/coprs/sentry/kernel-fsync) | 39 | `fsync-39` |
+| [patched Microsoft Surface devices](https://github.com/linux-surface/linux-surface/) | 39 | `surface-39` |
+| | 40 | `surface-40` |
 
 
 
