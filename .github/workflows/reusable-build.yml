@@ -62,17 +62,9 @@ jobs:
           else
               echo "IMAGE_NAME=${{ env.IMAGE_BASE_NAME }}-${{ matrix.cfile_suffix }}" >> $GITHUB_ENV
           fi
-          if [[ "${{ matrix.fedora_version }}" -ge "41" ]]; then
-              # when we are confident of official fedora images we can switch to them
-              export SOURCE_IMAGE=fedora-silverblue
-              export SOURCE_ORG=fedora
-          else
-              export SOURCE_IMAGE=base
-              export SOURCE_ORG=fedora-ostree-desktops
-          fi
-          echo "FQ_SOURCE_IMAGE=quay.io/${SOURCE_ORG}/${SOURCE_IMAGE}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
-          echo "SOURCE_IMAGE=${SOURCE_IMAGE}" >> $GITHUB_ENV
-          echo "SOURCE_ORG=${SOURCE_ORG}" >> $GITHUB_ENV
+          echo "SOURCE_IMAGE=base" >> $GITHUB_ENV
+          echo "SOURCE_ORG=fedora-ostree-desktops" >> $GITHUB_ENV
+          echo "FQ_SOURCE_IMAGE=quay.io/${{ env.SOURCE_ORG }}/${{ env.SOURCE_IMAGE }}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
 
 
       - name: Generate tags
