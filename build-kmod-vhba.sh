@@ -12,7 +12,13 @@ if [[ "$RELEASE" -lt 39 ]]; then
   exit 0
 fi
 
-cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_rok-cdemu.repo /etc/yum.repos.d/
+if [[ "${RELEASE}" -ge 41 ]]; then
+    COPR_RELEASE="rawhide"
+else
+    COPR_RELEASE="${RELEASE}"
+fi
+
+curl -Lo /etc/yum.repos.d/_copr_rok-cdemu.repo "https://copr.fedorainfracloud.org/coprs/rok/cdemu/repo/fedora-${COPR_RELEASE}/rok-cdemu-fedora-${COPR_RELEASE}.repo"
 
 ### BUILD vhba (succeed or fail-fast with debug output)
 rpm-ostree install \
