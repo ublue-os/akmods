@@ -42,6 +42,9 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     if grep -qv "fsync" <<< "${KERNEL_FLAVOR}"; then \
         /tmp/build-kmod-openrgb.sh \
     ; fi && \
+    if [[ "${FEDORA_MAJOR_VERSION}" -ge 39 ]]; then \
+        /tmp/build-kmod-vhba.sh && \
+    ; fi && \
     /tmp/build-kmod-ayaneo-platform.sh && \
     /tmp/build-kmod-ayn-platform.sh && \
     /tmp/build-kmod-kvmfr.sh && \
@@ -53,7 +56,6 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     /tmp/build-kmod-v4l2loopback.sh && \
     /tmp/build-kmod-VirtualBox.sh && \
     /tmp/build-kmod-wl.sh && \
-    /tmp/build-kmod-vhba.sh && \
     /tmp/build-kmod-xpadneo.sh && \
     /tmp/build-kmod-xone.sh && \
     /tmp/build-kmod-zenergy.sh
