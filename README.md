@@ -15,6 +15,7 @@ Feel free to PR more kmod build scripts into this repo!
 - [ayaneo-platform](https://github.com/ShadowBlip/ayaneo-platform) - Linux drivers for AYANEO x86 handhelds (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [ayn-platform](https://github.com/ShadowBlip/ayn-platform) - Linux drivers for AYN x86 handhelds (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [evdi](www.displaylink.com) - kernel module required for use of displaylink (akmod from [negativo17 multimedia repo](https://negativo17.org/multimedia/)
+- [kvmfr](https://github.com/gnif/looking-glass) - KVM framebuffer relay kernel module for use with Looking Glass (akmod from [hikariknight/looking-glass-kvmfr-akmod copr](https://copr.fedorainfracloud.org/coprs/hikariknight/looking-glass-kvmfr/))
 - [nct6687d](https://github.com/Fred78290/nct6687d) - Linux kernel module for Nuvoton NCT6687-R found on AMD B550 chipset motherboards (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [nvidia](https://rpmfusion.org/Howto/NVIDIA) - nvidia GPU drivers built from rpmfusion
 - [openrazer](https://openrazer.github.io/) - kernel module adding additional features to Razer hardware (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
