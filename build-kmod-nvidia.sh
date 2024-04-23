@@ -34,7 +34,7 @@ akmods --force --kernels "${KERNEL_VERSION}" --kmod "${NVIDIA_PACKAGE_NAME}"
 modinfo /usr/lib/modules/${KERNEL_VERSION}/extra/${NVIDIA_PACKAGE_NAME}/nvidia{,-drm,-modeset,-peermem,-uvm}.ko.xz > /dev/null || \
 (cat /var/cache/akmods/${NVIDIA_PACKAGE_NAME}/${NVIDIA_AKMOD_VERSION}-for-${KERNEL_VERSION}.failed.log && exit 1)
 
-cat <<EOF > /var/cache/rpms/kmods/nvidia-vars.${NVIDIA_MAJOR_VERSION}
+cat <<EOF > /var/cache/rpms/kmods/nvidia-vars
 KERNEL_VERSION=${KERNEL_VERSION}
 RELEASE=${RELEASE}
 NVIDIA_PACKAGE_NAME=${NVIDIA_PACKAGE_NAME}
