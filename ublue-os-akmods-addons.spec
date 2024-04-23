@@ -47,6 +47,9 @@ install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nega
 %attr(0644,root,root) %{_sysconfdir}/yum.repos.d/negativo17-fedora-multimedia.repo
 
 %changelog
+* Mon Apr 22 2024 Marco Rodolfi <marco.rodolfi@tuta.io> - 0.5
+- Add rok/cdemu copr repo for vhba kmod support
+
 * Mon Nov 20 2023 RJ Trujillo <eyecantcu@pm.me> - 0.4
 - Migrate xpadneo/xone modules from negativo17 fedora-steam to negativo17 fedora-multimedia
 
