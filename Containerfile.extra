@@ -34,8 +34,6 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     ; fi && \
     /tmp/build-kmod-facetimehd.sh
 
-RUN cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
-      /var/cache/rpms/ublue-os/
 RUN for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
         cp "${RPM}" /var/cache/rpms/kmods/; \
     done
