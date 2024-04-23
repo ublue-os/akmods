@@ -7,6 +7,11 @@ ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
 
+if [[ "$RELEASE" -lt 39 ]]; then
+  echo "SKIPPED BUILD of gasket: compile failure on kernel 6.8 as of 2024-03-17"
+  exit 0
+fi
+
 cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_rok-cdemu.repo /etc/yum.repos.d/
 
 ### BUILD vhba (succeed or fail-fast with debug output)
