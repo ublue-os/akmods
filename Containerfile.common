@@ -11,6 +11,7 @@ ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-39}"
 FROM ${BASE_IMAGE}:${FEDORA_MAJOR_VERSION} AS builder
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-39}"
 ARG KERNEL_FLAVOR="{KERNEL_FLAVOR:-main}"
+ARG KERNEL_VERSION=""
 ARG RPMFUSION_MIRROR=""
 
 COPY build*.sh /tmp
@@ -37,16 +38,11 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
         /tmp/build-kmod-evdi.sh \
     ; fi && \
     if grep -qv "fsync" <<< "${KERNEL_FLAVOR}"; then \
-        /tmp/build-kmod-winesync.sh && \
-        /tmp/build-kmod-openrgb.sh && \
-        /tmp/build-kmod-steamdeck.sh \
+        /tmp/build-kmod-openrgb.sh \
     ; fi && \
     /tmp/build-kmod-ayaneo-platform.sh && \
     /tmp/build-kmod-ayn-platform.sh && \
-    /tmp/build-kmod-bmi160.sh && \
-    /tmp/build-kmod-bmi260.sh && \
-    /tmp/build-kmod-bmi323.sh && \
-    /tmp/build-kmod-gcadapter_oc.sh && \
+    /tmp/build-kmod-kvmfr.sh && \
     /tmp/build-kmod-nct6687d.sh && \
     /tmp/build-kmod-openrazer.sh && \
     /tmp/build-kmod-ryzen-smu.sh && \

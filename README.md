@@ -14,11 +14,8 @@ Feel free to PR more kmod build scripts into this repo!
     - [nvidia-container-tookkit repo](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#installing-with-yum-or-dnf) - version 1.14 (and newer) provide CDI for podman use of nvidia gpus
 - [ayaneo-platform](https://github.com/ShadowBlip/ayaneo-platform) - Linux drivers for AYANEO x86 handhelds (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [ayn-platform](https://github.com/ShadowBlip/ayn-platform) - Linux drivers for AYN x86 handhelds (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
-- [bmi160](https://github.com/hhd-dev/bmi160) - kernel module driver for the BMI160 IMU (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
-- [bmi260](https://github.com/hhd-dev/bmi260) - kernel module driver for the Bosch BMI260 IMU (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
-- [bmi323](https://github.com/hhd-dev/bmi260) - kernel module driver for the Bosch BMI323 IMU (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [evdi](www.displaylink.com) - kernel module required for use of displaylink (akmod from [negativo17 multimedia repo](https://negativo17.org/multimedia/)
-- [gcadapter_oc](https://github.com/hannesmann/gcadapter-oc-kmod) - kernel module for overclocking the Nintendo Wii U/Mayflash GameCube adapter (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
+- [kvmfr](https://github.com/gnif/looking-glass) - KVM framebuffer relay kernel module for use with Looking Glass (akmod from [hikariknight/looking-glass-kvmfr-akmod copr](https://copr.fedorainfracloud.org/coprs/hikariknight/looking-glass-kvmfr/))
 - [nct6687d](https://github.com/Fred78290/nct6687d) - Linux kernel module for Nuvoton NCT6687-R found on AMD B550 chipset motherboards (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [nvidia](https://rpmfusion.org/Howto/NVIDIA) - nvidia GPU drivers built from rpmfusion
 - [openrazer](https://openrazer.github.io/) - kernel module adding additional features to Razer hardware (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
@@ -26,9 +23,7 @@ Feel free to PR more kmod build scripts into this repo!
 - rtl8814au - Realtek RTL8814AU Driver (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - rtl88xxau - Realtek RTL8812AU/21AU and RTL8814AU driver (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [ryzen_smu](https://gitlab.com/leogx9r/ryzen_smu) - A Linux kernel driver that exposes access to the SMU (System Management Unit) for certain AMD Ryzen Processors (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
-- [steamdeck](https://lkml.org/lkml/2022/2/5/391) - platform driver for Valve's Steam Deck handheld PC (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [v4l2loopback](https://github.com/umlaeute/v4l2loopback) - allows creating "virtual video devices"
-- [winesync](https://repo.or.cz/linux/zf.git/shortlog/refs/heads/winesync4) - Support for Winesync/Fastsync/NTSync primitives (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [wl (broadcom)](https://github.com/rpmfusion/broadcom-wl/) - support for some legacy broadcom wifi devices
 - [xpadneo](https://github.com/atar-axis/xpadneo) - xbox one controller bluetooth driver (akmod from [negativo17 steam repo](https://negativo17.org/steam/)
 - [xonedo](https://github.com/BoukeHaarsma23/xonedo/) - xbox one controller USB wired/RF driver modified to work along-side xpad (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
@@ -40,21 +35,21 @@ The [`akmods` image](https://github.com/orgs/ublue-os/packages/container/package
 
 Here's a rundown on how it's organized.
 
-We do our best to support all current builds of Fedora, current versions of the kernel modules listed, and in the case of NVIDIA current (550).
-**Note: NVIDIA legacy driver version 470 is no longer provided as RPMfusion has ceased updates to the package and it no longer builds with kernel 6.8 which has now released for Fedora 38 and 39.**
+We do our best to support all current builds of Fedora, current versions of the kernel modules listed, and the latest NVIDIA driver.
+**Note: NVIDIA legacy driver version 470 is no longer provided as RPMfusion has ceased updates to the package and it no longer builds with kernel 6.8 which has now released for Fedora 38 and 39. Also the `-550` extra driver version tag has been removed as the latest driver will always be included.**
 
 The majority of the drivers are tagged with `KERNEL_TYPE-FEDORA_RELEASE`. NVIDIA drivers are bundled distinctly with tag `KERNEL_TYPE-FEDORA_RELEASE-NVIDIA_VERSION`.
 
 | KERNEL_TYPE | FEDORA_RELEASE | TAG |
 | - | - | - |
-| Fedora stock kernel | 38 | `main-38`, `main-38-550` |
-| | 39 | `main-39`, `main-39-550` |
-| | 40 | `main-40`, `main-40-550` |
-| [patched for ASUS devices](https://copr.fedorainfracloud.org/coprs/lukenukem/asus-kernel) | 39 | `asus-39`, `asus-39-550` |
-| | 40 | `asus-40`, `asus-40-550` |
-| [patched fsync](https://copr.fedorainfracloud.org/coprs/sentry/kernel-fsync) | 39 | `fsync-39`, `fsync-39-550` |
-| [patched Microsoft Surface devices](https://github.com/linux-surface/linux-surface/) | 39 | `surface-39`, `surface-39-550` |
-| | 40 | `surface-40`, `surface-40-550` |
+| Fedora stock kernel | 38 | `main-38` |
+| | 39 | `main-39` |
+| | 40 | `main-40` |
+| [patched for ASUS devices](https://copr.fedorainfracloud.org/coprs/lukenukem/asus-kernel) | 39 | `asus-39`|
+| | 40 | `asus-40` |
+| [patched fsync](https://copr.fedorainfracloud.org/coprs/sentry/kernel-fsync) | 39 | `fsync-39` |
+| [patched Microsoft Surface devices](https://github.com/linux-surface/linux-surface/) | 39 | `surface-39` |
+| | 40 | `surface-40` |
 
 
 
