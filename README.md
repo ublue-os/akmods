@@ -46,7 +46,7 @@ Feel free to PR more kmod build scripts into this repo!
 | [v4l2loopback](https://github.com/umlaeute/v4l2loopback) | common | allows creating "virtual video devices" | [RPMFusion - free](https://rpmfusion.org/) |
 | [wl](https://github.com/rpmfusion/broadcom-wl/) | common | support for some legacy broadcom wifi devices | [RPMFusion - nonfree](https://rpmfusion.org/) |
 | [xpadneo](https://github.com/atar-axis/xpadneo) | common | xbox one controller bluetooth driver | [negativo17 - fedora-multimedia](https://negativo17.org/) |
-| [xone](https://github.com/BoukeHaarsma23/xonedo/) | common | xbox one controller USB wired/RF driver modified to work along-side xpad (akmod from | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/xone-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/xone-kmod) |
+| [xone](https://github.com/BoukeHaarsma23/xonedo/) | common | xbox one controller USB wired/RF driver modified to work along-side xpad | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/xone-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/xone-kmod) |
 | [zenergy](https://github.com/BoukeHaarsma23/zenergy) | extra | Based on AMD_ENERGY driver, but with some jiffies added so non-root users can read it safely | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/zenergy-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/zenergy-kmod) |
 
 ## Notes
