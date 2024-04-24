@@ -16,6 +16,7 @@ Feel free to PR more kmod build scripts into this repo!
 - [ayn-platform](https://github.com/ShadowBlip/ayn-platform) - Linux drivers for AYN x86 handhelds (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [evdi](www.displaylink.com) - kernel module required for use of displaylink (akmod from [negativo17 multimedia repo](https://negativo17.org/multimedia/)
 - [framework-laptop](https://github.com/DHowett/framework-laptop-kmod) - A kernel module that exposes the Framework Laptop (13, 16)'s battery charge limit and LEDs to userspace (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
+- [gcadapter_oc](https://github.com/hannesmann/gcadapter-oc-kmod) - kernel module for overclocking the Nintendo Wii U/Mayflash GameCube adapter (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [kvmfr](https://github.com/gnif/looking-glass) - KVM framebuffer relay kernel module for use with Looking Glass (akmod from [hikariknight/looking-glass-kvmfr-akmod copr](https://copr.fedorainfracloud.org/coprs/hikariknight/looking-glass-kvmfr/))
 - [nct6687d](https://github.com/Fred78290/nct6687d) - Linux kernel module for Nuvoton NCT6687-R found on AMD B550 chipset motherboards (akmod from [ublue-os/akmods copr](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/))
 - [nvidia](https://rpmfusion.org/Howto/NVIDIA) - nvidia GPU drivers built from rpmfusion
