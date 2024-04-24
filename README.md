@@ -35,7 +35,11 @@ Feel free to PR more kmod build scripts into this repo!
 
 The [`akmods` image](https://github.com/orgs/ublue-os/packages/container/package/akmods) is built and published daily. However, there's not a single image but several, given various kernel support we now provide.
 
-Here's a rundown on how it's organized.
+The akmods package is broken out into three akmod "streams":
+
+- `common` - any kmod installed by default in Bluefin or which was originally in main pre-39
+- `extra` - primarily for kmods used in Bazzite or any others we need, but don't fit in `common`
+- `nvidia` - only for the nvidia kmod
 
 We do our best to support all current builds of Fedora, current versions of the kernel modules listed, and the latest NVIDIA driver.
 **Note: NVIDIA legacy driver version 470 is no longer provided as RPMfusion has ceased updates to the package and it no longer builds with kernel 6.8 which has now released for Fedora 38 and 39. Also the `-550` extra driver version tag has been removed as the latest driver will always be included.**
