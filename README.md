@@ -1,17 +1,31 @@
-[![build-38](https://github.com/ublue-os/akmods/actions/workflows/build-38.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-38.yml) [![build-39](https://github.com/ublue-os/akmods/actions/workflows/build-39.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-39.yml) [![build-40](https://github.com/ublue-os/akmods/actions/workflows/build-40.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-40.yml)
-
 # ublue-os akmods
+
+[![build-38](https://github.com/ublue-os/akmods/actions/workflows/build-38.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-38.yml) [![build-39](https://github.com/ublue-os/akmods/actions/workflows/build-39.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-39.yml) [![build-40](https://github.com/ublue-os/akmods/actions/workflows/build-40.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-40.yml)
 
 A layer for adding extra kernel modules to your image. Use for better hardware support and a few other features!
 
-# Features
+## How it's organized
+
+The [`akmods` image](https://github.com/orgs/ublue-os/packages/container/package/akmods) is built and published daily. However, there's not a single image but several, given various kernel support we now provide.
+
+The akmods package is broken out into three akmod "streams":
+
+- `common` - any kmod installed by default in Bluefin or which was originally in main pre-39
+- `extra` - primarily for kmods used in Bazzite or any others we need, but don't fit in `common`
+- `nvidia` - only for the nvidia kmod
 
 Feel free to PR more kmod build scripts into this repo!
 
+## Features
+
+### Overview
+
 - ublue-os-akmods-addons - installs extra repos and our kmods signing key; install and import to allow SecureBoot systems to use these kmods
 - ublue-os-nvidia-addons - installs extra repos enabling our nvidia support
-    - [nvidia container selinux policy](https://github.com/NVIDIA/dgx-selinux/tree/master/src/nvidia-container-selinux) - uses RHEL9 policy as the closest match
-    - [nvidia-container-tookkit repo](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#installing-with-yum-or-dnf) - version 1.14 (and newer) provide CDI for podman use of nvidia gpus
+  - [nvidia container selinux policy](https://github.com/NVIDIA/dgx-selinux/tree/master/src/nvidia-container-selinux) - uses RHEL9 policy as the closest match
+  - [nvidia-container-tookkit repo](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#installing-with-yum-or-dnf) - version 1.14 (and newer) provide CDI for podman use of nvidia gpus
+
+### Kmod Packages
 
 | Package | Stream | Description | Source |
 |---------|--------|-------------|--------|
@@ -35,16 +49,7 @@ Feel free to PR more kmod build scripts into this repo!
 | [xone](https://github.com/BoukeHaarsma23/xonedo/) | common | xbox one controller USB wired/RF driver modified to work along-side xpad (akmod from | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/xone-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/xone-kmod) |
 | [zenergy](https://github.com/BoukeHaarsma23/zenergy) | extra | Based on AMD_ENERGY driver, but with some jiffies added so non-root users can read it safely | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/zenergy-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/zenergy-kmod) |
 
-
-# How it's organized
-
-The [`akmods` image](https://github.com/orgs/ublue-os/packages/container/package/akmods) is built and published daily. However, there's not a single image but several, given various kernel support we now provide.
-
-The akmods package is broken out into three akmod "streams":
-
-- `common` - any kmod installed by default in Bluefin or which was originally in main pre-39
-- `extra` - primarily for kmods used in Bazzite or any others we need, but don't fit in `common`
-- `nvidia` - only for the nvidia kmod
+## Notes
 
 We do our best to support all current builds of Fedora, current versions of the kernel modules listed, and the latest NVIDIA driver.
 **Note: NVIDIA legacy driver version 470 is no longer provided as RPMfusion has ceased updates to the package and it no longer builds with kernel 6.8 which has now released for Fedora 38 and 39. Also the `-550` extra driver version tag has been removed as the latest driver will always be included.**
@@ -62,11 +67,9 @@ The majority of the drivers are tagged with `KERNEL_TYPE-FEDORA_RELEASE`. NVIDIA
 | [patched Microsoft Surface devices](https://github.com/linux-surface/linux-surface/) | 39 | `surface-39` |
 | | 40 | `surface-40` |
 
+## Usage
 
-
-# Usage
-
-To install one of these kmods, you'll need to install any of their specific dependencies (checkout the `build-prep.sh` and the specific `build-FOO.sh` script for details.
+To install one of these kmods, you'll need to install any of their specific dependencies (checkout the `build-prep.sh` and the specific `build-FOO.sh` script for details).
 
 For common images, add something like this to your Containerfile, replacing `TAG` with one of the `something-FR` tags above:
 
@@ -83,22 +86,21 @@ For NVIDIA images, add something like this to your Containerfile, replacing `TAG
     RUN rpm-ostree install /tmp/rpms/kmods/kmod-nvidia.rpm
 
 These examples show:
+
 1. copying all the rpms from the respective akmods images
 2. installing the respective ublue specific RPM
 3. installing a kmods RPM.
 
-
-# Adding kmods
+## Adding kmods
 
 If you have a kmod you want to contribute send a pull request by adding a script using [build-kmod-wl.sh](https://github.com/ublue-os/akmods/blob/main/build-kmod-wl.sh) as an example.
 
-# Verification
+## Verification
 
 These images are signed with sisgstore's [cosign](https://docs.sigstore.dev/cosign/overview/). You can verify the signature by downloading the `cosign.pub` key from this repo and running the following command, replacing `RELEASE` with either `38` or `39`:
 
     cosign verify --key cosign.pub ghcr.io/ublue-os/akmods:RELEASE
 
-# Metrics
+## Metrics
 
 ![Alt](https://repobeats.axiom.co/api/embed/a7ddeb1a3d2e0ce534ccf7cfa75c33b35183b106.svg "Repobeats analytics image")
-
