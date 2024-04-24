@@ -78,9 +78,15 @@ For common images, add something like this to your Containerfile, replacing `TAG
     RUN rpm-ostree install /tmp/rpms/ublue-os/ublue-os-akmods*.rpm
     RUN rpm-ostree install /tmp/rpms/kmods/kmod-v4l2loopback*.rpm
 
+For extra images, add something like this to your Containerfile, replacing `TAG` with one of the `something-FR` tags above:
+
+    COPY --from=ghcr.io/ublue-os/akmods-extra:TAG /rpms/ /tmp/rpms
+    RUN find /tmp/rpms
+    RUN rpm-ostree install /tmp/rpms/kmods/kmod-facetimehd*.rpm
+
 For NVIDIA images, add something like this to your Containerfile, replacing `TAG` with one of the `something-FR-NVV` tags above:
 
-    COPY --from=ghcr.io/ublue-os/akmods:TAG /rpms/ /tmp/rpms
+    COPY --from=ghcr.io/ublue-os/akmods-nvidia:TAG /rpms/ /tmp/rpms
     RUN find /tmp/rpms
     RUN rpm-ostree install /tmp/rpms/ublue-os/ublue-os-nvidia*.rpm
     RUN rpm-ostree install /tmp/rpms/kmods/kmod-nvidia.rpm
