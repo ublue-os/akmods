@@ -47,9 +47,7 @@ jobs:
           - fedora_version: 38
             kernel_flavor: fsync-lts
           - fedora_version: 40
-            kernel_flavor: fsync # kernel-fsync packages are not being built for F40 yet.
-          - fedora_version: 40
-            kernel_flavor: fsync-lts
+            kernel_flavor: fsync-lts # kernel-ba packages are not being built for F40 yet.
     steps:
       # Checkout push-to-registry action GitHub repository
       - name: Checkout Push to Registry action
