@@ -37,25 +37,12 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     if grep -qv "asus" <<< "${KERNEL_FLAVOR}"; then \
         /tmp/build-kmod-evdi.sh \
     ; fi && \
-    if grep -qv "fsync" <<< "${KERNEL_FLAVOR}"; then \
-        /tmp/build-kmod-openrgb.sh \
-    ; fi && \
-    /tmp/build-kmod-ayaneo-platform.sh && \
-    /tmp/build-kmod-ayn-platform.sh && \
-    /tmp/build-kmod-kvmfr.sh && \
-    /tmp/build-kmod-nct6687d.sh && \
     /tmp/build-kmod-openrazer.sh && \
-    /tmp/build-kmod-ryzen-smu.sh && \
-    /tmp/build-kmod-rtl8814au.sh && \
-    /tmp/build-kmod-rtl88xxau.sh && \
     /tmp/build-kmod-v4l2loopback.sh && \
     /tmp/build-kmod-framework-laptop.sh && \
-    /tmp/build-kmod-vhba.sh && \
-    /tmp/build-kmod-VirtualBox.sh && \
     /tmp/build-kmod-wl.sh && \
     /tmp/build-kmod-xpadneo.sh && \
-    /tmp/build-kmod-xone.sh && \
-    /tmp/build-kmod-zenergy.sh
+    /tmp/build-kmod-xone.sh
 
 RUN cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
       /var/cache/rpms/ublue-os/
