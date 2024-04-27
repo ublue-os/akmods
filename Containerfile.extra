@@ -50,11 +50,8 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     /tmp/build-kmod-VirtualBox.sh && \
     /tmp/build-kmod-zenergy.sh
 
-RUN for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
-        cp "${RPM}" /var/cache/rpms/kmods/; \
-    done
-
-RUN find /var/cache/rpms
+# Copy all RPMs from /var/cache/akmods/ to /var/cache/rpms/kmods/
+RUN /tmp/build-post.sh
 
 FROM scratch
 
