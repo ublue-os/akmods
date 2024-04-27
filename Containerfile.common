@@ -38,7 +38,6 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     ; fi && \
     /tmp/build/build-kmod-openrazer.sh && \
     /tmp/build/build-kmod-v4l2loopback.sh && \
-    /tmp/build/build-kmod-framework-laptop.sh && \
     /tmp/build/build-kmod-wl.sh && \
     /tmp/build/build-kmod-xpadneo.sh && \
     /tmp/build/build-kmod-xone.sh
