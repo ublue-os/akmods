@@ -1,6 +1,6 @@
 # ublue-os akmods
 
-[![build-38](https://github.com/ublue-os/akmods/actions/workflows/build-38.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-38.yml) [![build-39](https://github.com/ublue-os/akmods/actions/workflows/build-39.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-39.yml) [![build-40](https://github.com/ublue-os/akmods/actions/workflows/build-40.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-40.yml)
+[![build-39](https://github.com/ublue-os/akmods/actions/workflows/build-39.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-39.yml) [![build-40](https://github.com/ublue-os/akmods/actions/workflows/build-40.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-40.yml)
 
 A layer for adding extra kernel modules to your image. Use for better hardware support and a few other features!
 
@@ -53,14 +53,13 @@ Feel free to PR more kmod build scripts into this repo!
 ## Notes
 
 We do our best to support all current builds of Fedora, current versions of the kernel modules listed, and the latest NVIDIA driver.
-**Note: NVIDIA legacy driver version 470 is no longer provided as RPMfusion has ceased updates to the package and it no longer builds with kernel 6.8 which has now released for Fedora 38 and 39. Also the `-550` extra driver version tag has been removed as the latest driver will always be included.**
+**Note: NVIDIA legacy driver version 470 is no longer provided as RPMfusion has ceased updates to the package and it no longer builds with kernel 6.8 which has now released for Fedora 39. Also the `-550` extra driver version tag has been removed as the latest driver will always be included.**
 
 The majority of the drivers are tagged with `KERNEL_TYPE-FEDORA_RELEASE`. NVIDIA drivers are bundled distinctly with tag `KERNEL_TYPE-FEDORA_RELEASE-NVIDIA_VERSION`.
 
 | KERNEL_TYPE | FEDORA_RELEASE | TAG |
 | - | - | - |
-| Fedora stock kernel | 38 | `main-38` |
-| | 39 | `main-39` |
+| Fedora stock kernel | 39 | `main-39` |
 | | 40 | `main-40` |
 | [patched for ASUS devices](https://copr.fedorainfracloud.org/coprs/lukenukem/asus-kernel) | 39 | `asus-39`|
 | | 40 | `asus-40` |
@@ -104,7 +103,7 @@ If you have a kmod you want to contribute send a pull request by adding a script
 
 ## Verification
 
-These images are signed with sisgstore's [cosign](https://docs.sigstore.dev/cosign/overview/). You can verify the signature by downloading the `cosign.pub` key from this repo and running the following command, replacing `RELEASE` with either `38` or `39`:
+These images are signed with sisgstore's [cosign](https://docs.sigstore.dev/cosign/overview/). You can verify the signature by downloading the `cosign.pub` key from this repo and running the following command, replacing `RELEASE` with either `39` or `40`:
 
     cosign verify --key cosign.pub ghcr.io/ublue-os/akmods:RELEASE
 
