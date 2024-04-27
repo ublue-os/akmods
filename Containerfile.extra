@@ -37,6 +37,7 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     ; fi && \
     /tmp/build-kmod-ayaneo-platform.sh && \
     /tmp/build-kmod-ayn-platform.sh && \
+    /tmp/build-kmod-bmi260.sh && \
     /tmp/build-kmod-facetimehd.sh \
     /tmp/build-kmod-framework-laptop.sh && \
     /tmp/build-kmod-gcadapter_oc.sh && \
