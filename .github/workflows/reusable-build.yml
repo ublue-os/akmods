@@ -3,7 +3,7 @@ on:
   workflow_call:
     inputs:
       fedora_version:
-        description: 'The Fedora release version: 38, 39, 40, etc'
+        description: 'The Fedora release version: 39, 40, etc'
         required: true
         type: string
 env:
@@ -35,20 +35,11 @@ jobs:
           - surface
         cfile_suffix:
           - common
+          - extra
           - nvidia
         exclude:
-          - kernel_flavor: asus
-            fedora_version: 38
-          - kernel_flavor: surface
-            fedora_version: 38
-          - fedora_version: 38
-            kernel_flavor: fsync # kernel-fsync not required for ublue-os F38
-          - fedora_version: 38
-            kernel_flavor: fsync-lts
           - fedora_version: 40
-            kernel_flavor: fsync # kernel-fsync packages are not being built for F40 yet.
-          - fedora_version: 40
-            kernel_flavor: fsync-lts
+            kernel_flavor: fsync-lts # kernel-ba packages are not being built for F40 yet.
     steps:
       # Checkout push-to-registry action GitHub repository
       - name: Checkout Push to Registry action
@@ -62,17 +53,11 @@ jobs:
           else
               echo "IMAGE_NAME=${{ env.IMAGE_BASE_NAME }}-${{ matrix.cfile_suffix }}" >> $GITHUB_ENV
           fi
-          if [[ "${{ matrix.fedora_version }}" -ge "41" ]]; then
-              # when we are confident of official fedora images we can switch to them
-              export SOURCE_IMAGE=fedora-silverblue
-              export SOURCE_ORG=fedora
-          else
-              export SOURCE_IMAGE=base
-              export SOURCE_ORG=fedora-ostree-desktops
-          fi
-          echo "FQ_SOURCE_IMAGE=quay.io/${SOURCE_ORG}/${SOURCE_IMAGE}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
+          export SOURCE_IMAGE=base
+          export SOURCE_ORG=fedora-ostree-desktops
           echo "SOURCE_IMAGE=${SOURCE_IMAGE}" >> $GITHUB_ENV
           echo "SOURCE_ORG=${SOURCE_ORG}" >> $GITHUB_ENV
+          echo "FQ_SOURCE_IMAGE=quay.io/${SOURCE_ORG}/${SOURCE_IMAGE}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
 
 
       - name: Generate tags
@@ -123,7 +108,7 @@ jobs:
           wc -c certs/private_key.priv
 
       - name: Pull build image
-        uses: Wandalen/wretry.action@v2.1.0
+        uses: Wandalen/wretry.action@v3.4.0
         with:
           attempt_limit: 3
           attempt_delay: 15000
@@ -233,7 +218,7 @@ jobs:
 
 
       - name: Push To GHCR
-        uses: Wandalen/wretry.action@v2.1.0
+        uses: Wandalen/wretry.action@v3.4.0
         id: push
         if: github.event_name != 'pull_request'
         env:
@@ -261,7 +246,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Sign container
-      - uses: sigstore/cosign-installer@v3.4.0
+      - uses: sigstore/cosign-installer@v3.5.0
         if: github.event_name != 'pull_request'
 
       - name: Sign container image

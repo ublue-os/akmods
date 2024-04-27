@@ -7,12 +7,7 @@ set -oeux pipefail
 ARCH="$(rpm -E '%_arch')"
 RELEASE="$(rpm -E '%fedora')"
 
-# Modularity repositories are not available on Fedora 39 and above, so don't try to disable them
-if [[ "${RELEASE}" -le 38 ]]; then
-    sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/fedora-{cisco-openh264,modular,updates-modular}.repo
-else
-    sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/fedora-cisco-openh264.repo
-fi
+sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/fedora-cisco-openh264.repo
 
 # enable RPMs with alternatives to create them in this image build
 mkdir -p /var/lib/alternatives
@@ -27,8 +22,8 @@ rpm-ostree install \
     ${RPMFUSION_MIRROR_RPMS}/nonfree/fedora/rpmfusion-nonfree-release-${RELEASE}.noarch.rpm \
     fedora-repos-archive
 
-# after F40 launches, bump to 41
-if [[ "${FEDORA_MAJOR_VERSION}" -ge 40 ]]; then
+# after F41 launches, bump to 42
+if [[ "${FEDORA_MAJOR_VERSION}" -ge 41 ]]; then
     # pre-release rpmfusion is in a different location
     sed -i "s%free/fedora/releases%free/fedora/development%" /etc/yum.repos.d/rpmfusion-*.repo
     # pre-release rpmfusion needs to enable testing
