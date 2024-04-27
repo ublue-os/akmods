@@ -14,17 +14,17 @@ ARG KERNEL_FLAVOR="{KERNEL_FLAVOR:-main}"
 ARG KERNEL_VERSION=""
 ARG RPMFUSION_MIRROR=""
 
-COPY build*.sh /tmp
+COPY build_files/common build_files/shared /tmp/build/build/
 COPY certs /tmp/certs
 
 # files for akmods
-COPY ublue-os-akmods-addons.spec /tmp/ublue-os-akmods-addons/ublue-os-akmods-addons.spec
+COPY ublue-os-akmods-addons.spec /tmp/build/ublue-os-akmods-addons/ublue-os-akmods-addons.spec
 ADD https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${FEDORA_MAJOR_VERSION}/ublue-os-akmods-fedora-${FEDORA_MAJOR_VERSION}.repo \
-    /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo
+    /tmp/build/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo
 ADD https://negativo17.org/repos/fedora-multimedia.repo \
-    /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo
+    /tmp/build/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo
 
-RUN /tmp/build-prep.sh
+RUN /tmp/build/build-prep.sh
 
 # Set kernel name
 RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
@@ -33,22 +33,22 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
         export KERNEL_NAME="kernel-surface" \
     ; fi && \
     if grep -qv "fsync" <<< "${KERNEL_FLAVOR}"; then \
-        /tmp/build-kmod-openrgb.sh \
+        /tmp/build/build-kmod-openrgb.sh \
     ; fi && \
-    /tmp/build-kmod-ayaneo-platform.sh && \
-    /tmp/build-kmod-ayn-platform.sh && \
-    /tmp/build-kmod-bmi260.sh && \
-    /tmp/build-kmod-facetimehd.sh \
-    /tmp/build-kmod-framework-laptop.sh && \
-    /tmp/build-kmod-gcadapter_oc.sh && \
-    /tmp/build-kmod-kvmfr.sh && \
-    /tmp/build-kmod-nct6687d.sh && \
-    /tmp/build-kmod-rtl8814au.sh && \
-    /tmp/build-kmod-rtl88xxau.sh && \
-    /tmp/build-kmod-ryzen-smu.sh && \
-    /tmp/build-kmod-vhba.sh && \
-    /tmp/build-kmod-VirtualBox.sh && \
-    /tmp/build-kmod-zenergy.sh
+    /tmp/build/build-kmod-ayaneo-platform.sh && \
+    /tmp/build/build-kmod-ayn-platform.sh && \
+    /tmp/build/build-kmod-bmi260.sh && \
+    /tmp/build/build-kmod-facetimehd.sh \
+    /tmp/build/build-kmod-framework-laptop.sh && \
+    /tmp/build/build-kmod-gcadapter_oc.sh && \
+    /tmp/build/build-kmod-kvmfr.sh && \
+    /tmp/build/build-kmod-nct6687d.sh && \
+    /tmp/build/build-kmod-rtl8814au.sh && \
+    /tmp/build/build-kmod-rtl88xxau.sh && \
+    /tmp/build/build-kmod-ryzen-smu.sh && \
+    /tmp/build/build-kmod-vhba.sh && \
+    /tmp/build/build-kmod-VirtualBox.sh && \
+    /tmp/build/build-kmod-zenergy.sh
 
 RUN for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
         cp "${RPM}" /var/cache/rpms/kmods/; \

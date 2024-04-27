@@ -14,34 +14,33 @@ ARG KERNEL_FLAVOR="{KERNEL_FLAVOR:-main}"
 ARG KERNEL_VERSION=""
 ARG RPMFUSION_MIRROR=""
 
-COPY build_files/build*.sh /tmp
+COPY build_files/nvidia build_files/shared /tmp/build/build/
 COPY certs /tmp/certs
 
 # files for nvidia
-COPY ublue-os-nvidia-addons.spec /tmp/ublue-os-nvidia-addons/ublue-os-nvidia-addons.spec
 ADD https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo \
-    /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/nvidia-container-toolkit.repo
+    /tmp/build/ublue-os-nvidia-addons/rpmbuild/SOURCES/nvidia-container-toolkit.repo
 ADD https://copr.fedorainfracloud.org/coprs/eyecantcu/supergfxctl/repo/fedora-${FEDORA_MAJOR_VERSION}/eyecantcu-supergfxctl-fedora-${FEDORA_MAJOR_VERSION}.repo \
-    /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/eyecantcu-supergfxctl.repo
+    /tmp/build/ublue-os-nvidia-addons/rpmbuild/SOURCES/eyecantcu-supergfxctl.repo
 ADD https://raw.githubusercontent.com/NVIDIA/dgx-selinux/master/bin/RHEL9/nvidia-container.pp \
-    /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/nvidia-container.pp
-ADD files/etc/sway/environment /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/environment
-ADD files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/ublue-nvctk-cdi.service
-ADD files/usr/lib/systemd/system-preset/70-ublue-nvctk-cdi.preset /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/70-ublue-nvctk-cdi.preset
+    /tmp/build/ublue-os-nvidia-addons/rpmbuild/SOURCES/nvidia-container.pp
+ADD files/etc/sway/environment /tmp/build/ublue-os-nvidia-addons/rpmbuild/SOURCES/environment
+ADD files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/build/ublue-os-nvidia-addons/rpmbuild/SOURCES/ublue-nvctk-cdi.service
+ADD files/usr/lib/systemd/system-preset/70-ublue-nvctk-cdi.preset /tmp/build/ublue-os-nvidia-addons/rpmbuild/SOURCES/70-ublue-nvctk-cdi.preset
 
 
-RUN /tmp/build-prep.sh
+RUN /tmp/build/build-prep.sh
 
-RUN /tmp/build-ublue-os-nvidia-addons.sh
+RUN /tmp/build/build-ublue-os-nvidia-addons.sh
 
 RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
        export KERNEL_NAME="kernel" \
     ; else \
        export KERNEL_NAME="kernel-surface" \
     ; fi && \
-    /tmp/build-kmod-nvidia.sh 550
+    /tmp/build/build-kmod-nvidia.sh 550
 
-RUN cp /tmp/ublue-os-nvidia-addons/rpmbuild/RPMS/noarch/ublue-os-nvidia-addons*.rpm \
+RUN cp /tmp/build/ublue-os-nvidia-addons/rpmbuild/RPMS/noarch/ublue-os-nvidia-addons*.rpm \
       /var/cache/rpms/ublue-os/
 RUN for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
         cp "${RPM}" /var/cache/rpms/kmods/; \
