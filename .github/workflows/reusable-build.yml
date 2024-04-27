@@ -35,6 +35,7 @@ jobs:
           - surface
         cfile_suffix:
           - common
+          - extra
           - nvidia
         exclude:
           - kernel_flavor: asus
