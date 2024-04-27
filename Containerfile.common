@@ -46,7 +46,7 @@ RUN cp /tmp/build/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-ad
       /var/cache/rpms/ublue-os/
 
 # Copy all RPMs from /var/cache/akmods/ to /var/cache/rpms/kmods/
-RUN /tmp/build-post.sh
+RUN /tmp/build/build-post.sh
 
 FROM scratch
 

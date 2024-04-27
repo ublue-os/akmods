@@ -50,7 +50,7 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     /tmp/build/build-kmod-zenergy.sh
 
 # Copy all RPMs from /var/cache/akmods/ to /var/cache/rpms/kmods/
-RUN /tmp/build-post.sh
+RUN /tmp/build/build-post.sh
 
 FROM scratch
 
