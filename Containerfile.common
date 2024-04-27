@@ -14,7 +14,7 @@ ARG KERNEL_FLAVOR="{KERNEL_FLAVOR:-main}"
 ARG KERNEL_VERSION=""
 ARG RPMFUSION_MIRROR=""
 
-COPY build_files/common build_files/shared /tmp/build/build/
+COPY build_files/common build_files/shared /tmp/build/
 COPY certs /tmp/certs
 
 # files for akmods
