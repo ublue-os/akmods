@@ -14,18 +14,18 @@ ARG KERNEL_FLAVOR="{KERNEL_FLAVOR:-main}"
 ARG KERNEL_VERSION=""
 ARG RPMFUSION_MIRROR=""
 
-COPY build_files/common build_files/shared /tmp/build/
+COPY build_files/common build_files/shared /tmp/
 COPY certs /tmp/certs
 
 # files for akmods
 ADD https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${FEDORA_MAJOR_VERSION}/ublue-os-akmods-fedora-${FEDORA_MAJOR_VERSION}.repo \
-    /tmp/build/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo
+    /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo
 ADD https://negativo17.org/repos/fedora-multimedia.repo \
-    /tmp/build/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo
+    /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo
 
-RUN /tmp/build/build-prep.sh
+RUN /tmp/build-prep.sh
 
-RUN /tmp/build/build-ublue-os-akmods-addons.sh
+RUN /tmp/build-ublue-os-akmods-addons.sh
 
 # Set kernel name
 RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
@@ -34,19 +34,19 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
         export KERNEL_NAME="kernel-surface" \
     ; fi && \
     if grep -qv "asus" <<< "${KERNEL_FLAVOR}"; then \
-        /tmp/build/build-kmod-evdi.sh \
+        /tmp/build-kmod-evdi.sh \
     ; fi && \
-    /tmp/build/build-kmod-openrazer.sh && \
-    /tmp/build/build-kmod-v4l2loopback.sh && \
-    /tmp/build/build-kmod-wl.sh && \
-    /tmp/build/build-kmod-xpadneo.sh && \
-    /tmp/build/build-kmod-xone.sh
+    /tmp/build-kmod-openrazer.sh && \
+    /tmp/build-kmod-v4l2loopback.sh && \
+    /tmp/build-kmod-wl.sh && \
+    /tmp/build-kmod-xpadneo.sh && \
+    /tmp/build-kmod-xone.sh
 
-RUN cp /tmp/build/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
+RUN cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
       /var/cache/rpms/ublue-os/
 
 # Copy all RPMs from /var/cache/akmods/ to /var/cache/rpms/kmods/
-RUN /tmp/build/build-post.sh
+RUN /tmp/build-post.sh
 
 FROM scratch
 

@@ -11,7 +11,7 @@ if [[ "${KERNEL}" =~ "6.8" ]]; then
   exit 0
 fi
 
-cp /tmp/build/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo /etc/yum.repos.d/
+cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo /etc/yum.repos.d/
 
 rpm-ostree install \
     akmod-rtl8814au-*.fc${RELEASE}.${ARCH}
