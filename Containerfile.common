@@ -36,6 +36,7 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     if grep -qv "asus" <<< "${KERNEL_FLAVOR}"; then \
         /tmp/build-kmod-evdi.sh \
     ; fi && \
+    /tmp/build-kmod-kvmfr.sh && \
     /tmp/build-kmod-openrazer.sh && \
     /tmp/build-kmod-v4l2loopback.sh && \
     /tmp/build-kmod-wl.sh && \
