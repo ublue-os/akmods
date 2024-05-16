@@ -32,6 +32,9 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     ; else \
         export KERNEL_NAME="kernel-surface" \
     ; fi && \
+    if grep -qv "asus" <<< "${KERNEL_FLAVOR}"; then \
+        /tmp/build-kmod-zenergy.sh \
+    ; fi && \
     if grep -qv "fsync" <<< "${KERNEL_FLAVOR}"; then \
         /tmp/build-kmod-openrgb.sh \
     ; fi && \
@@ -46,8 +49,7 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     /tmp/build-kmod-rtl88xxau.sh && \
     /tmp/build-kmod-ryzen-smu.sh && \
     /tmp/build-kmod-vhba.sh && \
-    /tmp/build-kmod-VirtualBox.sh && \
-    /tmp/build-kmod-zenergy.sh
+    /tmp/build-kmod-VirtualBox.sh
 
 RUN for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
         cp "${RPM}" /var/cache/rpms/kmods/; \
