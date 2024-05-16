@@ -33,7 +33,7 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
         export KERNEL_NAME="kernel-surface" \
     ; fi && \
     if grep -qv "asus" <<< "${KERNEL_FLAVOR}"; then \
-        /tmp/build-kmod-zenergy.sh
+        /tmp/build-kmod-zenergy.sh \
     ; fi && \
     if grep -qv "fsync" <<< "${KERNEL_FLAVOR}"; then \
         /tmp/build-kmod-openrgb.sh \
