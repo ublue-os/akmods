@@ -108,7 +108,7 @@ jobs:
           wc -c certs/private_key.priv
 
       - name: Pull build image
-        uses: Wandalen/wretry.action@v3.4.0
+        uses: Wandalen/wretry.action@v3.5.0
         with:
           attempt_limit: 3
           attempt_delay: 15000
@@ -218,7 +218,7 @@ jobs:
 
 
       - name: Push To GHCR
-        uses: Wandalen/wretry.action@v3.4.0
+        uses: Wandalen/wretry.action@v3.5.0
         id: push
         if: github.event_name != 'pull_request'
         env:
