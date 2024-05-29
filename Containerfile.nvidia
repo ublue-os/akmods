@@ -6,11 +6,12 @@
 ARG SOURCE_IMAGE="${SOURCE_IMAGE:-base}"
 ARG SOURCE_ORG="${SOURCE_ORG:-fedora-ostree-desktops}"
 ARG BASE_IMAGE="quay.io/${SOURCE_ORG}/${SOURCE_IMAGE}"
-ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-39}"
+ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-40}"
 
 FROM ${BASE_IMAGE}:${FEDORA_MAJOR_VERSION} AS builder
-ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-39}"
+ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-40}"
 ARG KERNEL_FLAVOR="{KERNEL_FLAVOR:-main}"
+ARG KERNEL_VERSION=""
 ARG RPMFUSION_MIRROR=""
 
 COPY build*.sh /tmp
@@ -32,7 +33,7 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     ; else \
        export KERNEL_NAME="kernel-surface" \
     ; fi && \
-    /tmp/build-kmod-nvidia.sh ${NVIDIA_MAJOR_VERSION}
+    /tmp/build-kmod-nvidia.sh 550
 
 RUN cp /tmp/ublue-os-nvidia-addons/rpmbuild/RPMS/noarch/ublue-os-nvidia-addons*.rpm \
       /var/cache/rpms/ublue-os/

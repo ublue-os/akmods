@@ -1,5 +1,5 @@
 Name:           ublue-os-akmods-addons
-Version:        0.4
+Version:        0.6
 Release:        1%{?dist}
 Summary:        Signing key and repos for ublue os akmods
 
@@ -41,6 +41,12 @@ install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nega
 %attr(0644,root,root) %{_sysconfdir}/yum.repos.d/negativo17-fedora-multimedia.repo
 
 %changelog
+* Mon Apr 23 2024 Kyle Gospodnetich <me@kylegospodneti.ch> - 0.6
+- Remove unneeded repositories
+
+* Mon Apr 22 2024 Marco Rodolfi <marco.rodolfi@tuta.io> - 0.5
+- Add rok/cdemu copr repo for vhba kmod support
+
 * Mon Nov 20 2023 RJ Trujillo <eyecantcu@pm.me> - 0.4
 - Migrate xpadneo/xone modules from negativo17 fedora-steam to negativo17 fedora-multimedia
 

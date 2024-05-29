@@ -1,5 +1,5 @@
 ###
-### Containerfile.common - used to build ONLY NON-nvidia kmods
+### Containerfile.extra - used to build extra kmods
 ###
 
 #Build from base, simpley because it's the smallest image
@@ -26,8 +26,6 @@ ADD https://negativo17.org/repos/fedora-multimedia.repo \
 
 RUN /tmp/build-prep.sh
 
-RUN /tmp/build-ublue-os-akmods-addons.sh
-
 # Set kernel name
 RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
         export KERNEL_NAME="kernel" \
@@ -35,18 +33,23 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
         export KERNEL_NAME="kernel-surface" \
     ; fi && \
     if grep -qv "asus" <<< "${KERNEL_FLAVOR}"; then \
-        /tmp/build-kmod-evdi.sh \
+        /tmp/build-kmod-zenergy.sh \
     ; fi && \
-    /tmp/build-kmod-framework-laptop.sh && \
-    /tmp/build-kmod-kvmfr.sh && \
-    /tmp/build-kmod-openrazer.sh && \
-    /tmp/build-kmod-v4l2loopback.sh && \
-    /tmp/build-kmod-wl.sh && \
-    /tmp/build-kmod-xpadneo.sh && \
-    /tmp/build-kmod-xone.sh
+    if grep -qv "fsync" <<< "${KERNEL_FLAVOR}"; then \
+        /tmp/build-kmod-openrgb.sh \
+    ; fi && \
+    /tmp/build-kmod-ayaneo-platform.sh && \
+    /tmp/build-kmod-ayn-platform.sh && \
+    /tmp/build-kmod-bmi260.sh && \
+    /tmp/build-kmod-facetimehd.sh && \
+    /tmp/build-kmod-gcadapter_oc.sh && \
+    /tmp/build-kmod-nct6687d.sh && \
+    /tmp/build-kmod-rtl8814au.sh && \
+    /tmp/build-kmod-rtl88xxau.sh && \
+    /tmp/build-kmod-ryzen-smu.sh && \
+    /tmp/build-kmod-vhba.sh && \
+    /tmp/build-kmod-VirtualBox.sh
 
-RUN cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
-      /var/cache/rpms/ublue-os/
 RUN for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
         cp "${RPM}" /var/cache/rpms/kmods/; \
     done
@@ -56,3 +59,4 @@ RUN find /var/cache/rpms
 FROM scratch
 
 COPY --from=builder /var/cache/rpms /rpms
+

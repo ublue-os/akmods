@@ -3,7 +3,7 @@ on:
   workflow_call:
     inputs:
       fedora_version:
-        description: 'The Fedora release version: 38, 39, 40, etc'
+        description: 'The Fedora release version: 39, 40, etc'
         required: true
         type: string
 env:
@@ -35,21 +35,11 @@ jobs:
           - surface
         cfile_suffix:
           - common
+          - extra
           - nvidia
         exclude:
-          - kernel_flavor: asus
-            fedora_version: 38
-          - kernel_flavor: surface
-            fedora_version: 38
-          - fedora_version: 38
-            kernel_flavor: fsync # kernel-fsync not required for ublue-os F38
-          - fedora_version: 38
-            kernel_flavor: fsync-lts
           - fedora_version: 40
-            kernel_flavor: fsync # kernel-fsync packages are not being built for F40 yet.
-          - fedora_version: 40
-            kernel_flavor: fsync-lts
-          
+            kernel_flavor: fsync-lts # kernel-ba packages are not being built for F40 yet.
     steps:
       # Checkout push-to-registry action GitHub repository
       - name: Checkout Push to Registry action
@@ -58,19 +48,16 @@ jobs:
       - name: Matrix Variables
         shell: bash
         run: |
-          if [[ "${{ matrix.fedora_version }}" -ge "41" ]]; then
-              # when we are confident of official fedora images we can switch to them
-              echo "SOURCE_IMAGE=fedora-silverblue" >> $GITHUB_ENV
-              echo "SOURCE_ORG=fedora" >> $GITHUB_ENV
-          else
-              echo "SOURCE_IMAGE=base" >> $GITHUB_ENV
-              echo "SOURCE_ORG=fedora-ostree-desktops" >> $GITHUB_ENV
-          fi
           if [ "common" == "${{ matrix.cfile_suffix }}" ]; then
               echo "IMAGE_NAME=${{ env.IMAGE_BASE_NAME }}" >> $GITHUB_ENV
           else
               echo "IMAGE_NAME=${{ env.IMAGE_BASE_NAME }}-${{ matrix.cfile_suffix }}" >> $GITHUB_ENV
           fi
+          export SOURCE_IMAGE=base
+          export SOURCE_ORG=fedora-ostree-desktops
+          echo "SOURCE_IMAGE=${SOURCE_IMAGE}" >> $GITHUB_ENV
+          echo "SOURCE_ORG=${SOURCE_ORG}" >> $GITHUB_ENV
+          echo "FQ_SOURCE_IMAGE=quay.io/${SOURCE_ORG}/${SOURCE_IMAGE}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
 
       - name: Generate tags
         id: generate-tags
@@ -119,27 +106,71 @@ jobs:
           # DEBUG: get character count of key
           wc -c certs/private_key.priv
 
-      - name: Get current version
-        id: labels
-        uses: Wandalen/wretry.action@v2.1.0
+      - name: Pull build image
+        uses: Wandalen/wretry.action@v3.5.0
         with:
           attempt_limit: 3
           attempt_delay: 15000
           command: |
-            set -eo pipefail
-            skopeo inspect docker://quay.io/${{ env.SOURCE_ORG }}/${{ env.SOURCE_IMAGE }}:${{ matrix.fedora_version }} > inspect.json
-            ver=$(jq -r '.Labels["org.opencontainers.image.version"]' inspect.json)
+            # pull the base image used for FROM in containerfile so
+            # we can retry on that unfortunately common failure case
+            podman pull ${{ env.FQ_SOURCE_IMAGE }}
+
+      - name: Get current version
+        run: |
+          set -eo pipefail
+
+          # skopeo must always run to inspect image labels for build version
+          skopeo inspect docker://${{ env.FQ_SOURCE_IMAGE }} > inspect.json
+          ver=$(jq -r '.Labels["org.opencontainers.image.version"]' inspect.json)
+          if [ -z "$ver" ] || [ "null" = "$ver" ]; then
+            echo "inspected image version must not be empty or null"
+            exit 1
+          fi
+
+          if [ "main" == "${{ matrix.kernel_flavor }}" ]; then
+            # main kernel_flavor: use ostree.linux to determine kernel version
             linux=$(jq -r '.Labels["ostree.linux"]' inspect.json)
-            if [ -z "$ver" ] || [ "null" = "$ver" ]; then
-              echo "inspected image version must not be empty or null"
-              exit 1
-            fi
-            if [ -z "$linux" ] || [ "null" = "$linux" ]; then
-              echo "inspected image linux version must not be empty or null"
-              exit 1
-            fi
-            echo "SOURCE_IMAGE_VERSION=$ver" >> $GITHUB_ENV
-            echo "SOURCE_IMAGE_LINUX=$linux" >> $GITHUB_ENV
+          else
+            # other kernel_flavor: start container use dnf to find kernel version
+            container_name="fq-$(uuidgen)"
+            podman run --entrypoint /bin/bash --name "$container_name" -dt "${{ env.FQ_SOURCE_IMAGE }}"
+            podman exec $container_name rpm-ostree install dnf dnf-plugins-core
+
+            # Fetch kernel version
+            dnf="podman exec $container_name dnf"
+            case "${{ matrix.kernel_flavor }}" in
+              "asus")
+                $dnf copr enable -y lukenukem/asus-kernel
+                linux=$($dnf repoquery --repoid copr:copr.fedorainfracloud.org:lukenukem:asus-kernel --whatprovides kernel | tail -n1 | sed 's/.*://')
+                ;;
+              "fsync")
+                $dnf copr enable -y sentry/kernel-fsync
+                linux=$($dnf repoquery --repoid copr:copr.fedorainfracloud.org:sentry:kernel-fsync --whatprovides kernel | tail -n1 | sed 's/.*://')
+                ;;
+              "fsync-lts")
+                $dnf copr enable -y sentry/kernel-ba
+                linux=$($dnf repoquery --repoid copr:copr.fedorainfracloud.org:sentry:kernel-ba --whatprovides kernel | tail -n1 | sed 's/.*://')
+                ;;
+              "main")
+                linux=$($dnf repoquery --whatprovides kernel | tail -n1 | sed 's/.*://')
+                ;;
+              "surface")
+                $dnf config-manager --add-repo=https://pkg.surfacelinux.com/fedora/linux-surface.repo
+                linux=$($dnf repoquery --repoid linux-surface --whatprovides kernel-surface | tail -n1 | sed 's/.*://')
+                ;;
+              *)
+                echo "unexpected kernel_flavor '${{ matrix.kernel_flavor }}' for dnf repoquery"
+                ;;
+            esac
+          fi
+
+          if [ -z "$linux" ] || [ "null" = "$linux" ]; then
+            echo "inspected image linux version must not be empty or null"
+            exit 1
+          fi
+          echo "SOURCE_IMAGE_VERSION=$ver" >> $GITHUB_ENV
+          echo "KERNEL_VERSION=$linux" >> $GITHUB_ENV
 
       # Build metadata
       - name: Image Metadata
@@ -152,19 +183,9 @@ jobs:
             org.opencontainers.image.title=${{ env.IMAGE_BASE_NAME }}
             org.opencontainers.image.description=A caching layer for pre-built akmod RPMs
             org.opencontainers.image.version=${{ env.SOURCE_IMAGE_VERSION }}
-            ostree.linux=${{ env.SOURCE_IMAGE_LINUX }}
+            ostree.linux=${{ env.KERNEL_VERSION }}
             io.artifacthub.package.readme-url=https://raw.githubusercontent.com/${{ github.repository }}/main/README.md
             io.artifacthub.package.logo-url=https://avatars.githubusercontent.com/u/1728152?s=200&v=4
-
-      - name: Pull build image
-        uses: Wandalen/wretry.action@v2.1.0
-        with:
-          attempt_limit: 3
-          attempt_delay: 15000
-          command: |
-            # pull the base image used for FROM in containerfile so
-            # we can retry on that unfortunately common failure case
-            podman pull quay.io/${{ env.SOURCE_ORG }}/${{ env.SOURCE_IMAGE }}:${{ matrix.fedora_version }}
 
       # Build image using Buildah action
       - name: Build Image
@@ -180,6 +201,7 @@ jobs:
             SOURCE_IMAGE=${{ env.SOURCE_IMAGE }}
             SOURCE_ORG=${{ env.SOURCE_ORG }}
             KERNEL_FLAVOR=${{ matrix.kernel_flavor }}
+            KERNEL_VERSION=${{ env.KERNEL_VERSION }}
             FEDORA_MAJOR_VERSION=${{ matrix.fedora_version }}
             RPMFUSION_MIRROR=${{ vars.RPMFUSION_MIRROR }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -195,7 +217,7 @@ jobs:
 
 
       - name: Push To GHCR
-        uses: Wandalen/wretry.action@v2.1.0
+        uses: Wandalen/wretry.action@v3.5.0
         id: push
         if: github.event_name != 'pull_request'
         env:
@@ -223,7 +245,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Sign container
-      - uses: sigstore/cosign-installer@v3.4.0
+      - uses: sigstore/cosign-installer@v3.5.0
         if: github.event_name != 'pull_request'
 
       - name: Sign container image
