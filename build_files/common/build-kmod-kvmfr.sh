@@ -12,7 +12,7 @@ else
     COPR_RELEASE="${RELEASE}"
 fi
 
-curl -Lo /etc/yum.repos.d/_copr_hikariknight-looking-glass-kvmfr.repo "https://copr.fedorainfracloud.org/coprs/hikariknight/looking-glass-kvmfr/repo/fedora-${COPR_RELEASE}/hikariknight-looking-glass-kvmfr-fedora-${COPR_RELEASE}.repo"
+curl -LsSf -o /etc/yum.repos.d/_copr_hikariknight-looking-glass-kvmfr.repo "https://copr.fedorainfracloud.org/coprs/hikariknight/looking-glass-kvmfr/repo/fedora-${COPR_RELEASE}/hikariknight-looking-glass-kvmfr-fedora-${COPR_RELEASE}.repo"
 
 ### BUILD kvmfr (succeed or fail-fast with debug output)
 rpm-ostree install \
