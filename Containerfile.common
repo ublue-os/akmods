@@ -14,11 +14,10 @@ ARG KERNEL_FLAVOR="{KERNEL_FLAVOR:-main}"
 ARG KERNEL_VERSION=""
 ARG RPMFUSION_MIRROR=""
 
-COPY build*.sh /tmp
+COPY build_files/common build_files/shared /tmp/
 COPY certs /tmp/certs
 
 # files for akmods
-COPY ublue-os-akmods-addons.spec /tmp/ublue-os-akmods-addons/ublue-os-akmods-addons.spec
 ADD https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${FEDORA_MAJOR_VERSION}/ublue-os-akmods-fedora-${FEDORA_MAJOR_VERSION}.repo \
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo
 ADD https://negativo17.org/repos/fedora-multimedia.repo \
@@ -47,11 +46,9 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
 
 RUN cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
       /var/cache/rpms/ublue-os/
-RUN for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
-        cp "${RPM}" /var/cache/rpms/kmods/; \
-    done
 
-RUN find /var/cache/rpms
+# Copy all RPMs from /var/cache/akmods/ to /var/cache/rpms/kmods/
+RUN /tmp/build-post.sh
 
 FROM scratch
 
