@@ -33,6 +33,7 @@ jobs:
           - fsync
           - fsync-lts
           - surface
+          - coreos
         cfile_suffix:
           - common
           - extra
@@ -160,6 +161,8 @@ jobs:
                 $dnf config-manager --add-repo=https://pkg.surfacelinux.com/fedora/linux-surface.repo
                 linux=$($dnf repoquery --repoid linux-surface --whatprovides kernel-surface | tail -n1 | sed 's/.*://')
                 ;;
+              "coroes")
+                linux=$(skopeo inspect docker://quay.io/fedora/fedora-coreos:stable | jq -r '.Labels["ostree.linux"] | split(".x86_64")[0]')
               *)
                 echo "unexpected kernel_flavor '${{ matrix.kernel_flavor }}' for dnf repoquery"
                 ;;
@@ -215,7 +218,6 @@ jobs:
         uses: ASzc/change-string-case-action@v6
         with:
           string: ${{ env.IMAGE_REGISTRY }}
-
 
       - name: Push To GHCR
         uses: Wandalen/wretry.action@v3.5.0
