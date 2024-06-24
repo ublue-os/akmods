@@ -163,6 +163,7 @@ jobs:
                 ;;
               "coroes")
                 linux=$(skopeo inspect docker://quay.io/fedora/fedora-coreos:stable | jq -r '.Labels["ostree.linux"] | split(".x86_64")[0]')
+                ;;
               *)
                 echo "unexpected kernel_flavor '${{ matrix.kernel_flavor }}' for dnf repoquery"
                 ;;
