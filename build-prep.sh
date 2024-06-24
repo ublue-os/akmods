@@ -111,6 +111,7 @@ elif [[ "coreos" == "${KERNEL_FLAVOR}" ]] && \
     echo "Installing CoreOS Kernel"
     KERNEL_MAJOR_MINOR_PATCH=$(echo $KERNEL_VERSION | cut -d '-' -f 1)
     KERNEL_RELEASE=$(echo $KERNEL_VERSION | cut -d '-' -f 2)
+    rpm-ostree cliwrap install-to-root /
     rpm-ostree override replace --experimental \
         https://kojipkgs.fedoraproject.org//packages/kernel/$KERNEL_MAJOR_MINOR_PATCH/$KERNEL_RELEASE/x86_64/kernel-$KERNEL_MAJOR_MINOR_PATCH-$KERNEL_RELEASE.x86_64.rpm \
         https://kojipkgs.fedoraproject.org//packages/kernel/$KERNEL_MAJOR_MINOR_PATCH/$KERNEL_RELEASE/x86_64/kernel-core-$KERNEL_MAJOR_MINOR_PATCH-$KERNEL_RELEASE.x86_64.rpm \
