@@ -161,7 +161,7 @@ jobs:
                 $dnf config-manager --add-repo=https://pkg.surfacelinux.com/fedora/linux-surface.repo
                 linux=$($dnf repoquery --repoid linux-surface --whatprovides kernel-surface | tail -n1 | sed 's/.*://')
                 ;;
-              "coroes")
+              "coreos")
                 linux=$(skopeo inspect docker://quay.io/fedora/fedora-coreos:stable | jq -r '.Labels["ostree.linux"] | split(".x86_64")[0]')
                 ;;
               *)
