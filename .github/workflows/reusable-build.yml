@@ -43,8 +43,6 @@ jobs:
             kernel_flavor: fsync
           - fedora_version: 39
             kernel_flavor: asus
-          - fedora_version: 39
-            kernel_flavor: coreos # CoreOS only maintains a stable/testing/next.
           - fedora_version: 40
             kernel_flavor: fsync-lts # kernel-ba packages are not being built for F40 yet.
     steps:
@@ -168,7 +166,14 @@ jobs:
                 linux=$($dnf repoquery --repoid linux-surface --whatprovides kernel-surface | tail -n1 | sed 's/.*://')
                 ;;
               "coreos")
-                linux=$(skopeo inspect docker://quay.io/fedora/fedora-coreos:stable | jq -r '.Labels["ostree.linux"] | split(".x86_64")[0]')
+                coreos_kernel_release=$(skopeo inspect docker://quay.io/fedora/fedora-coreos:stable | jq -r '.Labels["ostree.linux"] | split(".x86_64")[0]')
+                coreos_fedora_version=$(echo $coreos_kernel_release | grep -oP 'fc\K[0-9]+')
+                if [[ "${{ matrix.fedora_version }}" == "$coreos_fedora_version" ]]; then
+                    linux="${coreos_kernel_release}"
+                elif [[ "$(( "${coreos_fedora_version}" - 1 ))" == ${{ matrix.fedora_version }} ]]; then
+                    major_minor_patch=$(echo "$coreos_kernel_release" | cut -d '-' -f 1)
+                    linux="${major_minor_patch}-200.fc$(($coreos_fedora_version - 1))"
+                fi
                 ;;
               *)
                 echo "unexpected kernel_flavor '${{ matrix.kernel_flavor }}' for dnf repoquery"
