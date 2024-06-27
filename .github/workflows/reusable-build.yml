@@ -17,7 +17,7 @@ concurrency:
 jobs:
   build_ublue:
     name: akmods
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04 # Work Around Tar Bug
     permissions:
       contents: read
       packages: write
@@ -38,6 +38,12 @@ jobs:
           - extra
           - nvidia
         exclude:
+          - fedora_version: 39
+            kernel_flavor: fsync
+          - fedora_version: 39
+            kernel_flavor: asus
+          - fedora_version: 39
+            kernel_flavor: coreos # CoreOS only maintains a stable/testing/next.
           - fedora_version: 40
             kernel_flavor: fsync-lts # kernel-ba packages are not being built for F40 yet.
     steps:

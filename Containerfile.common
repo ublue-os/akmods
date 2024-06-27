@@ -43,7 +43,13 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     /tmp/build-kmod-v4l2loopback.sh && \
     /tmp/build-kmod-wl.sh && \
     /tmp/build-kmod-xpadneo.sh && \
-    /tmp/build-kmod-xone.sh
+    /tmp/build-kmod-xone.sh && \
+    if grep -q "coreos" <<< "${KERNEL_FLAVOR}"; then \
+        curl -Lo /tmp/zfs-kmod-spec-in.patch "https://raw.githubusercontent.com/ublue-os/ucore-kmods/main/zfs-kmod-spec-in.patch" && \
+        curl -Lo /tmp/build-kmod-zfs.sh "https://raw.githubusercontent.com/ublue-os/ucore-kmods/main/build-kmod-zfs.sh" && \
+        chmod +x /tmp/build-kmod-zfs.sh && \
+       /tmp/build-kmod-zfs.sh \
+    ; fi
 
 RUN cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
       /var/cache/rpms/ublue-os/
