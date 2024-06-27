@@ -45,7 +45,6 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     /tmp/build-kmod-xpadneo.sh && \
     /tmp/build-kmod-xone.sh && \
     if grep -q "coreos" <<< "${KERNEL_FLAVOR}"; then \
-        curl -Lo /tmp/zfs-kmod-spec-in.patch "https://raw.githubusercontent.com/ublue-os/ucore-kmods/main/zfs-kmod-spec-in.patch" && \
         curl -Lo /tmp/zfs-minor-version "https://raw.githubusercontent.com/ublue-os/ucore-kmods/main/Containerfile" && \
         zfs_minor_version=$(grep "ZFS_MINOR_VERSION" /tmp/zfs-minor-version | cut -d "-" -f 2 | cut -d \} -f 1) && \
         ZFS_MINOR_VERSION="$zfs_minor_version" /tmp/build-kmod-zfs.sh \

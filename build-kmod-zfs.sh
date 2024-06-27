@@ -32,17 +32,6 @@ tar -z -x --no-same-owner --no-same-permissions -f zfs-${ZFS_VERSION}.tar.gz
 ZFS_MAJ=$(echo $ZFS_VERSION | cut -f1 -d.)
 ZFS_MIN=$(echo $ZFS_VERSION | cut -f2 -d.)
 ZFS_PATCH=$(echo $ZFS_VERSION | cut -f3 -d.)
-DO_PATCH=1
-if [ "${ZFS_MAJ}" -lt "2" ]; then
-    DO_PATCH=0
-elif [ "${ZFS_MAJ}" -eq "2" ] && [ "${ZFS_MIN}" -lt "2" ]; then
-    DO_PATCH=0
-elif [ "${ZFS_MAJ}" -eq "2" ] && [ "${ZFS_MIN}" -eq "2" ] && [ "${ZFS_PATCH}" -lt "3" ]; then
-    DO_PATCH=0
-fi
-if [ "${DO_PATCH}" -eq "0" ]; then
-    patch  -b -uN -i zfs-kmod-spec-in.patch zfs-${ZFS_VERSION}/rpm/generic/zfs-kmod.spec.in
-fi
 
 cd /tmp/zfs-${ZFS_VERSION}
 ./configure \
