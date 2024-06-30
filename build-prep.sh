@@ -156,6 +156,9 @@ fi
 install -Dm644 /tmp/certs/public_key.der   /etc/pki/akmods/certs/public_key.der
 install -Dm644 /tmp/certs/private_key.priv /etc/pki/akmods/private/private_key.priv
 
+install -Dm644 /tmp/certs/public_key.der /lib/modules/${KERNEL_VERSION}/build/certs/signing_key.x509
+install -Dm644 /tmp/certs/private_key.priv /lib/modules/${KERNEL_VERSION}/build/certs/signing_key.pem
+
 # protect against incorrect permissions in tmp dirs which can break akmods builds
 chmod 1777 /tmp /var/tmp
 
