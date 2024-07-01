@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.1.0](https://github.com/ublue-os/akmods/compare/v1.0.0...v1.1.0) (2024-07-01)
+
+
+### Features
+
+* support CoreOS Kernel ([#206](https://github.com/ublue-os/akmods/issues/206)) ([782ea95](https://github.com/ublue-os/akmods/commit/782ea952f97283ac05785f3990c8fba100ba4bdf))
+* swap to negativo17 as nvidia driver source, again ([#173](https://github.com/ublue-os/akmods/issues/173)) ([4c124d8](https://github.com/ublue-os/akmods/commit/4c124d84f6a080c0d18d0a6a64d4fa2d915fdcc1))
+* ZFS for coreos, GTS version coreos ([#207](https://github.com/ublue-os/akmods/issues/207)) ([cbf9ff7](https://github.com/ublue-os/akmods/commit/cbf9ff754d6583abdbd4835ce4167c73d9484821))
+
+
+### Bug Fixes
+
+* adjust build schedule based on adjustments to main and hwe ([#205](https://github.com/ublue-os/akmods/issues/205)) ([6286c23](https://github.com/ublue-os/akmods/commit/6286c23804af9117a98a838b26624c820799a6de))
+* Correct typo causing modules not to build ([a1bc1ea](https://github.com/ublue-os/akmods/commit/a1bc1ea7fe68f4f69479f58b01fa615733fe2286))
+* **framework-laptop:** ensure only in one kmod stream ([#201](https://github.com/ublue-os/akmods/issues/201)) ([0c44cbf](https://github.com/ublue-os/akmods/commit/0c44cbfed53c148a002352f03b58a62731ab1655))
+* keys not in place for dkms ([#208](https://github.com/ublue-os/akmods/issues/208)) ([e9f7514](https://github.com/ublue-os/akmods/commit/e9f7514c13f13bc13e0a70d671608fa83c526ec6))
+* only copy dkms keys for coreos ([#209](https://github.com/ublue-os/akmods/issues/209)) ([c470982](https://github.com/ublue-os/akmods/commit/c4709825208a67986673e9b454e3acee2a3313d4))
+* **zenergy:** remove from ASUS build to fix builder ([#199](https://github.com/ublue-os/akmods/issues/199)) ([2ead2b3](https://github.com/ublue-os/akmods/commit/2ead2b3b120739c2603fb9f51504bc57f7b9805e))
+
 ## 1.0.0 (2024-04-27)
 
 
