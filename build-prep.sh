@@ -37,9 +37,10 @@ if [ -n "${RPMFUSION_MIRROR}" ]; then
     sed -i "s%^#baseurl=http://download1.rpmfusion.org%baseurl=${RPMFUSION_MIRROR}%" /etc/yum.repos.d/rpmfusion-*.repo
 fi
 
-# required for main and surface when fedora repo has updated kernel beyond what was in the image
-curl -LsSf -o /etc/yum.repos.d/fedora-coreos-pool.repo \
-    https://raw.githubusercontent.com/coreos/fedora-coreos-config/testing-devel/fedora-coreos-pool.repo
+# Commented to mitigate dnf and dnf5 file conflicts... not sure when we can add this back or if we need to filter it
+## required for main and surface when fedora repo has updated kernel beyond what was in the image
+##curl -LsSf -o /etc/yum.repos.d/fedora-coreos-pool.repo \
+##    https://raw.githubusercontent.com/coreos/fedora-coreos-config/testing-devel/fedora-coreos-pool.repo
 
 ### PREPARE CUSTOM KERNEL SUPPORT
 if [[ "asus" == "${KERNEL_FLAVOR}" ]]; then
@@ -126,8 +127,7 @@ elif [[ "coreos" == "${KERNEL_FLAVOR}" ]] && \
         dkms \
         git \
         libtool \
-        ncompress \
-        dnf
+        ncompress
 elif [[ "main" == "${KERNEL_FLAVOR}" ]] && \
      [[ "" != "${KERNEL_VERSION}" ]]; then
     echo "main kernel version ${KERNEL_VERSION} to avoid upgrading kernel beyond what is in the image."
