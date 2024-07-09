@@ -123,6 +123,7 @@ jobs:
             podman pull ${{ env.FQ_SOURCE_IMAGE }}
 
       - name: Get current version
+        shell: bash
         run: |
           set -eo pipefail
 
