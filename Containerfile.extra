@@ -2,9 +2,8 @@
 ### Containerfile.extra - used to build extra kmods
 ###
 
-#Build from base, simpley because it's the smallest image
-ARG SOURCE_IMAGE="${SOURCE_IMAGE:-base}"
-ARG SOURCE_ORG="${SOURCE_ORG:-fedora-ostree-desktops}"
+ARG SOURCE_IMAGE="${SOURCE_IMAGE:-fedora}"
+ARG SOURCE_ORG="${SOURCE_ORG:-fedora}"
 ARG BASE_IMAGE="quay.io/${SOURCE_ORG}/${SOURCE_IMAGE}"
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-40}"
 

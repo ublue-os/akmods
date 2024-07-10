@@ -8,7 +8,7 @@ RELEASE="$(rpm -E '%fedora')"
 
 cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo /etc/yum.repos.d/
 
-rpm-ostree install \
+dnf install -y \
     akmod-gcadapter_oc-*.fc${RELEASE}.${ARCH}
 akmods --force --kernels "${KERNEL}" --kmod gcadapter_oc
 modinfo /usr/lib/modules/${KERNEL}/extra/gcadapter_oc/gcadapter_oc.ko.xz > /dev/null \
