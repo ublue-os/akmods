@@ -83,19 +83,19 @@ jobs:
 
           skopeo inspect containers-storage:${{ env.FQ_KERNEL_IMAGE }} > kernel.json
 
-          version=$(jq -r '.["Labels"]["org.opencontainers.image.version"]' kernel.json)
-          if [ -z "$version" ] || [ "null" = "$version" ]; then
-            echo "inspected image version must not be empty or null"
-            exit 1
-          fi
-          echo "KERNEL_IMAGE_VERSION=$version" >> $GITHUB_ENV
-
-          img_version=$(jq -r '.["Labels"]["org.opencontainers.image.version"]' kernel.json)
+          linux=$(jq -r '.["Labels"]["os.linux"]' kernel.json)
           if [ -z "$linux" ] || [ "null" = "$linux" ]; then
             echo "inspected linux version must not be empty or null"
             exit 1
           fi
           echo "KERNEL_VERSION=$linux" >> $GITHUB_ENV
+
+          img_version=$(jq -r '.["Labels"]["org.opencontainers.image.version"]' kernel.json)
+          if [ -z "$img_version" ] || [ "null" = "$img_version" ]; then
+            echo "inspected image version must not be empty or null"
+            exit 1
+          fi
+          echo "KERNEL_IMAGE_VERSION=$version" >> $GITHUB_ENV
 
       - name: Generate tags
         id: generate-tags
