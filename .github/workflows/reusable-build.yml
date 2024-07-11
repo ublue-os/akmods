@@ -66,6 +66,12 @@ jobs:
           echo "KERNEL_IMAGE=${KERNEL_IMAGE}" >> $GITHUB_ENV
           echo "FQ_KERNEL_IMAGE=${{ env.IMAGE_REGISTRY }}/${KERNEL_IMAGE}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
 
+      - name: AppArmor
+        run: |
+          set -x
+          systemctl status apparmor
+          systemctl stop apparmor
+
       - name: Pull build images
         uses: Wandalen/wretry.action@v3.5.0
         with:
