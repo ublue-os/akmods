@@ -60,8 +60,8 @@ jobs:
               echo "IMAGE_NAME=${{ env.IMAGE_BASE_NAME }}-${{ matrix.cfile_suffix }}" >> $GITHUB_ENV
           fi
           export BUILDER_IMAGE=quay.io/fedora/fedora
-          echo "BUILDER_IMAGE=${BASE_IMAGE}" >> $GITHUB_ENV
-          echo "FQ_BUILDER_IMAGE=${BASE_IMAGE}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
+          echo "BUILDER_IMAGE=${BUILDER_IMAGE}" >> $GITHUB_ENV
+          echo "FQ_BUILDER_IMAGE=${BUILDER_IMAGE}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
           export KERNEL_IMAGE=${{ matrix.kernel_flavor }}-kernel
           echo "KERNEL_IMAGE=${KERNEL_IMAGE}" >> $GITHUB_ENV
           echo "FQ_KERNEL_IMAGE=${{ env.IMAGE_REGISTRY }}/${KERNEL_IMAGE}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
@@ -81,7 +81,7 @@ jobs:
         run: |
           set -eo pipefail
 
-          skopeo inspect containers-storage:${{ env.KERNEL_BASE_IMAGE }} > kernel.json
+          skopeo inspect containers-storage:${{ env.FQ_KERNEL_IMAGE }} > kernel.json
 
           version=$(jq -r '.["Labels"]["org.opencontainers.image.version"]' kernel.json)
           if [ -z "$version" ] || [ "null" = "$version" ]; then
