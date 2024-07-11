@@ -83,7 +83,7 @@ jobs:
 
           skopeo inspect containers-storage:${{ env.FQ_KERNEL_IMAGE }} > kernel.json
 
-          linux=$(jq -r '.["Labels"]["os.linux"]' kernel.json)
+          linux=$(jq -r '.["Labels"]["ostree.linux"]' kernel.json)
           if [ -z "$linux" ] || [ "null" = "$linux" ]; then
             echo "inspected linux version must not be empty or null"
             exit 1
