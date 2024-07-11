@@ -103,7 +103,7 @@ elif [[ "surface" == "${KERNEL_FLAVOR}" ]]; then
         --install kernel-surface-modules \
         --install kernel-surface-modules-core \
         --install kernel-surface-modules-extra
-elif [[ "coreos" == "${KERNEL_FLAVOR}" ]] && \
+elif [[ "${KERNEL_FLAVOR}" =~ "coreos" ]] && \
      [[ -n "${KERNEL_VERSION}" ]]; then
     echo "Installing CoreOS Kernel"
     KERNEL_MAJOR_MINOR_PATCH=$(echo $KERNEL_VERSION | cut -d '-' -f 1)
@@ -151,7 +151,7 @@ fi
 install -Dm644 /tmp/certs/public_key.der   /etc/pki/akmods/certs/public_key.der
 install -Dm644 /tmp/certs/private_key.priv /etc/pki/akmods/private/private_key.priv
 
-if [[ "coreos" == "${KERNEL_FLAVOR}" ]]; then
+if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]]; then
     install -Dm644 /tmp/certs/public_key.der /lib/modules/${KERNEL_VERSION}.x86_64/build/certs/signing_key.x509
     install -Dm644 /tmp/certs/private_key.priv /lib/modules/${KERNEL_VERSION}.x86_64/build/certs/signing_key.pem
 fi

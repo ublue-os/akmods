@@ -33,7 +33,8 @@ jobs:
           - fsync
           - fsync-lts
           - surface
-          - coreos
+          - coreos-stable
+          - coreos-testing
         cfile_suffix:
           - common
           - extra
@@ -164,8 +165,9 @@ jobs:
                 $dnf config-manager --add-repo=https://pkg.surfacelinux.com/fedora/linux-surface.repo
                 linux=$($dnf repoquery --repoid linux-surface --whatprovides kernel-surface | tail -n1 | sed 's/.*://')
                 ;;
-              "coreos")
-                coreos_kernel_release=$(skopeo inspect docker://quay.io/fedora/fedora-coreos:stable | jq -r '.Labels["ostree.linux"] | split(".x86_64")[0]')
+              "coreos-stable"|"coreos-testing")
+                coreos_stream=$(echo "${{ matrix.kernel_flavor }}" | cut -f2 -d-)
+                coreos_kernel_release=$(skopeo inspect docker://quay.io/fedora/fedora-coreos:${coreos_stream} | jq -r '.Labels["ostree.linux"] | split(".x86_64")[0]')
                 coreos_fedora_version=$(echo $coreos_kernel_release | grep -oP 'fc\K[0-9]+')
                 if [[ "${{ matrix.fedora_version }}" == "$coreos_fedora_version" ]]; then
                     linux="${coreos_kernel_release}"
