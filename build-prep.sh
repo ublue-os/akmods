@@ -70,9 +70,9 @@ if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]]; then
         automake \
         dkms \
         git \
+        jq \
         libtool \
-        ncompress \
-        dnf
+        ncompress
 fi
 
 # protect against incorrect permissions in tmp dirs which can break akmods builds
