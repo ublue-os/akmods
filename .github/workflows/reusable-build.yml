@@ -72,6 +72,7 @@ jobs:
           systemctl status apparmor
           sudo systemctl stop apparmor
           systemctl status apparmor
+          exit 0
 
       - name: Pull build images
         uses: Wandalen/wretry.action@v3.5.0
