@@ -88,7 +88,8 @@ jobs:
         run: |
           #set -eo pipefail
 
-          skopeo inspect containers-storage:${{ env.FQ_KERNEL_IMAGE }} > kernel.json
+          #skopeo inspect containers-storage:${{ env.FQ_KERNEL_IMAGE }} > kernel.json
+          skopeo inspect docker://:${{ env.FQ_KERNEL_IMAGE }} > kernel.json
           cat kernel.json
           #linux=$(jq -r '.["Labels"]["ostree.linux"]' kernel.json)
           #if [ -z "$linux" ] || [ "null" = "$linux" ]; then
