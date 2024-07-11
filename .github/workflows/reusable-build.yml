@@ -95,7 +95,7 @@ jobs:
             echo "inspected image version must not be empty or null"
             exit 1
           fi
-          echo "KERNEL_IMAGE_VERSION=$version" >> $GITHUB_ENV
+          echo "KERNEL_IMAGE_VERSION=$img_version" >> $GITHUB_ENV
 
       - name: Generate tags
         id: generate-tags
