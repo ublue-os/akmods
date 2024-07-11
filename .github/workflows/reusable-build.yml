@@ -17,7 +17,7 @@ concurrency:
 jobs:
   build_ublue:
     name: akmods
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # Work Around Tar Bug
     permissions:
       contents: read
       packages: write
