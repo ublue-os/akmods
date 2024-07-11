@@ -88,12 +88,12 @@ jobs:
         run: |
           set -eo pipefail
 
-          sudo skopeo inspect containers-storage:${{ env.FQ_KERNEL_IMAGE }} > kernel.json
-          # we SHOULD be able to use container-storage to inspect already pulled image here
-          # but ubuntu-24.04 builders prevent with this error:
-          # > Error during unshare(...): Operation not permitted
-          # intend to investigate/fix later, but need to move forward
-          #skopeo inspect docker://${{ env.FQ_KERNEL_IMAGE }} > kernel.json
+          #skopeo inspect containers-storage:${{ env.FQ_KERNEL_IMAGE }} > kernel.json
+          # We SHOULD be able to use container-storage to inspect already pulled image here
+          # BUT... ubuntu-24.04 builders prevent with this error:
+          #     Error during unshare(...): Operation not permitted
+          # I intend to investigate/fix later, but need to move forward
+          skopeo inspect docker://${{ env.FQ_KERNEL_IMAGE }} > kernel.json
 
           linux=$(jq -r '.["Labels"]["ostree.linux"]' kernel.json)
           if [ -z "$linux" ] || [ "null" = "$linux" ]; then
