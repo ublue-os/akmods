@@ -28,10 +28,10 @@ jobs:
         fedora_version:
           - ${{ inputs.fedora_version }}
         kernel_flavor:
+          - main
           - asus
           - fsync
           - surface
-          - main
           - coreos-stable
           - coreos-testing
         cfile_suffix:
@@ -40,11 +40,11 @@ jobs:
           - nvidia
         exclude:
           - fedora_version: 39
+            kernel_flavor: fsync
+          - fedora_version: 39
             kernel_flavor: asus
           - fedora_version: 39
             kernel_flavor: coreos-testing
-          - fedora_version: 39
-            kernel_flavor: fsync
 
     steps:
       # Checkout push-to-registry action GitHub repository
@@ -66,11 +66,12 @@ jobs:
           echo "KERNEL_IMAGE=${KERNEL_IMAGE}" >> $GITHUB_ENV
           echo "FQ_KERNEL_IMAGE=${{ env.IMAGE_REGISTRY }}/${KERNEL_IMAGE}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
 
-      - name: AppArmor
+      - name: AppArmor Disable
         run: |
           set -x
           systemctl status apparmor
           sudo systemctl stop apparmor
+          systemctl status apparmor
 
       - name: Pull build images
         uses: Wandalen/wretry.action@v3.5.0
