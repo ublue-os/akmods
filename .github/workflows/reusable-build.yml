@@ -186,7 +186,6 @@ jobs:
             BUILDER_IMAGE=${{ env.BUILDER_IMAGE }}
             FEDORA_MAJOR_VERSION=${{ matrix.fedora_version }}
             KERNEL_FLAVOR=${{ matrix.kernel_flavor }}
-            KERNEL_IMAGE=${{ env.KERNEL_IMAGE }}
             KERNEL_ORG=${{ github.repository_owner }}
             RPMFUSION_MIRROR=${{ vars.RPMFUSION_MIRROR }}
           labels: ${{ steps.meta.outputs.labels }}
