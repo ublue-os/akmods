@@ -8,7 +8,7 @@ RELEASE="$(rpm -E '%fedora')"
 
 cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo /etc/yum.repos.d/
 
-rpm-ostree install \
+dnf install -y \
     akmod-zenergy-*.fc${RELEASE}.${ARCH}
 akmods --force --kernels "${KERNEL}" --kmod zenergy
 modinfo /usr/lib/modules/${KERNEL}/extra/zenergy/zenergy.ko.xz > /dev/null \

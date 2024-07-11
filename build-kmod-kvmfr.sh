@@ -15,7 +15,7 @@ fi
 curl -LsSf -o /etc/yum.repos.d/_copr_hikariknight-looking-glass-kvmfr.repo "https://copr.fedorainfracloud.org/coprs/hikariknight/looking-glass-kvmfr/repo/fedora-${COPR_RELEASE}/hikariknight-looking-glass-kvmfr-fedora-${COPR_RELEASE}.repo"
 
 ### BUILD kvmfr (succeed or fail-fast with debug output)
-rpm-ostree install \
+dnf install -y \
     "akmod-kvmfr-*.fc${RELEASE}.${ARCH}"
 akmods --force --kernels "${KERNEL}" --kmod kvmfr
 modinfo "/usr/lib/modules/${KERNEL}/extra/kvmfr/kvmfr.ko.xz" > /dev/null \

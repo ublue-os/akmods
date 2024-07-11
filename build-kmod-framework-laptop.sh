@@ -9,7 +9,7 @@ RELEASE="$(rpm -E '%fedora')"
 cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo /etc/yum.repos.d/
 
 ### BUILD framework-laptop (succeed or fail-fast with debug output)
-rpm-ostree install \
+dnf install -y \
     akmod-framework-laptop-*.fc${RELEASE}.${ARCH}
 akmods --force --kernels "${KERNEL}" --kmod framework-laptop
 modinfo /usr/lib/modules/${KERNEL}/extra/framework-laptop/framework_laptop.ko.xz > /dev/null \
