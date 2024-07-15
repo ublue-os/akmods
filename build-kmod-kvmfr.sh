@@ -24,7 +24,7 @@ fi
 
 if [[ "${DUAL_SIGN}" == "true" ]]; then
     SIGN_FILE="/usr/lib/modules/${KERNEL}/source/scripts/sign-file"
-    PUBLIC_KEY_PATH_2="/tmp/certs/public_key_2.der"
+    PUBLIC_KEY_PATH_2="/tmp/certs/public_key_2.crt"
     PRIVATE_KEY_PATH_2="/tmp/certs/private_key_2.priv"
     for module in /usr/lib/modules/"${KERNEL}"/extra/kvmfr/*.ko*;
     do

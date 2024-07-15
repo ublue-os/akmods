@@ -62,6 +62,7 @@ if [[ ! -s "/tmp/certs/private_key.priv" ]]; then
     echo "WARNING: Using test signing key. Run './generate-akmods-key' for production builds."
     cp /tmp/certs/private_key_2.priv{.test,}
     cp /tmp/certs/public_key_2.der{.test,}
+    openssl -in /tmp/certs/public_key_2.der -out /tmp/certs/public_key_2.crt
 fi
 
 install -Dm644 /tmp/certs/public_key.der   /etc/pki/akmods/certs/public_key.der
