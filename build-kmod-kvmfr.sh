@@ -23,7 +23,6 @@ if ! modinfo "/usr/lib/modules/${KERNEL}/extra/kvmfr/kvmfr.ko.xz" > /dev/null; t
 fi
 
 if [[ "${DUAL_SIGN}" == "true" ]]; then
-    SIGN_FILE="/usr/lib/modules/${KERNEL}/source/scripts/sign-file"
     PUBLIC_KEY_PATH_2="/tmp/certs/public_key_2.crt"
     PRIVATE_KEY_PATH_2="/tmp/certs/private_key_2.priv"
     for module in /usr/lib/modules/"${KERNEL}"/extra/kvmfr/*.ko*;
@@ -32,14 +31,14 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
         module_suffix=${module: -3}
         if [[ "$module_suffix" == ".xz" ]]; then
                 xz --decompress "$module"
-                ${SIGN_FILE} sha256 "${PRIVATE_KEY_PATH_2}" "${PUBLIC_KEY_PATH_2}" "${module_basename}"
+                /usr/src/kernels/"{KERNEL}"/scripts/sign-file sha256 "${PRIVATE_KEY_PATH_2}" "${PUBLIC_KEY_PATH_2}" "${module_basename}"
                 xz -f "${module_basename}"
         elif [[ "$module_suffix" == ".gz" ]]; then
                 gzip -d "$module"
-                "${SIGN_FILE}" sha256 "${PRIVATE_KEY_PATH_2}" "${PUBLIC_KEY_PATH_2}" "${module_basename}"
+                /usr/src/kernels/"{KERNEL}"/scripts/sign-file sha256 "${PRIVATE_KEY_PATH_2}" "${PUBLIC_KEY_PATH_2}" "${module_basename}"
                 gzip -9f "${module_basename}"
         else
-                "${SIGN_FILE}" sha256 "${PRIVATE_KEY_PATH_2}" "${PUBLIC_KEY_PATH_2}" "${module_basename}"
+                /usr/src/kernels/"{KERNEL}"/scripts/sign-file sha256 "${PRIVATE_KEY_PATH_2}" "${PUBLIC_KEY_PATH_2}" "${module_basename}"
         fi
     done
 fi
