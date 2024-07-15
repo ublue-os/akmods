@@ -45,7 +45,7 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
 fi
 
 if [[ "${DUAL_SIGN}" == "true" ]]; then
-    rpmrebuild kmod-kvmfr-"${KERNEL}"-*
+    rpmrebuild --batch kmod-kvmfr-"${KERNEL}"-*
     dnf reinstal -y /root/rpmbuild/RPMS/"$(uname -m)"/kmod-kvmfr-"${KERNEL}"-*.rpm
     if ! modinfo "/usr/lib/modules/${KERNEL}/extra/kvmfr/kvmfr.ko.xz" > /dev/null; then
         (find /var/cache/akmods/kvmfr/ -name \*.log -print -exec cat {} \; && exit 1)
