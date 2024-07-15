@@ -31,21 +31,24 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
         module_suffix=${module: -3}
         if [[ "$module_suffix" == ".xz" ]]; then
                 xz --decompress "$module"
-                /usr/src/kernels/"{KERNEL}"/scripts/sign-file sha256 "${PRIVATE_KEY_PATH_2}" "${PUBLIC_KEY_PATH_2}" "${module_basename}"
+                /usr/src/kernels/"${KERNEL}"/scripts/sign-file sha256 "${PRIVATE_KEY_PATH_2}" "${PUBLIC_KEY_PATH_2}" "${module_basename}"
                 xz -f "${module_basename}"
+                modinfo "${module}"
         elif [[ "$module_suffix" == ".gz" ]]; then
                 gzip -d "$module"
-                /usr/src/kernels/"{KERNEL}"/scripts/sign-file sha256 "${PRIVATE_KEY_PATH_2}" "${PUBLIC_KEY_PATH_2}" "${module_basename}"
+                /usr/src/kernels/"${KERNEL}"/scripts/sign-file sha256 "${PRIVATE_KEY_PATH_2}" "${PUBLIC_KEY_PATH_2}" "${module_basename}"
                 gzip -9f "${module_basename}"
+                modinfo "${module}"
         else
-                /usr/src/kernels/"{KERNEL}"/scripts/sign-file sha256 "${PRIVATE_KEY_PATH_2}" "${PUBLIC_KEY_PATH_2}" "${module_basename}"
+                /usr/src/kernels/"${KERNEL}"/scripts/sign-file sha256 "${PRIVATE_KEY_PATH_2}" "${PUBLIC_KEY_PATH_2}" "${module_basename}"
+                modinfo "${module}"
         fi
     done
 fi
 
 if [[ "${DUAL_SIGN}" == "true" ]]; then
     rpmrebuild --batch kmod-kvmfr-"${KERNEL}"-*
-    dnf reinstal -y /root/rpmbuild/RPMS/"$(uname -m)"/kmod-kvmfr-"${KERNEL}"-*.rpm
+    dnf reinstall -y /root/rpmbuild/RPMS/"$(uname -m)"/kmod-kvmfr-"${KERNEL}"-*.rpm
     if ! modinfo "/usr/lib/modules/${KERNEL}/extra/kvmfr/kvmfr.ko.xz" > /dev/null; then
         (find /var/cache/akmods/kvmfr/ -name \*.log -print -exec cat {} \; && exit 1)
     fi

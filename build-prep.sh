@@ -58,18 +58,18 @@ if [[ ! -s "/tmp/certs/private_key.priv" ]]; then
     cp /tmp/certs/public_key.der{.test,}
 fi
 
-if [[ ! -s "/tmp/certs/private_key.priv" ]]; then
+if [[ ! -s "/tmp/certs/private_key_2.priv" ]]; then
     echo "WARNING: Using test signing key. Run './generate-akmods-key' for production builds."
     cp /tmp/certs/private_key_2.priv{.test,}
     cp /tmp/certs/public_key_2.der{.test,}
-    openssl -in /tmp/certs/public_key_2.der -out /tmp/certs/public_key_2.crt
+    openssl x509 -in /tmp/certs/public_key_2.der -out /tmp/certs/public_key_2.crt
 fi
 
 install -Dm644 /tmp/certs/public_key.der   /etc/pki/akmods/certs/public_key.der
 install -Dm644 /tmp/certs/private_key.priv /etc/pki/akmods/private/private_key.priv
 
 if [[ "${DUAL_SIGN}" == "true" ]]; then
-    dnf install -y rpmrebuild
+    dnf install -y rpmrebuild openssl-devel
 fi
 
 # This is for ZFS more than CoreOS
