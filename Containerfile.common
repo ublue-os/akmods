@@ -15,6 +15,7 @@ FROM ${BUILDER_BASE} AS builder
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-40}"
 ARG KERNEL_FLAVOR="${KERNEL_FLAVOR:-main}"
 ARG RPMFUSION_MIRROR=""
+ARG DUAL_SIGN="true"
 
 COPY build*.sh /tmp
 COPY certs /tmp/certs
@@ -55,9 +56,15 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
         ZFS_MINOR_VERSION="$zfs_minor_version" /tmp/build-kmod-zfs.sh \
     ; fi
 
+
 RUN cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
       /var/cache/rpms/ublue-os/
+
 RUN for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
+        cp "${RPM}" /var/cache/rpms/kmods/; \
+    done
+
+RUN for RPM in $(find /root/rpmbuild/RPMS/"$(uname -m)"/ -type f -name \*.rpm); do \
         cp "${RPM}" /var/cache/rpms/kmods/; \
     done
 
