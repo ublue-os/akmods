@@ -38,6 +38,11 @@ jobs:
           - common
           - extra
           - nvidia
+        include:
+          - kernel_flavor: coreos-stable
+            cfile_suffix: zfs
+          - kernel_flavor: coreos-testing
+            cfile_suffix: zfs
         exclude:
           - fedora_version: 39
             kernel_flavor: fsync
