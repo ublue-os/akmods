@@ -38,11 +38,7 @@ jobs:
           - common
           - extra
           - nvidia
-        include:
-          - kernel_flavor: coreos-stable
-            cfile_suffix: zfs
-          - kernel_flavor: coreos-testing
-            cfile_suffix: zfs
+          - zfs
         exclude:
           - fedora_version: 39
             kernel_flavor: fsync
@@ -50,6 +46,14 @@ jobs:
             kernel_flavor: asus
           - fedora_version: 39
             kernel_flavor: coreos-testing
+          - kernel_flavor: main
+            cfile_suffix: zfs
+          - kernel_flavor: asus
+            cfile_suffix: zfs
+          - kernel_flavor: fsync
+            cfile_suffix: zfs
+          - kernel_flavor: surface
+            cfile_suffix: zfs
 
     steps:
       # Checkout push-to-registry action GitHub repository
