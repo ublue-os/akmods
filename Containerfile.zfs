@@ -24,12 +24,8 @@ COPY certs /tmp/certs
 COPY --from=kernel_cache /tmp/rpms /tmp/kernel_cache
 
 # Set kernel name
-RUN if grep -q "coreos" <<< "${KERNEL_FLAVOR}"; then \
-        /tmp/build-prep.sh && \
-        /tmp/build-kmod-zfs.sh \
-    ; else \
-        echo "Error: ublue only builds ZFS for CoreOS kernels." \
-    ; fi
+RUN /tmp/build-prep.sh && \
+    /tmp/build-kmod-zfs.sh
 
 RUN for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
         cp "${RPM}" /var/cache/rpms/kmods/; \
