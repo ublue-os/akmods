@@ -9,7 +9,7 @@ PUBLIC_CHAIN="/tmp/certs/public_key_chain.pem"
 
 if [[ "${DUAL_SIGN}" == "true" ]]; then
     dnf install -y /var/cache/rpms/kmods/zfs/*.rpm pv
-
+    modinfo /usr/lib/modules/"${KERNEL}"/extra/zfs/spl.ko
     for module in /usr/lib/modules/"${KERNEL}"/extra/zfs/*.ko*;
     do
         module_basename=${module:0:-3}
@@ -33,8 +33,15 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
     rm -rf /usr/lib/modules/"${KERNEL}"/extra
     dnf reinstall -y /root/rpmbuild/RPMS/"$(uname -m)"/kmod-*-"${KERNEL}"-*.rpm
     for module in /usr/lib/modules/"${KERNEL}"/extra/*/*.ko*; do
-        if ! modinfo "${module}" > /dev/null; then
+        if ! modinfo "${module}"; then
             exit 1
         fi
     done
+    mv -f /root/rpmbuild/RPMS/"$(uname -m)"/kmod-*.rpm /var/cache/rpms/kmods/ /var/cache/rpms/kmods/zfs/
 fi
+
+for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do
+    cp "${RPM}" /var/cache/rpms/kmods/
+done
+
+find /var/cache/rpms

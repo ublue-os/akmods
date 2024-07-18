@@ -35,14 +35,6 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     /tmp/build-kmod-zfs.sh && \
     /tmp/dual-sign-zfs.sh
 
-RUN for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
-        cp "${RPM}" /var/cache/rpms/kmods/; \
-    done && \
-    for RPM in $(find /root/rpmbuild/RPMS/"$(uname -m)"/ -type f -name \*.rpm); do \
-        cp "${RPM}" /var/cache/rpms/kmods/; \
-    done && \
-    find /var/cache/rpms
-
 FROM scratch
 
 COPY --from=builder /var/cache/rpms /rpms
