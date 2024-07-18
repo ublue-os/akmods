@@ -5,9 +5,6 @@ set -oeux pipefail
 ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
-SIGNING_KEY_1="/tmp/certs/signing_key_1.pem"
-SIGNING_KEY_2="/tmp/certs/signing_key_2.pem"
-PUBLIC_CHAIN="/tmp/certs/public_key_chain.pem"
 
 if [[ "${RELEASE}" -ge 41 ]]; then
     COPR_RELEASE="rawhide"
@@ -25,33 +22,33 @@ if ! modinfo "/usr/lib/modules/${KERNEL}/extra/kvmfr/kvmfr.ko.xz" > /dev/null; t
     (find /var/cache/akmods/kvmfr/ -name \*.log -print -exec cat {} \; && exit 1)
 fi
 
-if [[ "${DUAL_SIGN}" == "true" ]]; then
-    for module in /usr/lib/modules/"${KERNEL}"/extra/kvmfr/*.ko*;
-    do
-        module_basename=${module:0:-3}
-        module_suffix=${module: -3}
-        if [[ "$module_suffix" == ".xz" ]]; then
-                xz --decompress "$module"
-                openssl cms -sign -signer "${SIGNING_KEY_1}" -signer "${SIGNING_KEY_2}" -binary -in "$module_basename" -outform DER -out "${module_basename}.cms" -nocerts -noattr -nosmimecap
-                /usr/src/kernels/"${KERNEL}"/scripts/sign-file -s "${module_basename}.cms" sha256 "${PUBLIC_CHAIN}" "${module_basename}"
-                xz -f "${module_basename}"
-        elif [[ "$module_suffix" == ".gz" ]]; then
-                gzip -d "$module"
-                openssl cms -sign -signer "${SIGNING_KEY_1}" -signer "${SIGNING_KEY_2}" -binary -in "$module_basename" -outform DER -out "${module_basename}.cms" -nocerts -noattr -nosmimecap
-                /usr/src/kernels/"${KERNEL}"/scripts/sign-file -s "${module_basename}.cms" sha256 "${PUBLIC_CHAIN}" "${module_basename}"
-                gzip -9f "${module_basename}"
-        else
-                openssl cms -sign -signer "${SIGNING_KEY_1}" -signer "${SIGNING_KEY_2}" -binary -in "$module_basename" -outform DER -out "${module_basename}.cms" -nocerts -noattr -nosmimecap
-                /usr/src/kernels/"${KERNEL}"/scripts/sign-file -s "${module_basename}.cms" sha256 "${PUBLIC_CHAIN}" "${module_basename}"
-        fi
-    done
+# if [[ "${DUAL_SIGN}" == "true" ]]; then
+#     for module in /usr/lib/modules/"${KERNEL}"/extra/kvmfr/*.ko*;
+#     do
+#         module_basename=${module:0:-3}
+#         module_suffix=${module: -3}
+#         if [[ "$module_suffix" == ".xz" ]]; then
+#                 xz --decompress "$module"
+#                 openssl cms -sign -signer "${SIGNING_KEY_1}" -signer "${SIGNING_KEY_2}" -binary -in "$module_basename" -outform DER -out "${module_basename}.cms" -nocerts -noattr -nosmimecap
+#                 /usr/src/kernels/"${KERNEL}"/scripts/sign-file -s "${module_basename}.cms" sha256 "${PUBLIC_CHAIN}" "${module_basename}"
+#                 xz -f "${module_basename}"
+#         elif [[ "$module_suffix" == ".gz" ]]; then
+#                 gzip -d "$module"
+#                 openssl cms -sign -signer "${SIGNING_KEY_1}" -signer "${SIGNING_KEY_2}" -binary -in "$module_basename" -outform DER -out "${module_basename}.cms" -nocerts -noattr -nosmimecap
+#                 /usr/src/kernels/"${KERNEL}"/scripts/sign-file -s "${module_basename}.cms" sha256 "${PUBLIC_CHAIN}" "${module_basename}"
+#                 gzip -9f "${module_basename}"
+#         else
+#                 openssl cms -sign -signer "${SIGNING_KEY_1}" -signer "${SIGNING_KEY_2}" -binary -in "$module_basename" -outform DER -out "${module_basename}.cms" -nocerts -noattr -nosmimecap
+#                 /usr/src/kernels/"${KERNEL}"/scripts/sign-file -s "${module_basename}.cms" sha256 "${PUBLIC_CHAIN}" "${module_basename}"
+#         fi
+#     done
 
-    rpmrebuild --batch kmod-kvmfr-"${KERNEL}"-*
-    rm -f /usr/lib/modules/"${KERNEL}"/extra/kvmfr/*.ko*
-    dnf reinstall -y /root/rpmbuild/RPMS/"$(uname -m)"/kmod-kvmfr-"${KERNEL}"-*.rpm
-    if ! modinfo "/usr/lib/modules/${KERNEL}/extra/kvmfr/kvmfr.ko.xz" > /dev/null; then
-        exit 1
-    fi
-fi
+#     rpmrebuild --batch kmod-kvmfr-"${KERNEL}"-*
+#     rm -f /usr/lib/modules/"${KERNEL}"/extra/kvmfr/*.ko*
+#     dnf reinstall -y /root/rpmbuild/RPMS/"$(uname -m)"/kmod-kvmfr-"${KERNEL}"-*.rpm
+#     if ! modinfo "/usr/lib/modules/${KERNEL}/extra/kvmfr/kvmfr.ko.xz" > /dev/null; then
+#         exit 1
+#     fi
+# fi
 
-rm -f /etc/yum.repos.d/_copr_hikariknight-looking-glass-kvmfr.repo
+# rm -f /etc/yum.repos.d/_copr_hikariknight-looking-glass-kvmfr.repo
