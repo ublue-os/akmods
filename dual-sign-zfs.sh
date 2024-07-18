@@ -37,7 +37,7 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
             exit 1
         fi
     done
-    mv -f /root/rpmbuild/RPMS/"$(uname -m)"/kmod-*.rpm /var/cache/rpms/kmods/ /var/cache/rpms/kmods/zfs/
+    mv -f /root/rpmbuild/RPMS/"$(uname -m)"/kmod-*.rpm /var/cache/rpms/kmods/zfs/
 fi
 
 for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do
