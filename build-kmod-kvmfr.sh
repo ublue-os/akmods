@@ -5,6 +5,9 @@ set -oeux pipefail
 ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
+SIGNING_KEY_1="/tmp/certs/signing_key_1.pem"
+SIGNING_KEY_2="/tmp/certs/signing_key_2.pem"
+PUBLIC_CHAIN="/tmp/certs/public_key_chain.pem"
 
 if [[ "${RELEASE}" -ge 41 ]]; then
     COPR_RELEASE="rawhide"
