@@ -57,17 +57,22 @@ if [[ ! -s "/tmp/certs/private_key.priv" ]]; then
     cp /tmp/certs/private_key.priv{.test,}
     cp /tmp/certs/public_key.der{.test,}
 fi
-if [[ ! -s "/tmp/certs/private_key_2.priv" ]]; then
-    echo "WARNING: Using test signing key. Run './generate-akmods-key' for production builds."
-    cp /tmp/certs/private_key_2.priv{.test,}
-    cp /tmp/certs/public_key_2.der{.test,}
-fi
 
 openssl x509 -in /tmp/certs/public_key.der -out /tmp/certs/public_key.crt
-openssl x509 -in /tmp/certs/public_key_2.der -out /tmp/certs/public_key_2.crt
 cat /tmp/certs/private_key.priv <(echo) /tmp/certs/public_key.crt >> /tmp/certs/signing_key_1.pem
-cat /tmp/certs/private_key_2.priv <(echo) /tmp/certs/public_key_2.crt >> /tmp/certs/signing_key_2.pem
-cat /tmp/certs/public_key.crt <(echo) /tmp/certs/public_key_2.crt >> /tmp/certs/public_key_chain.pem
+
+if [[ "${DUAL_SIGN}" == "true" ]]; then
+    if [[ ! -s "/tmp/certs/private_key_2.priv" ]]; then
+        echo "WARNING: Using test signing key. Run './generate-akmods-key' for production builds."
+        cp /tmp/certs/private_key_2.priv{.test,}
+        cp /tmp/certs/public_key_2.der{.test,}
+    fi
+    openssl x509 -in /tmp/certs/public_key_2.der -out /tmp/certs/public_key_2.crt
+    cat /tmp/certs/private_key_2.priv <(echo) /tmp/certs/public_key_2.crt >> /tmp/certs/signing_key_2.pem
+    rm -f /tmp/certs/public_key_chain.pem
+    cat /tmp/certs/public_key.crt <(echo) /tmp/certs/public_key_2.crt >> /tmp/certs/public_key_chain.pem
+fi
+
 
 export SIGNING_KEY_1="/tmp/certs/signing_key_1.pem"
 export SIGNING_KEY_2="/tmp/certs/signing_key_2.pem"

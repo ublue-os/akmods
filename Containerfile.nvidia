@@ -30,7 +30,8 @@ COPY files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/ublue-os-nvidia-a
 COPY files/usr/lib/systemd/system-preset/70-ublue-nvctk-cdi.preset /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/70-ublue-nvctk-cdi.preset
 
 
-RUN /tmp/build-prep.sh && \
+RUN --mount=type=cache,dst=/var/cache/dnf \
+    /tmp/build-prep.sh && \
     /tmp/build-ublue-os-nvidia-addons.sh && \
     if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
        export KERNEL_NAME="kernel" \

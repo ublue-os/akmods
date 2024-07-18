@@ -18,15 +18,22 @@ ARG DUAL_SIGN="true"
 ARG RPMFUSION_MIRROR=""
 ARG ZFS_MINOR_VERSION="${ZFS_MINOR_VERSION:-2.2}"
 
-COPY build-*.sh /tmp
+COPY build-*.sh dual-sign-zfs.sh /tmp/
 COPY certs /tmp/certs
 
 # cached kernel rpms
 COPY --from=kernel_cache /tmp/rpms /tmp/kernel_cache
 
 # Set kernel name
-RUN /tmp/build-prep.sh && \
-    /tmp/build-kmod-zfs.sh
+RUN --mount=type=cache,dst=/var/cache/dnf \
+    if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
+        export KERNEL_NAME="kernel" \
+    ; else \
+        export KERNEL_NAME="kernel-surface" \
+    ; fi && \
+    /tmp/build-prep.sh && \
+    /tmp/build-kmod-zfs.sh && \
+    /tmp/dual-sign-zfs.sh
 
 RUN for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
         cp "${RPM}" /var/cache/rpms/kmods/; \
