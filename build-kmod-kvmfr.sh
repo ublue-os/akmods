@@ -23,30 +23,31 @@ if ! modinfo "/usr/lib/modules/${KERNEL}/extra/kvmfr/kvmfr.ko.xz" > /dev/null; t
 fi
 
 if [[ "${DUAL_SIGN}" == "true" ]]; then
-    PUBLIC_KEY_PATH_2="/tmp/certs/public_key_2.crt"
-    PRIVATE_KEY_PATH_2="/tmp/certs/private_key_2.priv"
     for module in /usr/lib/modules/"${KERNEL}"/extra/kvmfr/*.ko*;
     do
         module_basename=${module:0:-3}
         module_suffix=${module: -3}
         if [[ "$module_suffix" == ".xz" ]]; then
                 xz --decompress "$module"
-                /usr/src/kernels/"${KERNEL}"/scripts/sign-file -p sha256 "${PRIVATE_KEY_PATH_2}" "${PUBLIC_KEY_PATH_2}" "${module_basename}"
+                openssl cms -sign -signer "${SIGNING_KEY_1}" -signer "${SIGNING_KEY_2}" -binary -in "$module_basename" -outform DER -out "${module_basename}.cms" -nocerts -noattr -nosmimecap
+                /usr/src/kernels/"${KERNEL}"/scripts/sign-file -s "${module_basename}.cms" sha256 "${PUBLIC_CHAIN}" "${module_basename}"
                 xz -f "${module_basename}"
         elif [[ "$module_suffix" == ".gz" ]]; then
                 gzip -d "$module"
-                /usr/src/kernels/"${KERNEL}"/scripts/sign-file -p sha256 "${PRIVATE_KEY_PATH_2}" "${PUBLIC_KEY_PATH_2}" "${module_basename}"
+                openssl cms -sign -signer "${SIGNING_KEY_1}" -signer "${SIGNING_KEY_2}" -binary -in "$module_basename" -outform DER -out "${module_basename}.cms" -nocerts -noattr -nosmimecap
+                /usr/src/kernels/"${KERNEL}"/scripts/sign-file -s "${module_basename}.cms" sha256 "${PUBLIC_CHAIN}" "${module_basename}"
                 gzip -9f "${module_basename}"
         else
-                /usr/src/kernels/"${KERNEL}"/scripts/sign-file -p sha256 "${PRIVATE_KEY_PATH_2}" "${PUBLIC_KEY_PATH_2}" "${module_basename}"
+                openssl cms -sign -signer "${SIGNING_KEY_1}" -signer "${SIGNING_KEY_2}" -binary -in "$module_basename" -outform DER -out "${module_basename}.cms" -nocerts -noattr -nosmimecap
+                /usr/src/kernels/"${KERNEL}"/scripts/sign-file -s "${module_basename}.cms" sha256 "${PUBLIC_CHAIN}" "${module_basename}"
         fi
     done
 
     rpmrebuild --batch kmod-kvmfr-"${KERNEL}"-*
     rm -f /usr/lib/modules/"${KERNEL}"/extra/kvmfr/*.ko*
     dnf reinstall -y /root/rpmbuild/RPMS/"$(uname -m)"/kmod-kvmfr-"${KERNEL}"-*.rpm
-    if ! modinfo "/usr/lib/modules/${KERNEL}/extra/kvmfr/kvmfr.ko.xz"; then
-        (find /var/cache/akmods/kvmfr/ -name \*.log -print -exec cat {} \; && exit 1)
+    if ! modinfo "/usr/lib/modules/${KERNEL}/extra/kvmfr/kvmfr.ko.xz" > /dev/null; then
+        exit 1
     fi
 fi
 

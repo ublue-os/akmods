@@ -57,13 +57,21 @@ if [[ ! -s "/tmp/certs/private_key.priv" ]]; then
     cp /tmp/certs/private_key.priv{.test,}
     cp /tmp/certs/public_key.der{.test,}
 fi
-
 if [[ ! -s "/tmp/certs/private_key_2.priv" ]]; then
     echo "WARNING: Using test signing key. Run './generate-akmods-key' for production builds."
     cp /tmp/certs/private_key_2.priv{.test,}
     cp /tmp/certs/public_key_2.der{.test,}
-    openssl x509 -in /tmp/certs/public_key_2.der -out /tmp/certs/public_key_2.crt
 fi
+
+openssl x509 -in /tmp/certs/public_key_2.der -out /tmp/certs/public_key_2.crt
+openssl x509 -in /tmp/certs/public_key_2.der -out /tmp/certs/public_key_2.crt
+cat /tmp/certs/private_key.priv <(echo) /tmp/certs/public_key.crt >> /tmp/certs/signing_key_1.pem
+cat /tmp/certs/private_key_2.priv <(echo) /tmp/certs/public_key_2.crt >> /tmp/certs/signing_key_2.pem
+cat /tmp/certs/public_key.crt <(echo) /tmp/certs/public_key_2.crt >> /tmp/certs/public_key_chain.pem
+
+export SIGNING_KEY_1="/tmp/certs/signing_key_1.pem"
+export SIGNING_KEY_2="/tmp/certs/signing_key_2.pem"
+export PUBLIC_CHAIN="/tmp/certs/public_key_chain.pem"
 
 install -Dm644 /tmp/certs/public_key.der   /etc/pki/akmods/certs/public_key.der
 install -Dm644 /tmp/certs/private_key.priv /etc/pki/akmods/private/private_key.priv
