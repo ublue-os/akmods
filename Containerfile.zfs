@@ -18,7 +18,7 @@ ARG DUAL_SIGN="true"
 ARG RPMFUSION_MIRROR=""
 ARG ZFS_MINOR_VERSION="${ZFS_MINOR_VERSION:-2.2}"
 
-COPY build*.sh dual-sign.sh /tmp/
+COPY build-*.sh /tmp
 COPY certs /tmp/certs
 
 # cached kernel rpms
@@ -26,16 +26,13 @@ COPY --from=kernel_cache /tmp/rpms /tmp/kernel_cache
 
 # Set kernel name
 RUN /tmp/build-prep.sh && \
-    /tmp/build-kmod-zfs.sh && \
-    /tmp/dual-sign.sh && \
-    for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
-        cp "${RPM}" /var/cache/rpms/kmods/; \
-    done && \
-    for RPM in $(find /root/rpmbuild/RPMS/"$(uname -m)"/ -type f -name \*.rpm); do \
-        cp "${RPM}" /var/cache/rpms/kmods/; \
-    done && \
-    find /var/cache/rpms
+    /tmp/build-kmod-zfs.sh
 
+RUN for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
+        cp "${RPM}" /var/cache/rpms/kmods/; \
+    done
+
+RUN find /var/cache/rpms
 FROM scratch
 
 COPY --from=builder /var/cache/rpms /rpms

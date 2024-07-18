@@ -1,5 +1,7 @@
 #!/usr/bin/bash
 
+set -eoux pipefail
+
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 SIGNING_KEY_1="/tmp/certs/signing_key_1.pem"
 SIGNING_KEY_2="/tmp/certs/signing_key_2.pem"
