@@ -31,7 +31,7 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
     done
     rpmrebuild --batch /var/cache/rpms/kmods/zfs/kmod-zfs-*.rpm
     rm -rf /usr/lib/modules/"${KERNEL}"/extra
-    dnf install -y /root/rpmbuild/RPMS/"$(uname -m)"/kmod-*-"${KERNEL}"-*.rpm
+    dnf reinstall -y /root/rpmbuild/RPMS/"$(uname -m)"/kmod-*-"${KERNEL}"-*.rpm
     for module in /usr/lib/modules/"${KERNEL}"/extra/*/*.ko*; do
         if ! modinfo "${module}" > /dev/null; then
             exit 1
