@@ -63,7 +63,7 @@ if [[ ! -s "/tmp/certs/private_key_2.priv" ]]; then
     cp /tmp/certs/public_key_2.der{.test,}
 fi
 
-openssl x509 -in /tmp/certs/public_key_2.der -out /tmp/certs/public_key_2.crt
+openssl x509 -in /tmp/certs/public_key.der -out /tmp/certs/public_key.crt
 openssl x509 -in /tmp/certs/public_key_2.der -out /tmp/certs/public_key_2.crt
 cat /tmp/certs/private_key.priv <(echo) /tmp/certs/public_key.crt >> /tmp/certs/signing_key_1.pem
 cat /tmp/certs/private_key_2.priv <(echo) /tmp/certs/public_key_2.crt >> /tmp/certs/signing_key_2.pem
