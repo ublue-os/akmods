@@ -25,7 +25,8 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
                 /usr/src/kernels/"${KERNEL}"/scripts/sign-file -s "${module_basename}.cms" sha256 "${PUBLIC_CHAIN}" "${module_basename}"
         fi
     done
-    for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
+    find /var/cache/akmods -type f -name \kmod-*.rpm
+    for RPM in $(find /var/cache/akmods/ -type f -name \kmod-*.rpm); do \
         rpmrebuild --batch "$RPM"
     done
     rm -rf /usr/lib/modules/"${KERNEL}"/extra
