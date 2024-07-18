@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/sh
 
 set -oeux pipefail
 
@@ -18,37 +18,7 @@ curl -LsSf -o /etc/yum.repos.d/_copr_hikariknight-looking-glass-kvmfr.repo "http
 dnf install -y \
     "akmod-kvmfr-*.fc${RELEASE}.${ARCH}"
 akmods --force --kernels "${KERNEL}" --kmod kvmfr
-if ! modinfo "/usr/lib/modules/${KERNEL}/extra/kvmfr/kvmfr.ko.xz" > /dev/null; then
-    (find /var/cache/akmods/kvmfr/ -name \*.log -print -exec cat {} \; && exit 1)
-fi
+modinfo "/usr/lib/modules/${KERNEL}/extra/kvmfr/kvmfr.ko.xz" > /dev/null \
+|| (find /var/cache/akmods/kvmfr/ -name \*.log -print -exec cat {} \; && exit 1)
 
-# if [[ "${DUAL_SIGN}" == "true" ]]; then
-#     for module in /usr/lib/modules/"${KERNEL}"/extra/kvmfr/*.ko*;
-#     do
-#         module_basename=${module:0:-3}
-#         module_suffix=${module: -3}
-#         if [[ "$module_suffix" == ".xz" ]]; then
-#                 xz --decompress "$module"
-#                 openssl cms -sign -signer "${SIGNING_KEY_1}" -signer "${SIGNING_KEY_2}" -binary -in "$module_basename" -outform DER -out "${module_basename}.cms" -nocerts -noattr -nosmimecap
-#                 /usr/src/kernels/"${KERNEL}"/scripts/sign-file -s "${module_basename}.cms" sha256 "${PUBLIC_CHAIN}" "${module_basename}"
-#                 xz -f "${module_basename}"
-#         elif [[ "$module_suffix" == ".gz" ]]; then
-#                 gzip -d "$module"
-#                 openssl cms -sign -signer "${SIGNING_KEY_1}" -signer "${SIGNING_KEY_2}" -binary -in "$module_basename" -outform DER -out "${module_basename}.cms" -nocerts -noattr -nosmimecap
-#                 /usr/src/kernels/"${KERNEL}"/scripts/sign-file -s "${module_basename}.cms" sha256 "${PUBLIC_CHAIN}" "${module_basename}"
-#                 gzip -9f "${module_basename}"
-#         else
-#                 openssl cms -sign -signer "${SIGNING_KEY_1}" -signer "${SIGNING_KEY_2}" -binary -in "$module_basename" -outform DER -out "${module_basename}.cms" -nocerts -noattr -nosmimecap
-#                 /usr/src/kernels/"${KERNEL}"/scripts/sign-file -s "${module_basename}.cms" sha256 "${PUBLIC_CHAIN}" "${module_basename}"
-#         fi
-#     done
-
-#     rpmrebuild --batch kmod-kvmfr-"${KERNEL}"-*
-#     rm -f /usr/lib/modules/"${KERNEL}"/extra/kvmfr/*.ko*
-#     dnf reinstall -y /root/rpmbuild/RPMS/"$(uname -m)"/kmod-kvmfr-"${KERNEL}"-*.rpm
-#     if ! modinfo "/usr/lib/modules/${KERNEL}/extra/kvmfr/kvmfr.ko.xz" > /dev/null; then
-#         exit 1
-#     fi
-# fi
-
-# rm -f /etc/yum.repos.d/_copr_hikariknight-looking-glass-kvmfr.repo
+rm -f /etc/yum.repos.d/_copr_hikariknight-looking-glass-kvmfr.repo
