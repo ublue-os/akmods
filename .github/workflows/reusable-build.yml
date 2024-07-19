@@ -3,12 +3,12 @@ on:
   workflow_call:
     inputs:
       fedora_version:
-        description: 'The Fedora release version: 39, 40, etc'
+        description: "The Fedora release version: 39, 40, etc"
         required: true
         type: string
 env:
-    IMAGE_BASE_NAME: akmods
-    IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
+  IMAGE_BASE_NAME: akmods
+  IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}-${{ inputs.fedora_version }}
@@ -170,16 +170,21 @@ jobs:
             io.artifacthub.package.readme-url=https://raw.githubusercontent.com/${{ github.repository }}/main/README.md
             io.artifacthub.package.logo-url=https://avatars.githubusercontent.com/u/1728152?s=200&v=4
 
-      - name: Retrieve akmods signing key
+      - name: Retrieve Signing Key
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group'
+        shell: bash
         run: |
           mkdir -p certs
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-              echo "Using test signing key"
+          if [[ "${{ github.event_name }}"  == 'pull_request' ]]; then
+            echo "This should not have run... exiting..."
+            exit 1
           else
-              echo "${{ secrets.AKMOD_PRIVKEY_20230518 }}" > certs/private_key.priv
+            echo "${{ secrets.KERNEL_PRIVKEY }}" > certs/private_key.priv
+            echo "${{ secrets.AKMOD_PRIVKEY_20230518 }}" > certs/private_key_2.priv
+            # DEBUG: get character count of key
+            wc -c certs/private_key.priv
+            wc -c certs/private_key_2.priv
           fi
-          # DEBUG: get character count of key
-          wc -c certs/private_key.priv
 
       # Build image using Buildah action
       - name: Build Image
@@ -197,6 +202,7 @@ jobs:
             KERNEL_FLAVOR=${{ matrix.kernel_flavor }}
             FEDORA_MAJOR_VERSION=${{ matrix.fedora_version }}
             RPMFUSION_MIRROR=${{ vars.RPMFUSION_MIRROR }}
+            DUAL_SIGN=true
           labels: ${{ steps.meta.outputs.labels }}
           oci: false
 

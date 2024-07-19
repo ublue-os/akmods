@@ -15,8 +15,9 @@ FROM ${BUILDER_BASE} AS builder
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-40}"
 ARG KERNEL_FLAVOR="${KERNEL_FLAVOR:-main}"
 ARG RPMFUSION_MIRROR=""
+ARG DUAL_SIGN="true"
 
-COPY build*.sh /tmp
+COPY build*.sh dual-sign.sh /tmp/
 COPY certs /tmp/certs
 
 # cached kernel rpms
@@ -29,10 +30,9 @@ ADD https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${FEDORA
 ADD https://negativo17.org/repos/fedora-multimedia.repo \
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo
 
-RUN /tmp/build-prep.sh
-
-# Set kernel name
-RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
+RUN --mount=type=cache,dst=/var/cache/dnf \
+    /tmp/build-prep.sh && \
+    if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
         export KERNEL_NAME="kernel" \
     ; else \
         export KERNEL_NAME="kernel-surface" \
@@ -53,13 +53,15 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     /tmp/build-kmod-rtl88xxau.sh && \
     /tmp/build-kmod-ryzen-smu.sh && \
     /tmp/build-kmod-vhba.sh && \
-    /tmp/build-kmod-VirtualBox.sh
-
-RUN for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
+    /tmp/build-kmod-VirtualBox.sh && \
+    /tmp/dual-sign.sh && \
+    for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
         cp "${RPM}" /var/cache/rpms/kmods/; \
-    done
-
-RUN find /var/cache/rpms
+    done && \
+    for RPM in $(find /root/rpmbuild/RPMS/"$(uname -m)"/ -type f -name \*.rpm); do \
+        cp "${RPM}" /var/cache/rpms/kmods/; \
+    done && \
+    find /var/cache/rpms
 
 FROM scratch
 
