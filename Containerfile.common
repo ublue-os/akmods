@@ -17,7 +17,7 @@ ARG KERNEL_FLAVOR="${KERNEL_FLAVOR:-main}"
 ARG RPMFUSION_MIRROR=""
 ARG DUAL_SIGN="true"
 
-COPY build*.sh dual-sign.sh /tmp/
+COPY build*.sh dual-sign*.sh /tmp/
 COPY certs /tmp/certs
 
 # cached kernel rpms

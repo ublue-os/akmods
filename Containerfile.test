@@ -1,40 +1,40 @@
 ###
-### Containerfile.zfs - used to build ONLY ZFS kmod
+### Containerfile.test - used to test akmods
 ###
 
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-40}"
-ARG KERNEL_FLAVOR="${KERNEL_FLAVOR:-coreos-stable}"
+ARG KERNEL_FLAVOR="${KERNEL_FLAVOR:-main}"
 ARG KERNEL_IMAGE="${KERNEL_IMAGE:-${KERNEL_FLAVOR}-kernel}"
 ARG KERNEL_ORG="${KERNEL_ORG:-ublue-os}"
 ARG KERNEL_BASE="ghcr.io/${KERNEL_ORG}/${KERNEL_IMAGE}:${FEDORA_MAJOR_VERSION}"
 ARG BUILDER_IMAGE="${BUILDER_IMAGE:-quay.io/fedora/fedora}"
 ARG BUILDER_BASE="${BUILDER_IMAGE}:${FEDORA_MAJOR_VERSION}"
+ARG INPUT_AKMODS="${INPUT_AKMODS:-akmods}"
+ARG INPUT_TAG="${INPUT_TAG:-${KERNEL_FLAVOR}-${FEDORA_MAJOR_VERSION}}"
+ARG INPUT_BASE="${INPUT_AKMODS}:${INPUT_TAG}"
 FROM ${KERNEL_BASE} AS kernel_cache
-FROM ${BUILDER_BASE} AS builder
+FROM ${INPUT_BASE} AS akmods_cache
+FROM ${BUILDER_BASE} AS tester
 
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-40}"
-ARG KERNEL_FLAVOR="${KERNEL_FLAVOR:-coreos-stable}"
-ARG DUAL_SIGN="true"
+ARG KERNEL_FLAVOR="${KERNEL_FLAVOR:-main}"
 ARG RPMFUSION_MIRROR=""
-ARG ZFS_MINOR_VERSION="${ZFS_MINOR_VERSION:-2.2}"
+ARG DUAL_SIGN="true"
 
-COPY build*.sh dual-sign*.sh /tmp/
+COPY test-prep.sh dual-sign-check.sh /tmp/
+COPY check-signatures.sh /
 COPY certs /tmp/certs
 
 # cached kernel rpms
 COPY --from=kernel_cache /tmp/rpms /tmp/kernel_cache
+COPY --from=akmods_cache /rpms /tmp/akmods-rpms
 
-# Set kernel name
 RUN --mount=type=cache,dst=/var/cache/dnf \
-    /tmp/build-prep.sh && \
     if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
         export KERNEL_NAME="kernel" \
     ; else \
         export KERNEL_NAME="kernel-surface" \
     ; fi && \
-    /tmp/build-kmod-zfs.sh && \
-    /tmp/dual-sign-zfs.sh
+    /tmp/test-prep.sh
 
-FROM scratch
-
-COPY --from=builder /var/cache/rpms /rpms
+CMD ["/check-signatures.sh"]
