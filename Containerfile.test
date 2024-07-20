@@ -9,10 +9,11 @@ ARG KERNEL_ORG="${KERNEL_ORG:-ublue-os}"
 ARG KERNEL_BASE="ghcr.io/${KERNEL_ORG}/${KERNEL_IMAGE}:${FEDORA_MAJOR_VERSION}"
 ARG BUILDER_IMAGE="${BUILDER_IMAGE:-quay.io/fedora/fedora}"
 ARG BUILDER_BASE="${BUILDER_IMAGE}:${FEDORA_MAJOR_VERSION}"
-ARG INPUT_AKMODS="localhost/${INPUT_AKMODS:-akmods}"
+ARG INPUT_AKMODS="${INPUT_AKMODS:-akmods}"
 ARG INPUT_TAG="${INPUT_TAG:-${KERNEL_FLAVOR}-${FEDORA_MAJOR_VERSION}}"
+ARG INPUT_BASE="${INPUT_AKMODS}:${INPUT_TAG}"
 FROM ${KERNEL_BASE} AS kernel_cache
-FROM ${INPUT_AKMODS}:${INPUT_TAG} AS akmod_cache
+FROM ${INPUT_BASE} AS akmods_cache
 FROM ${BUILDER_BASE} AS tester
 
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-40}"
@@ -22,17 +23,11 @@ ARG DUAL_SIGN="true"
 
 COPY test-prep.sh /tmp
 COPY check-signatures.sh /
+COPY certs /tmp/certs
 
 # cached kernel rpms
 COPY --from=kernel_cache /tmp/rpms /tmp/kernel_cache
 COPY --from=akmods_cache /rpms /tmp/akmods-rpms
-
-# files for akmods
-COPY ublue-os-akmods-addons.spec /tmp/ublue-os-akmods-addons/ublue-os-akmods-addons.spec
-ADD https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${FEDORA_MAJOR_VERSION}/ublue-os-akmods-fedora-${FEDORA_MAJOR_VERSION}.repo \
-    /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo
-ADD https://negativo17.org/repos/fedora-multimedia.repo \
-    /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo
 
 RUN --mount=type=cache,dst=/var/cache/dnf \
     if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \

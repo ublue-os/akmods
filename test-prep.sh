@@ -67,7 +67,8 @@ fi
 dnf install -y \
     "${RPMFUSION_MIRROR_RPMS}"/free/fedora/rpmfusion-free-release-"${RELEASE}".noarch.rpm \
     "${RPMFUSION_MIRROR_RPMS}"/nonfree/fedora/rpmfusion-nonfree-release-"${RELEASE}".noarch.rpm \
-    fedora-repos-archive
+    fedora-repos-archive \
+    openssl
 
 
 # after F41 launches, bump to 42
@@ -106,7 +107,7 @@ fi
 
 rm -f /tmp/certs/private_key_2.priv
 
-if [[ -f $(find /tmp/akmods-rpms/kmod-nvidia-*.rpm) ]]; then
+if [[ -f $(find /tmp/akmods-rpms/kmod-nvidia-*.rpm 2> /dev/null) ]]; then
     dnf install -y \
         /tmp/akmods-rpms/ublue-os/*.rpm \
     sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/eyecantcu-supergfxctl.repo
@@ -127,7 +128,7 @@ if [[ -f $(find /tmp/akmods-rpms/kmod-nvidia-*.rpm) ]]; then
         nvidia-settings \
         nvidia-container-toolkit \
         /tmp/akmods-rpms/kmods/kmod-nvidia-"${KERNEL_VERSION}"-"${NVIDIA_AKMOD_VERSION}".fc"${RELEASE}".rpm
-elif [[ -f $(find /tmp/akmods-rpms/kmods/zfs/kmod-*.rpm) ]]; then
+elif [[ -f $(find /tmp/akmods-rpms/kmods/zfs/kmod-*.rpm 2> /dev/null) ]]; then
     dnf install -y \
         pv \
         /tmp/akmods-rpms/ublue-os/*.rpm \
