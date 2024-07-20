@@ -34,22 +34,34 @@ else
     COPR_RELEASE="${RELEASE}"
 fi
 
-if [[ -f $(find /tmp/akmods-rpms/kmod-vhba-*.rpm) ]]; then
+curl -Lo /etc/yum.repos.d/_copr_ublue-os_staging.repo \
+    "https://copr.fedorainfracloud.org/coprs/ublue-os/staging/repo/fedora-${COPR_RELEASE}/ublue-os-staging-fedora-${COPR_RELEASE}.repo"
+
+curl -Lo /etc/yum.repos.d/_copr_kylegospo_oversteer.repo \
+    "https://copr.fedorainfracloud.org/coprs/kylegospo/oversteer/repo/fedora-${COPR_RELEASE}/kylegospo-oversteer-fedora-${COPR_RELEASE}.repo"
+
+curl -Lo /etc/yum.repos.d/_copr_ublue-os-akmods.repo \
+    "https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${COPR_RELEASE}/ublue-os-akmods-fedora-${COPR_RELEASE}.repo"
+
+curl -Lo /etc/yum.repos.d/negativo17-fedora-multimedia.repo \
+    "https://negativo17.org/repos/fedora-multimedia.repo"
+
+if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-vhba-*.rpm) ]]; then
 curl -LsSf -o /etc/yum.repos.d/_copr_rok-cdemu.repo \
     "https://copr.fedorainfracloud.org/coprs/rok/cdemu/repo/fedora-${COPR_RELEASE}/rok-cdemu-fedora-${COPR_RELEASE}.repo"
 fi
 
-if [[ -f $(find /tmp/akmods-rpms/kmod-facetimehd-*.rpm) ]]; then
+if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-facetimehd-*.rpm) ]]; then
 curl -LsSf -o /etc/yum.repos.d/_copr_mulderje-facetimehd-kmod.repo \
     "https://copr.fedorainfracloud.org/coprs/mulderje/facetimehd-kmod/repo/fedora-${COPR_RELEASE}/mulderje-facetimehd-kmod-fedora-${COPR_RELEASE}.repo"
 fi
 
-if [[ -f $(find /tmp/akmods-rpms/kmod-kvmfr-*.rpm) ]]; then
+if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-kvmfr-*.rpm) ]]; then
 curl -LsSf -o /etc/yum.repos.d/_copr_hikariknight-looking-glass-kvmfr.repo \
     "https://copr.fedorainfracloud.org/coprs/hikariknight/looking-glass-kvmfr/repo/fedora-${COPR_RELEASE}/hikariknight-looking-glass-kvmfr-fedora-${COPR_RELEASE}.repo"
 fi
 
-if [[ -f $(find /tmp/akmods-rpms/kmod-nvidia-*.rpm) ]]; then
+if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm) ]]; then
     curl -Lo /etc/yum.repos.d/negativo17-fedora-nvidia.repo \
         "https://negativo17.org/repos/fedora-nvidia.repo"
     curl -Lo /etc/yum.repos.d/nvidia-container-toolkit.repo \
@@ -107,7 +119,7 @@ fi
 
 rm -f /tmp/certs/private_key_2.priv
 
-if [[ -f $(find /tmp/akmods-rpms/kmod-nvidia-*.rpm 2> /dev/null) ]]; then
+if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm 2> /dev/null) ]]; then
     dnf install -y \
         /tmp/akmods-rpms/ublue-os/*.rpm \
     sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/eyecantcu-supergfxctl.repo
