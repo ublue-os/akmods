@@ -11,6 +11,11 @@ sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/fedora-cisco-openh264.repo
 # enable RPMs with alternatives to create them in this image build
 mkdir -p /var/lib/alternatives
 
+if [[ -f $(find /tmp/akmods-rpms/ublue-os/ublue-os-*.rpm 2> /dev/null) ]]; then
+    dnf install -y /tmp/akmods-rpms/ublue-os/ublue-os-*.rpm
+fi
+
+
 # install kernel_cache provided kernel
 echo "Installing ${KERNEL_FLAVOR} kernel-cache RPMs..."
 # fedora image has no kernel so this needs nothing fancy, just install
@@ -120,8 +125,6 @@ fi
 rm -f /tmp/certs/private_key_2.priv
 
 if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm 2> /dev/null) ]]; then
-    dnf install -y \
-        /tmp/akmods-rpms/ublue-os/*.rpm
     sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/eyecantcu-supergfxctl.repo
     sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/negativo17-fedora-nvidia.repo
     sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/nvidia-container-toolkit.repo
@@ -145,9 +148,6 @@ elif [[ -f $(find /tmp/akmods-rpms/kmods/zfs/kmod-*.rpm 2> /dev/null) ]]; then
         pv \
         /tmp/akmods-rpms/kmods/zfs/*.rpm
 else
-    if [[ -f $(find /tmp/akmods-rpms/ublue-os/*.rpm 2> /dev/null) ]]; then
-        dnf install -y /tmp/akmods-rpms/ublue-os/*.rpm
-    fi
     dnf install -y \
         /tmp/akmods-rpms/kmods/*.rpm
 fi
