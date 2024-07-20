@@ -93,4 +93,4 @@ fi
 chmod 1777 /tmp /var/tmp
 
 # create directories for later copying resulting artifacts
-mkdir -p /var/cache/rpms/{kmods,ublue-os}
+mkdir -p /var/cache/rpms/{kmods,ublue-os,ucore}

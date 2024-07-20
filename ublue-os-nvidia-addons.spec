@@ -4,18 +4,18 @@ Release:        1%{?dist}
 Summary:        Additional files for nvidia driver support
 
 License:        MIT
-URL:            https://github.com/ublue-os/nvidia
+URL:            https://github.com/ublue-os/akmods
 
 BuildArch:      noarch
 Supplements:    mokutil policycoreutils
 
 Source0:        nvidia-container-toolkit.repo
-Source1:        eyecantcu-supergfxctl.repo
-Source2:        nvidia-container.pp
-Source3:        environment
-Source4:        ublue-nvctk-cdi.service
-Source5:        70-ublue-nvctk-cdi.preset
-Source6:        negativo17-fedora-nvidia.repo
+Source1:        nvidia-container.pp
+Source2:        ublue-nvctk-cdi.service
+Source3:        70-ublue-nvctk-cdi.preset
+Source4:        environment
+Source5:        negativo17-fedora-nvidia.repo
+Source6:        eyecantcu-supergfxctl.repo
 
 %description
 Adds various runtime files for nvidia support.
@@ -25,21 +25,21 @@ Adds various runtime files for nvidia support.
 
 
 %build
-install -Dm0644 %{SOURCE6} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo
 install -Dm0644 %{SOURCE0} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
-install -Dm0644 %{SOURCE1} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/eyecantcu-supergfxctl.repo
-install -Dm0644 %{SOURCE2} %{buildroot}%{_datadir}/ublue-os/%{_datadir}/selinux/packages/nvidia-container.pp
-install -Dm0644 %{SOURCE3} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/sway/environment
-install -Dm0644 %{SOURCE4} %{buildroot}%{_datadir}/ublue-os/%{_unitdir}/ublue-nvctk-cdi.service
-install -Dm0644 %{SOURCE5} %{buildroot}%{_presetdir}/70-ublue-nvctk-cdi.preset
+install -Dm0644 %{SOURCE1} %{buildroot}%{_datadir}/ublue-os/%{_datadir}/selinux/packages/nvidia-container.pp
+install -Dm0644 %{SOURCE2} %{buildroot}%{_datadir}/ublue-os/%{_unitdir}/ublue-nvctk-cdi.service
+install -Dm0644 %{SOURCE3} %{buildroot}%{_presetdir}/70-ublue-nvctk-cdi.preset
+install -Dm0644 %{SOURCE4} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/sway/environment
+install -Dm0644 %{SOURCE5} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo
+install -Dm0644 %{SOURCE6} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/eyecantcu-supergfxctl.repo
 
+sed -i 's@enabled=1@enabled=0@g' %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/eyecantcu-supergfxctl.repo
 sed -i 's@enabled=1@enabled=0@g' %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo
 sed -i 's@enabled=1@enabled=0@g' %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
-sed -i 's@enabled=1@enabled=0@g' %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/eyecantcu-supergfxctl.repo
 
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo     %{buildroot}%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo
-install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo     %{buildroot}%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/eyecantcu-supergfxctl.repo        %{buildroot}%{_sysconfdir}/yum.repos.d/eyecantcu-supergfxctl.repo
+install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo     %{buildroot}%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_datadir}/selinux/packages/nvidia-container.pp             %{buildroot}%{_datadir}/selinux/packages/nvidia-container.pp
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_unitdir}/ublue-nvctk-cdi.service                          %{buildroot}%{_unitdir}/ublue-nvctk-cdi.service
 
