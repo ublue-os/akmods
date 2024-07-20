@@ -142,9 +142,10 @@ jobs:
               for TAG in "${COMMIT_TAGS[@]}"; do
                   echo "${TAG}"
               done
-
+              default_tag=${COMMIT_TAGS[0]}
               alias_tags=("${COMMIT_TAGS[@]}")
           else
+              default_tag=${BUILD_TAGS[0]}
               alias_tags=("${BUILD_TAGS[@]}")
           fi
 
@@ -154,6 +155,7 @@ jobs:
           done
 
           echo "alias_tags=${alias_tags[*]}" >> $GITHUB_OUTPUT
+          echo "default_tag=$default_tag" >> $GITHUB_ENV
 
       # Build metadata
       - name: Image Metadata
@@ -205,6 +207,32 @@ jobs:
             DUAL_SIGN=true
           labels: ${{ steps.meta.outputs.labels }}
           oci: false
+
+      - name: Build Test Image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          containerfiles: |
+            ./Containerfile.test
+          image: akmods-test
+          tags: latest
+          build-args: |
+            BUILDER_IMAGE=${{ env.BUILDER_IMAGE }}
+            KERNEL_ORG=${{ github.repository_owner }}
+            KERNEL_FLAVOR=${{ matrix.kernel_flavor }}
+            FEDORA_MAJOR_VERSION=${{ matrix.fedora_version }}
+            INPUT_AKMODS=${{ env.IMAGE_NAME }}
+            INPUT_TAG=${{ env.default_tag }}
+            DUAL_SIGN=true
+          oci: false
+
+      - name: Test Akmods Signature
+        id: test_akmods
+        shell: bash
+        run: |
+          if ! podman run akmods-test:latest; then
+              echo "Signatures Failed"
+              exit 1
+          fi
 
       # Workaround bug where capital letters in your GitHub username make it impossible to push to GHCR.
       # https://github.com/macbre/push-to-ghcr/issues/12
