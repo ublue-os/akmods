@@ -21,7 +21,7 @@ ARG KERNEL_FLAVOR="${KERNEL_FLAVOR:-main}"
 ARG RPMFUSION_MIRROR=""
 ARG DUAL_SIGN="true"
 
-COPY test-prep.sh /tmp
+COPY test-prep.sh dual-sign-check.sh /tmp/
 COPY check-signatures.sh /
 COPY certs /tmp/certs
 
