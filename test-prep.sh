@@ -121,7 +121,7 @@ rm -f /tmp/certs/private_key_2.priv
 
 if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm 2> /dev/null) ]]; then
     dnf install -y \
-        /tmp/akmods-rpms/ublue-os/*.rpm \
+        /tmp/akmods-rpms/ublue-os/*.rpm
     sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/eyecantcu-supergfxctl.repo
     sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/negativo17-fedora-nvidia.repo
     sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/nvidia-container-toolkit.repo
@@ -143,11 +143,12 @@ if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm 2> /dev/null) ]]; then
 elif [[ -f $(find /tmp/akmods-rpms/kmods/zfs/kmod-*.rpm 2> /dev/null) ]]; then
     dnf install -y \
         pv \
-        /tmp/akmods-rpms/ublue-os/*.rpm \
         /tmp/akmods-rpms/kmods/zfs/*.rpm
 else
+    if [[ -f $(find /tmp/akmods-rpms/ublue-os/*.rpm 2> /dev/null) ]]; then
+        dnf install -y /tmp/akmods-rpms/ublue-os/*.rpm
+    fi
     dnf install -y \
-        /tmp/akmods-rpms/ublue-os/*.rpm \
         /tmp/akmods-rpms/kmods/*.rpm
 fi
 
