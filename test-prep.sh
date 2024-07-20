@@ -92,6 +92,7 @@ fi
 
 openssl x509 -in /tmp/certs/public_key.der -out /tmp/certs/public_key.crt
 cat /tmp/certs/public_key.crt > /tmp/certs/public_key_chain.pem
+rm -f /tmp/certs/private_key.priv
 
 if [[ "${DUAL_SIGN}" == "true" ]]; then
     if [[ ! -s "/tmp/certs/private_key_2.priv" ]]; then
@@ -102,6 +103,8 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
     rm -f /tmp/certs/public_key_chain.pem
     cat /tmp/certs/public_key.crt <(echo) /tmp/certs/public_key_2.crt >> /tmp/certs/public_key_chain.pem
 fi
+
+rm -f /tmp/certs/private_key_2.priv
 
 if [[ -f $(find /tmp/akmods-rpms/kmod-nvidia-*.rpm) ]]; then
     dnf install -y \
