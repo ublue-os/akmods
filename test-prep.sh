@@ -150,3 +150,5 @@ else
         /tmp/akmods-rpms/ublue-os/*.rpm \
         /tmp/akmods-rpms/kmods/*.rpm
 fi
+
+printf "KERNEL_NAME=%s" "$KERNEL_NAME" >> /tmp/info.sh

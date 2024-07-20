@@ -1,5 +1,7 @@
 #!/usr/bin/bash
 
+source /tmp/info.sh
+
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 PUBLIC_CHAIN="/tmp/certs/public_key_chain.pem"
 
