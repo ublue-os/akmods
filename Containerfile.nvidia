@@ -25,14 +25,24 @@ COPY --from=kernel_cache /tmp/rpms /tmp/kernel_cache
 
 # files for nvidia
 COPY ublue-os-nvidia-addons.spec /tmp/ublue-os-nvidia-addons/ublue-os-nvidia-addons.spec
+COPY ublue-os-ucore-nvidia.spec /tmp/ublue-os-ucore-nvidia/ublue-os-ucore-nvidia.spec
 COPY files/etc/sway/environment /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/environment
 COPY files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/ublue-nvctk-cdi.service
+COPY files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/ublue-os-ucore-nvidia/rpmbuild/SOURCES/ublue-nvctk-cdi.service
 COPY files/usr/lib/systemd/system-preset/70-ublue-nvctk-cdi.preset /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/70-ublue-nvctk-cdi.preset
+COPY files/usr/lib/systemd/system-preset/70-ublue-nvctk-cdi.preset /tmp/ublue-os-ucore-nvidia/rpmbuild/SOURCES/70-ublue-nvctk-cdi.preset
 
 
 RUN --mount=type=cache,dst=/var/cache/dnf \
     /tmp/build-prep.sh && \
+    if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]]; then \
+      /tmp/build-ublue-os-ucore-nvidia.sh && \
+      cp /tmp/ublue-os-ucore-nvidia/rpmbuild/RPMS/noarch/ublue-os-ucore-nvidia*.rpm \
+        /var/cache/rpms/ucore/ \
+    ; fi && \
     /tmp/build-ublue-os-nvidia-addons.sh && \
+    cp /tmp/ublue-os-nvidia-addons/rpmbuild/RPMS/noarch/ublue-os-nvidia-addons*.rpm \
+      /var/cache/rpms/ublue-os/ && \
     if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
        export KERNEL_NAME="kernel" \
     ; else \
@@ -40,8 +50,6 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     ; fi && \
     /tmp/build-kmod-nvidia.sh 550 && \
     /tmp/dual-sign.sh && \
-    cp /tmp/ublue-os-nvidia-addons/rpmbuild/RPMS/noarch/ublue-os-nvidia-addons*.rpm \
-      /var/cache/rpms/ublue-os/ && \
     for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
         cp "${RPM}" /var/cache/rpms/kmods/; \
     done && \
