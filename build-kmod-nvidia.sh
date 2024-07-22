@@ -3,6 +3,7 @@
 set -oeux pipefail
 
 RELEASE="$(rpm -E '%fedora.%_arch')"
+KERNEL_MODULE_TYPE="$1"
 
 cd /tmp
 
@@ -33,7 +34,7 @@ mkdir -p /var/cache/rpms/kmods/nvidia
 
 cat <<EOF > /var/cache/rpms/kmods/nvidia-vars
 KERNEL_VERSION=${KERNEL_VERSION}
+KERNEL_MODULE_TYPE=${KERNEL_MODULE_TYPE}
 RELEASE=${RELEASE}
 NVIDIA_AKMOD_VERSION=${NVIDIA_AKMOD_VERSION}
 EOF
-

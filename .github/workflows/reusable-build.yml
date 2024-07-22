@@ -38,6 +38,7 @@ jobs:
           - common
           - extra
           - nvidia
+          - nvidia-open
           - zfs
         exclude:
           - fedora_version: 39
