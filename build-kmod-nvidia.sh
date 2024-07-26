@@ -15,6 +15,9 @@ cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-fedora-nvidia.repo /e
 dnf install -y \
     akmod-nvidia*.fc${RELEASE}
 
+# Switch to the open source kernel module
+sed -i -e 's/kernel$/kernel-open/g' /etc/nvidia/kernel.conf
+
 # Either successfully build and install the kernel modules, or fail early with debug output
 rpm -qa |grep nvidia
 KERNEL_VERSION="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
