@@ -3,6 +3,7 @@
 set -oeux pipefail
 
 RELEASE="$(rpm -E '%fedora.%_arch')"
+NVIDIA_DRIVER_TYPE="${1:-kernel}"
 
 cd /tmp
 
@@ -15,8 +16,8 @@ cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-fedora-nvidia.repo /e
 dnf install -y \
     akmod-nvidia*.fc${RELEASE}
 
-# Switch to the open source kernel module
-sed -i -e 's/kernel$/kernel-open/g' /etc/nvidia/kernel.conf
+# Switch to the desired driver flavor
+sed -i "s/^MODULE_VARIANT=.*/MODULE_VARIANT=$NVIDIA_DRIVER_TYPE/" /etc/nvidia/kernel.conf
 
 # Either successfully build and install the kernel modules, or fail early with debug output
 rpm -qa |grep nvidia
