@@ -22,7 +22,9 @@ KERNEL_VERSION="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%
 NVIDIA_AKMOD_VERSION="$(basename "$(rpm -q "akmod-nvidia" --queryformat '%{VERSION}-%{RELEASE}')" ".fc${RELEASE%%.*}")"
 
 if [[ "${KERNEL_MODULE_TYPE}" == "open" ]]; then
-    sed -i -e 's/kernel$/kernel-open/g' /etc/nvidia/kernel.conf
+    sed -i "s/^MODULE_VARIANT=.*/MODULE_VARIANT=kernel-open/" /etc/nvidia/kernel.conf
+else
+    sed -i "s/^MODULE_VARIANT=.*/MODULE_VARIANT=kernel/" /etc/nvidia/kernel.conf
 fi
 
 akmods --force --kernels "${KERNEL_VERSION}" --kmod "nvidia"
