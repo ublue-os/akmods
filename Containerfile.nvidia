@@ -34,7 +34,7 @@ COPY files/usr/lib/systemd/system-preset/70-ublue-nvctk-cdi.preset /tmp/ublue-os
 
 ARG NVIDIA_FLAVOR
 RUN --mount=type=cache,dst=/var/cache/dnf \
-    /tmp/build-prep.sh && \
+    env &&/tmp/build-prep.sh && \
     if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]]; then \
       /tmp/build-ublue-os-ucore-nvidia.sh && \
       cp /tmp/ublue-os-ucore-nvidia/rpmbuild/RPMS/noarch/ublue-os-ucore-nvidia*.rpm \
@@ -48,7 +48,6 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     ; else \
        export KERNEL_NAME="kernel-surface" \
     ; fi && \
-    env && \ 
     DRIVER_TYPE=$([ "$NVIDIA_FLAVOR" = "nvidia-legacy" ] && echo "kernel" || echo "kernel-open") && \
     /tmp/build-kmod-nvidia.sh "$DRIVER_TYPE" && \
     /tmp/dual-sign.sh && \
