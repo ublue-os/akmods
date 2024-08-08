@@ -49,6 +49,7 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     ; else \
        export KERNEL_NAME="kernel-surface" \
     ; fi && \
+    env && \ 
     DRIVER_TYPE=$([ "$NVIDIA_FLAVOR" = "nvidia-legacy" ] && echo "kernel" || echo "kernel-open") && \
     /tmp/build-kmod-nvidia.sh "$DRIVER_TYPE" && \
     /tmp/dual-sign.sh && \
