@@ -7,6 +7,7 @@ ARG KERNEL_FLAVOR="${KERNEL_FLAVOR:-main}"
 ARG KERNEL_IMAGE="${KERNEL_IMAGE:-${KERNEL_FLAVOR}-kernel}"
 ARG KERNEL_ORG="${KERNEL_ORG:-ublue-os}"
 ARG KERNEL_BASE="ghcr.io/${KERNEL_ORG}/${KERNEL_IMAGE}:${FEDORA_MAJOR_VERSION}"
+ARG NVIDIA_FLAVOR="${NVIDIA_FLAVOR}"
 ARG BUILDER_IMAGE="${BUILDER_IMAGE:-quay.io/fedora/fedora}"
 ARG BUILDER_BASE="${BUILDER_IMAGE}:${FEDORA_MAJOR_VERSION}"
 FROM ${KERNEL_BASE} AS kernel_cache
@@ -48,7 +49,7 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     ; else \
        export KERNEL_NAME="kernel-surface" \
     ; fi && \
-    /tmp/build-kmod-nvidia.sh kernel && \
+    /tmp/build-kmod-nvidia.sh "${NVIDIA_FLAVOR}" && \
     /tmp/dual-sign.sh && \
     for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
         cp "${RPM}" /var/cache/rpms/kmods/; \

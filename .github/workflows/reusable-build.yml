@@ -38,8 +38,8 @@ jobs:
         cfile_suffix:
           - common
           - extra
-          - nvidia
           - nvidia-open
+          - nvidia-legacy
           - zfs
         exclude:
           - fedora_version: 39
@@ -73,6 +73,16 @@ jobs:
               echo "IMAGE_NAME=${{ env.IMAGE_BASE_NAME }}" >> $GITHUB_ENV
           else
               echo "IMAGE_NAME=${{ env.IMAGE_BASE_NAME }}-${{ matrix.cfile_suffix }}" >> $GITHUB_ENV
+          fi
+          if [ "nvidia-legacy" == "${{ matrix.cfile_suffix }}" ]; then
+              echo "NVIDIA_FLAVOR=nvidia" >> $GITHUB_ENV
+              echo "CFILE_SUFFIX=nvidia" >> $GITHUB_ENV
+          elif [ "nvidia-open" == "${{ matrix.cfile_suffix }}" ]; then
+              echo "NVIDIA_FLAVOR=nvidia-open" >> $GITHUB_ENV
+              echo "CFILE_SUFFIX=nvidia" >> $GITHUB_ENV
+          else
+              echo "NVIDIA_FLAVOR=none" >> $GITHUB_ENV
+              echo "CFILE_SUFFIX=${{ matrix.cfile_suffix }}" >> $GITHUB_ENV
           fi
           export BUILDER_IMAGE=quay.io/fedora/fedora
           echo "BUILDER_IMAGE=${BUILDER_IMAGE}" >> $GITHUB_ENV
@@ -200,7 +210,7 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           containerfiles: |
-            ./Containerfile.${{ matrix.cfile_suffix }}
+            ./Containerfile.${{ env.CFILE_SUFFIX }}
           image: ${{ env.IMAGE_NAME }}
           tags: |
             ${{ steps.generate-tags.outputs.alias_tags }}
@@ -210,6 +220,7 @@ jobs:
             KERNEL_FLAVOR=${{ matrix.kernel_flavor }}
             FEDORA_MAJOR_VERSION=${{ matrix.fedora_version }}
             RPMFUSION_MIRROR=${{ vars.RPMFUSION_MIRROR }}
+            NVIDIA_FLAVOR=${{ env.NVIDIA_FLAVOR }}
             DUAL_SIGN=true
           labels: ${{ steps.meta.outputs.labels }}
           oci: false
