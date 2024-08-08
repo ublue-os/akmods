@@ -49,11 +49,8 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     ; else \
        export KERNEL_NAME="kernel-surface" \
     ; fi && \
-    if [[ "${NVIDIA_FLAVOR}" == "nvidia" ]]; then \
-       /tmp/build-kmod-nvidia.sh kernel \
-    ; elif [[ "${NVIDIA_FLAVOR}" == "nvidia-open" ]]; then \
-       /tmp/build-kmod-nvidia.sh kernel-open \
-    ; fi && \
+    DRIVER_TYPE=$([ "$NVIDIA_FLAVOR" = "nvidia-legacy" ] && echo "kernel" || echo "kernel-open") && \
+    /tmp/build-kmod-nvidia.sh "$DRIVER_TYPE" && \
     /tmp/dual-sign.sh && \
     for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
         cp "${RPM}" /var/cache/rpms/kmods/; \
