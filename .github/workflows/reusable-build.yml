@@ -39,7 +39,7 @@ jobs:
           - common
           - extra
           - nvidia-open
-          - nvidia-legacy
+          - nvidia # legacy proprietary driver
           - zfs
         exclude:
           - fedora_version: 39
@@ -74,8 +74,8 @@ jobs:
           else
               echo "IMAGE_NAME=${{ env.IMAGE_BASE_NAME }}-${{ matrix.cfile_suffix }}" >> $GITHUB_ENV
           fi
-          if [ "nvidia-legacy" == "${{ matrix.cfile_suffix }}" ]; then
-              echo "NVIDIA_FLAVOR=nvidia-legacy" >> $GITHUB_ENV
+          if [ "nvidia" == "${{ matrix.cfile_suffix }}" ]; then
+              echo "NVIDIA_FLAVOR=nvidia" >> $GITHUB_ENV
               echo "CFILE_SUFFIX=nvidia" >> $GITHUB_ENV
           elif [ "nvidia-open" == "${{ matrix.cfile_suffix }}" ]; then
               echo "NVIDIA_FLAVOR=nvidia-open" >> $GITHUB_ENV
