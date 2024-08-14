@@ -46,9 +46,6 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     ; else \
         export KERNEL_NAME="kernel-surface" \
     ; fi && \
-    if grep -qv "asus" <<< "${KERNEL_FLAVOR}"; then \
-        /tmp/build-kmod-evdi.sh \
-    ; fi && \
     /tmp/build-kmod-framework-laptop.sh && \
     /tmp/build-kmod-kvmfr.sh && \
     /tmp/build-kmod-openrazer.sh && \
