@@ -38,7 +38,8 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
         export KERNEL_NAME="kernel-surface" \
     ; fi && \
     if grep -qv "asus" <<< "${KERNEL_FLAVOR}"; then \
-        /tmp/build-kmod-zenergy.sh \
+        /tmp/build-kmod-zenergy.sh && \
+        /tmp/build-kmod-evdi.sh \
     ; fi && \
     if grep -qv "fsync" <<< "${KERNEL_FLAVOR}"; then \
         /tmp/build-kmod-openrgb.sh \
