@@ -136,7 +136,7 @@ jobs:
           COMMIT_TAGS+=("pr-${{ github.event.number }}-${VARIANT}")
           COMMIT_TAGS+=("${SHA_SHORT}-${VARIANT}")
 
-          BUILD_TAGS=("${VARIANT}" "${VARIANT}-${TIMESTAMP}")
+          BUILD_TAGS=("${VARIANT}" "${VARIANT}-${TIMESTAMP}" "${VARIANT}-${KERNEL_VERSION}")
 
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
               echo "Generated the following commit tags: "
@@ -272,7 +272,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Sign container
-      - uses: sigstore/cosign-installer@v3.5.0
+      - uses: sigstore/cosign-installer@v3.6.0
         if: github.event_name != 'pull_request'
 
       - name: Sign container image
