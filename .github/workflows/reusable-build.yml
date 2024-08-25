@@ -30,6 +30,7 @@ jobs:
         kernel_flavor:
           - main
           - asus
+          - fsync
           - fsync-ba
           - surface
           - coreos-stable
