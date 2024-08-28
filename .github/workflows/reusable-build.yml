@@ -108,7 +108,7 @@ jobs:
 
       - name: Get current version
         shell: bash
-        if: matrix.kernel_flavor != "fsync-gated"
+        if: matrix.kernel_flavor != 'fsync-gated'
         run: |
           set -eo pipefail
 
@@ -135,7 +135,7 @@ jobs:
 
       - name: Get current version (fsync-gated)
         shell: bash
-        if: matrix.kernel_flavor == "fsync-gated"
+        if: matrix.kernel_flavor == 'fsync-gated'
         run: |
           set -eo pipefail
 
