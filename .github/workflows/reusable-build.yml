@@ -32,7 +32,7 @@ jobs:
           - asus
           - fsync
           - fsync-ba
-          - fsync-gated
+          - fsync-coreos
           - surface
           - coreos-stable
           - coreos-testing
@@ -48,7 +48,7 @@ jobs:
           - fedora_version: 39
             kernel_flavor: fsync-ba
           - fedora_version: 39
-            kernel_flavor: fsync-gated
+            kernel_flavor: fsync-coreos
           - fedora_version: 39
             kernel_flavor: asus
           - fedora_version: 39
@@ -80,7 +80,7 @@ jobs:
           export BUILDER_IMAGE=quay.io/fedora/fedora
           echo "BUILDER_IMAGE=${BUILDER_IMAGE}" >> $GITHUB_ENV
           echo "FQ_BUILDER_IMAGE=${BUILDER_IMAGE}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
-          if [[ "${{matrix.kernel_flavor}}" == "fsync-gated" ]]; then
+          if [[ "${{matrix.kernel_flavor}}" == "fsync-coreos" ]]; then
             export KERNEL_IMAGE=fsync-kernel
           else
             export KERNEL_IMAGE=${{ matrix.kernel_flavor }}-kernel
@@ -108,7 +108,7 @@ jobs:
 
       - name: Get current version
         shell: bash
-        if: matrix.kernel_flavor != 'fsync-gated'
+        if: matrix.kernel_flavor != 'fsync-coreos'
         run: |
           set -eo pipefail
 
@@ -133,9 +133,9 @@ jobs:
           fi
           echo "KERNEL_IMAGE_VERSION=$img_version" >> $GITHUB_ENV
 
-      - name: Get current version (fsync-gated)
+      - name: Get current version (fsync-coreos)
         shell: bash
-        if: matrix.kernel_flavor == 'fsync-gated'
+        if: matrix.kernel_flavor == 'fsync-coreos'
         run: |
           set -eo pipefail
 
