@@ -80,10 +80,10 @@ jobs:
           export BUILDER_IMAGE=quay.io/fedora/fedora
           echo "BUILDER_IMAGE=${BUILDER_IMAGE}" >> $GITHUB_ENV
           echo "FQ_BUILDER_IMAGE=${BUILDER_IMAGE}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
-          if [[ "${{matrix.kernel_flavor}}" != "fsync-gated" ]]; then
-            export KERNEL_IMAGE=${{ matrix.kernel_flavor }}-kernel
-          else
+          if [[ "${{matrix.kernel_flavor}}" == "fsync-gated" ]]; then
             export KERNEL_IMAGE=fsync-kernel
+          else
+            export KERNEL_IMAGE=${{ matrix.kernel_flavor }}-kernel
           fi
           echo "KERNEL_IMAGE=${KERNEL_IMAGE}" >> $GITHUB_ENV
           echo "FQ_KERNEL_IMAGE=${{ env.IMAGE_REGISTRY }}/${KERNEL_IMAGE}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
