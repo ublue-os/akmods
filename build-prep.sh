@@ -2,7 +2,6 @@
 
 set -oeux pipefail
 
-
 ### PREPARE REPOS
 # ARCH="$(rpm -E '%_arch')"
 RELEASE="$(rpm -E '%fedora')"
@@ -17,9 +16,9 @@ echo "Installing ${KERNEL_FLAVOR} kernel-cache RPMs..."
 # fedora image has no kernel so this needs nothing fancy, just install
 dnf install -y /tmp/kernel_cache/*.rpm
 if [[ "${KERNEL_FLAVOR}" == "surface" ]]; then
-    KERNEL_VERSION=$(rpm -q kernel-surface|cut -d '-' -f2-)
+    KERNEL_VERSION=$(rpm -q kernel-surface | cut -d '-' -f2-)
 else
-    KERNEL_VERSION=$(rpm -q kernel|cut -d '-' -f2-)
+    KERNEL_VERSION=$(rpm -q kernel | cut -d '-' -f2-)
 fi
 
 # enable more repos
@@ -58,7 +57,7 @@ if [[ ! -s "/tmp/certs/private_key.priv" ]]; then
     cp /tmp/certs/public_key.der{.test,}
 fi
 
-install -Dm644 /tmp/certs/public_key.der   /etc/pki/akmods/certs/public_key.der
+install -Dm644 /tmp/certs/public_key.der /etc/pki/akmods/certs/public_key.der
 install -Dm644 /tmp/certs/private_key.priv /etc/pki/akmods/private/private_key.priv
 
 if [[ "${DUAL_SIGN}" == "true" ]]; then
@@ -70,9 +69,9 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
     fi
     openssl x509 -in /tmp/certs/public_key_2.der -out /tmp/certs/public_key_2.crt
     openssl x509 -in /tmp/certs/public_key.der -out /tmp/certs/public_key.crt
-    cat /tmp/certs/private_key.priv <(echo) /tmp/certs/public_key.crt >> /tmp/certs/signing_key_1.pem
-    cat /tmp/certs/private_key_2.priv <(echo) /tmp/certs/public_key_2.crt >> /tmp/certs/signing_key_2.pem
-    cat /tmp/certs/public_key.crt <(echo) /tmp/certs/public_key_2.crt >> /tmp/certs/public_key_chain.pem
+    cat /tmp/certs/private_key.priv <(echo) /tmp/certs/public_key.crt >>/tmp/certs/signing_key_1.pem
+    cat /tmp/certs/private_key_2.priv <(echo) /tmp/certs/public_key_2.crt >>/tmp/certs/signing_key_2.pem
+    cat /tmp/certs/public_key.crt <(echo) /tmp/certs/public_key_2.crt >>/tmp/certs/public_key_chain.pem
 fi
 
 # This is for ZFS more than CoreOS
