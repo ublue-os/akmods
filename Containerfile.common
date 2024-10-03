@@ -52,7 +52,9 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     /tmp/build-kmod-v4l2loopback.sh && \
     /tmp/build-kmod-wl.sh && \
     /tmp/build-kmod-xpadneo.sh && \
-    /tmp/build-kmod-xone.sh && \
+    if grep -qv "asus" <<< "${KERNEL_FLAVOR}"; then \
+        /tmp/build-kmod-xone.sh \
+    ; fi && \
     /tmp/dual-sign.sh && \
     for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
         cp "${RPM}" /var/cache/rpms/kmods/; \
