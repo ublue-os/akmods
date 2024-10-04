@@ -12,7 +12,8 @@ The akmods package is broken out into three akmod "streams":
 
 - `common` - any kmod installed by default in Bluefin or which was originally in main pre-39
 - `extra` - primarily for kmods used in Bazzite or any others we need, but don't fit in `common`
-- `nvidia` - only for the nvidia kmod
+- `nvidia` - only for the nvidia kmod and addons
+- `zfs` - only for the zfs kmod and utilities
 
 Feel free to PR more kmod build scripts into this repo!
 
@@ -20,10 +21,17 @@ Feel free to PR more kmod build scripts into this repo!
 
 ### Overview
 
+The `common` stream image contains related kmod packages, plus:
+
 - ublue-os-akmods-addons - installs extra repos and our kmods signing key; install and import to allow SecureBoot systems to use these kmods
+- `ublue-os-ucore-addons` - a slightly lighter `ublue-os-akmods-addons` for CoreOS/uCore systems
+
+The `nvidia` stream image contains
+
 - ublue-os-nvidia-addons - installs extra repos enabling our nvidia support
   - [nvidia container selinux policy](https://github.com/NVIDIA/dgx-selinux/tree/master/src/nvidia-container-selinux) - uses RHEL9 policy as the closest match
   - [nvidia-container-tookkit repo](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#installing-with-yum-or-dnf) - version 1.14 (and newer) provide CDI for podman use of nvidia gpus
+- `ublue-os-ucore-nvidia` - a slightly lighter `ublue-os-nvidia-addons` for CoreOS/uCore systems
 
 ### Kmod Packages
 
@@ -37,7 +45,7 @@ Feel free to PR more kmod build scripts into this repo!
 | [gcadapter_oc](https://github.com/hannesmann/gcadapter-oc-kmod) | extra | kernel module for overclocking the Nintendo Wii U/Mayflash GameCube adapter | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/gcadapter_oc-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/gcadapter_oc-kmod) |
 | [kvmfr](https://github.com/gnif/looking-glass) | common | KVM framebuffer relay kernel module for use with Looking Glass | [![badge](https://copr.fedorainfracloud.org/coprs/hikariknight/looking-glass-kvmfr/package/kvmfr-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/hikariknight/looking-glass-kvmfr/package/kvmfr-kmod) |
 | [nct6687d](https://github.com/Fred78290/nct6687d) | extra | Linux kernel module for Nuvoton NCT6687-R found on AMD B550 chipset motherboards | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/nct6687d-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/nct6687d-kmod) |
-| [nvidia](https://rpmfusion.org/Howto/NVIDIA) | nvidia | nvidia GPU drivers built from rpmfusion | [RPMFusion - nonfree](https://rpmfusion.org/) |
+| [nvidia](https://negativo17.org/nvidia-driver/) | nvidia | nvidia GPU drivers | [negativo17 - fedora-nvidia](https://negativo17.org/) |
 | [openrazer](https://openrazer.github.io/) | common | kernel module adding additional features to Razer hardware | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/openrazer-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/openrazer-kmod) |
 | [openrgb](https://gitlab.com/CalcProgrammer1/OpenRGB/-/raw/master/OpenRGB.patch) | extra | kernel module with i2c-nct6775 and patched i2c-piix4 for use with OpenRGB | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/openrgb-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/openrgb-kmod) |
 | [rtl8814au](https://github.com/morrownr/8814au) | extra | Realtek RTL8814AU Driver | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/rtl8814au-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/rtl8814au-kmod) |
@@ -48,7 +56,7 @@ Feel free to PR more kmod build scripts into this repo!
 | [xpadneo](https://github.com/atar-axis/xpadneo) | common | xbox one controller bluetooth driver | [negativo17 - fedora-multimedia](https://negativo17.org/) |
 | [xone](https://github.com/BoukeHaarsma23/xonedo/) | common | xbox one controller USB wired/RF driver modified to work along-side xpad | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/xone-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/xone-kmod) |
 | [zenergy](https://github.com/BoukeHaarsma23/zenergy) | extra | Based on AMD_ENERGY driver, but with some jiffies added so non-root users can read it safely | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/zenergy-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/zenergy-kmod) |
-| [zfs](https://github.com/openzfs/zfs) | common | OpenZFS advanced file system and volume manager (From Ucore, CoreOS Only) |
+| [zfs](https://github.com/openzfs/zfs) | zfs | OpenZFS advanced file system and volume manager (From Ucore, CoreOS Only) |
 
 ## Notes
 
