@@ -23,12 +23,12 @@ Feel free to PR more kmod build scripts into this repo!
 
 The `common` stream image contains related kmod packages, plus:
 
-- ublue-os-akmods-addons - installs extra repos and our kmods signing key; install and import to allow SecureBoot systems to use these kmods
+- `ublue-os-akmods-addons - installs extra repos and our kmods signing key; install and import to allow SecureBoot systems to use these kmods
 - `ublue-os-ucore-addons` - a slightly lighter `ublue-os-akmods-addons` for CoreOS/uCore systems
 
 The `nvidia` stream image contains
 
-- ublue-os-nvidia-addons - installs extra repos enabling our nvidia support
+- `ublue-os-nvidia-addons` - installs extra repos enabling our nvidia support
   - [nvidia container selinux policy](https://github.com/NVIDIA/dgx-selinux/tree/master/src/nvidia-container-selinux) - uses RHEL9 policy as the closest match
   - [nvidia-container-tookkit repo](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#installing-with-yum-or-dnf) - version 1.14 (and newer) provide CDI for podman use of nvidia gpus
 - `ublue-os-ucore-nvidia` - a slightly lighter `ublue-os-nvidia-addons` for CoreOS/uCore systems
