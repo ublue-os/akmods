@@ -23,7 +23,7 @@ Feel free to PR more kmod build scripts into this repo!
 
 The `common` stream image contains related kmod packages, plus:
 
-- `ublue-os-akmods-addons - installs extra repos and our kmods signing key; install and import to allow SecureBoot systems to use these kmods
+- `ublue-os-akmods-addons` - installs extra repos and our kmods signing key; install and import to allow SecureBoot systems to use these kmods
 - `ublue-os-ucore-addons` - a slightly lighter `ublue-os-akmods-addons` for CoreOS/uCore systems
 
 The `nvidia` stream image contains
