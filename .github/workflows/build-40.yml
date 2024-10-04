@@ -1,6 +1,5 @@
 name: ublue akmods 40
 on:
-  pull_request:
   merge_group:
   pull_request:
     branches:
