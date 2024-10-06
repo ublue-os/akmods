@@ -8,6 +8,7 @@ SIGNING_KEY_2="/tmp/certs/signing_key_2.pem"
 PUBLIC_CHAIN="/tmp/certs/public_key_chain.pem"
 
 if [[ "${DUAL_SIGN}" == "true" ]]; then
+    ln -s / /tmp/buildroot
     dnf install -y /var/cache/rpms/kmods/zfs/*.rpm pv
     modinfo /usr/lib/modules/"${KERNEL}"/extra/zfs/spl.ko
     for module in /usr/lib/modules/"${KERNEL}"/extra/zfs/*.ko*;
@@ -32,7 +33,7 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
                 /tmp/dual-sign-check.sh "${KERNEL}" "${module}" "${PUBLIC_CHAIN}"
         fi
     done
-    rpmrebuild --batch /var/cache/rpms/kmods/zfs/kmod-zfs-*.rpm
+    rpmrebuild --additional=--buildroot=/tmp/buildroot --batch /var/cache/rpms/kmods/zfs/kmod-zfs-*.rpm
     rm -rf /usr/lib/modules/"${KERNEL}"/extra
     dnf reinstall -y /root/rpmbuild/RPMS/"$(uname -m)"/kmod-*-"${KERNEL}"-*.rpm
     for module in /usr/lib/modules/"${KERNEL}"/extra/*/*.ko*; do

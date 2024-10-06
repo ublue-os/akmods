@@ -8,6 +8,7 @@ SIGNING_KEY_2="/tmp/certs/signing_key_2.pem"
 PUBLIC_CHAIN="/tmp/certs/public_key_chain.pem"
 
 if [[ "${DUAL_SIGN}" == "true" ]]; then
+    ln -s / /tmp/buildroot
     for module in /usr/lib/modules/"${KERNEL}"/extra/*/*.ko*;
     do
         module_basename=${module:0:-3}
@@ -32,7 +33,7 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
     done
     find /var/cache/akmods -type f -name \kmod-*.rpm
     for RPM in $(find /var/cache/akmods/ -type f -name \kmod-*.rpm); do \
-        rpmrebuild --batch "$RPM"
+        rpmrebuild --additional=--buildroot=/tmp/buildroot --batch "$RPM"
     done
     rm -rf /usr/lib/modules/"${KERNEL}"/extra
     dnf reinstall -y /root/rpmbuild/RPMS/"$(uname -m)"/kmod-*-"${KERNEL}"-*.rpm
