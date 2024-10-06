@@ -32,7 +32,6 @@ jobs:
           - asus
           - fsync
           - fsync-ba
-          - fsync-coreos
           - surface
           - coreos-stable
           - coreos-testing
@@ -47,8 +46,6 @@ jobs:
             kernel_flavor: fsync
           - fedora_version: 39
             kernel_flavor: fsync-ba
-          - fedora_version: 39
-            kernel_flavor: fsync-coreos
           - fedora_version: 39
             kernel_flavor: asus
           - fedora_version: 39
@@ -80,11 +77,7 @@ jobs:
           export BUILDER_IMAGE=quay.io/fedora/fedora
           echo "BUILDER_IMAGE=${BUILDER_IMAGE}" >> $GITHUB_ENV
           echo "FQ_BUILDER_IMAGE=${BUILDER_IMAGE}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
-          if [[ "${{matrix.kernel_flavor}}" == "fsync-coreos" ]]; then
-            export KERNEL_IMAGE=fsync-kernel
-          else
-            export KERNEL_IMAGE=${{ matrix.kernel_flavor }}-kernel
-          fi
+          export KERNEL_IMAGE=${{ matrix.kernel_flavor }}-kernel
           echo "KERNEL_IMAGE=${KERNEL_IMAGE}" >> $GITHUB_ENV
           echo "FQ_KERNEL_IMAGE=${{ env.IMAGE_REGISTRY }}/${KERNEL_IMAGE}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
 
@@ -108,7 +101,6 @@ jobs:
 
       - name: Get current version
         shell: bash
-        if: matrix.kernel_flavor != 'fsync-coreos'
         run: |
           set -eo pipefail
 
@@ -119,37 +111,6 @@ jobs:
           # I intend to investigate/fix later, but need to move forward
           skopeo inspect docker://${{ env.FQ_KERNEL_IMAGE }} > kernel.json
 
-          linux=$(jq -r '.["Labels"]["ostree.linux"]' kernel.json)
-          if [ -z "$linux" ] || [ "null" = "$linux" ]; then
-            echo "inspected linux version must not be empty or null"
-            exit 1
-          fi
-          echo "KERNEL_VERSION=$linux" >> $GITHUB_ENV
-
-          img_version=$(jq -r '.["Labels"]["org.opencontainers.image.version"]' kernel.json)
-          if [ -z "$img_version" ] || [ "null" = "$img_version" ]; then
-            echo "inspected image version must not be empty or null"
-            exit 1
-          fi
-          echo "KERNEL_IMAGE_VERSION=$img_version" >> $GITHUB_ENV
-
-      - name: Get current version (fsync-coreos)
-        shell: bash
-        if: matrix.kernel_flavor == 'fsync-coreos'
-        run: |
-          set -eo pipefail
-
-          # Get coreos kernel info
-          skopeo inspect docker://${{ env.IMAGE_REGISTRY }}/coreos-stable-kernel:${{ matrix.fedora_version }} > kernel.json
-
-          coreos_linux=$(jq -r '.["Labels"]["ostree.linux"]' kernel.json)
-          if [ -z "$coreos_linux" ] || [ "null" = "$coreos_linux" ]; then
-            echo "inspected linux version must not be empty or null"
-            exit 1
-          fi
-          major_minor_patch=$(echo $coreos_linux | cut -d - -f1)
-          # Match to fsync from kernel-cache
-          skopeo inspect docker://${{ env.IMAGE_REGISTRY }}/fsync-kernel:${{ matrix.fedora_version }}-${major_minor_patch} > kernel.json
           linux=$(jq -r '.["Labels"]["ostree.linux"]' kernel.json)
           if [ -z "$linux" ] || [ "null" = "$linux" ]; then
             echo "inspected linux version must not be empty or null"
@@ -247,8 +208,6 @@ jobs:
             BUILDER_IMAGE=${{ env.BUILDER_IMAGE }}
             KERNEL_ORG=${{ github.repository_owner }}
             KERNEL_FLAVOR=${{ matrix.kernel_flavor }}
-            KERNEL_IMAGE=${{ env.KERNEL_IMAGE }}
-            KERNEL_VERSION=${{ env.KERNEL_VERSION }}
             FEDORA_MAJOR_VERSION=${{ matrix.fedora_version }}
             RPMFUSION_MIRROR=${{ vars.RPMFUSION_MIRROR }}
             DUAL_SIGN=true
@@ -267,8 +226,6 @@ jobs:
             KERNEL_ORG=${{ github.repository_owner }}
             KERNEL_FLAVOR=${{ matrix.kernel_flavor }}
             FEDORA_MAJOR_VERSION=${{ matrix.fedora_version }}
-            KERNEL_IMAGE=${{ env.KERNEL_IMAGE }}
-            KERNEL_VERSION=${{ env.KERNEL_VERSION }}
             INPUT_AKMODS=${{ env.IMAGE_NAME }}
             INPUT_TAG=${{ env.default_tag }}
             DUAL_SIGN=true
