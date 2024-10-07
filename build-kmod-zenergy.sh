@@ -6,6 +6,11 @@ ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
 
+if [[ "${FEDORA_MAJOR_VERSION}" -ge 41 ]]; then
+  echo "Skipping build of zenergy; net yet building..."
+  exit 0
+fi
+
 cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo /etc/yum.repos.d/
 
 dnf install -y \
