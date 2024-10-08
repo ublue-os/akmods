@@ -41,9 +41,6 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
         /tmp/build-kmod-zenergy.sh && \
         /tmp/build-kmod-evdi.sh \
     ; fi && \
-    if grep -qv "fsync" <<< "${KERNEL_FLAVOR}"; then \
-        /tmp/build-kmod-openrgb.sh \
-    ; fi && \
     /tmp/build-kmod-ayaneo-platform.sh && \
     /tmp/build-kmod-ayn-platform.sh && \
     /tmp/build-kmod-bmi260.sh && \
