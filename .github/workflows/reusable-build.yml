@@ -42,6 +42,18 @@ jobs:
           - nvidia-open
           - zfs
         exclude:
+          - fedora_version: 41
+            kernel_flavor: asus
+          - fedora_version: 41
+            kernel_flavor: coreos-stable
+          - fedora_version: 41
+            kernel_flavor: coreos-testing
+          - fedora_version: 41
+            kernel_flavor: fsync
+          - fedora_version: 41
+            kernel_flavor: fsync-ba
+          - fedora_version: 41
+            kernel_flavor: surface
           - fedora_version: 39
             kernel_flavor: fsync
           - fedora_version: 39
