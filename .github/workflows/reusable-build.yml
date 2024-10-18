@@ -32,6 +32,7 @@ jobs:
           - asus
           - fsync
           - fsync-ba
+          - bazzite
           - surface
           - coreos-stable
           - coreos-testing
@@ -57,6 +58,8 @@ jobs:
           - fedora_version: 39
             kernel_flavor: fsync-ba
           - fedora_version: 39
+            kernel_flavor: bazzite
+          - fedora_version: 39
             kernel_flavor: asus
           - fedora_version: 39
             kernel_flavor: coreos-testing
@@ -67,6 +70,8 @@ jobs:
           - kernel_flavor: fsync
             cfile_suffix: zfs
           - kernel_flavor: fsync-ba
+            cfile_suffix: zfs
+          - kernel_flavor: bazzite
             cfile_suffix: zfs
           - kernel_flavor: surface
             cfile_suffix: zfs
