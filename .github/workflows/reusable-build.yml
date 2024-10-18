@@ -71,6 +71,8 @@ jobs:
             cfile_suffix: zfs
           - kernel_flavor: fsync-ba
             cfile_suffix: zfs
+          - kernel_flavor: bazzite
+            cfile_suffix: zfs
           - kernel_flavor: surface
             cfile_suffix: zfs
 
