@@ -43,8 +43,6 @@ jobs:
           - zfs
         exclude:
           - fedora_version: 41
-            kernel_flavor: asus
-          - fedora_version: 41
             kernel_flavor: coreos-stable
           - fedora_version: 41
             kernel_flavor: coreos-testing
