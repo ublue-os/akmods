@@ -194,7 +194,7 @@ jobs:
             io.artifacthub.package.logo-url=https://avatars.githubusercontent.com/u/1728152?s=200&v=4
 
       - name: Retrieve Signing Key
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group'
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           mkdir -p certs
