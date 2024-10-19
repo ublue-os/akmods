@@ -1,7 +1,7 @@
 name: ublue akmods 41
 on:
-  pull_request:
   merge_group:
+  pull_request:
     branches:
       - main
     paths-ignore:
