@@ -58,6 +58,14 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     done && \
     find /var/cache/rpms
 
+# Remove kernel version from kmod package names
+# FIXME: This will only work for 6.* kernels unfortunately
+RUN set -e; for rpm in $(find /var/cache/rpms/kmods -type f -name \*.rpm); do \
+        basename=$(basename ${rpm}); \
+        name=${basename%%-6*}; \
+        fpm -s rpm -t rpm -p ${rpm} -f --name ${name} ${rpm}; \
+    done
+
 FROM scratch
 
 COPY --from=builder /var/cache/rpms /rpms
