@@ -26,8 +26,10 @@ fi
 curl -LsSf -o /etc/yum.repos.d/_copr_rok-cdemu.repo "https://copr.fedorainfracloud.org/coprs/rok/cdemu/repo/fedora-${COPR_RELEASE}/rok-cdemu-fedora-${COPR_RELEASE}.repo"
 
 ### BUILD vhba (succeed or fail-fast with debug output)
-dnf install -y \
+dnf download -y --destdir /var/cache/rpms/akmods \
     akmod-vhba-*.fc${RELEASE}.${ARCH}
+dnf install -y \
+    /var/cache/rpms/akmods/akmod-vhba-*.rpm
 akmods --force --kernels "${KERNEL}" --kmod vhba
 modinfo /usr/lib/modules/${KERNEL}/extra/vhba/vhba.ko.xz > /dev/null \
 || (find /var/cache/akmods/vhba/ -name \*.log -print -exec cat {} \; && exit 1)

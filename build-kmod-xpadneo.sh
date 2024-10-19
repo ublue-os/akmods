@@ -19,8 +19,10 @@ fi
 set -e pipefail
 
 ### BUILD xpadneo (succeed or fail-fast with debug output)
-dnf install -y \
+dnf download -y --destdir /var/cache/rpms/akmods \
     akmod-xpadneo-*.fc${RELEASE}.${ARCH}
+dnf install -y \
+    /var/cache/rpms/akmods/akmod-xpadneo-*.rpm
 akmods --force --kernels "${KERNEL}" --kmod xpadneo
 modinfo /usr/lib/modules/${KERNEL}/extra/xpadneo/hid-xpadneo.ko.xz > /dev/null \
 || (find /var/cache/akmods/xpadneo/ -name \*.log -print -exec cat {} \; && exit 1)

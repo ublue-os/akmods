@@ -9,8 +9,10 @@ RELEASE="$(rpm -E '%fedora')"
 cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo /etc/yum.repos.d/
 
 ### BUILD openrazer (succeed or fail-fast with debug output)
-dnf install -y \
+dnf download -y --destdir /var/cache/rpms/akmods \
     akmod-openrazer-*.fc${RELEASE}.${ARCH}
+dnf install -y \
+    /var/cache/rpms/akmods/akmod-openrazer-*.rpm
 akmods --force --kernels "${KERNEL}" --kmod openrazer
 modinfo /usr/lib/modules/${KERNEL}/extra/openrazer/razerkbd.ko.xz > /dev/null \
 || (find /var/cache/akmods/openrazer/ -name \*.log -print -exec cat {} \; && exit 1)
