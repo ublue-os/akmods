@@ -35,6 +35,17 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     /tmp/build-kmod-zfs.sh && \
     /tmp/dual-sign-zfs.sh
 
+# Remove kernel version from kmod package names
+# FIXME: This will only work for 6.* kernels unfortunately
+# FIXME: The sed is a gross hack, maybe PR upstream?
+RUN set -e; \
+    sed -i -e 's/args = \["rpmbuild", "-bb"\]/args = \["rpmbuild", "-bb", "--buildroot", "#{build_path}\/BUILD"\]/g' /usr/local/share/gems/gems/fpm-*/lib/fpm/package/rpm.rb; \
+    for rpm in $(find /var/cache/rpms/kmods -type f -name \*.rpm); do \
+        basename=$(basename ${rpm}); \
+        name=${basename%%-6*}; \
+        fpm --verbose -s rpm -t rpm -p ${rpm} -f --name ${name} ${rpm}; \
+    done
+
 FROM scratch
 
 COPY --from=builder /var/cache/rpms /rpms
