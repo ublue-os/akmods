@@ -50,7 +50,10 @@ fi
 ### PREPARE BUILD ENV
 dnf install -y \
     akmods \
-    mock
+    mock \
+    ruby-devel
+
+gem install fpm
 
 if [[ ! -s "/tmp/certs/private_key.priv" ]]; then
     echo "WARNING: Using test signing key. Run './generate-akmods-key' for production builds."
