@@ -50,12 +50,7 @@ fi
 ### PREPARE BUILD ENV
 dnf install -y \
     akmods \
-    mock \
-    ruby-devel
-
-# FPM is needed to rename akmods, gem provided by ruby-devel
-gem install fpm
-
+    mock
 
 if [[ ! -s "/tmp/certs/private_key.priv" ]]; then
     echo "WARNING: Using test signing key. Run './generate-akmods-key' for production builds."
@@ -98,4 +93,4 @@ fi
 chmod 1777 /tmp /var/tmp
 
 # create directories for later copying resulting artifacts
-mkdir -p /var/cache/rpms/{akmods,kmods,ublue-os,ucore}
+mkdir -p /var/cache/rpms/{kmods,ublue-os,ucore}

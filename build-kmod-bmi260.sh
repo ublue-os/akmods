@@ -8,10 +8,8 @@ RELEASE="$(rpm -E '%fedora')"
 
 cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo /etc/yum.repos.d/
 
-dnf download -y --destdir /var/cache/rpms/akmods \
-    akmod-bmi260-*.fc${RELEASE}.${ARCH}
 dnf install -y \
-    /var/cache/rpms/akmods/akmod-bmi260-*.rpm
+    akmod-bmi260-*.fc${RELEASE}.${ARCH}
 akmods --force --kernels "${KERNEL}" --kmod bmi260
 modinfo /usr/lib/modules/${KERNEL}/extra/bmi260/bmi260_{core,i2c}.ko.xz > /dev/null \
 || (find /var/cache/akmods/bmi260/ -name \*.log -print -exec cat {} \; && exit 1)

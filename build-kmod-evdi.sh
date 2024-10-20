@@ -19,10 +19,8 @@ set -e pipefail
 
 ### BUILD evdi (succeed or fail-fast with debug output)
 export CFLAGS="-fno-pie -no-pie"
-dnf download -y --destdir /var/cache/rpms/akmods \
-  kmod-evdi*.fc"${RELEASE}.${ARCH}" akmod-evdi-*.fc"${RELEASE}.${ARCH}"
 dnf install -y \
-  /var/cache/rpms/akmods/kmod-evdi*.rpm /var/cache/rpms/akmods/akmod-evdi-*.rpm
+  kmod-evdi*.fc"${RELEASE}.${ARCH}" akmod-evdi-*.fc"${RELEASE}.${ARCH}"
 akmods --force --kernels "${KERNEL}" --kmod evdi
 modinfo /usr/lib/modules/"${KERNEL}"/extra/evdi/evdi.ko.xz >/dev/null ||
   (find /var/cache/akmods/evdi/ -name \*.log -print -exec cat {} \; && exit 1)
