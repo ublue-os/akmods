@@ -65,7 +65,7 @@ RUN set -e; \
     kernel_version=$(rpm -q --qf "%{VERSION}-%{RELEASE}.%{ARCH}\n" kernel-core | head -n 1); \
     for rpm in $(find /var/cache/rpms/kmods -type f -name \*.rpm); do \
         basename=$(basename ${rpm}); \
-        name=${basename/-${kernel_version}*/}; \
+        name=${basename%%-${kernel_version}*}; \
         if [[ "$basename" == *"$kernel_version"* ]]; then \
             fpm --verbose -s rpm -t rpm -p ${rpm} -f --name ${name} ${rpm}; \
         else \
