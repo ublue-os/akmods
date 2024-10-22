@@ -36,25 +36,25 @@ COPY files/usr/lib/systemd/system-preset/70-ublue-nvctk-cdi.preset /tmp/ublue-os
 RUN --mount=type=cache,dst=/var/cache/dnf \
     /tmp/build-prep.sh && \
     if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]]; then \
-    /tmp/build-ublue-os-ucore-nvidia.sh && \
-    cp /tmp/ublue-os-ucore-nvidia/rpmbuild/RPMS/noarch/ublue-os-ucore-nvidia*.rpm \
-    /var/cache/rpms/ucore/ \
+      /tmp/build-ublue-os-ucore-nvidia.sh && \
+      cp /tmp/ublue-os-ucore-nvidia/rpmbuild/RPMS/noarch/ublue-os-ucore-nvidia*.rpm \
+        /var/cache/rpms/ucore/ \
     ; fi && \
     /tmp/build-ublue-os-nvidia-addons.sh && \
     cp /tmp/ublue-os-nvidia-addons/rpmbuild/RPMS/noarch/ublue-os-nvidia-addons*.rpm \
-    /var/cache/rpms/ublue-os/ && \
+      /var/cache/rpms/ublue-os/ && \
     if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
-    export KERNEL_NAME="kernel" \
+       export KERNEL_NAME="kernel" \
     ; else \
-    export KERNEL_NAME="kernel-surface" \
+       export KERNEL_NAME="kernel-surface" \
     ; fi && \
     /tmp/build-kmod-nvidia.sh kernel && \
     /tmp/dual-sign.sh && \
     for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
-    cp "${RPM}" /var/cache/rpms/kmods/; \
+        cp "${RPM}" /var/cache/rpms/kmods/; \
     done && \
     for RPM in $(find /root/rpmbuild/RPMS/"$(uname -m)"/ -type f -name \*.rpm); do \
-    cp "${RPM}" /var/cache/rpms/kmods/; \
+        cp "${RPM}" /var/cache/rpms/kmods/; \
     done && \
     find /var/cache/rpms
 

@@ -34,17 +34,17 @@ ADD https://negativo17.org/repos/fedora-multimedia.repo \
 RUN --mount=type=cache,dst=/var/cache/dnf \
     /tmp/build-prep.sh && \
     if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]]; then \
-    /tmp/build-ublue-os-ucore-addons.sh && \
-    cp /tmp/ublue-os-ucore-addons/rpmbuild/RPMS/noarch/ublue-os-ucore-addons*.rpm \
-    /var/cache/rpms/ucore/ \
+      /tmp/build-ublue-os-ucore-addons.sh && \
+      cp /tmp/ublue-os-ucore-addons/rpmbuild/RPMS/noarch/ublue-os-ucore-addons*.rpm \
+        /var/cache/rpms/ucore/ \
     ; fi && \
     /tmp/build-ublue-os-akmods-addons.sh && \
     cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
-    /var/cache/rpms/ublue-os/ && \
+      /var/cache/rpms/ublue-os/ && \
     if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
-    export KERNEL_NAME="kernel" \
+        export KERNEL_NAME="kernel" \
     ; else \
-    export KERNEL_NAME="kernel-surface" \
+        export KERNEL_NAME="kernel-surface" \
     ; fi && \
     /tmp/build-kmod-kvmfr.sh && \
     /tmp/build-kmod-openrazer.sh && \
@@ -54,10 +54,10 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     /tmp/build-kmod-xone.sh && \
     /tmp/dual-sign.sh && \
     for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
-    cp "${RPM}" /var/cache/rpms/kmods/; \
+        cp "${RPM}" /var/cache/rpms/kmods/; \
     done && \
     for RPM in $(find /root/rpmbuild/RPMS/"$(uname -m)"/ -type f -name \*.rpm); do \
-    cp "${RPM}" /var/cache/rpms/kmods/; \
+        cp "${RPM}" /var/cache/rpms/kmods/; \
     done && \
     find /var/cache/rpms
 
