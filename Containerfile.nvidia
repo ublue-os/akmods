@@ -65,11 +65,11 @@ RUN set -e; \
     kernel_version=$(rpm -q --qf "%{VERSION}-%{RELEASE}.%{ARCH}\n" kernel-core | head -n 1); \
     for rpm in $(find /var/cache/rpms/kmods -type f -name \*.rpm); do \
         basename=$(basename ${rpm}); \
-        name=$(echo ${basename} | sed -r "s/(-${kernel_version})//g"); \
+        name=${basename/-${kernel_version}*/}; \
         if [[ "$basename" == *"$kernel_version"* ]]; then \
             fpm --verbose -s rpm -t rpm -p ${rpm} -f --name ${name} ${rpm}; \
         else \
-            echo "Skipping $basename as it does not contain $kernel_version in its name"; \
+            echo "Skipping $basename rebuild as its name does not contain $kernel_version"; \
         fi; \
     done
 
