@@ -9,7 +9,7 @@ RELEASE="$(rpm -E '%fedora')"
 
 cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo /etc/yum.repos.d/
 
-if [[ "${FEDORA_MAJOR_VERSION}" -ge 41 ]]; then
+if [[ "${FEDORA_MAJOR_VERSION}" -ge 42 ]]; then
   if dnf search akmod-xpadneo|grep -qv "akmod-xpadneo"; then
     echo "Skipping build of xpadneo; net yet provided by negativo17"
     exit 0
