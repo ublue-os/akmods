@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -oux pipefail
+set -oeux pipefail
 
 
 ARCH="$(rpm -E '%_arch')"
@@ -8,15 +8,6 @@ KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')
 RELEASE="$(rpm -E '%fedora')"
 
 cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo /etc/yum.repos.d/
-
-if [[ "${FEDORA_MAJOR_VERSION}" -ge 41 ]]; then
-  if dnf search akmod-xpadneo|grep -qv "akmod-xpadneo"; then
-    echo "Skipping build of xpadneo; net yet provided by negativo17"
-    exit 0
-  fi
-fi
-
-set -e pipefail
 
 ### BUILD xpadneo (succeed or fail-fast with debug output)
 dnf install -y \
