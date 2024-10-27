@@ -12,11 +12,6 @@ if [[ "$RELEASE" -lt 39 ]]; then
   exit 0
 fi
 
-if [[ "${FEDORA_MAJOR_VERSION}" -ge 41 ]]; then
-  echo "Skipping build of vhba; net yet provided by COPR"
-  exit 0
-fi
-
 if [[ "${RELEASE}" -ge 42 ]]; then
     COPR_RELEASE="rawhide"
 else
