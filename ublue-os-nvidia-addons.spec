@@ -16,6 +16,7 @@ Source3:        70-ublue-nvctk-cdi.preset
 Source4:        environment
 Source5:        negativo17-fedora-nvidia.repo
 Source6:        eyecantcu-supergfxctl.repo
+Source7:        60-nvidia-extra-devices-pm.rules
 
 %description
 Adds various runtime files for nvidia support.
