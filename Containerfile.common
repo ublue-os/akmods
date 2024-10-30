@@ -46,6 +46,7 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     ; else \
         export KERNEL_NAME="kernel-surface" \
     ; fi && \
+    /tmp/build-kmod-framework-laptop.sh && \
     /tmp/build-kmod-kvmfr.sh && \
     /tmp/build-kmod-openrazer.sh && \
     /tmp/build-kmod-v4l2loopback.sh && \
