@@ -7,7 +7,7 @@ on:
     paths-ignore:
       - '**.md'
   schedule:
-    - cron: '10 2 * * *'  # 2am-ish UTC everyday (timed against official fedora container pushes, and after 'config')
+    - cron: '15 0 * * *'  # 10 minutes after kernel-cache
   workflow_dispatch:
 
 jobs:
