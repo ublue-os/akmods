@@ -43,7 +43,7 @@ jobs:
           - nvidia-open
           - zfs
         exclude:
-          - fedora_version: 41
+          - fedora_version: 39
             kernel_flavor: coreos-stable
           - fedora_version: 40
             kernel_flavor: coreos-testing
