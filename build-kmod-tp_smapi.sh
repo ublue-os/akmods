@@ -11,7 +11,7 @@ dnf install -y https://repo.linrunner.de/fedora/tlp/repos/releases/tlp-release.f
 
 ### BUILD tp_smapi (succeed or fail-fast with debug output)
 dnf install -y \
-  akmod-tp_smapi-*.fc${RELEASE}.${ARCH}
+	"akmod-tp_smapi-*.fc${RELEASE}.${ARCH}"
 akmods --force --kernels "${KERNEL}" --kmod tp_smapi
-modinfo /usr/lib/modules/${KERNEL}/extra/tp_smapi/tp_smapi.ko.xz >/dev/null ||
-  (find /var/cache/akmods/tp_smapi/ -name \*.log -print -exec cat {} \; && exit 1)
+modinfo "/usr/lib/modules/${KERNEL}/extra/tp_smapi/tp_smapi.ko.xz" >/dev/null ||
+	(find /var/cache/akmods/tp_smapi/ -name \*.log -print -exec cat {} \; && exit 1)
