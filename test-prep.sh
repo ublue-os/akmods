@@ -73,8 +73,6 @@ if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm) ]]; then
         "https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo"
     curl -Lo /etc/yum.repos.d/nvidia-container.pp \
         "https://raw.githubusercontent.com/NVIDIA/dgx-selinux/master/bin/RHEL9/nvidia-container.pp"
-    curl -Lo /etc/yum.repos.d/eyecantcu-supergfxctl.repo \
-        "https://copr.fedorainfracloud.org/coprs/eyecantcu/supergfxctl/repo/fedora-${COPR_RELEASE}/eyecantcu-supergfxctl-fedora-${COPR_RELEASE}.repo"
     curl -Lo /tmp/nvidia-install.sh \
         "https://raw.githubusercontent.com/ublue-os/hwe/main/nvidia-install.sh"
     chmod +x /tmp/nvidia-install.sh
@@ -125,7 +123,6 @@ fi
 rm -f /tmp/certs/private_key_2.priv
 
 if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm 2> /dev/null) ]]; then
-    sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/eyecantcu-supergfxctl.repo
     sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/negativo17-fedora-nvidia.repo
     sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/nvidia-container-toolkit.repo
     source /tmp/akmods-rpms/kmods/nvidia-vars
