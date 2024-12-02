@@ -46,6 +46,7 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     /tmp/build-kmod-bmi260.sh && \
     /tmp/build-kmod-facetimehd.sh && \
     /tmp/build-kmod-gcadapter_oc.sh && \
+    /tmp/build-kmod-it87-extras.sh && \
     /tmp/build-kmod-nct6687d.sh && \
     /tmp/build-kmod-rtl8814au.sh && \
     /tmp/build-kmod-rtl88xxau.sh && \
