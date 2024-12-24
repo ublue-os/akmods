@@ -17,7 +17,7 @@ curl -LsSf -o /etc/yum.repos.d/_copr_ssweeny-system76-io.repo \
 
 ### BUILD system76-io (succeed or fail-fast with debug output)
 dnf install -y \
-    akmod-system76-io-*.fc${RELEASE}.${ARCH}
+    "akmod-system76-io-*.fc${RELEASE}.${ARCH}"
 akmods --force --kernels "${KERNEL}" --kmod system76-io
 modinfo "/usr/lib/modules/${KERNEL}/extra/system76-io/system76-io.ko.xz" >/dev/null ||
     (find /var/cache/akmods/system76-io/ -name \*.log -print -exec cat {} \; && exit 1)
