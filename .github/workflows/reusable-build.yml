@@ -43,7 +43,7 @@ jobs:
           - nvidia-open
           - zfs
         exclude:
-          - fedora_version: 41
+          - fedora_version: 39
             kernel_flavor: coreos-stable
           - fedora_version: 40
             kernel_flavor: coreos-testing
@@ -53,6 +53,8 @@ jobs:
             kernel_flavor: fsync-ba
           - fedora_version: 41
             kernel_flavor: surface
+          - fedora_version: 40
+            kernel_flavor: bazzite
           - fedora_version: 39
             kernel_flavor: fsync
           - fedora_version: 39
@@ -104,7 +106,7 @@ jobs:
           systemctl status apparmor || true
 
       - name: Pull build images
-        uses: Wandalen/wretry.action@v3.5.0
+        uses: Wandalen/wretry.action@v3.7.3
         with:
           attempt_limit: 3
           attempt_delay: 15000
@@ -264,7 +266,7 @@ jobs:
           string: ${{ env.IMAGE_REGISTRY }}
 
       - name: Push To GHCR
-        uses: Wandalen/wretry.action@v3.5.0
+        uses: Wandalen/wretry.action@v3.7.3
         id: push
         if: github.event_name != 'pull_request'
         env:

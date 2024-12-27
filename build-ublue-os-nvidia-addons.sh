@@ -12,9 +12,6 @@ sed -i "s@gpgcheck=0@gpgcheck=1@" /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/n
 curl -L https://raw.githubusercontent.com/NVIDIA/dgx-selinux/master/bin/RHEL9/nvidia-container.pp \
     -o /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/nvidia-container.pp
 
-curl -L https://copr.fedorainfracloud.org/coprs/eyecantcu/supergfxctl/repo/fedora-${FEDORA_MAJOR_VERSION}/eyecantcu-supergfxctl-fedora-${FEDORA_MAJOR_VERSION}.repo \
-    -o /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/eyecantcu-supergfxctl.repo
-
 
 rpmbuild -ba \
     --define '_topdir /tmp/ublue-os-nvidia-addons/rpmbuild' \
