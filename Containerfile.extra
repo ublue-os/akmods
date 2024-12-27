@@ -41,12 +41,14 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
         /tmp/build-kmod-zenergy.sh && \
         /tmp/build-kmod-evdi.sh \
     ; fi && \
+    if [[ "${FEDORA_MAJOR_VERSION}" -ge 41 ]]; then \
+        /tmp/build-kmod-gpd-fan.sh && \
+    ; fi && \
     /tmp/build-kmod-ayaneo-platform.sh && \
     /tmp/build-kmod-ayn-platform.sh && \
     /tmp/build-kmod-bmi260.sh && \
     /tmp/build-kmod-facetimehd.sh && \
     /tmp/build-kmod-gcadapter_oc.sh && \
-    /tmp/build-kmod-gpd-fan.sh && \
     /tmp/build-kmod-nct6687d.sh && \
     /tmp/build-kmod-rtl8814au.sh && \
     /tmp/build-kmod-rtl88xxau.sh && \
