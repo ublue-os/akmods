@@ -66,6 +66,11 @@ curl -LsSf -o /etc/yum.repos.d/_copr_hikariknight-looking-glass-kvmfr.repo \
     "https://copr.fedorainfracloud.org/coprs/hikariknight/looking-glass-kvmfr/repo/fedora-${COPR_RELEASE}/hikariknight-looking-glass-kvmfr-fedora-${COPR_RELEASE}.repo"
 fi
 
+if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-system76-io-*.rpm) ]]; then
+curl -LsSf -o /etc/yum.repos.d/_copr_ssweeny-system76-io.repo \
+    "https://copr.fedorainfracloud.org/coprs/ssweeny/system76-hwe/repo/fedora-${COPR_RELEASE}/ssweeny-system76-hwe-fedora-${COPR_RELEASE}.repo"
+fi
+
 if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm) ]]; then
     curl -Lo /etc/yum.repos.d/negativo17-fedora-nvidia.repo \
         "https://negativo17.org/repos/fedora-nvidia.repo"
