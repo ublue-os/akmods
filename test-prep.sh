@@ -79,6 +79,13 @@ if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm) ]]; then
     sed -i "s@gpgcheck=0@gpgcheck=1@" /etc/yum.repos.d/nvidia-container-toolkit.repo
 fi
 
+if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-tp_smapi.rpm) ]]; then
+  dnf install -y https://repo.linrunner.de/fedora/tlp/repos/releases/tlp-release.fc$(rpm -E %fedora).noarch.rpm
+  if [[ "${RELEASE}" = 41 ]]; then
+    dnf config-manager --set-enabled=tlp-updates-testing
+  fi
+fi
+
 dnf install -y \
     "${RPMFUSION_MIRROR_RPMS}"/free/fedora/rpmfusion-free-release-"${RELEASE}".noarch.rpm \
     "${RPMFUSION_MIRROR_RPMS}"/nonfree/fedora/rpmfusion-nonfree-release-"${RELEASE}".noarch.rpm \
