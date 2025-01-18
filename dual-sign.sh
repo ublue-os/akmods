@@ -29,8 +29,12 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
             /tmp/dual-sign-check.sh "${KERNEL}" "${module}" "${PUBLIC_CHAIN}"
         fi
     done
+
+    rpm -qa |grep kmod
+
     find /var/cache/akmods -type f -name "\kmod-*.rpm"
-    for RPM in $(find /var/cache/akmods/ -type f -name \kmod-*.rpm); do
+    for RPMPATH in $(find /var/cache/akmods/ -type f -name \kmod-*.rpm); do
+        RPM=$(basename $( echo ${RPMPATH} | sed 's/\.rpm//' ))
         mkdir -p /tmp/buildroot
         cp -r /{usr,lib} /tmp/buildroot
         rpmrebuild --additional=--buildroot=/tmp/buildroot --batch "$RPM"
