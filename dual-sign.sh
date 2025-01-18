@@ -31,7 +31,7 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
     done
     find /var/cache/akmods -type f -name "\kmod-*.rpm"
     for RPMPATH in $(find /var/cache/akmods/ -type f -name \kmod-*.rpm); do
-        RPM=$(basename ${RPMPATH})
+        RPM=$(basename "${RPMPATH}")
         mkdir -p /tmp/buildroot
         cp -r /{usr,lib} /tmp/buildroot
         rpmrebuild --additional=--buildroot=/tmp/buildroot --batch "$RPM"
