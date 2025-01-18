@@ -52,6 +52,7 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     /tmp/build-kmod-nct6687d.sh && \
     /tmp/build-kmod-rtl8814au.sh && \
     /tmp/build-kmod-rtl88xxau.sh && \
+    /tmp/build-kmod-system76.sh && \
     /tmp/build-kmod-system76-io.sh && \
     /tmp/build-kmod-ryzen-smu.sh && \
     /tmp/build-kmod-vhba.sh && \
