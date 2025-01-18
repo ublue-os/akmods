@@ -34,7 +34,7 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
     done
     find /var/cache/rpms/kmods/zfs -type f -name "\kmod-*.rpm" | grep -v debug | grep -v devel
     RPMPATH=$(find /var/cache/rpms/kmods/zfs -type f -name "\kmod-*.rpm" | grep -v debug | grep -v devel)
-    RPM=$(basename "${RPMPATH}")
+    RPM=$(basename $(echo "${RPMPATH}" | sed 's/\.rpm//'))
     rpmrebuild --additional=--buildroot=/tmp/buildroot --batch "${RPM}"
     rm -rf /usr/lib/modules/"${KERNEL}"/extra
     dnf reinstall -y /root/rpmbuild/RPMS/"$(uname -m)"/kmod-*-"${KERNEL}"-*.rpm
