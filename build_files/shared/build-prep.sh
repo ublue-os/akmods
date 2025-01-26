@@ -16,11 +16,7 @@ mkdir -p /var/lib/alternatives
 echo "Installing ${KERNEL_FLAVOR} kernel-cache RPMs..."
 # fedora image has no kernel so this needs nothing fancy, just install
 dnf install -y /tmp/kernel_cache/*.rpm
-if [[ "${KERNEL_FLAVOR}" == "surface" ]]; then
-    KERNEL_VERSION=$(rpm -q kernel-surface|cut -d '-' -f2-)
-else
-    KERNEL_VERSION=$(rpm -q kernel|cut -d '-' -f2-)
-fi
+KERNEL_VERSION=$(rpm -q "${KERNEL_NAME}" | cut -d '-' -f2-)
 
 # enable more repos
 RPMFUSION_MIRROR_RPMS="https://mirrors.rpmfusion.org"

@@ -17,26 +17,25 @@ ARG KERNEL_FLAVOR="${KERNEL_FLAVOR:-main}"
 ARG RPMFUSION_MIRROR=""
 ARG DUAL_SIGN="true"
 
-COPY build*.sh dual-sign*.sh /tmp/
+COPY build_files/extra build_files/shared /tmp/
 COPY certs /tmp/certs
 
 # cached kernel rpms
 COPY --from=kernel_cache /tmp/rpms /tmp/kernel_cache
 
 # files for akmods
-COPY ublue-os-akmods-addons.spec /tmp/ublue-os-akmods-addons/ublue-os-akmods-addons.spec
 ADD https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${FEDORA_MAJOR_VERSION}/ublue-os-akmods-fedora-${FEDORA_MAJOR_VERSION}.repo \
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo
 ADD https://negativo17.org/repos/fedora-multimedia.repo \
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo
 
 RUN --mount=type=cache,dst=/var/cache/dnf \
-    /tmp/build-prep.sh && \
     if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
         export KERNEL_NAME="kernel" \
     ; else \
         export KERNEL_NAME="kernel-surface" \
     ; fi && \
+    /tmp/build-prep.sh && \
     if grep -qv "asus" <<< "${KERNEL_FLAVOR}"; then \
         /tmp/build-kmod-zenergy.sh && \
         /tmp/build-kmod-evdi.sh \
@@ -58,28 +57,7 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     /tmp/build-kmod-vhba.sh && \
     /tmp/build-kmod-VirtualBox.sh && \
     /tmp/dual-sign.sh && \
-    for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
-        cp "${RPM}" /var/cache/rpms/kmods/; \
-    done && \
-    for RPM in $(find /root/rpmbuild/RPMS/"$(uname -m)"/ -type f -name \*.rpm); do \
-        cp "${RPM}" /var/cache/rpms/kmods/; \
-    done && \
-    find /var/cache/rpms
-
-# Remove kernel version from kmod package names
-# FIXME: The sed is a gross hack, maybe PR upstream?
-RUN set -e; \
-    sed -i -e 's/args = \["rpmbuild", "-bb"\]/args = \["rpmbuild", "-bb", "--buildroot", "#{build_path}\/BUILD"\]/g' /usr/local/share/gems/gems/fpm-*/lib/fpm/package/rpm.rb; \
-    kernel_version=$(rpm -q --qf "%{VERSION}-%{RELEASE}.%{ARCH}\n" kernel-core | head -n 1); \
-    for rpm in $(find /var/cache/rpms/kmods -type f -name \*.rpm); do \
-        basename=$(basename ${rpm}); \
-        name=${basename%%-${kernel_version}*}; \
-        if [[ "$basename" == *"$kernel_version"* ]]; then \
-            fpm --verbose -s rpm -t rpm -p ${rpm} -f --name ${name} ${rpm}; \
-        else \
-            echo "Skipping $basename rebuild as its name does not contain $kernel_version"; \
-        fi; \
-    done
+    /tmp/build-post.sh
 
 FROM scratch
 
