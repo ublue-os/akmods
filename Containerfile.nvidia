@@ -2,49 +2,76 @@
 ### Containerfile.nvidia - used to build ONLY NVIDIA kmods
 ###
 
-#Build from base, simply because it's the smallest image
-ARG SOURCE_IMAGE="${SOURCE_IMAGE:-base}"
-ARG SOURCE_ORG="${SOURCE_ORG:-fedora-ostree-desktops}"
-ARG BASE_IMAGE="quay.io/${SOURCE_ORG}/${SOURCE_IMAGE}"
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-40}"
+ARG KERNEL_FLAVOR="${KERNEL_FLAVOR:-main}"
+ARG KERNEL_IMAGE="${KERNEL_IMAGE:-${KERNEL_FLAVOR}-kernel}"
+ARG KERNEL_ORG="${KERNEL_ORG:-ublue-os}"
+ARG KERNEL_BASE="ghcr.io/${KERNEL_ORG}/${KERNEL_IMAGE}:${FEDORA_MAJOR_VERSION}"
+ARG BUILDER_IMAGE="${BUILDER_IMAGE:-quay.io/fedora/fedora}"
+ARG BUILDER_BASE="${BUILDER_IMAGE}:${FEDORA_MAJOR_VERSION}"
+FROM ${KERNEL_BASE} AS kernel_cache
+FROM ${BUILDER_BASE} AS builder
 
-FROM ${BASE_IMAGE}:${FEDORA_MAJOR_VERSION} AS builder
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-40}"
-ARG KERNEL_FLAVOR="{KERNEL_FLAVOR:-main}"
-ARG KERNEL_VERSION=""
+ARG KERNEL_FLAVOR="${KERNEL_FLAVOR:-main}"
 ARG RPMFUSION_MIRROR=""
+ARG DUAL_SIGN="true"
 
 COPY build_files/nvidia build_files/shared /tmp/
 COPY certs /tmp/certs
 
+# cached kernel rpms
+COPY --from=kernel_cache /tmp/rpms /tmp/kernel_cache
+
 # files for nvidia
-ADD https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo \
-    /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/nvidia-container-toolkit.repo
-ADD https://copr.fedorainfracloud.org/coprs/eyecantcu/supergfxctl/repo/fedora-${FEDORA_MAJOR_VERSION}/eyecantcu-supergfxctl-fedora-${FEDORA_MAJOR_VERSION}.repo \
-    /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/eyecantcu-supergfxctl.repo
-ADD https://raw.githubusercontent.com/NVIDIA/dgx-selinux/master/bin/RHEL9/nvidia-container.pp \
-    /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/nvidia-container.pp
-ADD files/etc/sway/environment /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/environment
-ADD files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/ublue-nvctk-cdi.service
-ADD files/usr/lib/systemd/system-preset/70-ublue-nvctk-cdi.preset /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/70-ublue-nvctk-cdi.preset
+COPY ublue-os-nvidia-addons.spec /tmp/ublue-os-nvidia-addons/ublue-os-nvidia-addons.spec
+COPY ublue-os-ucore-nvidia.spec /tmp/ublue-os-ucore-nvidia/ublue-os-ucore-nvidia.spec
+COPY files/etc/sway/environment /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/environment
+COPY files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/ublue-nvctk-cdi.service
+COPY files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/ublue-os-ucore-nvidia/rpmbuild/SOURCES/ublue-nvctk-cdi.service
+COPY files/usr/lib/systemd/system-preset/70-ublue-nvctk-cdi.preset /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/70-ublue-nvctk-cdi.preset
+COPY files/usr/lib/systemd/system-preset/70-ublue-nvctk-cdi.preset /tmp/ublue-os-ucore-nvidia/rpmbuild/SOURCES/70-ublue-nvctk-cdi.preset
+COPY files/etc/udev/rules.d/60-nvidia-extra-devices-pm.rules /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/60-nvidia-extra-devices-pm.rules
 
-
-RUN /tmp/build-prep.sh
-
-RUN /tmp/build-ublue-os-nvidia-addons.sh
-
-RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
+RUN --mount=type=cache,dst=/var/cache/dnf \
+    /tmp/build-prep.sh && \
+    if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]]; then \
+      /tmp/build-ublue-os-ucore-nvidia.sh && \
+      cp /tmp/ublue-os-ucore-nvidia/rpmbuild/RPMS/noarch/ublue-os-ucore-nvidia*.rpm \
+        /var/cache/rpms/ucore/ \
+    ; fi && \
+    /tmp/build-ublue-os-nvidia-addons.sh && \
+    cp /tmp/ublue-os-nvidia-addons/rpmbuild/RPMS/noarch/ublue-os-nvidia-addons*.rpm \
+      /var/cache/rpms/ublue-os/ && \
+    if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
        export KERNEL_NAME="kernel" \
     ; else \
        export KERNEL_NAME="kernel-surface" \
     ; fi && \
-    /tmp/build-kmod-nvidia.sh 550
+    /tmp/build-kmod-nvidia.sh kernel && \
+    /tmp/dual-sign.sh && \
+    for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
+        cp "${RPM}" /var/cache/rpms/kmods/; \
+    done && \
+    for RPM in $(find /root/rpmbuild/RPMS/"$(uname -m)"/ -type f -name \*.rpm); do \
+        cp "${RPM}" /var/cache/rpms/kmods/; \
+    done && \
+    find /var/cache/rpms
 
-RUN cp /tmp/ublue-os-nvidia-addons/rpmbuild/RPMS/noarch/ublue-os-nvidia-addons*.rpm \
-      /var/cache/rpms/ublue-os/
-
-# Copy all RPMs from /var/cache/akmods/ to /var/cache/rpms/kmods/
-RUN /tmp/build-post.sh
+# Remove kernel version from kmod package names
+# FIXME: The sed is a gross hack, maybe PR upstream?
+RUN set -e; \
+    sed -i -e 's/args = \["rpmbuild", "-bb"\]/args = \["rpmbuild", "-bb", "--buildroot", "#{build_path}\/BUILD"\]/g' /usr/local/share/gems/gems/fpm-*/lib/fpm/package/rpm.rb; \
+    kernel_version=$(rpm -q --qf "%{VERSION}-%{RELEASE}.%{ARCH}\n" kernel-core | head -n 1); \
+    for rpm in $(find /var/cache/rpms/kmods -type f -name \*.rpm); do \
+        basename=$(basename ${rpm}); \
+        name=${basename%%-${kernel_version}*}; \
+        if [[ "$basename" == *"$kernel_version"* ]]; then \
+            fpm --verbose -s rpm -t rpm -p ${rpm} -f --name ${name} ${rpm}; \
+        else \
+            echo "Skipping $basename rebuild as its name does not contain $kernel_version"; \
+        fi; \
+    done
 
 FROM scratch
 

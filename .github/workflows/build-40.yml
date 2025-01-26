@@ -1,9 +1,13 @@
 name: ublue akmods 40
 on:
-  pull_request:
   merge_group:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
   schedule:
-    - cron: '5 14 * * *'  # 2pm-ish UTC everyday (timed against official fedora container pushes, and after 'config')
+    - cron: '15 0 * * *'  # 10 minutes after kernel-cache
   workflow_dispatch:
 
 jobs:

@@ -2,39 +2,49 @@
 ### Containerfile.common - used to build ONLY NON-nvidia kmods
 ###
 
-#Build from base, simpley because it's the smallest image
-ARG SOURCE_IMAGE="${SOURCE_IMAGE:-base}"
-ARG SOURCE_ORG="${SOURCE_ORG:-fedora-ostree-desktops}"
-ARG BASE_IMAGE="quay.io/${SOURCE_ORG}/${SOURCE_IMAGE}"
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-40}"
+ARG KERNEL_FLAVOR="${KERNEL_FLAVOR:-main}"
+ARG KERNEL_IMAGE="${KERNEL_IMAGE:-${KERNEL_FLAVOR}-kernel}"
+ARG KERNEL_ORG="${KERNEL_ORG:-ublue-os}"
+ARG KERNEL_BASE="ghcr.io/${KERNEL_ORG}/${KERNEL_IMAGE}:${FEDORA_MAJOR_VERSION}"
+ARG BUILDER_IMAGE="${BUILDER_IMAGE:-quay.io/fedora/fedora}"
+ARG BUILDER_BASE="${BUILDER_IMAGE}:${FEDORA_MAJOR_VERSION}"
+FROM ${KERNEL_BASE} AS kernel_cache
+FROM ${BUILDER_BASE} AS builder
 
-FROM ${BASE_IMAGE}:${FEDORA_MAJOR_VERSION} AS builder
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-40}"
-ARG KERNEL_FLAVOR="{KERNEL_FLAVOR:-main}"
-ARG KERNEL_VERSION=""
+ARG KERNEL_FLAVOR="${KERNEL_FLAVOR:-main}"
 ARG RPMFUSION_MIRROR=""
+ARG DUAL_SIGN="true"
 
 COPY build_files/common build_files/shared /tmp/
 COPY certs /tmp/certs
 
+# cached kernel rpms
+COPY --from=kernel_cache /tmp/rpms /tmp/kernel_cache
+
 # files for akmods
+COPY ublue-os-akmods-addons.spec /tmp/ublue-os-akmods-addons/ublue-os-akmods-addons.spec
+COPY ublue-os-ucore-addons.spec /tmp/ublue-os-ucore-addons/ublue-os-ucore-addons.spec
 ADD https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${FEDORA_MAJOR_VERSION}/ublue-os-akmods-fedora-${FEDORA_MAJOR_VERSION}.repo \
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo
 ADD https://negativo17.org/repos/fedora-multimedia.repo \
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo
 
-RUN /tmp/build-prep.sh
-
-RUN /tmp/build-ublue-os-akmods-addons.sh
-
-# Set kernel name
-RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
+RUN --mount=type=cache,dst=/var/cache/dnf \
+    /tmp/build-prep.sh && \
+    if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]]; then \
+      /tmp/build-ublue-os-ucore-addons.sh && \
+      cp /tmp/ublue-os-ucore-addons/rpmbuild/RPMS/noarch/ublue-os-ucore-addons*.rpm \
+        /var/cache/rpms/ucore/ \
+    ; fi && \
+    /tmp/build-ublue-os-akmods-addons.sh && \
+    cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
+      /var/cache/rpms/ublue-os/ && \
+    if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
         export KERNEL_NAME="kernel" \
     ; else \
         export KERNEL_NAME="kernel-surface" \
-    ; fi && \
-    if grep -qv "asus" <<< "${KERNEL_FLAVOR}"; then \
-        /tmp/build-kmod-evdi.sh \
     ; fi && \
     /tmp/build-kmod-framework-laptop.sh && \
     /tmp/build-kmod-kvmfr.sh && \
@@ -42,13 +52,30 @@ RUN if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
     /tmp/build-kmod-v4l2loopback.sh && \
     /tmp/build-kmod-wl.sh && \
     /tmp/build-kmod-xpadneo.sh && \
-    /tmp/build-kmod-xone.sh
+    /tmp/build-kmod-xone.sh && \
+    /tmp/dual-sign.sh && \
+    for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
+        cp "${RPM}" /var/cache/rpms/kmods/; \
+    done && \
+    for RPM in $(find /root/rpmbuild/RPMS/"$(uname -m)"/ -type f -name \*.rpm); do \
+        cp "${RPM}" /var/cache/rpms/kmods/; \
+    done && \
+    find /var/cache/rpms
 
-RUN cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
-      /var/cache/rpms/ublue-os/
-
-# Copy all RPMs from /var/cache/akmods/ to /var/cache/rpms/kmods/
-RUN /tmp/build-post.sh
+# Remove kernel version from kmod package names
+# FIXME: The sed is a gross hack, maybe PR upstream?
+RUN set -e; \
+    sed -i -e 's/args = \["rpmbuild", "-bb"\]/args = \["rpmbuild", "-bb", "--buildroot", "#{build_path}\/BUILD"\]/g' /usr/local/share/gems/gems/fpm-*/lib/fpm/package/rpm.rb; \
+    kernel_version=$(rpm -q --qf "%{VERSION}-%{RELEASE}.%{ARCH}\n" kernel-core | head -n 1); \
+    for rpm in $(find /var/cache/rpms/kmods -type f -name \*.rpm); do \
+        basename=$(basename ${rpm}); \
+        name=${basename%%-${kernel_version}*}; \
+        if [[ "$basename" == *"$kernel_version"* ]]; then \
+            fpm --verbose -s rpm -t rpm -p ${rpm} -f --name ${name} ${rpm}; \
+        else \
+            echo "Skipping $basename rebuild as its name does not contain $kernel_version"; \
+        fi; \
+    done
 
 FROM scratch
 

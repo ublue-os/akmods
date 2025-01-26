@@ -3,12 +3,12 @@ on:
   workflow_call:
     inputs:
       fedora_version:
-        description: 'The Fedora release version: 39, 40, etc'
+        description: "The Fedora release version: 39, 40, etc"
         required: true
         type: string
 env:
-    IMAGE_BASE_NAME: akmods
-    IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
+  IMAGE_BASE_NAME: akmods
+  IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}-${{ inputs.fedora_version }}
@@ -17,7 +17,7 @@ concurrency:
 jobs:
   build_ublue:
     name: akmods
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04 # Work Around Tar Bug
     permissions:
       contents: read
       packages: write
@@ -31,15 +31,53 @@ jobs:
           - main
           - asus
           - fsync
-          - fsync-lts
+          - fsync-ba
+          - bazzite
           - surface
+          - coreos-stable
+          - coreos-testing
         cfile_suffix:
           - common
           - extra
           - nvidia
+          - nvidia-open
+          - zfs
         exclude:
+          - fedora_version: 39
+            kernel_flavor: coreos-stable
           - fedora_version: 40
-            kernel_flavor: fsync-lts # kernel-ba packages are not being built for F40 yet.
+            kernel_flavor: coreos-testing
+          - fedora_version: 41
+            kernel_flavor: fsync
+          - fedora_version: 41
+            kernel_flavor: fsync-ba
+          - fedora_version: 40
+            kernel_flavor: asus
+          - fedora_version: 40
+            kernel_flavor: bazzite
+          - fedora_version: 39
+            kernel_flavor: fsync
+          - fedora_version: 39
+            kernel_flavor: fsync-ba
+          - fedora_version: 39
+            kernel_flavor: bazzite
+          - fedora_version: 39
+            kernel_flavor: asus
+          - fedora_version: 39
+            kernel_flavor: coreos-testing
+          - kernel_flavor: main
+            cfile_suffix: zfs
+          - kernel_flavor: asus
+            cfile_suffix: zfs
+          - kernel_flavor: fsync
+            cfile_suffix: zfs
+          - kernel_flavor: fsync-ba
+            cfile_suffix: zfs
+          - kernel_flavor: bazzite
+            cfile_suffix: zfs
+          - kernel_flavor: surface
+            cfile_suffix: zfs
+
     steps:
       # Checkout push-to-registry action GitHub repository
       - name: Checkout Push to Registry action
@@ -53,12 +91,56 @@ jobs:
           else
               echo "IMAGE_NAME=${{ env.IMAGE_BASE_NAME }}-${{ matrix.cfile_suffix }}" >> $GITHUB_ENV
           fi
-          export SOURCE_IMAGE=base
-          export SOURCE_ORG=fedora-ostree-desktops
-          echo "SOURCE_IMAGE=${SOURCE_IMAGE}" >> $GITHUB_ENV
-          echo "SOURCE_ORG=${SOURCE_ORG}" >> $GITHUB_ENV
-          echo "FQ_SOURCE_IMAGE=quay.io/${SOURCE_ORG}/${SOURCE_IMAGE}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
+          export BUILDER_IMAGE=quay.io/fedora/fedora
+          echo "BUILDER_IMAGE=${BUILDER_IMAGE}" >> $GITHUB_ENV
+          echo "FQ_BUILDER_IMAGE=${BUILDER_IMAGE}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
+          export KERNEL_IMAGE=${{ matrix.kernel_flavor }}-kernel
+          echo "KERNEL_IMAGE=${KERNEL_IMAGE}" >> $GITHUB_ENV
+          echo "FQ_KERNEL_IMAGE=${{ env.IMAGE_REGISTRY }}/${KERNEL_IMAGE}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
 
+      - name: AppArmor Disable
+        run: |
+          set -x
+          systemctl status apparmor
+          sudo systemctl stop apparmor
+          systemctl status apparmor || true
+
+      - name: Pull build images
+        uses: Wandalen/wretry.action@v3.8.0
+        with:
+          attempt_limit: 3
+          attempt_delay: 15000
+          command: |
+            # pull the base image used for FROM in containerfile so
+            # we can retry on that unfortunately common failure case
+            podman pull ${{ env.FQ_BUILDER_IMAGE }}
+            podman pull ${{ env.FQ_KERNEL_IMAGE }}
+
+      - name: Get current version
+        shell: bash
+        run: |
+          set -eo pipefail
+
+          #skopeo inspect containers-storage:${{ env.FQ_KERNEL_IMAGE }} > kernel.json
+          # We SHOULD be able to use container-storage to inspect already pulled image here
+          # BUT... ubuntu-24.04 builders prevent with this error:
+          #     Error during unshare(...): Operation not permitted
+          # I intend to investigate/fix later, but need to move forward
+          skopeo inspect docker://${{ env.FQ_KERNEL_IMAGE }} > kernel.json
+
+          linux=$(jq -r '.["Labels"]["ostree.linux"]' kernel.json)
+          if [ -z "$linux" ] || [ "null" = "$linux" ]; then
+            echo "inspected linux version must not be empty or null"
+            exit 1
+          fi
+          echo "KERNEL_VERSION=$linux" >> $GITHUB_ENV
+
+          img_version=$(jq -r '.["Labels"]["org.opencontainers.image.version"]' kernel.json)
+          if [ -z "$img_version" ] || [ "null" = "$img_version" ]; then
+            echo "inspected image version must not be empty or null"
+            exit 1
+          fi
+          echo "KERNEL_IMAGE_VERSION=$img_version" >> $GITHUB_ENV
 
       - name: Generate tags
         id: generate-tags
@@ -76,16 +158,17 @@ jobs:
           COMMIT_TAGS+=("pr-${{ github.event.number }}-${VARIANT}")
           COMMIT_TAGS+=("${SHA_SHORT}-${VARIANT}")
 
-          BUILD_TAGS=("${VARIANT}" "${VARIANT}-${TIMESTAMP}")
+          BUILD_TAGS=("${VARIANT}" "${VARIANT}-${TIMESTAMP}" "${VARIANT}-${KERNEL_VERSION}")
 
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
               echo "Generated the following commit tags: "
               for TAG in "${COMMIT_TAGS[@]}"; do
                   echo "${TAG}"
               done
-
+              default_tag=${COMMIT_TAGS[0]}
               alias_tags=("${COMMIT_TAGS[@]}")
           else
+              default_tag=${BUILD_TAGS[0]}
               alias_tags=("${BUILD_TAGS[@]}")
           fi
 
@@ -95,83 +178,7 @@ jobs:
           done
 
           echo "alias_tags=${alias_tags[*]}" >> $GITHUB_OUTPUT
-
-      - name: Retrieve akmods signing key
-        run: |
-          mkdir -p certs
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-              echo "Using test signing key"
-          else
-              echo "${{ secrets.AKMOD_PRIVKEY_20230518 }}" > certs/private_key.priv
-          fi
-          # DEBUG: get character count of key
-          wc -c certs/private_key.priv
-
-      - name: Pull build image
-        uses: Wandalen/wretry.action@v3.5.0
-        with:
-          attempt_limit: 3
-          attempt_delay: 15000
-          command: |
-            # pull the base image used for FROM in containerfile so
-            # we can retry on that unfortunately common failure case
-            podman pull ${{ env.FQ_SOURCE_IMAGE }}
-
-      - name: Get current version
-        run: |
-          set -eo pipefail
-
-          # skopeo must always run to inspect image labels for build version
-          skopeo inspect docker://${{ env.FQ_SOURCE_IMAGE }} > inspect.json
-          ver=$(jq -r '.Labels["org.opencontainers.image.version"]' inspect.json)
-          if [ -z "$ver" ] || [ "null" = "$ver" ]; then
-            echo "inspected image version must not be empty or null"
-            exit 1
-          fi
-
-          if [ "main" == "${{ matrix.kernel_flavor }}" ]; then
-            # main kernel_flavor: use ostree.linux to determine kernel version
-            linux=$(jq -r '.Labels["ostree.linux"]' inspect.json)
-          else
-            # other kernel_flavor: start container use dnf to find kernel version
-            container_name="fq-$(uuidgen)"
-            podman run --entrypoint /bin/bash --name "$container_name" -dt "${{ env.FQ_SOURCE_IMAGE }}"
-            podman exec $container_name rpm-ostree install dnf dnf-plugins-core
-
-            # Fetch kernel version
-            dnf="podman exec $container_name dnf"
-            case "${{ matrix.kernel_flavor }}" in
-              "asus")
-                $dnf copr enable -y lukenukem/asus-kernel
-                linux=$($dnf repoquery --repoid copr:copr.fedorainfracloud.org:lukenukem:asus-kernel --whatprovides kernel | tail -n1 | sed 's/.*://')
-                ;;
-              "fsync")
-                $dnf copr enable -y sentry/kernel-fsync
-                linux=$($dnf repoquery --repoid copr:copr.fedorainfracloud.org:sentry:kernel-fsync --whatprovides kernel | tail -n1 | sed 's/.*://')
-                ;;
-              "fsync-lts")
-                $dnf copr enable -y sentry/kernel-ba
-                linux=$($dnf repoquery --repoid copr:copr.fedorainfracloud.org:sentry:kernel-ba --whatprovides kernel | tail -n1 | sed 's/.*://')
-                ;;
-              "main")
-                linux=$($dnf repoquery --whatprovides kernel | tail -n1 | sed 's/.*://')
-                ;;
-              "surface")
-                $dnf config-manager --add-repo=https://pkg.surfacelinux.com/fedora/linux-surface.repo
-                linux=$($dnf repoquery --repoid linux-surface --whatprovides kernel-surface | tail -n1 | sed 's/.*://')
-                ;;
-              *)
-                echo "unexpected kernel_flavor '${{ matrix.kernel_flavor }}' for dnf repoquery"
-                ;;
-            esac
-          fi
-
-          if [ -z "$linux" ] || [ "null" = "$linux" ]; then
-            echo "inspected image linux version must not be empty or null"
-            exit 1
-          fi
-          echo "SOURCE_IMAGE_VERSION=$ver" >> $GITHUB_ENV
-          echo "KERNEL_VERSION=$linux" >> $GITHUB_ENV
+          echo "default_tag=$default_tag" >> $GITHUB_ENV
 
       # Build metadata
       - name: Image Metadata
@@ -183,10 +190,26 @@ jobs:
           labels: |
             org.opencontainers.image.title=${{ env.IMAGE_BASE_NAME }}
             org.opencontainers.image.description=A caching layer for pre-built akmod RPMs
-            org.opencontainers.image.version=${{ env.SOURCE_IMAGE_VERSION }}
+            org.opencontainers.image.version=${{ env.KERNEL_IMAGE_VERSION }}
             ostree.linux=${{ env.KERNEL_VERSION }}
             io.artifacthub.package.readme-url=https://raw.githubusercontent.com/${{ github.repository }}/main/README.md
             io.artifacthub.package.logo-url=https://avatars.githubusercontent.com/u/1728152?s=200&v=4
+
+      - name: Retrieve Signing Key
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group'
+        shell: bash
+        run: |
+          mkdir -p certs
+          if [[ "${{ github.event_name }}"  == 'pull_request' ]]; then
+            echo "This should not have run... exiting..."
+            exit 1
+          else
+            echo "${{ secrets.KERNEL_PRIVKEY }}" > certs/private_key.priv
+            echo "${{ secrets.AKMOD_PRIVKEY_20230518 }}" > certs/private_key_2.priv
+            # DEBUG: get character count of key
+            wc -c certs/private_key.priv
+            wc -c certs/private_key_2.priv
+          fi
 
       # Build image using Buildah action
       - name: Build Image
@@ -199,14 +222,40 @@ jobs:
           tags: |
             ${{ steps.generate-tags.outputs.alias_tags }}
           build-args: |
-            SOURCE_IMAGE=${{ env.SOURCE_IMAGE }}
-            SOURCE_ORG=${{ env.SOURCE_ORG }}
+            BUILDER_IMAGE=${{ env.BUILDER_IMAGE }}
+            KERNEL_ORG=${{ github.repository_owner }}
             KERNEL_FLAVOR=${{ matrix.kernel_flavor }}
-            KERNEL_VERSION=${{ env.KERNEL_VERSION }}
             FEDORA_MAJOR_VERSION=${{ matrix.fedora_version }}
             RPMFUSION_MIRROR=${{ vars.RPMFUSION_MIRROR }}
+            DUAL_SIGN=true
           labels: ${{ steps.meta.outputs.labels }}
           oci: false
+
+      - name: Build Test Image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          containerfiles: |
+            ./Containerfile.test
+          image: akmods-test
+          tags: latest
+          build-args: |
+            BUILDER_IMAGE=${{ env.BUILDER_IMAGE }}
+            KERNEL_ORG=${{ github.repository_owner }}
+            KERNEL_FLAVOR=${{ matrix.kernel_flavor }}
+            FEDORA_MAJOR_VERSION=${{ matrix.fedora_version }}
+            INPUT_AKMODS=${{ env.IMAGE_NAME }}
+            INPUT_TAG=${{ env.default_tag }}
+            DUAL_SIGN=true
+          oci: false
+
+      - name: Test Akmods Signature
+        id: test_akmods
+        shell: bash
+        run: |
+          if ! podman run akmods-test:latest; then
+              echo "Signatures Failed"
+              exit 1
+          fi
 
       # Workaround bug where capital letters in your GitHub username make it impossible to push to GHCR.
       # https://github.com/macbre/push-to-ghcr/issues/12
@@ -216,9 +265,8 @@ jobs:
         with:
           string: ${{ env.IMAGE_REGISTRY }}
 
-
       - name: Push To GHCR
-        uses: Wandalen/wretry.action@v3.5.0
+        uses: Wandalen/wretry.action@v3.8.0
         id: push
         if: github.event_name != 'pull_request'
         env:
@@ -246,7 +294,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Sign container
-      - uses: sigstore/cosign-installer@v3.5.0
+      - uses: sigstore/cosign-installer@v3.7.0
         if: github.event_name != 'pull_request'
 
       - name: Sign container image

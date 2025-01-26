@@ -8,7 +8,7 @@ RELEASE="$(rpm -E '%fedora')"
 
 cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo /etc/yum.repos.d/
 
-rpm-ostree install \
+dnf install -y \
     akmod-ayaneo-platform-*.fc${RELEASE}.${ARCH}
 akmods --force --kernels "${KERNEL}" --kmod ayaneo-platform
 modinfo /usr/lib/modules/${KERNEL}/extra/ayaneo-platform/ayaneo-platform.ko.xz > /dev/null \

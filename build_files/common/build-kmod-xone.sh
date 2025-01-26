@@ -9,7 +9,7 @@ RELEASE="$(rpm -E '%fedora')"
 cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo /etc/yum.repos.d/
 
 ### BUILD xone (succeed or fail-fast with debug output)
-rpm-ostree install \
+dnf install -y \
     akmod-xone-*.fc${RELEASE}.${ARCH}
 akmods --force --kernels "${KERNEL}" --kmod xone
 modinfo /usr/lib/modules/${KERNEL}/extra/xone/xone-{dongle,gip,gip-gamepad,gip-headset,gip-chatpad,gip-madcatz-strat,gip-madcatz-glam,gip-pdp-jaguar}.ko.xz > /dev/null \

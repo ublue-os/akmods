@@ -13,7 +13,7 @@ fi
 
 cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo /etc/yum.repos.d/
 
-rpm-ostree install \
+dnf install -y \
     akmod-rtl8814au-*.fc${RELEASE}.${ARCH}
 akmods --force --kernels "${KERNEL}" --kmod rtl8814au
 modinfo /usr/lib/modules/${KERNEL}/extra/rtl8814au/rtl8814au.ko.xz > /dev/null \

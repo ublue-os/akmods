@@ -8,7 +8,7 @@ RELEASE="$(rpm -E '%fedora')"
 
 
 ### BUILD VirtualBox (succeed or fail-fast with debug output)
-rpm-ostree install \
+dnf install -y \
     akmod-VirtualBox-*.fc${RELEASE}.${ARCH}
 akmods --force --kernels "${KERNEL}" --kmod VirtualBox
 modinfo /usr/lib/modules/${KERNEL}/extra/VirtualBox/{vboxdrv,vboxnetadp,vboxnetflt}.ko.xz > /dev/null \

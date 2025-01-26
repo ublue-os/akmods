@@ -10,7 +10,7 @@ RELEASE="$(rpm -E '%fedora')"
 cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo /etc/yum.repos.d/
 
 ### BUILD xpadneo (succeed or fail-fast with debug output)
-rpm-ostree install \
+dnf install -y \
     akmod-xpadneo-*.fc${RELEASE}.${ARCH}
 akmods --force --kernels "${KERNEL}" --kmod xpadneo
 modinfo /usr/lib/modules/${KERNEL}/extra/xpadneo/hid-xpadneo.ko.xz > /dev/null \

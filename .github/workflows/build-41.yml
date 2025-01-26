@@ -1,4 +1,4 @@
-name: ublue akmods 39
+name: ublue akmods 41
 on:
   merge_group:
   pull_request:
@@ -7,7 +7,7 @@ on:
     paths-ignore:
       - '**.md'
   schedule:
-    - cron: '0 2 * * *'  # 2am-ish UTC everyday (timed against official fedora container pushes, and after 'config')
+    - cron: '15 0 * * *'  # 10 minutes after kernel-cache
   workflow_dispatch:
 
 jobs:
@@ -16,4 +16,4 @@ jobs:
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     with:
-      fedora_version: 39
+      fedora_version: 41

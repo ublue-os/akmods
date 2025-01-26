@@ -1,5 +1,5 @@
 ###
-### Containerfile.extra - used to build extra kmods
+### Containerfile.nvidia - used to build ONLY NVIDIA kmods
 ###
 
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-40}"
@@ -17,45 +17,38 @@ ARG KERNEL_FLAVOR="${KERNEL_FLAVOR:-main}"
 ARG RPMFUSION_MIRROR=""
 ARG DUAL_SIGN="true"
 
-COPY build_files/extra build_files/shared /tmp/
+COPY build*.sh dual-sign*.sh /tmp/
 COPY certs /tmp/certs
 
 # cached kernel rpms
 COPY --from=kernel_cache /tmp/rpms /tmp/kernel_cache
 
-# files for akmods
-ADD https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${FEDORA_MAJOR_VERSION}/ublue-os-akmods-fedora-${FEDORA_MAJOR_VERSION}.repo \
-    /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo
-ADD https://negativo17.org/repos/fedora-multimedia.repo \
-    /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo
+# files for nvidia
+COPY ublue-os-nvidia-addons.spec /tmp/ublue-os-nvidia-addons/ublue-os-nvidia-addons.spec
+COPY ublue-os-ucore-nvidia.spec /tmp/ublue-os-ucore-nvidia/ublue-os-ucore-nvidia.spec
+COPY files/etc/sway/environment /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/environment
+COPY files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/ublue-nvctk-cdi.service
+COPY files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/ublue-os-ucore-nvidia/rpmbuild/SOURCES/ublue-nvctk-cdi.service
+COPY files/usr/lib/systemd/system-preset/70-ublue-nvctk-cdi.preset /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/70-ublue-nvctk-cdi.preset
+COPY files/usr/lib/systemd/system-preset/70-ublue-nvctk-cdi.preset /tmp/ublue-os-ucore-nvidia/rpmbuild/SOURCES/70-ublue-nvctk-cdi.preset
+COPY files/etc/udev/rules.d/60-nvidia-extra-devices-pm.rules /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/60-nvidia-extra-devices-pm.rules
 
 RUN --mount=type=cache,dst=/var/cache/dnf \
     /tmp/build-prep.sh && \
+    if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]]; then \
+      /tmp/build-ublue-os-ucore-nvidia.sh && \
+      cp /tmp/ublue-os-ucore-nvidia/rpmbuild/RPMS/noarch/ublue-os-ucore-nvidia*.rpm \
+        /var/cache/rpms/ucore/ \
+    ; fi && \
+    /tmp/build-ublue-os-nvidia-addons.sh && \
+    cp /tmp/ublue-os-nvidia-addons/rpmbuild/RPMS/noarch/ublue-os-nvidia-addons*.rpm \
+      /var/cache/rpms/ublue-os/ && \
     if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
-        export KERNEL_NAME="kernel" \
+       export KERNEL_NAME="kernel" \
     ; else \
-        export KERNEL_NAME="kernel-surface" \
+       export KERNEL_NAME="kernel-surface" \
     ; fi && \
-    if grep -qv "asus" <<< "${KERNEL_FLAVOR}"; then \
-        /tmp/build-kmod-zenergy.sh && \
-        /tmp/build-kmod-evdi.sh \
-    ; fi && \
-    if [[ "${FEDORA_MAJOR_VERSION}" -ge 41 ]]; then \
-        /tmp/build-kmod-gpd-fan.sh \
-    ; fi && \
-    /tmp/build-kmod-ayaneo-platform.sh && \
-    /tmp/build-kmod-ayn-platform.sh && \
-    /tmp/build-kmod-bmi260.sh && \
-    /tmp/build-kmod-facetimehd.sh && \
-    /tmp/build-kmod-gcadapter_oc.sh && \
-    /tmp/build-kmod-nct6687d.sh && \
-    /tmp/build-kmod-rtl8814au.sh && \
-    /tmp/build-kmod-rtl88xxau.sh && \
-    /tmp/build-kmod-system76.sh && \
-    /tmp/build-kmod-system76-io.sh && \
-    /tmp/build-kmod-ryzen-smu.sh && \
-    /tmp/build-kmod-vhba.sh && \
-    /tmp/build-kmod-VirtualBox.sh && \
+    /tmp/build-kmod-nvidia.sh kernel-open && \
     /tmp/dual-sign.sh && \
     for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do \
         cp "${RPM}" /var/cache/rpms/kmods/; \
