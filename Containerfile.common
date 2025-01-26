@@ -24,8 +24,6 @@ COPY certs /tmp/certs
 COPY --from=kernel_cache /tmp/rpms /tmp/kernel_cache
 
 # files for akmods
-COPY ublue-os-akmods-addons.spec /tmp/ublue-os-akmods-addons/ublue-os-akmods-addons.spec
-COPY ublue-os-ucore-addons.spec /tmp/ublue-os-ucore-addons/ublue-os-ucore-addons.spec
 ADD https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${FEDORA_MAJOR_VERSION}/ublue-os-akmods-fedora-${FEDORA_MAJOR_VERSION}.repo \
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo
 ADD https://negativo17.org/repos/fedora-multimedia.repo \

@@ -24,8 +24,6 @@ COPY certs /tmp/certs
 COPY --from=kernel_cache /tmp/rpms /tmp/kernel_cache
 
 # files for nvidia
-COPY ublue-os-nvidia-addons.spec /tmp/ublue-os-nvidia-addons/ublue-os-nvidia-addons.spec
-COPY ublue-os-ucore-nvidia.spec /tmp/ublue-os-ucore-nvidia/ublue-os-ucore-nvidia.spec
 COPY files/etc/sway/environment /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/environment
 COPY files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/ublue-nvctk-cdi.service
 COPY files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/ublue-os-ucore-nvidia/rpmbuild/SOURCES/ublue-nvctk-cdi.service

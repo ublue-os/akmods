@@ -18,7 +18,7 @@ ARG DUAL_SIGN="true"
 ARG RPMFUSION_MIRROR=""
 ARG ZFS_MINOR_VERSION="${ZFS_MINOR_VERSION:-2.2}"
 
-COPY build*.sh dual-sign*.sh /tmp/
+COPY build_files/zfs build_files/shared /tmp/
 COPY certs /tmp/certs
 
 # cached kernel rpms

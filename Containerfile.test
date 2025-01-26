@@ -21,8 +21,7 @@ ARG KERNEL_FLAVOR="${KERNEL_FLAVOR:-main}"
 ARG RPMFUSION_MIRROR=""
 ARG DUAL_SIGN="true"
 
-COPY test-prep.sh dual-sign-check.sh /tmp/
-COPY check-signatures.sh /
+COPY build_files/shared /tmp/
 COPY certs /tmp/certs
 
 # cached kernel rpms
@@ -37,4 +36,4 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     ; fi && \
     /tmp/test-prep.sh
 
-CMD ["/check-signatures.sh"]
+CMD ["/tmp/check-signatures.sh"]
