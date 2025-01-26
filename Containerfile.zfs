@@ -33,9 +33,8 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
         export KERNEL_NAME="kernel-surface" \
     ; fi && \
     /tmp/build-kmod-zfs.sh && \
-    /tmp/dual-sign-zfs.sh
-
-RUN /tmp/build-post.sh
+    /tmp/dual-sign-zfs.sh && \
+    /tmp/build-post.sh
 
 FROM scratch
 

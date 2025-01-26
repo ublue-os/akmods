@@ -47,9 +47,8 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
        export KERNEL_NAME="kernel-surface" \
     ; fi && \
     /tmp/build-kmod-nvidia.sh kernel-open && \
-    /tmp/dual-sign.sh
-
-RUN /tmp/build-post.sh
+    /tmp/dual-sign.sh && \
+    /tmp/build-post.sh
 
 FROM scratch
 
