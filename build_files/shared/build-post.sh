@@ -18,7 +18,7 @@ fi
 # Remove kernel version from kmod package names
 # FIXME: The sed is a gross hack, maybe PR upstream?
 sed -i -e 's/args = \["rpmbuild", "-bb"\]/args = \["rpmbuild", "-bb", "--buildroot", "#{build_path}\/BUILD"\]/g' /usr/local/share/gems/gems/fpm-*/lib/fpm/package/rpm.rb
-kernel_version=$(rpm -q --qf "%{VERSION}-%{RELEASE}.%{ARCH}\n" kernel-core | head -n 1)
+kernel_version=$(rpm -q --qf "%{VERSION}-%{RELEASE}.%{ARCH}\n" "${KERNEL_NAME}" | head -n 1)
 for rpm in $(find /var/cache/rpms/kmods -type f -name \*.rpm); do
     basename=$(basename ${rpm})
     name=${basename%%-${kernel_version}*}

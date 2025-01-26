@@ -30,12 +30,12 @@ ADD https://negativo17.org/repos/fedora-multimedia.repo \
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo
 
 RUN --mount=type=cache,dst=/var/cache/dnf \
-    /tmp/build-prep.sh && \
     if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
         export KERNEL_NAME="kernel" \
     ; else \
         export KERNEL_NAME="kernel-surface" \
     ; fi && \
+    /tmp/build-prep.sh && \
     if grep -qv "asus" <<< "${KERNEL_FLAVOR}"; then \
         /tmp/build-kmod-zenergy.sh && \
         /tmp/build-kmod-evdi.sh \

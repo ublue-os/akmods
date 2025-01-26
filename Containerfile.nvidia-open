@@ -32,6 +32,11 @@ COPY files/usr/lib/systemd/system-preset/70-ublue-nvctk-cdi.preset /tmp/ublue-os
 COPY files/etc/udev/rules.d/60-nvidia-extra-devices-pm.rules /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/60-nvidia-extra-devices-pm.rules
 
 RUN --mount=type=cache,dst=/var/cache/dnf \
+    if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
+       export KERNEL_NAME="kernel" \
+    ; else \
+       export KERNEL_NAME="kernel-surface" \
+    ; fi && \
     /tmp/build-prep.sh && \
     if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]]; then \
       /tmp/build-ublue-os-ucore-nvidia.sh && \
@@ -41,11 +46,6 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     /tmp/build-ublue-os-nvidia-addons.sh && \
     cp /tmp/ublue-os-nvidia-addons/rpmbuild/RPMS/noarch/ublue-os-nvidia-addons*.rpm \
       /var/cache/rpms/ublue-os/ && \
-    if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
-       export KERNEL_NAME="kernel" \
-    ; else \
-       export KERNEL_NAME="kernel-surface" \
-    ; fi && \
     /tmp/build-kmod-nvidia.sh kernel-open && \
     /tmp/dual-sign.sh && \
     /tmp/build-post.sh

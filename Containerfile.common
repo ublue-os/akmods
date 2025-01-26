@@ -30,6 +30,11 @@ ADD https://negativo17.org/repos/fedora-multimedia.repo \
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo
 
 RUN --mount=type=cache,dst=/var/cache/dnf \
+    if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
+        export KERNEL_NAME="kernel" \
+    ; else \
+        export KERNEL_NAME="kernel-surface" \
+    ; fi && \
     /tmp/build-prep.sh && \
     if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]]; then \
       /tmp/build-ublue-os-ucore-addons.sh && \
@@ -39,11 +44,6 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     /tmp/build-ublue-os-akmods-addons.sh && \
     cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm \
       /var/cache/rpms/ublue-os/ && \
-    if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
-        export KERNEL_NAME="kernel" \
-    ; else \
-        export KERNEL_NAME="kernel-surface" \
-    ; fi && \
     /tmp/build-kmod-framework-laptop.sh && \
     /tmp/build-kmod-kvmfr.sh && \
     /tmp/build-kmod-openrazer.sh && \

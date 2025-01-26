@@ -26,12 +26,12 @@ COPY --from=kernel_cache /tmp/rpms /tmp/kernel_cache
 
 # Set kernel name
 RUN --mount=type=cache,dst=/var/cache/dnf \
-    /tmp/build-prep.sh && \
     if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
         export KERNEL_NAME="kernel" \
     ; else \
         export KERNEL_NAME="kernel-surface" \
     ; fi && \
+    /tmp/build-prep.sh && \
     /tmp/build-kmod-zfs.sh && \
     /tmp/dual-sign-zfs.sh && \
     /tmp/build-post.sh
