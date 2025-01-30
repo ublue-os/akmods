@@ -180,8 +180,8 @@ if [[ ${DUAL_SIGN:-} == "true" ]]; then
 fi
 
 find "${CKWD}"
-find /root/rpmbuild
-ln -s / "${CKWD}"/buildroot
+find /root/
+#ln -s / "${CKWD}"/buildroot
 
 # Rebuild RPMs and Verify
 if [[ "${kernel_flavor}" =~ surface ]]; then
