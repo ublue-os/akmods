@@ -180,8 +180,7 @@ if [[ ${DUAL_SIGN:-} == "true" ]]; then
 fi
 
 find "${CKWD}"
-find /root/
-#ln -s / "${CKWD}"/buildroot
+find /github/home/rpmbuild/RPMS
 
 # Rebuild RPMs and Verify
 if [[ "${kernel_flavor}" =~ surface ]]; then
@@ -192,7 +191,7 @@ if [[ "${kernel_flavor}" =~ surface ]]; then
         ./kernel-surface-modules-"$kernel_version".rpm \
         ./kernel-surface-modules-core-"$kernel_version".rpm \
         ./kernel-surface-modules-extra-"$kernel_version".rpm \
-        /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
+        /github/home/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
 else
     rpmrebuild --additional=--buildroot="${CKWD}"/buildroot --batch kernel-core-"${kernel_version}"
     rm -f /usr/lib/modules/"${kernel_version}"/vmlinuz
@@ -201,7 +200,7 @@ else
         ./kernel-modules-"$kernel_version".rpm \
         ./kernel-modules-core-"$kernel_version".rpm \
         ./kernel-modules-extra-"$kernel_version".rpm \
-        /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
+        /github/home/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
 fi
 
 sbverify --list /usr/lib/modules/"${kernel_version}"/vmlinuz
@@ -211,7 +210,7 @@ mkdir -p "${CKWD}"/rpms
 
 # Move RPMs over
 mv ./kernel-*.rpm "${CKWD}"/rpms
-mv /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm "${CKWD}"/rpms
+mv /github/home/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm "${CKWD}"/rpms
 
 if [[ "${kernel_flavor}" =~ surface ]]; then
     cp iptsd-*.rpm libwacom-*.rpm "${CKWD}"/rpms
