@@ -179,6 +179,8 @@ if [[ ${DUAL_SIGN:-} == "true" ]]; then
     rm -f "$SECOND_PRIVATE_KEY_PATH" "$SECOND_PUBLIC_KEY_PATH"
 fi
 
+find "${CKWD}"
+find /root/rpmbuild
 ln -s / "${CKWD}"/buildroot
 
 # Rebuild RPMs and Verify
