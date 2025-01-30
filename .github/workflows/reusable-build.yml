@@ -172,7 +172,7 @@ jobs:
 
             echo "kernel_release=${linux}" >> $GITHUB_OUTPUT
             echo "kernel_build_tag=${build_tag}" >> $GITHUB_OUTPUT
-            echo "CKKEY=${{ matrix.kernel_flavor }}-${linux}" >> $GIBHUB_OUTPUT
+            echo "CKKEY=${{ matrix.kernel_flavor }}-${linux}" >> $GITHUB_OUTPUT
 
       - name: Cache Kernel RPMs
         id: cache-kernel
