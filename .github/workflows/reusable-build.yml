@@ -46,10 +46,11 @@ jobs:
 
       - name: Install Tools
         run: |
-          dnf install -y \
+          dnf -y install --setopt=install_weak_deps=False \
             curl \
             dnf-plugins-core \
             jq \
+            openssl \
             rpmrebuild \
             sbsigntools \
             skopeo
