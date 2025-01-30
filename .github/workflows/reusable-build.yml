@@ -192,7 +192,7 @@ jobs:
           cd ${{ env.CKWD }}
           find ${{ env.CKWD }}
 
-          bash -x CKWD=${{ env.CKWD }} ./fetch-kernel.sh
+          bash -x ./fetch-kernel.sh ${{ env.CKWD }}
 
           find ${{ env.CKWD }}
 

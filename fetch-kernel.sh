@@ -2,6 +2,8 @@
 
 set -eoux pipefail
 
+CKWD=${1}
+
 mkdir -p "${CKWD}"/downloads
 cd "${CKWD}"/downloads
 
