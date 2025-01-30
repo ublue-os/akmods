@@ -180,7 +180,6 @@ if [[ ${DUAL_SIGN:-} == "true" ]]; then
 fi
 
 find "${CKWD}"
-find /github/home/rpmbuild
 
 # Rebuild RPMs and Verify
 if [[ "${kernel_flavor}" =~ surface ]]; then
