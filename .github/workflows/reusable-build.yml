@@ -318,6 +318,23 @@ jobs:
           echo "Kernel Cache not found for key: ${{ needs.cache-kernel.outputs.CKKEY }}"
           exit 1
 
+      - name: Get Cached Kernel Date/Version
+        shell: bash
+        run: |
+          set -exo pipefail
+
+          find /tmp
+          # how can the Cache be restored to ${{ env.CKPATH }} but there not exist anything there?
+          KCDATE=$(cat ${{ env.CKPATH }}/kernel-cache-date)
+          if [ -z "${KCDATE}" ]; then
+            echo "kernel-cache-date must not be empty"
+          fi
+          if [ -z "${{ env.KERNEL_VERSION }}" ]; then
+            echo "KERNEL_VERSION must not be empty"
+          fi
+          KERNEL_IMAGE_VERSION=${{ env.KERNEL_VERSION }}-${date}
+          echo "KERNEL_IMAGE_VERSION=$img_version" >> $GITHUB_ENV
+
       - name: Matrix Variables
         shell: bash
         run: |
@@ -329,22 +346,6 @@ jobs:
           export BUILDER_IMAGE=quay.io/fedora/fedora
           echo "BUILDER_IMAGE=${BUILDER_IMAGE}" >> $GITHUB_ENV
           echo "FQ_BUILDER_IMAGE=${BUILDER_IMAGE}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
-
-      - name: Get Cached Kernel Date/Version
-        shell: bash
-        run: |
-          set -exo pipefail
-
-          find ${{ env.CKPATH }}
-          KCDATE=$(cat ${{ env.CKPATH }}/kernel-cache-date)
-          if [ -z "${KCDATE}" ]; then
-            echo "kernel-cache-date must not be empty"
-          fi
-          if [ -z "${{ env.KERNEL_VERSION }}" ]; then
-            echo "KERNEL_VERSION must not be empty"
-          fi
-          KERNEL_IMAGE_VERSION=${{ env.KERNEL_VERSION }}-${date}
-          echo "KERNEL_IMAGE_VERSION=$img_version" >> $GITHUB_ENV
 
       - name: AppArmor Disable
         run: |
