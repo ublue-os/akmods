@@ -313,7 +313,7 @@ jobs:
           key: ${{ needs.cache-kernel.outputs.CKKEY }}
 
       - name: Fail Absent Kernel Cache
-        if: steps.cache-kernel.outputs.cache-hit = 'false'
+        if: steps.cache-kernel.outputs.cache-hit != 'true'
         run: |
           echo "Kernel Cache not found for key: ${{ needs.cache-kernel.outputs.CKKEY }}"
           exit 1
