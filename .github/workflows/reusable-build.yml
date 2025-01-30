@@ -50,8 +50,8 @@ jobs:
             curl \
             dnf-plugins-core \
             jq \
-            rpmrebuild
-            sbsigntools
+            rpmrebuild \
+            sbsigntools \
             skopeo
 
       - name: Get Kernel Version
