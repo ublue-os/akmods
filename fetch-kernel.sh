@@ -95,19 +95,19 @@ if [[ "${kernel_flavor}" =~ fsync|fsync-ba ]]; then
         kernel-headers-"${kernel_version}"
 fi
 
-if [[ ! -s /tmp/certs/private_key.priv ]]; then
+if [[ ! -s /tmp/cache-kernel/certs/private_key.priv ]]; then
     echo "WARNING: Using test signing key."
-    cp /tmp/certs/private_key.priv{.test,}
-    cp /tmp/certs/public_key.der{.test,}
+    cp /tmp/cache-kernel/certs/private_key.priv{.test,}
+    cp /tmp/cache-kernel/certs/public_key.der{.test,}
 fi
 
 PUBLIC_KEY_PATH="/etc/pki/kernel/public/public_key.crt"
 PRIVATE_KEY_PATH="/etc/pki/kernel/private/private_key.priv"
 
-openssl x509 -in /tmp/certs/public_key.der -out /tmp/certs/public_key.crt
+openssl x509 -in /tmp/cache-kernel/certs/public_key.der -out /tmp/cache-kernel/certs/public_key.crt
 
-install -Dm644 /tmp/certs/public_key.crt "$PUBLIC_KEY_PATH"
-install -Dm644 /tmp/certs/private_key.priv "$PRIVATE_KEY_PATH"
+install -Dm644 /tmp/cache-kernel/certs/public_key.crt "$PUBLIC_KEY_PATH"
+install -Dm644 /tmp/cache-kernel/certs/private_key.priv "$PRIVATE_KEY_PATH"
 
 ls -la /
 if [[ "${kernel_flavor}" =~ asus|fsync|fsync-ba ]]; then
@@ -164,25 +164,25 @@ rm -f "$PRIVATE_KEY_PATH" "$PUBLIC_KEY_PATH"
 if [[ ${DUAL_SIGN:-} == "true" ]]; then
     SECOND_PUBLIC_KEY_PATH="/etc/pki/kernel/public/public_key_2.crt"
     SECOND_PRIVATE_KEY_PATH="/etc/pki/kernel/private/public_key_2.priv"
-    if [[ ! -s /tmp/certs/private_key_2.priv ]]; then
+    if [[ ! -s /tmp/cache-kernel/certs/private_key_2.priv ]]; then
         echo "WARNING: Using test signing key."
-        cp /tmp/certs/private_key_2.priv{.test,}
-        cp /tmp/certs/public_key_2.der{.test,}
-        find /tmp/certs/
+        cp /tmp/cache-kernel/certs/private_key_2.priv{.test,}
+        cp /tmp/cache-kernel/certs/public_key_2.der{.test,}
+        find /tmp/cache-kernel/certs/
     fi
-    openssl x509 -in /tmp/certs/public_key_2.der -out /tmp/certs/public_key_2.crt
-    install -Dm644 /tmp/certs/public_key_2.crt "$SECOND_PUBLIC_KEY_PATH"
-    install -Dm644 /tmp/certs/private_key_2.priv "$SECOND_PRIVATE_KEY_PATH"
+    openssl x509 -in /tmp/cache-kernel/certs/public_key_2.der -out /tmp/cache-kernel/certs/public_key_2.crt
+    install -Dm644 /tmp/cache-kernel/certs/public_key_2.crt "$SECOND_PUBLIC_KEY_PATH"
+    install -Dm644 /tmp/cache-kernel/certs/private_key_2.priv "$SECOND_PRIVATE_KEY_PATH"
     sbsign --cert "$SECOND_PUBLIC_KEY_PATH" --key "$SECOND_PRIVATE_KEY_PATH" /usr/lib/modules/"${kernel_version}"/vmlinuz --output /usr/lib/modules/"${kernel_version}"/vmlinuz
     sbverify --list /usr/lib/modules/"${kernel_version}"/vmlinuz
     rm -f "$SECOND_PRIVATE_KEY_PATH" "$SECOND_PUBLIC_KEY_PATH"
 fi
 
-ln -s / /tmp/buildroot
+ln -s / /tmp/cache-kernel/buildroot
 
 # Rebuild RPMs and Verify
 if [[ "${kernel_flavor}" =~ surface ]]; then
-    rpmrebuild --additional=--buildroot=/tmp/buildroot --batch kernel-surface-core-"${kernel_version}"
+    rpmrebuild --additional=--buildroot=/tmp/cache-kernel/buildroot --batch kernel-surface-core-"${kernel_version}"
     rm -f /usr/lib/modules/"${kernel_version}"/vmlinuz
     dnf reinstall -y \
         /kernel-surface-"$kernel_version".rpm \
@@ -191,7 +191,7 @@ if [[ "${kernel_flavor}" =~ surface ]]; then
         /kernel-surface-modules-extra-"$kernel_version".rpm \
         /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
 else
-    rpmrebuild --additional=--buildroot=/tmp/buildroot --batch kernel-core-"${kernel_version}"
+    rpmrebuild --additional=--buildroot=/tmp/cache-kernel/buildroot --batch kernel-core-"${kernel_version}"
     rm -f /usr/lib/modules/"${kernel_version}"/vmlinuz
     dnf reinstall -y \
         /kernel-"$kernel_version".rpm \
@@ -204,15 +204,15 @@ fi
 sbverify --list /usr/lib/modules/"${kernel_version}"/vmlinuz
 
 # Make Temp Dir
-mkdir -p /tmp/rpms
+mkdir -p /tmp/cache-kernel/rpms
 
 # Move RPMs over
-mv /kernel-*.rpm /tmp/rpms
-mv /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm /tmp/rpms
+mv /kernel-*.rpm /tmp/cache-kernel/rpms
+mv /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm /tmp/cache-kernel/rpms
 
 if [[ "${kernel_flavor}" =~ surface ]]; then
-    cp iptsd-*.rpm libwacom-*.rpm /tmp/rpms
+    cp iptsd-*.rpm libwacom-*.rpm /tmp/cache-kernel/rpms
 fi
 
 # Delete keys in /tmp if we decide to publish this later
-rm -rf /tmp/certs
+rm -rf /tmp/cache-kernel/certs
