@@ -1,14 +1,14 @@
 name: ublue akmods 40
 on:
-  merge_group:
-  pull_request:
-    branches:
-      - main
-    paths-ignore:
-      - '**.md'
-  schedule:
-    - cron: '15 0 * * *'  # 10 minutes after kernel-cache
-  workflow_dispatch:
+  #merge_group:
+  #pull_request:
+  #  branches:
+  #    - main
+  #  paths-ignore:
+  #    - '**.md'
+  #schedule:
+  #  - cron: '15 0 * * *'  # 10 minutes after kernel-cache
+  #workflow_dispatch:
 
 jobs:
   build:

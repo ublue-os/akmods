@@ -11,9 +11,20 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: build
+  kernel-akmods:
+    name: Cache Kernel & Build Kmods
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
+    strategy:
+      fail-fast: false
+      matrix:
+        kernel_flavor:
+          - asus
+          - bazzite
+          - surface
+          - main
+          - coreos-stable
+          - coreos-testing
     with:
       fedora_version: 41
+      image_flavor: ${{ matrix.image_flavor }}

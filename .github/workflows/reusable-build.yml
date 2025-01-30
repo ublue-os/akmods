@@ -3,7 +3,11 @@ on:
   workflow_call:
     inputs:
       fedora_version:
-        description: "The Fedora release version: 39, 40, etc"
+        description: "The Fedora release version: 40, 41, etc"
+        required: true
+        type: string
+      kernel_flavor:
+        description: "The Kernel flavor: main, bazzite, coreos-stable, etc"
         required: true
         type: string
 env:
@@ -11,13 +15,232 @@ env:
   IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}-${{ inputs.fedora_version }}
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}-${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}
   cancel-in-progress: true
 
 jobs:
-  build_ublue:
-    name: akmods
+  cache-kernel:
+    name: Prime kernel cache for ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        fedora_version:
+          - ${{ inputs.fedora_version }}
+        kernel_flavor:
+          - ${{ inputs.kernel_flavor }}
+        exclude:
+          - fedora_version: 40
+            kernel_flavor: asus
+          - fedora_version: 40
+            kernel_flavor: bazzite
+
+    steps:
+      - name: Checkout Push to Registry action
+        uses: actions/checkout@v4
+
+      - name: Pull Image
+        uses: Wandalen/wretry.action@v3.7.3
+        with:
+          attempt_limit: 3
+          attempt_delay: 15000
+          command: |
+            build_image="quay.io/fedora/fedora:${{ matrix.fedora_version }}"
+            echo "build_image=$build_image" >> "$GITHUB_ENV"
+            podman pull "$build_image"
+
+      - name: Get Kernel Version
+        id: Version
+        uses: Wandalen/wretry.action@v3.7.3
+        with:
+          attempt_limit: 3
+          attempt_delay: 15000
+          command: |
+            if [[ ${{ matrix.kernel_flavor }} =~ asus|fsync|fsync-ba|surface ]]; then
+              container_name="fq-$(uuidgen)"
+              dnf="podman exec $container_name dnf"
+
+              podman run --entrypoint /bin/bash --name "$container_name" -dt "${{ env.build_image }}"
+              $dnf install -y dnf-plugins-core
+            fi
+
+            coreos_kernel () {
+              coreos_version=${1}
+              image_linux=$(skopeo inspect docker://quay.io/fedora/fedora-coreos:${coreos_version} | jq -r '.Labels["ostree.linux"]')
+              # Pin a kernel here, gross workaround TODO: Make this cleaner
+              # if [[ "${{ matrix.kernel_flavor }}" == "coreos-stable" ]]; then
+              #    image_linux="6.11.3-300.fc41.x86_64"
+              # fi
+              major_minor_patch=$(echo $image_linux | grep -oP '^\d+\.\d+\.\d+')
+              kernel_rel_part=$(echo $image_linux | grep -oP '^\d+\.\d+\.\d+\-\K([123][0]{2})')
+              arch=$(echo $image_linux | grep -oP 'fc\d+\.\K.*$')
+
+              kernel_rel="$kernel_rel_part.fc${{ matrix.fedora_version }}"
+              kernel_version="$major_minor_patch-$kernel_rel.$arch"
+              URL="https://kojipkgs.fedoraproject.org/packages/kernel/"$major_minor_patch"/"$kernel_rel"/"$arch"/kernel-"$kernel_version".rpm"
+              echo "Querying koji for ${coreos_version} kernel: $kernel_version"
+              echo "$URL"
+              HTTP_RESP=$(curl -sI "$URL" | grep ^HTTP)
+              linux=""
+              if grep -qv "200 OK" <<< "${HTTP_RESP}"; then
+                echo "Koji failed to find $coreos_version kernel: $kernel_version"
+                case "$kernel_rel_part" in
+                  "300")
+                    kernel_rel_part="200"
+                    ;;
+                  "200")
+                    kernel_rel_part="100"
+                    ;;
+                  "100")
+                    ;;
+                  *)
+                    echo "unexpected kernel_rel_part ${kernel_rel_part}"
+                    ;;
+                esac
+                kernel_rel="$kernel_rel_part.fc${{ matrix.fedora_version }}"
+                kernel_version="$major_minor_patch-$kernel_rel.$arch"
+                URL="https://kojipkgs.fedoraproject.org/packages/kernel/"$major_minor_patch"/"$kernel_rel"/"$arch"/kernel-"$kernel_version".rpm"
+                echo "Re-querying koji for ${coreos_version} kernel: $kernel_version"
+                echo "$URL"
+                HTTP_RESP=$(curl -sI "$URL" | grep ^HTTP)
+                if grep -qv "200 OK" <<< "${HTTP_RESP}"; then
+                  echo "Koji failed to find $coreos_version kernel: $kernel_version"
+                fi
+              fi
+              if grep -q "200 OK" <<< "${HTTP_RESP}"; then
+                linux=$kernel_version
+              fi
+            }
+
+            case ${{ matrix.kernel_flavor }} in
+              "asus")
+                $dnf copr enable -y lukenukem/asus-kernel
+                linux=$($dnf repoquery --repoid copr:copr.fedorainfracloud.org:lukenukem:asus-kernel --whatprovides kernel | sort -V | tail -n1 | sed 's/.*://')
+                ;;
+              "fsync")
+                $dnf copr enable -y sentry/kernel-fsync
+                linux=$($dnf repoquery --repoid copr:copr.fedorainfracloud.org:sentry:kernel-fsync --whatprovides kernel | sort -V | tail -n1 | sed 's/.*://')
+                ;;
+              "fsync-ba")
+                $dnf copr enable -y sentry/kernel-ba
+                linux=$($dnf repoquery --repoid copr:copr.fedorainfracloud.org:sentry:kernel-ba --whatprovides kernel | sort -V | tail -n1 | sed 's/.*://')
+                ;;
+              "bazzite")
+                latest="$(curl "https://api.github.com/repos/hhd-dev/kernel-bazzite/releases/latest" )"
+                linux=$(echo -E "$latest" | jq -r '.assets[].name' | grep -E 'kernel-.*.rpm' | grep "fc${{ matrix.fedora_version }}.x86_64" | head -1 | sed "s/kernel-//g" | sed "s/.rpm//g" )
+                build_tag=$(echo -E $latest | jq -r '.tag_name')
+                ;;
+              "surface")
+                if [[ "${{ matrix.fedora_version }}" < 41 ]]; then
+                $dnf config-manager --add-repo=https://pkg.surfacelinux.com/fedora/linux-surface.repo
+                else
+                $dnf config-manager addrepo --from-repofile=https://pkg.surfacelinux.com/fedora/linux-surface.repo
+                fi
+                linux=$($dnf repoquery --repoid linux-surface --whatprovides kernel-surface | sort -V | tail -n1 | sed 's/.*://')
+
+                ;;
+              "main")
+                base_image_name="base"
+                if [[ ${{ matrix.fedora_version }} > 40 ]]; then
+                  base_image_name+="-atomic"
+                fi
+                linux=$(skopeo inspect docker://quay.io/fedora-ostree-desktops/$base_image_name:${{ matrix.fedora_version }} | jq -r '.Labels["ostree.linux"]' )
+                ;;
+              "coreos-stable")
+                coreos_kernel stable
+                ;;
+              "coreos-testing")
+                coreos_kernel testing
+                ;;
+              *)
+                echo "unexpected kernel_flavor '${{ matrix.kernel_flavor }}' for query"
+                ;;
+              esac
+              if [ -z "$linux" ] || [ "null" = "$linux" ]; then
+                echo "inspected image linux version must not be empty or null"
+                exit 1
+              fi
+              major=$(echo "$linux" | cut -d '.' -f 1)
+              minor=$(echo "$linux" | cut -d '.' -f 2)
+              patch=$(echo "$linux" | cut -d '.' -f 3)
+              kernel_major_minor_patch="${major}.${minor}.${patch}"
+              echo "Kernel Version is ${linux}"
+              echo "kernel_release=${linux}" >> $GITHUB_ENV
+              echo "kernel_build_tag=${build_tag}" >> $GITHUB_ENV
+              echo "kernel_major_minor_patch=${kernel_major_minor_patch}" >> $GITHUB_ENV
+
+      - name: Retrieve Signing Key
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group'
+        shell: bash
+        run: |
+          mkdir -p certs
+          if [[ "${{ github.event_name }}"  == 'pull_request' ]]; then
+            echo "This should not have run... exiting..."
+            exit 1
+          else
+            echo "${{ secrets.KERNEL_PRIVKEY }}" > certs/private_key.priv
+            echo "${{ secrets.AKMOD_PRIVKEY_20230518 }}" > certs/private_key_2.priv
+            # DEBUG: get character count of key
+            wc -c certs/private_key.priv
+            wc -c certs/private_key_2.priv
+          fi
+
+      - name: Fetch and Sign Kernel Packages
+        id: build_image
+        shell: bash
+        run: |
+          export FEDORA_VERSION=${{ matrix.fedora_version }}
+          export KERNEL_VERSION=${{ env.kernel_release }}
+          export KERNEL_BUILD_TAG=${{ env.kernel_build_tag }}
+          export KERNEL_FLAVOR=${{ matrix.kernel_flavor }}
+          export DUAL_SIGN=true
+
+          cp -a certs /tmp/
+          find /tmp
+
+          bash -x ./fetch.sh
+
+          find /tmp/rpms
+
+
+      - name: Check Secureboot Signatures
+        shell: bash
+        run: |
+          set -x
+          if [[ ! $(command -v sbverify) || ! $(command -v curl) || ! $(command -v openssl) || ! $(command -v rpm2cpio) ]]; then
+            sudo apt update
+            sudo apt install sbsigntool curl openssl rpm2cpio
+          fi
+          #podman create --name "${{ matrix.kernel_flavor}}"-kernel-"$(echo "${{ steps.generate_tags.outputs.alias_tags }}" | cut -d " " -f 1)" "${{ matrix.kernel_flavor}}"-kernel:$(echo "${{ steps.generate_tags.outputs.alias_tags }}" | cut -d " " -f 1) sh
+          #podman export "${{ matrix.kernel_flavor}}"-kernel-"$(echo "${{ steps.generate_tags.outputs.alias_tags }}" | cut -d " " -f 1)" > /tmp/"${{ matrix.kernel_flavor}}"-kernel-"$(echo "${{ steps.generate_tags.outputs.alias_tags }}" | cut -d " " -f 1)".tar
+          #tar xvf /tmp/"${{ matrix.kernel_flavor}}"-kernel-"$(echo "${{ steps.generate_tags.outputs.alias_tags }}" | cut -d " " -f 1)".tar -C /tmp
+          cd /tmp/rpms/
+          if [[ "${{ matrix.kernel_flavor }}" == "surface" ]]; then
+            rpm2cpio kernel-surface-core-"${{ env.kernel_release }}".rpm | cpio -idmv
+          else
+            rpm2cpio kernel-core-"${{ env.kernel_release }}".rpm | cpio -idmv
+          fi
+          cd ./lib/modules/"${{ env.kernel_release }}"/
+          sbverify --list vmlinuz
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            curl --retry 3 -Lo kernel-sign.der https://github.com/ublue-os/kernel-cache/raw/main/certs/public_key.der.test
+            curl --retry 3 -Lo akmods.der https://github.com/ublue-os/kernel-cache/raw/main/certs/public_key_2.der.test
+          else
+            curl --retry 3 -Lo kernel-sign.der https://github.com/ublue-os/kernel-cache/raw/main/certs/public_key.der
+            curl --retry 3 -Lo akmods.der https://github.com/ublue-os/kernel-cache/raw/main/certs/public_key_2.der
+          fi
+          openssl x509 -in kernel-sign.der -out kernel-sign.crt
+          openssl x509 -in akmods.der -out akmods.crt
+          sbverify --cert kernel-sign.crt vmlinuz || exit 1
+          sbverify --cert akmods.crt vmlinuz || exit 1
+          cd $HOME
+
+          find /tmp/rpms/
+
+  build-akmods:
+    name: Build kmods for ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}
     runs-on: ubuntu-24.04 # Work Around Tar Bug
+    needs: [cache-kernel]
     permissions:
       contents: read
       packages: write
@@ -28,14 +251,7 @@ jobs:
         fedora_version:
           - ${{ inputs.fedora_version }}
         kernel_flavor:
-          - main
-          - asus
-          - fsync
-          - fsync-ba
-          - bazzite
-          - surface
-          - coreos-stable
-          - coreos-testing
+          - ${{ inputs.kernel_flavor }}
         cfile_suffix:
           - common
           - extra
@@ -43,35 +259,13 @@ jobs:
           - nvidia-open
           - zfs
         exclude:
-          - fedora_version: 39
-            kernel_flavor: coreos-stable
-          - fedora_version: 40
-            kernel_flavor: coreos-testing
-          - fedora_version: 41
-            kernel_flavor: fsync
-          - fedora_version: 41
-            kernel_flavor: fsync-ba
           - fedora_version: 40
             kernel_flavor: asus
           - fedora_version: 40
             kernel_flavor: bazzite
-          - fedora_version: 39
-            kernel_flavor: fsync
-          - fedora_version: 39
-            kernel_flavor: fsync-ba
-          - fedora_version: 39
-            kernel_flavor: bazzite
-          - fedora_version: 39
-            kernel_flavor: asus
-          - fedora_version: 39
-            kernel_flavor: coreos-testing
           - kernel_flavor: main
             cfile_suffix: zfs
           - kernel_flavor: asus
-            cfile_suffix: zfs
-          - kernel_flavor: fsync
-            cfile_suffix: zfs
-          - kernel_flavor: fsync-ba
             cfile_suffix: zfs
           - kernel_flavor: bazzite
             cfile_suffix: zfs
@@ -314,10 +508,10 @@ jobs:
   check:
     name: Check all ${{ inputs.fedora_version }} builds successful
     runs-on: ubuntu-latest
-    needs: [build_ublue]
+    needs: [build-akmods]
     steps:
       - name: Exit on failure
-        if: ${{ needs.build_ublue.result == 'failure' }}
+        if: ${{ needs.build-akmods.result == 'failure' }}
         shell: bash
         run: exit 1
       - name: Exit
