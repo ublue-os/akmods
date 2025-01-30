@@ -2,15 +2,14 @@
 
 set -eoux pipefail
 
+mkdir -p "${CKWD}"/downloads
+cd "${CKWD}"/downloads
+
 kernel_version="${KERNEL_VERSION}"
 kernel_flavor="${KERNEL_FLAVOR}"
 build_tag="${KERNEL_BUILD_TAG:-latest}"
 
-# CoreOS pool repo
-# curl -LsSf -o /etc/yum.repos.d/fedora-coreos-pool.repo \
-#     https://raw.githubusercontent.com/coreos/fedora-coreos-config/testing-devel/fedora-coreos-pool.repo
-
-dnf install -y dnf-plugins-core rpmrebuild sbsigntools openssl
+#dnf install -y dnf-plugins-core rpmrebuild sbsigntools openssl
 
 case "$kernel_flavor" in
     "asus")
@@ -23,10 +22,10 @@ case "$kernel_flavor" in
         dnf copr enable -y sentry/kernel-ba
         ;;
     "surface")
-       if [[ "$(rpm -E %fedora)" -lt 41 ]]; then
-                dnf config-manager --add-repo=https://pkg.surfacelinux.com/fedora/linux-surface.repo
-                else
-                dnf config-manager addrepo --from-repofile=https://pkg.surfacelinux.com/fedora/linux-surface.repo
+        if [[ "$(rpm -E %fedora)" -lt 41 ]]; then
+            dnf config-manager --add-repo=https://pkg.surfacelinux.com/fedora/linux-surface.repo
+        else
+            dnf config-manager addrepo --from-repofile=https://pkg.surfacelinux.com/fedora/linux-surface.repo
         fi
         ;;
     "coreos-stable")
@@ -95,48 +94,48 @@ if [[ "${kernel_flavor}" =~ fsync|fsync-ba ]]; then
         kernel-headers-"${kernel_version}"
 fi
 
-if [[ ! -s /tmp/cache-kernel/certs/private_key.priv ]]; then
+if [[ ! -s "${CKWD}"/certs/private_key.priv ]]; then
     echo "WARNING: Using test signing key."
-    cp /tmp/cache-kernel/certs/private_key.priv{.test,}
-    cp /tmp/cache-kernel/certs/public_key.der{.test,}
+    cp "${CKWD}"/certs/private_key.priv{.test,}
+    cp "${CKWD}"/certs/public_key.der{.test,}
 fi
 
 PUBLIC_KEY_PATH="/etc/pki/kernel/public/public_key.crt"
 PRIVATE_KEY_PATH="/etc/pki/kernel/private/private_key.priv"
 
-openssl x509 -in /tmp/cache-kernel/certs/public_key.der -out /tmp/cache-kernel/certs/public_key.crt
+openssl x509 -in "${CKWD}"/certs/public_key.der -out "${CKWD}"/certs/public_key.crt
 
-install -Dm644 /tmp/cache-kernel/certs/public_key.crt "$PUBLIC_KEY_PATH"
-install -Dm644 /tmp/cache-kernel/certs/private_key.priv "$PRIVATE_KEY_PATH"
+install -Dm644 "${CKWD}"/certs/public_key.crt "$PUBLIC_KEY_PATH"
+install -Dm644 "${CKWD}"/certs/private_key.priv "$PRIVATE_KEY_PATH"
 
 ls -la /
 if [[ "${kernel_flavor}" =~ asus|fsync|fsync-ba ]]; then
     dnf install -y \
-        /kernel-"$kernel_version".rpm \
-        /kernel-modules-"$kernel_version".rpm \
-        /kernel-modules-core-"$kernel_version".rpm \
-        /kernel-modules-extra-"$kernel_version".rpm \
+        ./kernel-"$kernel_version".rpm \
+        ./kernel-modules-"$kernel_version".rpm \
+        ./kernel-modules-core-"$kernel_version".rpm \
+        ./kernel-modules-extra-"$kernel_version".rpm \
         kernel-core-"${kernel_version}"
 elif [[ "${kernel_flavor}" =~ surface ]]; then
     dnf install -y \
-        /kernel-surface-"$kernel_version".rpm \
-        /kernel-surface-modules-"$kernel_version".rpm \
-        /kernel-surface-modules-core-"$kernel_version".rpm \
-        /kernel-surface-modules-extra-"$kernel_version".rpm \
+        ./kernel-surface-"$kernel_version".rpm \
+        ./kernel-surface-modules-"$kernel_version".rpm \
+        ./kernel-surface-modules-core-"$kernel_version".rpm \
+        ./kernel-surface-modules-extra-"$kernel_version".rpm \
         kernel-surface-core-"${kernel_version}"
 elif [[ "${kernel_flavor}" == "bazzite" ]]; then
     dnf install -y \
-        /kernel-"$kernel_version".rpm \
-        /kernel-core-"$kernel_version".rpm \
-        /kernel-modules-"$kernel_version".rpm \
-        /kernel-modules-core-"$kernel_version".rpm \
-        /kernel-modules-extra-"$kernel_version".rpm
+        ./kernel-"$kernel_version".rpm \
+        ./kernel-core-"$kernel_version".rpm \
+        ./kernel-modules-"$kernel_version".rpm \
+        ./kernel-modules-core-"$kernel_version".rpm \
+        ./kernel-modules-extra-"$kernel_version".rpm
 else
     dnf install -y \
-        /kernel-"$kernel_version".rpm \
-        /kernel-modules-"$kernel_version".rpm \
-        /kernel-modules-core-"$kernel_version".rpm \
-        /kernel-modules-extra-"$kernel_version".rpm \
+        ./kernel-"$kernel_version".rpm \
+        ./kernel-modules-"$kernel_version".rpm \
+        ./kernel-modules-core-"$kernel_version".rpm \
+        ./kernel-modules-extra-"$kernel_version".rpm \
         https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-core-"$kernel_version".rpm
 fi
 
@@ -164,55 +163,55 @@ rm -f "$PRIVATE_KEY_PATH" "$PUBLIC_KEY_PATH"
 if [[ ${DUAL_SIGN:-} == "true" ]]; then
     SECOND_PUBLIC_KEY_PATH="/etc/pki/kernel/public/public_key_2.crt"
     SECOND_PRIVATE_KEY_PATH="/etc/pki/kernel/private/public_key_2.priv"
-    if [[ ! -s /tmp/cache-kernel/certs/private_key_2.priv ]]; then
+    if [[ ! -s "${CKWD}"/certs/private_key_2.priv ]]; then
         echo "WARNING: Using test signing key."
-        cp /tmp/cache-kernel/certs/private_key_2.priv{.test,}
-        cp /tmp/cache-kernel/certs/public_key_2.der{.test,}
-        find /tmp/cache-kernel/certs/
+        cp "${CKWD}"/certs/private_key_2.priv{.test,}
+        cp "${CKWD}"/certs/public_key_2.der{.test,}
+        find "${CKWD}"/certs/
     fi
-    openssl x509 -in /tmp/cache-kernel/certs/public_key_2.der -out /tmp/cache-kernel/certs/public_key_2.crt
-    install -Dm644 /tmp/cache-kernel/certs/public_key_2.crt "$SECOND_PUBLIC_KEY_PATH"
-    install -Dm644 /tmp/cache-kernel/certs/private_key_2.priv "$SECOND_PRIVATE_KEY_PATH"
+    openssl x509 -in "${CKWD}"/certs/public_key_2.der -out "${CKWD}"/certs/public_key_2.crt
+    install -Dm644 "${CKWD}"/certs/public_key_2.crt "$SECOND_PUBLIC_KEY_PATH"
+    install -Dm644 "${CKWD}"/certs/private_key_2.priv "$SECOND_PRIVATE_KEY_PATH"
     sbsign --cert "$SECOND_PUBLIC_KEY_PATH" --key "$SECOND_PRIVATE_KEY_PATH" /usr/lib/modules/"${kernel_version}"/vmlinuz --output /usr/lib/modules/"${kernel_version}"/vmlinuz
     sbverify --list /usr/lib/modules/"${kernel_version}"/vmlinuz
     rm -f "$SECOND_PRIVATE_KEY_PATH" "$SECOND_PUBLIC_KEY_PATH"
 fi
 
-ln -s / /tmp/cache-kernel/buildroot
+ln -s / "${CKWD}"/buildroot
 
 # Rebuild RPMs and Verify
 if [[ "${kernel_flavor}" =~ surface ]]; then
-    rpmrebuild --additional=--buildroot=/tmp/cache-kernel/buildroot --batch kernel-surface-core-"${kernel_version}"
+    rpmrebuild --additional=--buildroot="${CKWD}"/buildroot --batch kernel-surface-core-"${kernel_version}"
     rm -f /usr/lib/modules/"${kernel_version}"/vmlinuz
     dnf reinstall -y \
-        /kernel-surface-"$kernel_version".rpm \
-        /kernel-surface-modules-"$kernel_version".rpm \
-        /kernel-surface-modules-core-"$kernel_version".rpm \
-        /kernel-surface-modules-extra-"$kernel_version".rpm \
+        ./kernel-surface-"$kernel_version".rpm \
+        ./kernel-surface-modules-"$kernel_version".rpm \
+        ./kernel-surface-modules-core-"$kernel_version".rpm \
+        ./kernel-surface-modules-extra-"$kernel_version".rpm \
         /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
 else
-    rpmrebuild --additional=--buildroot=/tmp/cache-kernel/buildroot --batch kernel-core-"${kernel_version}"
+    rpmrebuild --additional=--buildroot="${CKWD}"/buildroot --batch kernel-core-"${kernel_version}"
     rm -f /usr/lib/modules/"${kernel_version}"/vmlinuz
     dnf reinstall -y \
-        /kernel-"$kernel_version".rpm \
-        /kernel-modules-"$kernel_version".rpm \
-        /kernel-modules-core-"$kernel_version".rpm \
-        /kernel-modules-extra-"$kernel_version".rpm \
+        ./kernel-"$kernel_version".rpm \
+        ./kernel-modules-"$kernel_version".rpm \
+        ./kernel-modules-core-"$kernel_version".rpm \
+        ./kernel-modules-extra-"$kernel_version".rpm \
         /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
 fi
 
 sbverify --list /usr/lib/modules/"${kernel_version}"/vmlinuz
 
 # Make Temp Dir
-mkdir -p /tmp/cache-kernel/rpms
+mkdir -p "${CKWD}"/rpms
 
 # Move RPMs over
-mv /kernel-*.rpm /tmp/cache-kernel/rpms
-mv /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm /tmp/cache-kernel/rpms
+mv ./kernel-*.rpm "${CKWD}"/rpms
+mv /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm "${CKWD}"/rpms
 
 if [[ "${kernel_flavor}" =~ surface ]]; then
-    cp iptsd-*.rpm libwacom-*.rpm /tmp/cache-kernel/rpms
+    cp iptsd-*.rpm libwacom-*.rpm "${CKWD}"/rpms
 fi
 
 # Delete keys in /tmp if we decide to publish this later
-rm -rf /tmp/cache-kernel/certs
+rm -rf "${CKWD}"/certs

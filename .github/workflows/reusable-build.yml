@@ -37,17 +37,27 @@ jobs:
             kernel_flavor: asus
           - fedora_version: 40
             kernel_flavor: bazzite
+    env:
+      CKWD: /tmp/cache-kernel
 
     steps:
       - name: Checkout Push to Registry action
         uses: actions/checkout@v4
 
+      - name: Install Tools
+        run: |
+          dnf install -y \
+            curl \
+            dnf-plugins-core \
+            jq \
+            rpmrebuild
+            sbsigntools
+            skopeo
+
       - name: Get Kernel Version
         id: Version
         shell: bash
         run: |
-          dnf install -y dnf-plugins-core jq skopeo
-
           coreos_kernel () {
             coreos_version=${1}
             image_linux=$(skopeo inspect docker://quay.io/fedora/fedora-coreos:${coreos_version} | jq -r '.Labels["ostree.linux"]')
@@ -170,7 +180,6 @@ jobs:
           fi
 
       - name: Fetch and Sign Kernel Packages
-        id: build_image
         shell: bash
         run: |
           export FEDORA_VERSION=${{ matrix.fedora_version }}
@@ -179,26 +188,21 @@ jobs:
           export KERNEL_FLAVOR=${{ matrix.kernel_flavor }}
           export DUAL_SIGN=true
 
-          cp -a fetch-kernel.sh certs /tmp/cache-kernel
-          find /tmp/cache-kernel
+          cp -a fetch-kernel.sh certs ${{ env.CKWD }}
+          cd ${{ env.CKWD }}
+          find ${{ env.CKWD }}
 
-          bash -x /tmp/cache-kernel/fetch-kernel.sh
+          bash -x CKWD=${{ env.CKWD }} ./fetch-kernel.sh
 
-          find /tmp/cache-kernel/rpms
+          find ${{ env.CKWD }}
 
 
       - name: Check Secureboot Signatures
         shell: bash
         run: |
           set -x
-          if [[ ! $(command -v sbverify) || ! $(command -v curl) || ! $(command -v openssl) || ! $(command -v rpm2cpio) ]]; then
-            sudo apt update
-            sudo apt install sbsigntool curl openssl rpm2cpio
-          fi
-          #podman create --name "${{ matrix.kernel_flavor}}"-kernel-"$(echo "${{ steps.generate_tags.outputs.alias_tags }}" | cut -d " " -f 1)" "${{ matrix.kernel_flavor}}"-kernel:$(echo "${{ steps.generate_tags.outputs.alias_tags }}" | cut -d " " -f 1) sh
-          #podman export "${{ matrix.kernel_flavor}}"-kernel-"$(echo "${{ steps.generate_tags.outputs.alias_tags }}" | cut -d " " -f 1)" > /tmp/"${{ matrix.kernel_flavor}}"-kernel-"$(echo "${{ steps.generate_tags.outputs.alias_tags }}" | cut -d " " -f 1)".tar
-          #tar xvf /tmp/"${{ matrix.kernel_flavor}}"-kernel-"$(echo "${{ steps.generate_tags.outputs.alias_tags }}" | cut -d " " -f 1)".tar -C /tmp
-          cd /tmp/rpms/
+
+          cd ${{ env.CKWD }}/rpms
           if [[ "${{ matrix.kernel_flavor }}" == "surface" ]]; then
             rpm2cpio kernel-surface-core-"${{ env.kernel_release }}".rpm | cpio -idmv
           else
@@ -219,7 +223,7 @@ jobs:
           sbverify --cert akmods.crt vmlinuz || exit 1
           cd $HOME
 
-          find /tmp/rpms/
+          find ${{ env.CKWD }}/rpms
 
   build-akmods:
     name: Build kmods for ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}
