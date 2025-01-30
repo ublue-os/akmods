@@ -198,7 +198,7 @@ jobs:
           cp -a certs /tmp/
           find /tmp/certs
 
-          bash -x ./fetch.sh
+          bash -x ./fetch-kernel.sh
 
           find /tmp/rpms
 
