@@ -12,7 +12,6 @@ on:
 
 jobs:
   kernel-akmods:
-    name: Cache Kernel & Build Kmods
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     strategy:

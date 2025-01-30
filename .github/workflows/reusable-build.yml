@@ -196,7 +196,7 @@ jobs:
           export DUAL_SIGN=true
 
           cp -a certs /tmp/
-          find /tmp
+          find /tmp/certs
 
           bash -x ./fetch.sh
 
