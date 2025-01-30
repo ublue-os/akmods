@@ -27,4 +27,4 @@ jobs:
           - coreos-testing
     with:
       fedora_version: 41
-      image_flavor: ${{ matrix.image_flavor }}
+      kernel_flavor: ${{ matrix.kernel_flavor }}
