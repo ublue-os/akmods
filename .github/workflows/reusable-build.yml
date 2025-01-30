@@ -179,7 +179,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.CKPATH }}
-          key: ${{ steps.cache-kernel.outputs.CKKEY }}
+          key: ${{ steps.kernel-version.outputs.CKKEY }}
 
       - name: Retrieve Signing Key
         if: steps.cache-kernel.outputs.cache-hit != 'true' && github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group'
