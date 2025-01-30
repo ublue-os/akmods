@@ -46,7 +46,7 @@ jobs:
         id: Version
         shell: bash
         run: |
-          dnf install -y dnf-plugins-core
+          dnf install -y dnf-plugins-core jq skopeo
 
           coreos_kernel () {
             coreos_version=${1}
