@@ -17,7 +17,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        fedora_version: 41
+        fedora_version: 
+          - 41
         kernel_flavor:
           - asus
           - bazzite
