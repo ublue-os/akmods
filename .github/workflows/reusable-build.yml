@@ -335,6 +335,7 @@ jobs:
         run: |
           set -exo pipefail
 
+          find ${{ env.CKPATH }}
           KCDATE=$(cat ${{ env.CKPATH }}/kernel-cache-date)
           if [ -z "${KCDATE}" ]; then
             echo "kernel-cache-date must not be empty"
