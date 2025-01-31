@@ -39,6 +39,7 @@ jobs:
             kernel_flavor: bazzite
     outputs:
       CKKEY: ${{ steps.kernel-version.outputs.CKKEY }}
+      CKWD: /tmp/cache-kernel
       CKPATH: /tmp/cache-kernel/rpms
       kernel_build_tag: ${{ steps.kernel-version.outputs.kernel_build_tag }}
       KERNEL_VERSION: ${{ steps.kernel-version.outputs.kernel_release }}
@@ -296,6 +297,7 @@ jobs:
           - kernel_flavor: surface
             cfile_suffix: zfs
     env:
+      CKWD: ${{ needs.cache-kernel.outputs.CKWD }}
       CKPATH: ${{ needs.cache-kernel.outputs.CKPATH }}
       kernel_build_tag: ${{ needs.cache-kernel.outputs.kernel_build_tag }}
       KERNEL_VERSION: ${{ needs.cache-kernel.outputs.KERNEL_VERSION }}
@@ -304,6 +306,11 @@ jobs:
       # Checkout push-to-registry action GitHub repository
       - name: Checkout Push to Registry action
         uses: actions/checkout@v4
+
+      - name: Create cache parent dir
+        shell: bash
+        run: |
+          mkdir -p ${{ env.CKWD }}
 
       - name: Cache Kernel RPMs
         id: cache-kernel
