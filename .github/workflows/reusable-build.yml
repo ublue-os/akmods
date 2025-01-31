@@ -314,6 +314,9 @@ jobs:
 
       - name: Cache Kernel RPMs
         id: cache-kernel
+        container:
+          image: "quay.io/fedora/fedora:${{ inputs.fedora_version }}"
+          options: "--privileged --security-opt label=disable --user 0:0 -v /proc/:/host/proc/:rw -v /tmp/cache-kernel/:/tmp/cache-kernel:rw"
         uses: actions/cache@v4
         with:
           path: ${{ env.CKPATH }}
@@ -330,7 +333,7 @@ jobs:
         run: |
           set -exo pipefail
 
-          find /home/runner/work
+          find /home/runner/work | grep -v work/_actions
           find /tmp
           # how can the Cache be restored to ${{ env.CKPATH }} but there not exist anything there?
           KCDATE=$(cat ${{ env.CKPATH }}/kernel-cache-date)
