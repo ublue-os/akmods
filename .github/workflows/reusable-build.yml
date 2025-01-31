@@ -314,9 +314,6 @@ jobs:
 
       - name: Cache Kernel RPMs
         id: cache-kernel
-        container:
-          image: "quay.io/fedora/fedora:${{ inputs.fedora_version }}"
-          options: "--privileged --security-opt label=disable --user 0:0 -v /proc/:/host/proc/:rw -v /tmp/cache-kernel/:/tmp/cache-kernel:rw"
         uses: actions/cache@v4
         with:
           path: ${{ env.CKPATH }}
