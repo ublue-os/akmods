@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   cache-kernel:
-    name: Cache Kernel ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}
+    name: Kernel ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}
     runs-on: ubuntu-24.04
     container:
       image: "quay.io/fedora/fedora:${{ inputs.fedora_version }}"
@@ -262,7 +262,7 @@ jobs:
           find ${{ env.CKPATH }}
 
   build-akmods:
-    name: Build kmods ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}
+    name: Akmods ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}-${{ matrix.cfile_suffix }}
     runs-on: ubuntu-24.04 # Work Around Tar Bug
     needs: [cache-kernel]
     permissions:
@@ -323,6 +323,7 @@ jobs:
         run: |
           set -exo pipefail
 
+          find /home/runner/work
           find /tmp
           # how can the Cache be restored to ${{ env.CKPATH }} but there not exist anything there?
           KCDATE=$(cat ${{ env.CKPATH }}/kernel-cache-date)
