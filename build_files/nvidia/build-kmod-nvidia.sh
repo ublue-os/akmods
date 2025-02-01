@@ -11,7 +11,7 @@ cd /tmp
 
 # disable rpmfusion and enable negativo17
 sed -i 's/enabled=1/enabled=0/' /etc/yum.repos.d/rpmfusion-*.repo
-cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-fedora-nvidia.repo /etc/yum.repos.d/
+cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo /etc/yum.repos.d/
 
 dnf install -y \
     akmod-nvidia*.fc${RELEASE}

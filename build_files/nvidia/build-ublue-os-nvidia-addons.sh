@@ -2,8 +2,8 @@
 
 set -oeux pipefail
 
-curl -L https://negativo17.org/repos/fedora-nvidia.repo \
-    -o /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-fedora-nvidia.repo
+curl -L https://negativo17.org/repos/fedora-multimedia.repo \
+    -o /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo
 
 curl -L https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo \
     -o /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/nvidia-container-toolkit.repo
