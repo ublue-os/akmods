@@ -11,17 +11,11 @@ kernel_version="${KERNEL_VERSION}"
 kernel_flavor="${KERNEL_FLAVOR}"
 build_tag="${KERNEL_BUILD_TAG:-latest}"
 
-#dnf install -y dnf-plugins-core rpmrebuild sbsigntools openssl
+dnf install -y --setopt=install_weak_deps=False dnf-plugins-core rpmrebuild sbsigntools openssl
 
 case "$kernel_flavor" in
     "asus")
         dnf copr enable -y lukenukem/asus-kernel
-        ;;
-    "fsync")
-        dnf copr enable -y sentry/kernel-fsync
-        ;;
-    "fsync-ba")
-        dnf copr enable -y sentry/kernel-ba
         ;;
     "surface")
         if [[ "$(rpm -E %fedora)" -lt 41 ]]; then
@@ -43,7 +37,7 @@ case "$kernel_flavor" in
         ;;
 esac
 
-if [[ "${kernel_flavor}" =~ asus|fsync ]]; then
+if [[ "${kernel_flavor}" =~ asus ]]; then
     dnf download -y \
         kernel-"${kernel_version}" \
         kernel-modules-"${kernel_version}" \
@@ -91,11 +85,6 @@ else
     curl -LO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-uki-virt-"$kernel_version".rpm
 fi
 
-if [[ "${kernel_flavor}" =~ fsync|fsync-ba ]]; then
-    dnf download -y \
-        kernel-headers-"${kernel_version}"
-fi
-
 if [[ ! -s "${CKWD}"/certs/private_key.priv ]]; then
     echo "WARNING: Using test signing key."
     cp "${CKWD}"/certs/private_key.priv{.test,}
@@ -111,7 +100,7 @@ install -Dm644 "${CKWD}"/certs/public_key.crt "$PUBLIC_KEY_PATH"
 install -Dm644 "${CKWD}"/certs/private_key.priv "$PRIVATE_KEY_PATH"
 
 ls -la /
-if [[ "${kernel_flavor}" =~ asus|fsync|fsync-ba ]]; then
+if [[ "${kernel_flavor}" =~ asus ]]; then
     dnf install -y \
         ./kernel-"$kernel_version".rpm \
         ./kernel-modules-"$kernel_version".rpm \
