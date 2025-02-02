@@ -335,10 +335,6 @@ jobs:
             wc -c certs/private_key_2.priv
           fi
 
-      - name: TEMP SHORT CIRCUIT
-        run: |
-          exit 1
-
       # Build image using Buildah action
       - name: Build Image
         id: build_image
