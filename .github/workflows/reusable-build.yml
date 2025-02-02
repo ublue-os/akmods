@@ -126,11 +126,11 @@ jobs:
           cd ./lib/modules/"${{ steps.kernel-version.outputs.kernel_release }}"/
           sbverify --list vmlinuz
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            curl --retry 3 -#fLo kernel-sign.der https://github.com/ublue-os/kernel-cache/raw/main/certs/public_key.der.test
-            curl --retry 3 -#fLo akmods.der https://github.com/ublue-os/kernel-cache/raw/main/certs/public_key_2.der.test
+            curl --retry 3 -#fLo kernel-sign.der https://github.com/ublue-os/akmods/raw/main/certs/public_key.der.test
+            curl --retry 3 -#fLo akmods.der https://github.com/ublue-os/akmods/raw/main/certs/public_key_2.der.test
           else
-            curl --retry 3 -#fLo kernel-sign.der https://github.com/ublue-os/kernel-cache/raw/main/certs/public_key.der
-            curl --retry 3 -#fLo akmods.der https://github.com/ublue-os/kernel-cache/raw/main/certs/public_key_2.der
+            curl --retry 3 -#fLo kernel-sign.der https://github.com/ublue-os/akmods/raw/main/certs/public_key.der
+            curl --retry 3 -#fLo akmods.der https://github.com/ublue-os/akmods/raw/main/certs/public_key_2.der
           fi
           openssl x509 -in kernel-sign.der -out kernel-sign.crt
           openssl x509 -in akmods.der -out akmods.crt
