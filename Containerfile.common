@@ -23,7 +23,7 @@ ADD https://negativo17.org/repos/fedora-multimedia.repo \
 
 RUN --mount=type=bind,src=kernel_cache,dst=/tmp/kernel_cache \
     --mount=type=cache,dst=/var/cache/dnf \
-    find /tmp/cache-kernel
+    find /tmp/kernel_cache
     if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
         export KERNEL_NAME="kernel" \
     ; else \
