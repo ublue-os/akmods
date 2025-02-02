@@ -38,7 +38,7 @@ jobs:
       CKWD: /tmp/cache-kernel
       CKPATH: /tmp/cache-kernel/rpms
     outputs:
-      CKKEY: ${{ env.CKKEY }}
+      CKKEY: ${{ matrix.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_release }}
       CKWD: ${{ env.CKWD }}
       CKPATH: ${{ env.CKPATH }}
       kernel_build_tag: ${{ steps.kernel-version.outputs.kernel_build_tag }}
@@ -74,7 +74,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.CKPATH }}
-          key: ${{ env.CKKEY }}
+          key: ${{ matrix.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_release }}
 
       - name: Retrieve Signing Key
         if: steps.cache-kernel.outputs.cache-hit != 'true' && github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group'
