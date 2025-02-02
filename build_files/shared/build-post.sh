@@ -29,4 +29,8 @@ for rpm in $(find /var/cache/rpms/kmods -type f -name \*.rpm); do
     fi
 done
 
+# ensure kernel cache RPMS are copied
+mkdir -p /var/cache/kernel-rpms
+cp -a /tmp/kernel_cache/*.rpm /var/cache/kernel-rpms
+
 find /var/cache/rpms

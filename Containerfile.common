@@ -21,7 +21,7 @@ ADD https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${FEDORA
 ADD https://negativo17.org/repos/fedora-multimedia.repo \
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo
 
-RUN --mount=type=bind,src=kernel_cache,dst=/tmp/kernel_cache \
+RUN --mount=type=bind,src=kernel_cache,dst=/tmp/kernel_cache,ro \
     --mount=type=cache,dst=/var/cache/dnf \
     ls -sh /tmp/kernel_cache; \
     if grep -qv "surface" <<< "${KERNEL_FLAVOR}"; then \
@@ -50,4 +50,5 @@ RUN --mount=type=bind,src=kernel_cache,dst=/tmp/kernel_cache \
 
 FROM scratch
 
+COPY --from=builder /var/cache/kernel-rpms /kernel-rpms
 COPY --from=builder /var/cache/rpms /rpms
