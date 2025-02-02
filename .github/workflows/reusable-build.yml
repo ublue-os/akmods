@@ -421,7 +421,7 @@ jobs:
           echo "${{ toJSON(steps.push.outputs) }}"
 
   check:
-    name: Check all ${{ inputs.fedora_version }} builds successful
+    name: Check all ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor}} builds successful
     runs-on: ubuntu-latest
     needs: [build-akmods]
     steps:
