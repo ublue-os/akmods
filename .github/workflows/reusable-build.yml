@@ -53,7 +53,7 @@ jobs:
           attempt_delay: 15000
           command: |
             build_image="quay.io/fedora/fedora:${{ matrix.fedora_version }}"
-            echo "build_image=$build_image" >> "$GITHUB_ENV"
+            echo "build_image=$build_image" >> $GITHUB_ENV
             podman pull "$build_image"
 
       - name: Checkout Repo
