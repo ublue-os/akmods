@@ -10,15 +10,15 @@ inputs:
     required: true
     type: string
 outputs:
-  kernel_release:
-    description: "Full kernel release eg, 6.12.9-200.fc41.x86_64"
-    value: ${{ steps.kernel.outputs.release }}
+  kernel_build_tag:
+    description: "Optional (bazzite specific) tag"
+    value: ${{ steps.kernel.outputs.build_tag }}
   kernel_major_minor_patch:
     description: "Simple version eg, 6.12.9"
     value: ${{ steps.kernel.outputs.major_minor_patch }}
-  kernel_buildtag:
-    description: "Optional (bazzite specific) tag"
-    value: ${{ steps.kernel.outputs.build_tag }}
+  kernel_release:
+    description: "Full kernel release eg, 6.12.9-200.fc41.x86_64"
+    value: ${{ steps.kernel.outputs.release }}
 runs:
   using: "composite"
   steps:
@@ -136,13 +136,13 @@ runs:
           kernel_major_minor_patch="${major}.${minor}.${patch}"
 
           # Debug Output
-          echo "kernel_flavor: ${{ matrix.kernel_flavor }}"
-          echo "kernel_release: ${linux}"
           echo "kernel_build_tag: ${build_tag}"
+          echo "kernel_flavor: ${{ matrix.kernel_flavor }}"
           echo "kernel_major_minor_patch: ${kernel_major_minor_patch}"
+          echo "kernel_release: ${linux}"
 
           # Action Output
-          echo "release=${linux}" >> $GITHUB_OUTPUT
           echo "build_tag=${build_tag}" >> $GITHUB_OUTPUT
-          echo "major_minor_patch=${kernel_major_minor_patch}" >> $GITHUB.OUTPUT
+          echo "major_minor_patch=${kernel_major_minor_patch}" >> $GITHUB_OUTPUT
+          echo "release=${linux}" >> $GITHUB_OUTPUT
 
