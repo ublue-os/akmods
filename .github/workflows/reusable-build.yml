@@ -46,16 +46,6 @@ jobs:
       KERNEL_VERSION: ${{ steps.kernel-version.outputs.kernel_release }}
 
     steps:
-      - name: Pull Fedora Build Image
-        uses: Wandalen/wretry.action@v3.7.3
-        with:
-          attempt_limit: 3
-          attempt_delay: 15000
-          command: |
-            build_image="quay.io/fedora/fedora:${{ matrix.fedora_version }}"
-            echo "build_image=$build_image" >> $GITHUB_ENV
-            podman pull "$build_image"
-
       - name: Checkout Repo
         uses: actions/checkout@v4
 
@@ -93,6 +83,9 @@ jobs:
         if: steps.cache-kernel.outputs.cache-hit != 'true'
         shell: bash
         run: |
+          build_image="quay.io/fedora/fedora:${{ matrix.fedora_version }}"
+          podman pull --retry 3 --retry-delay=10 "$build_image"
+
           mkdir -p ${{ env.CKWD }}
           cp -a fetch-kernel.sh certs ${{ env.CKWD }}
 
@@ -108,7 +101,7 @@ jobs:
             --env DUAL_SIGN=true \
             --name "$container_name" \
             -v ${{ env.CKWD }}:${{ env.CKWD }}:rw \
-            -dt "quay.io/fedora/fedora:${{ matrix.fedora_version }}"
+            -dt "$build_image"
 
           podman exec "$container_name" bash -x ${{ env.CKWD }}/fetch-kernel.sh ${{ env.CKWD }}
 
@@ -247,17 +240,10 @@ jobs:
           fi
           export BUILDER_IMAGE=quay.io/fedora/fedora
           echo "BUILDER_IMAGE=${BUILDER_IMAGE}" >> $GITHUB_ENV
-          echo "FQ_BUILDER_IMAGE=${BUILDER_IMAGE}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
 
-      - name: Pull build images
-        uses: Wandalen/wretry.action@v3.8.0
-        with:
-          attempt_limit: 3
-          attempt_delay: 15000
-          command: |
-            # pull the base image used for FROM in containerfile so
-            # we can retry on that unfortunately common failure case
-            podman pull ${{ env.FQ_BUILDER_IMAGE }}
+      - name: Pull build image
+        shell: bash
+        run: podman pull --retry 3 --retry-delay=10 ${{ env.BUILDER_IMAGE }}:${{ matrix.fedora_version }}
 
       - name: AppArmor Disable
         run: |

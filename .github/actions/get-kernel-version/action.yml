@@ -27,10 +27,13 @@ runs:
       shell: bash
       run: |
         if [[ ${{ matrix.kernel_flavor }} =~ asus|surface ]]; then
+          build_image="quay.io/fedora/fedora:${{ inputs.fedora_version }}"
+          podman pull --retry 3 --retry-delay=10 "$build_image"
+
           container_name="fq-$(uuidgen)"
           dnf="podman exec $container_name dnf"
 
-          podman run --entrypoint /bin/bash --name "$container_name" -dt "quay.io/fedora/fedora:${{ inputs.fedora_version }}"
+          podman run --entrypoint /bin/bash --name "$container_name" -dt "$build_image"
           $dnf install -y --setopt=install_weak_deps=False dnf-plugins-core
         fi
 
