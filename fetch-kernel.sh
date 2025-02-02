@@ -60,14 +60,14 @@ elif [[ "${kernel_flavor}" == "surface" ]]; then
         libwacom-surface-data
 elif [[ "${kernel_flavor}" == "bazzite" ]]; then
     # Using curl for bazzite release
-    curl -LO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-"$kernel_version".rpm
-    curl -LO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-core-"$kernel_version".rpm
-    curl -LO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-modules-"$kernel_version".rpm
-    curl -LO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-modules-core-"$kernel_version".rpm
-    curl -LO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-modules-extra-"$kernel_version".rpm
-    curl -LO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-devel-"$kernel_version".rpm
-    curl -LO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-devel-matched-"$kernel_version".rpm
-    curl -LO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-uki-virt-"$kernel_version".rpm
+    curl -#fLO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-"$kernel_version".rpm
+    curl -#fLO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-core-"$kernel_version".rpm
+    curl -#fLO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-modules-"$kernel_version".rpm
+    curl -#fLO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-modules-core-"$kernel_version".rpm
+    curl -#fLO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-modules-extra-"$kernel_version".rpm
+    curl -#fLO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-devel-"$kernel_version".rpm
+    curl -#fLO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-devel-matched-"$kernel_version".rpm
+    curl -#fLO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-uki-virt-"$kernel_version".rpm
     # curl -LO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-uki-virt-addons-"$kernel_version".rpm
 else
     KERNEL_MAJOR_MINOR_PATCH=$(echo "$kernel_version" | cut -d '-' -f 1)
@@ -75,13 +75,13 @@ else
     ARCH=$(uname -m)
     
     # Using curl instead of dnf download for https links
-    curl -LO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-"$kernel_version".rpm
-    curl -LO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-modules-"$kernel_version".rpm
-    curl -LO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-modules-core-"$kernel_version".rpm
-    curl -LO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-modules-extra-"$kernel_version".rpm
-    curl -LO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-devel-"$kernel_version".rpm
-    curl -LO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-devel-matched-"$kernel_version".rpm
-    curl -LO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-uki-virt-"$kernel_version".rpm
+    curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-"$kernel_version".rpm
+    curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-modules-"$kernel_version".rpm
+    curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-modules-core-"$kernel_version".rpm
+    curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-modules-extra-"$kernel_version".rpm
+    curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-devel-"$kernel_version".rpm
+    curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-devel-matched-"$kernel_version".rpm
+    curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-uki-virt-"$kernel_version".rpm
 fi
 
 if [[ ! -s "${CKWD}"/certs/private_key.priv ]]; then
