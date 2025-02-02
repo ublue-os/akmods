@@ -235,7 +235,7 @@ jobs:
             echo "KERNEL_VERSION must not be empty"
           fi
           KERNEL_IMAGE_VERSION=${{ env.KERNEL_VERSION }}-${KCDATE}
-          echo "KERNEL_IMAGE_VERSION=$img_version" >> $GITHUB_ENV
+          echo "KERNEL_IMAGE_VERSION=$KERNEL_IMAGE_VERSION" >> $GITHUB_ENV
 
       - name: Matrix Variables
         shell: bash
@@ -249,13 +249,6 @@ jobs:
           echo "BUILDER_IMAGE=${BUILDER_IMAGE}" >> $GITHUB_ENV
           echo "FQ_BUILDER_IMAGE=${BUILDER_IMAGE}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
 
-      - name: AppArmor Disable
-        run: |
-          set -x
-          systemctl status apparmor
-          sudo systemctl stop apparmor
-          systemctl status apparmor || true
-
       - name: Pull build images
         uses: Wandalen/wretry.action@v3.8.0
         with:
@@ -265,6 +258,13 @@ jobs:
             # pull the base image used for FROM in containerfile so
             # we can retry on that unfortunately common failure case
             podman pull ${{ env.FQ_BUILDER_IMAGE }}
+
+      - name: AppArmor Disable
+        run: |
+          set -x
+          systemctl status apparmor
+          sudo systemctl stop apparmor
+          systemctl status apparmor || true
 
       - name: Generate tags
         id: generate-tags
