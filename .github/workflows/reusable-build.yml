@@ -97,14 +97,14 @@ jobs:
           cp -a fetch-kernel.sh certs ${{ env.CKWD }}
           find ${{ env.CKWD }}
 
-          echo "${{join(steps.kernel-version.outputs.*, '\n')}}"
+          echo "${{toJSON(steps.kernel-version.outputs)}}"
 
           container_name="fq-$(uuidgen)"
           podman run \
             --entrypoint /bin/bash \
             --env FEDORA_VERSION=${{ matrix.fedora_version }} \
-            --env KERNEL_VERSION=${{ steps.kernel-version.outputs.kernel_release }} \
             --env KERNEL_BUILD_TAG=${{ steps.kernel-version.outputs.kernel_build_tag }} \
+            --env KERNEL_VERSION=${{ steps.kernel-version.outputs.kernel_release }} \
             --env KERNEL_FLAVOR=${{ matrix.kernel_flavor }} \
             --env DUAL_SIGN=true \
             --name "$container_name" \
