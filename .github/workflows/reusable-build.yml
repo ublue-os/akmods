@@ -97,6 +97,8 @@ jobs:
           cp -a fetch-kernel.sh certs ${{ env.CKWD }}
           find ${{ env.CKWD }}
 
+          echo "${{join(steps.kernel-version.outputs.*, '\n')}}"
+
           container_name="fq-$(uuidgen)"
           podman run \
             --entrypoint /bin/bash \
