@@ -56,6 +56,9 @@ jobs:
             echo "build_image=$build_image" >> "$GITHUB_ENV"
             podman pull "$build_image"
 
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
       - name: Get Kernel Version
         id: kernel-version
         uses: ./.github/actions/get-kernel-version
@@ -72,10 +75,6 @@ jobs:
         with:
           path: ${{ env.CKPATH }}
           key: ${{ env.CKKEY }}
-
-      - name: Checkout Code
-        if: steps.cache-kernel.outputs.cache-hit != 'true'
-        uses: actions/checkout@v4
 
       - name: Retrieve Signing Key
         if: steps.cache-kernel.outputs.cache-hit != 'true' && github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group'
@@ -199,8 +198,7 @@ jobs:
       KERNEL_VERSION: ${{ needs.cache-kernel.outputs.KERNEL_VERSION }}
 
     steps:
-      # Checkout push-to-registry action GitHub repository
-      - name: Checkout Push to Registry action
+      - name: Checkout Repo
         uses: actions/checkout@v4
 
       - name: Create cache parent dir
