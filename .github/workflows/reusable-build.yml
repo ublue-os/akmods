@@ -179,6 +179,8 @@ jobs:
           - zfs
         exclude:
           - fedora_version: 40
+            kernel_flavor: coreos-testing
+          - fedora_version: 40
             kernel_flavor: asus
           - fedora_version: 40
             kernel_flavor: bazzite
