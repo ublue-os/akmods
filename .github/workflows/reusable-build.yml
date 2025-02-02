@@ -63,11 +63,8 @@ jobs:
         id: kernel-version
         uses: ./.github/actions/get-kernel-version
         with:
-          fedora_version: ${{ inputs.fedora_version}}
-          kernel_flavor: ${{ inputs.kernel_flavor }}
-
-      - name: Set Cache Key
-        run: echo "CKKEY=${{ matrix.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_release }}" >> GITHUB_ENV
+          fedora_version: ${{ matrix.fedora_version}}
+          kernel_flavor: ${{ matrix.kernel_flavor }}
 
       - name: Cache Kernel RPMs
         id: cache-kernel
@@ -97,8 +94,8 @@ jobs:
         shell: bash
         run: |
           export FEDORA_VERSION=${{ matrix.fedora_version }}
-          export KERNEL_VERSION=${{ env.kernel_release }}
-          export KERNEL_BUILD_TAG=${{ env.kernel_build_tag }}
+          export KERNEL_VERSION=${{ steps.kernel-version.outputs.kernel_release }}
+          export KERNEL_BUILD_TAG=${{ steps.kernel-version.outputs.kernel_build_tag }}
           export KERNEL_FLAVOR=${{ matrix.kernel_flavor }}
           export DUAL_SIGN=true
 
@@ -111,7 +108,7 @@ jobs:
             --name "$container_name" \
             --env-host \
             -v ${{ env.CKWD }}:${{ env.CKWD }}:rw \
-            -dt "quay.io/fedora/fedora:${{ inputs.fedora_version }}"
+            -dt "quay.io/fedora/fedora:${{ matrix.fedora_version }}"
 
           podman exec "$container_name" bash -x ${{ env.CKWD }}/fetch-kernel.sh ${{ env.CKWD }}
 
