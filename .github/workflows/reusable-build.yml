@@ -22,23 +22,11 @@ jobs:
   cache-kernel:
     name: Kernel ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}
     runs-on: ubuntu-24.04
-    strategy:
-      fail-fast: false
-      matrix:
-        fedora_version:
-          - ${{ inputs.fedora_version }}
-        kernel_flavor:
-          - ${{ inputs.kernel_flavor }}
-        exclude:
-          - fedora_version: 40
-            kernel_flavor: asus
-          - fedora_version: 40
-            kernel_flavor: bazzite
     env:
       KCWD: /tmp/kernel-cache
       KCPATH: kernel_cache
     outputs:
-      KCKEY: ${{ matrix.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_release }}
+      KCKEY: ${{ inputs.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_release }}
       KCWD: ${{ env.KCWD }}
       KCPATH: ${{ env.KCPATH }}
       kernel_build_tag: ${{ steps.kernel-version.outputs.kernel_build_tag }}
@@ -53,15 +41,15 @@ jobs:
         id: kernel-version
         uses: ./.github/actions/get-kernel-version
         with:
-          fedora_version: ${{ matrix.fedora_version}}
-          kernel_flavor: ${{ matrix.kernel_flavor }}
+          fedora_version: ${{ inputs.fedora_version}}
+          kernel_flavor: ${{ inputs.kernel_flavor }}
 
       - name: Cache Kernel RPMs
         id: cache-kernel
         uses: actions/cache@v4
         with:
           path: ${{ env.KCPATH }}
-          key: ${{ matrix.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_release }} # job outputs KCKEY
+          key: ${{ inputs.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_release }} # job outputs KCKEY
 
       - name: Retrieve Signing Key
         if: steps.cache-kernel.outputs.cache-hit != 'true' && github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group'
@@ -83,7 +71,7 @@ jobs:
         if: steps.cache-kernel.outputs.cache-hit != 'true'
         shell: bash
         run: |
-          build_image="quay.io/fedora/fedora:${{ matrix.fedora_version }}"
+          build_image="quay.io/fedora/fedora:${{ inputs.fedora_version }}"
           podman pull "$build_image"
 
           mkdir -p ${{ env.KCWD }}
@@ -94,10 +82,10 @@ jobs:
           container_name="fq-$(uuidgen)"
           podman run \
             --entrypoint /bin/bash \
-            --env FEDORA_VERSION=${{ matrix.fedora_version }} \
+            --env FEDORA_VERSION=${{ inputs.fedora_version }} \
             --env KERNEL_BUILD_TAG=${{ steps.kernel-version.outputs.kernel_build_tag }} \
             --env KERNEL_VERSION=${{ steps.kernel-version.outputs.kernel_release }} \
-            --env KERNEL_FLAVOR=${{ matrix.kernel_flavor }} \
+            --env KERNEL_FLAVOR=${{ inputs.kernel_flavor }} \
             --env DUAL_SIGN=true \
             --name "$container_name" \
             -v ${{ env.KCWD }}:${{ env.KCWD }}:rw \
@@ -118,7 +106,7 @@ jobs:
           fi
 
           cd ${{ env.KCWD }}/rpms
-          if [[ "${{ matrix.kernel_flavor }}" == "surface" ]]; then
+          if [[ "${{ inputs.kernel_flavor }}" == "surface" ]]; then
             rpm2cpio kernel-surface-core-"${{ steps.kernel-version.outputs.kernel_release }}".rpm | cpio -idmv
           else
             rpm2cpio kernel-core-"${{ steps.kernel-version.outputs.kernel_release }}".rpm | cpio -idmv
