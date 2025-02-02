@@ -107,7 +107,11 @@ jobs:
           find ${{ env.CKWD }}
 
           container_name="fq-$(uuidgen)"
-          podman run --entrypoint /bin/bash --name "$container_name" -v ${{ env.CKWD }}:${{ env.CKWD }}:rw -dt "quay.io/fedora/fedora:${{ inputs.fedora_version }}"
+          podman run --entrypoint /bin/bash \
+            --name "$container_name" \
+            --env-host \
+            -v ${{ env.CKWD }}:${{ env.CKWD }}:rw \
+            -dt "quay.io/fedora/fedora:${{ inputs.fedora_version }}"
 
           podman exec "$container_name" bash -x ${{ env.CKWD }}/fetch-kernel.sh ${{ env.CKWD }}
 
