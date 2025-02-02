@@ -150,9 +150,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        fedora_version:
-          - ${{ inputs.fedora_version }}
-        kernel_flavor:
+        kernel_flavor:  # this must be in matrix for excludes, but reference inputs.kernel_flavor in workflow
           - ${{ inputs.kernel_flavor }}
         cfile_suffix:
           - common
@@ -161,12 +159,6 @@ jobs:
           - nvidia-open
           - zfs
         exclude:
-          - fedora_version: 40
-            kernel_flavor: coreos-testing
-          - fedora_version: 40
-            kernel_flavor: asus
-          - fedora_version: 40
-            kernel_flavor: bazzite
           - kernel_flavor: main
             cfile_suffix: zfs
           - kernel_flavor: asus
@@ -232,7 +224,7 @@ jobs:
 
       - name: Pull build image
         shell: bash
-        run: podman pull ${{ env.BUILDER_IMAGE }}:${{ matrix.fedora_version }}
+        run: podman pull ${{ env.BUILDER_IMAGE }}:${{ inputs.fedora_version }}
 
       - name: AppArmor Disable
         run: |
@@ -247,7 +239,7 @@ jobs:
         run: |
           # Generate a timestamp for creating an image version history
           TIMESTAMP="$(date +%Y%m%d)"
-          VARIANT="${{ matrix.kernel_flavor }}-${{ matrix.fedora_version }}"
+          VARIANT="${{ inputs.kernel_flavor }}-${{ inputs.fedora_version }}"
 
           COMMIT_TAGS=()
           BUILD_TAGS=()
@@ -322,8 +314,8 @@ jobs:
             ${{ steps.generate-tags.outputs.alias_tags }}
           build-args: |
             BUILDER_IMAGE=${{ env.BUILDER_IMAGE }}
-            KERNEL_FLAVOR=${{ matrix.kernel_flavor }}
-            FEDORA_MAJOR_VERSION=${{ matrix.fedora_version }}
+            KERNEL_FLAVOR=${{ inputs.kernel_flavor }}
+            FEDORA_MAJOR_VERSION=${{ inputs.fedora_version }}
             RPMFUSION_MIRROR=${{ vars.RPMFUSION_MIRROR }}
             DUAL_SIGN=true
           labels: ${{ steps.meta.outputs.labels }}
@@ -338,8 +330,8 @@ jobs:
           tags: latest
           build-args: |
             BUILDER_IMAGE=${{ env.BUILDER_IMAGE }}
-            KERNEL_FLAVOR=${{ matrix.kernel_flavor }}
-            FEDORA_MAJOR_VERSION=${{ matrix.fedora_version }}
+            KERNEL_FLAVOR=${{ inputs.kernel_flavor }}
+            FEDORA_MAJOR_VERSION=${{ inputs.fedora_version }}
             INPUT_AKMODS=${{ env.IMAGE_NAME }}
             INPUT_TAG=${{ env.default_tag }}
             DUAL_SIGN=true
