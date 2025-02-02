@@ -166,10 +166,10 @@ jobs:
           - ${{ inputs.kernel_flavor }}
         cfile_suffix:
           - common
-          - extra
-          - nvidia
-          - nvidia-open
-          - zfs
+#          - extra
+#          - nvidia
+#          - nvidia-open
+#          - zfs
         exclude:
           - fedora_version: 40
             kernel_flavor: coreos-testing
