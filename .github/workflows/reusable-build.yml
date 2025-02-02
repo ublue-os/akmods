@@ -84,7 +84,7 @@ jobs:
         shell: bash
         run: |
           build_image="quay.io/fedora/fedora:${{ matrix.fedora_version }}"
-          podman pull --retry 3 --retry-delay=10 "$build_image"
+          podman pull "$build_image"
 
           mkdir -p ${{ env.CKWD }}
           cp -a fetch-kernel.sh certs ${{ env.CKWD }}
@@ -243,7 +243,7 @@ jobs:
 
       - name: Pull build image
         shell: bash
-        run: podman pull --retry 3 --retry-delay=10 ${{ env.BUILDER_IMAGE }}:${{ matrix.fedora_version }}
+        run: podman pull ${{ env.BUILDER_IMAGE }}:${{ matrix.fedora_version }}
 
       - name: AppArmor Disable
         run: |

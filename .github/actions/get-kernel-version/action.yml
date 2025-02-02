@@ -28,7 +28,7 @@ runs:
       run: |
         if [[ ${{ matrix.kernel_flavor }} =~ asus|surface ]]; then
           build_image="quay.io/fedora/fedora:${{ inputs.fedora_version }}"
-          podman pull --retry 3 --retry-delay=10 "$build_image"
+          podman pull "$build_image"
 
           container_name="fq-$(uuidgen)"
           dnf="podman exec $container_name dnf"
