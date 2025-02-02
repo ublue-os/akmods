@@ -95,7 +95,6 @@ jobs:
         run: |
           mkdir -p ${{ env.CKWD }}
           cp -a fetch-kernel.sh certs ${{ env.CKWD }}
-          find ${{ env.CKWD }}
 
           echo "${{toJSON(steps.kernel-version.outputs)}}"
 
@@ -125,13 +124,13 @@ jobs:
             sudo apt install sbsigntool curl openssl rpm2cpio
           fi
 
-          cd ${{ env.CKWD }}/rpms
+          cd ${{ env.CKPATH }}
           if [[ "${{ matrix.kernel_flavor }}" == "surface" ]]; then
-            rpm2cpio kernel-surface-core-"${{ env.kernel_release }}".rpm | cpio -idmv
+            rpm2cpio kernel-surface-core-"${{ steps.kernel-version.outputs.kernel_release }}".rpm | cpio -idmv
           else
-            rpm2cpio kernel-core-"${{ env.kernel_release }}".rpm | cpio -idmv
+            rpm2cpio kernel-core-"${{ steps.kernel-version.outputs.kernel_release }}".rpm | cpio -idmv
           fi
-          cd ./lib/modules/"${{ env.kernel_release }}"/
+          cd ./lib/modules/"${{ steps.kernel-version.outputs.kernel_release }}"/
           sbverify --list vmlinuz
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             curl --retry 3 -Lo kernel-sign.der https://github.com/ublue-os/kernel-cache/raw/main/certs/public_key.der.test
