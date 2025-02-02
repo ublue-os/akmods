@@ -2,10 +2,9 @@
 
 set -eoux pipefail
 
+# ensures we pass a known dir for volume mount of output rpm files
 CKWD=${1}
-
-mkdir -p "${CKWD}"/downloads
-cd "${CKWD}"/downloads
+find "${CKWD}"
 
 kernel_version="${KERNEL_VERSION}"
 kernel_flavor="${KERNEL_FLAVOR}"
@@ -102,31 +101,31 @@ install -Dm644 "${CKWD}"/certs/private_key.priv "$PRIVATE_KEY_PATH"
 ls -la /
 if [[ "${kernel_flavor}" =~ asus ]]; then
     dnf install -y \
-        ./kernel-"$kernel_version".rpm \
-        ./kernel-modules-"$kernel_version".rpm \
-        ./kernel-modules-core-"$kernel_version".rpm \
-        ./kernel-modules-extra-"$kernel_version".rpm \
+        /kernel-"$kernel_version".rpm \
+        /kernel-modules-"$kernel_version".rpm \
+        /kernel-modules-core-"$kernel_version".rpm \
+        /kernel-modules-extra-"$kernel_version".rpm \
         kernel-core-"${kernel_version}"
 elif [[ "${kernel_flavor}" =~ surface ]]; then
     dnf install -y \
-        ./kernel-surface-"$kernel_version".rpm \
-        ./kernel-surface-modules-"$kernel_version".rpm \
-        ./kernel-surface-modules-core-"$kernel_version".rpm \
-        ./kernel-surface-modules-extra-"$kernel_version".rpm \
+        /kernel-surface-"$kernel_version".rpm \
+        /kernel-surface-modules-"$kernel_version".rpm \
+        /kernel-surface-modules-core-"$kernel_version".rpm \
+        /kernel-surface-modules-extra-"$kernel_version".rpm \
         kernel-surface-core-"${kernel_version}"
 elif [[ "${kernel_flavor}" == "bazzite" ]]; then
     dnf install -y \
-        ./kernel-"$kernel_version".rpm \
-        ./kernel-core-"$kernel_version".rpm \
-        ./kernel-modules-"$kernel_version".rpm \
-        ./kernel-modules-core-"$kernel_version".rpm \
-        ./kernel-modules-extra-"$kernel_version".rpm
+        /kernel-"$kernel_version".rpm \
+        /kernel-core-"$kernel_version".rpm \
+        /kernel-modules-"$kernel_version".rpm \
+        /kernel-modules-core-"$kernel_version".rpm \
+        /kernel-modules-extra-"$kernel_version".rpm
 else
     dnf install -y \
-        ./kernel-"$kernel_version".rpm \
-        ./kernel-modules-"$kernel_version".rpm \
-        ./kernel-modules-core-"$kernel_version".rpm \
-        ./kernel-modules-extra-"$kernel_version".rpm \
+        /kernel-"$kernel_version".rpm \
+        /kernel-modules-"$kernel_version".rpm \
+        /kernel-modules-core-"$kernel_version".rpm \
+        /kernel-modules-extra-"$kernel_version".rpm \
         https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-core-"$kernel_version".rpm
 fi
 
@@ -168,27 +167,27 @@ if [[ ${DUAL_SIGN:-} == "true" ]]; then
     rm -f "$SECOND_PRIVATE_KEY_PATH" "$SECOND_PUBLIC_KEY_PATH"
 fi
 
-find "${CKWD}"
+ln -s / /tmp/buildroot
 
 # Rebuild RPMs and Verify
 if [[ "${kernel_flavor}" =~ surface ]]; then
-    rpmrebuild --additional=--buildroot="${CKWD}"/buildroot --batch kernel-surface-core-"${kernel_version}"
+    rpmrebuild --additional=--buildroot=/tmp/buildroot --batch kernel-surface-core-"${kernel_version}"
     rm -f /usr/lib/modules/"${kernel_version}"/vmlinuz
     dnf reinstall -y \
-        ./kernel-surface-"$kernel_version".rpm \
-        ./kernel-surface-modules-"$kernel_version".rpm \
-        ./kernel-surface-modules-core-"$kernel_version".rpm \
-        ./kernel-surface-modules-extra-"$kernel_version".rpm \
-        /github/home/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
+        /kernel-surface-"$kernel_version".rpm \
+        /kernel-surface-modules-"$kernel_version".rpm \
+        /kernel-surface-modules-core-"$kernel_version".rpm \
+        /kernel-surface-modules-extra-"$kernel_version".rpm \
+        /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
 else
-    rpmrebuild --additional=--buildroot="${CKWD}"/buildroot --batch kernel-core-"${kernel_version}"
+    rpmrebuild --additional=--buildroot=/tmp/buildroot --batch kernel-core-"${kernel_version}"
     rm -f /usr/lib/modules/"${kernel_version}"/vmlinuz
     dnf reinstall -y \
-        ./kernel-"$kernel_version".rpm \
-        ./kernel-modules-"$kernel_version".rpm \
-        ./kernel-modules-core-"$kernel_version".rpm \
-        ./kernel-modules-extra-"$kernel_version".rpm \
-        /github/home/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
+        /kernel-"$kernel_version".rpm \
+        /kernel-modules-"$kernel_version".rpm \
+        /kernel-modules-core-"$kernel_version".rpm \
+        /kernel-modules-extra-"$kernel_version".rpm \
+        /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
 fi
 
 sbverify --list /usr/lib/modules/"${kernel_version}"/vmlinuz
@@ -197,8 +196,8 @@ sbverify --list /usr/lib/modules/"${kernel_version}"/vmlinuz
 mkdir -p "${CKWD}"/rpms
 
 # Move RPMs over
-mv ./kernel-*.rpm "${CKWD}"/rpms
-mv /github/home/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm "${CKWD}"/rpms
+mv /kernel-*.rpm "${CKWD}"/rpms
+mv /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm "${CKWD}"/rpms
 
 if [[ "${kernel_flavor}" =~ surface ]]; then
     cp iptsd-*.rpm libwacom-*.rpm "${CKWD}"/rpms
