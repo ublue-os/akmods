@@ -234,7 +234,7 @@ jobs:
           if [ -z "${{ env.KERNEL_VERSION }}" ]; then
             echo "KERNEL_VERSION must not be empty"
           fi
-          KERNEL_IMAGE_VERSION=${{ env.KERNEL_VERSION }}-${date}
+          KERNEL_IMAGE_VERSION=${{ env.KERNEL_VERSION }}-${KCDATE}
           echo "KERNEL_IMAGE_VERSION=$img_version" >> $GITHUB_ENV
 
       - name: Matrix Variables
