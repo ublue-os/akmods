@@ -35,12 +35,12 @@ jobs:
           - fedora_version: 40
             kernel_flavor: bazzite
     env:
-      CKWD: /tmp/cache-kernel
-      CKPATH: /tmp/cache-kernel/rpms
+      KCWD: /tmp/kernel-cache
+      KCPATH: kernel_cache
     outputs:
-      CKKEY: ${{ matrix.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_release }}
-      CKWD: ${{ env.CKWD }}
-      CKPATH: ${{ env.CKPATH }}
+      KCKEY: ${{ matrix.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_release }}
+      KCWD: ${{ env.KCWD }}
+      KCPATH: ${{ env.KCPATH }}
       kernel_build_tag: ${{ steps.kernel-version.outputs.kernel_build_tag }}
       kernel_major_minor_patch: ${{ steps.kernel-version.outputs.kernel_major_minor_patch }}
       KERNEL_VERSION: ${{ steps.kernel-version.outputs.kernel_release }}
@@ -60,8 +60,8 @@ jobs:
         id: cache-kernel
         uses: actions/cache@v4
         with:
-          path: ${{ env.CKPATH }}
-          key: ${{ matrix.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_release }}
+          path: ${{ env.KCPATH }}
+          key: ${{ matrix.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_release }} # job outputs KCKEY
 
       - name: Retrieve Signing Key
         if: steps.cache-kernel.outputs.cache-hit != 'true' && github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group'
@@ -86,8 +86,8 @@ jobs:
           build_image="quay.io/fedora/fedora:${{ matrix.fedora_version }}"
           podman pull "$build_image"
 
-          mkdir -p ${{ env.CKWD }}
-          cp -a fetch-kernel.sh certs ${{ env.CKWD }}
+          mkdir -p ${{ env.KCWD }}
+          cp -a fetch-kernel.sh certs ${{ env.KCWD }}
 
           echo "${{toJSON(steps.kernel-version.outputs)}}"
 
@@ -100,12 +100,12 @@ jobs:
             --env KERNEL_FLAVOR=${{ matrix.kernel_flavor }} \
             --env DUAL_SIGN=true \
             --name "$container_name" \
-            -v ${{ env.CKWD }}:${{ env.CKWD }}:rw \
+            -v ${{ env.KCWD }}:${{ env.KCWD }}:rw \
             -dt "$build_image"
 
-          podman exec "$container_name" bash -x ${{ env.CKWD }}/fetch-kernel.sh ${{ env.CKWD }}
+          podman exec "$container_name" bash -x ${{ env.KCWD }}/fetch-kernel.sh ${{ env.KCWD }}
 
-          find ${{ env.CKWD }}
+          find ${{ env.KCWD }}
 
       - name: Check Secureboot Signatures
         if: steps.cache-kernel.outputs.cache-hit != 'true'
@@ -117,7 +117,7 @@ jobs:
             sudo apt install sbsigntool curl openssl rpm2cpio
           fi
 
-          cd ${{ env.CKPATH }}
+          cd ${{ env.KCWD }}/rpms
           if [[ "${{ matrix.kernel_flavor }}" == "surface" ]]; then
             rpm2cpio kernel-surface-core-"${{ steps.kernel-version.outputs.kernel_release }}".rpm | cpio -idmv
           else
@@ -136,18 +136,20 @@ jobs:
           openssl x509 -in akmods.der -out akmods.crt
           sbverify --cert kernel-sign.crt vmlinuz || exit 1
           sbverify --cert akmods.crt vmlinuz || exit 1
-          cd $HOME
 
-      - name: Add Date to Kernel Cache
+      - name: Finalize Cache Files
         if: steps.cache-kernel.outputs.cache-hit != 'true'
         shell: bash
         run: |
-          echo "$(date '+%Y%m%d.0')" > ${{ env.CKPATH }}/kernel-cache-date
+          # this should be in runner user's home dir
+          mkdir -p ${{ env.KCPATH }}
+          cp -a ${{ env.KCWD }}/rpms/*.rpm ${{ env.KCPATH }}/
+          echo "$(date '+%Y%m%d.0')" > ${{ env.KCPATH }}/kernel-cache-date
 
       - name: List Cached Kernel RPMs
         shell: bash
         run: |
-          find ${{ env.CKPATH }}
+          find ${{ env.KCPATH }}
 
   build-akmods:
     name: Akmods ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}-${{ matrix.cfile_suffix }}
@@ -186,8 +188,8 @@ jobs:
           - kernel_flavor: surface
             cfile_suffix: zfs
     env:
-      CKWD: ${{ needs.cache-kernel.outputs.CKWD }}
-      CKPATH: ${{ needs.cache-kernel.outputs.CKPATH }}
+      KCWD: ${{ needs.cache-kernel.outputs.KCWD }}
+      KCPATH: ${{ needs.cache-kernel.outputs.KCPATH }}
       kernel_build_tag: ${{ needs.cache-kernel.outputs.kernel_build_tag }}
       KERNEL_VERSION: ${{ needs.cache-kernel.outputs.KERNEL_VERSION }}
 
@@ -198,19 +200,19 @@ jobs:
       - name: Create cache parent dir
         shell: bash
         run: |
-          mkdir -p ${{ env.CKWD }}
+          mkdir -p ${{ env.KCWD }}
 
       - name: Cache Kernel RPMs
         id: cache-kernel
         uses: actions/cache@v4
         with:
-          path: ${{ env.CKPATH }}
-          key: ${{ needs.cache-kernel.outputs.CKKEY }}
+          path: ${{ env.KCPATH }}
+          key: ${{ needs.cache-kernel.outputs.KCKEY }}
 
       - name: Fail Absent Kernel Cache
         if: steps.cache-kernel.outputs.cache-hit != 'true'
         run: |
-          echo "Kernel Cache not found for key: ${{ needs.cache-kernel.outputs.CKKEY }}"
+          echo "Kernel Cache not found for key: ${{ needs.cache-kernel.outputs.KCKEY }}"
           exit 1
 
       - name: Get Cached Kernel Date/Version
@@ -218,9 +220,8 @@ jobs:
         run: |
           set -exo pipefail
 
-          find ${{ env.CKPATH }}
-          # how can the Cache be restored to ${{ env.CKPATH }} but there not exist anything there?
-          KCDATE=$(cat ${{ env.CKPATH }}/kernel-cache-date)
+          find ${{ env.KCPATH }}
+          KCDATE=$(cat ${{ env.KCPATH }}/kernel-cache-date)
           if [ -z "${KCDATE}" ]; then
             echo "kernel-cache-date must not be empty"
           fi

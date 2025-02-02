@@ -3,8 +3,8 @@
 set -eoux pipefail
 
 # ensures we pass a known dir for volume mount of output rpm files
-CKWD=${1}
-find "${CKWD}"
+KCWD=${1}
+find "${KCWD}"
 
 kernel_version="${KERNEL_VERSION}"
 kernel_flavor="${KERNEL_FLAVOR}"
@@ -84,19 +84,19 @@ else
     curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-uki-virt-"$kernel_version".rpm
 fi
 
-if [[ ! -s "${CKWD}"/certs/private_key.priv ]]; then
+if [[ ! -s "${KCWD}"/certs/private_key.priv ]]; then
     echo "WARNING: Using test signing key."
-    cp "${CKWD}"/certs/private_key.priv{.test,}
-    cp "${CKWD}"/certs/public_key.der{.test,}
+    cp "${KCWD}"/certs/private_key.priv{.test,}
+    cp "${KCWD}"/certs/public_key.der{.test,}
 fi
 
 PUBLIC_KEY_PATH="/etc/pki/kernel/public/public_key.crt"
 PRIVATE_KEY_PATH="/etc/pki/kernel/private/private_key.priv"
 
-openssl x509 -in "${CKWD}"/certs/public_key.der -out "${CKWD}"/certs/public_key.crt
+openssl x509 -in "${KCWD}"/certs/public_key.der -out "${KCWD}"/certs/public_key.crt
 
-install -Dm644 "${CKWD}"/certs/public_key.crt "$PUBLIC_KEY_PATH"
-install -Dm644 "${CKWD}"/certs/private_key.priv "$PRIVATE_KEY_PATH"
+install -Dm644 "${KCWD}"/certs/public_key.crt "$PUBLIC_KEY_PATH"
+install -Dm644 "${KCWD}"/certs/private_key.priv "$PRIVATE_KEY_PATH"
 
 ls -la /
 if [[ "${kernel_flavor}" =~ asus ]]; then
@@ -153,15 +153,15 @@ rm -f "$PRIVATE_KEY_PATH" "$PUBLIC_KEY_PATH"
 if [[ ${DUAL_SIGN:-} == "true" ]]; then
     SECOND_PUBLIC_KEY_PATH="/etc/pki/kernel/public/public_key_2.crt"
     SECOND_PRIVATE_KEY_PATH="/etc/pki/kernel/private/public_key_2.priv"
-    if [[ ! -s "${CKWD}"/certs/private_key_2.priv ]]; then
+    if [[ ! -s "${KCWD}"/certs/private_key_2.priv ]]; then
         echo "WARNING: Using test signing key."
-        cp "${CKWD}"/certs/private_key_2.priv{.test,}
-        cp "${CKWD}"/certs/public_key_2.der{.test,}
-        find "${CKWD}"/certs/
+        cp "${KCWD}"/certs/private_key_2.priv{.test,}
+        cp "${KCWD}"/certs/public_key_2.der{.test,}
+        find "${KCWD}"/certs/
     fi
-    openssl x509 -in "${CKWD}"/certs/public_key_2.der -out "${CKWD}"/certs/public_key_2.crt
-    install -Dm644 "${CKWD}"/certs/public_key_2.crt "$SECOND_PUBLIC_KEY_PATH"
-    install -Dm644 "${CKWD}"/certs/private_key_2.priv "$SECOND_PRIVATE_KEY_PATH"
+    openssl x509 -in "${KCWD}"/certs/public_key_2.der -out "${KCWD}"/certs/public_key_2.crt
+    install -Dm644 "${KCWD}"/certs/public_key_2.crt "$SECOND_PUBLIC_KEY_PATH"
+    install -Dm644 "${KCWD}"/certs/private_key_2.priv "$SECOND_PRIVATE_KEY_PATH"
     sbsign --cert "$SECOND_PUBLIC_KEY_PATH" --key "$SECOND_PRIVATE_KEY_PATH" /usr/lib/modules/"${kernel_version}"/vmlinuz --output /usr/lib/modules/"${kernel_version}"/vmlinuz
     sbverify --list /usr/lib/modules/"${kernel_version}"/vmlinuz
     rm -f "$SECOND_PRIVATE_KEY_PATH" "$SECOND_PUBLIC_KEY_PATH"
@@ -195,15 +195,15 @@ fi
 sbverify --list /usr/lib/modules/"${kernel_version}"/vmlinuz
 
 # Make Temp Dir
-mkdir -p "${CKWD}"/rpms
+mkdir -p "${KCWD}"/rpms
 
 # Move RPMs over
-mv /kernel-*.rpm "${CKWD}"/rpms
-mv /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm "${CKWD}"/rpms
+mv /kernel-*.rpm "${KCWD}"/rpms
+mv /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm "${KCWD}"/rpms
 
 if [[ "${kernel_flavor}" =~ surface ]]; then
-    cp iptsd-*.rpm libwacom-*.rpm "${CKWD}"/rpms
+    cp iptsd-*.rpm libwacom-*.rpm "${KCWD}"/rpms
 fi
 
 # Delete keys in /tmp if we decide to publish this later
-rm -rf "${CKWD}"/certs
+rm -rf "${KCWD}"/certs
