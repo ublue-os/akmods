@@ -93,20 +93,19 @@ jobs:
         if: steps.cache-kernel.outputs.cache-hit != 'true'
         shell: bash
         run: |
-          export FEDORA_VERSION=${{ matrix.fedora_version }}
-          export KERNEL_VERSION=${{ steps.kernel-version.outputs.kernel_release }}
-          export KERNEL_BUILD_TAG=${{ steps.kernel-version.outputs.kernel_build_tag }}
-          export KERNEL_FLAVOR=${{ matrix.kernel_flavor }}
-          export DUAL_SIGN=true
-
           mkdir -p ${{ env.CKWD }}
           cp -a fetch-kernel.sh certs ${{ env.CKWD }}
           find ${{ env.CKWD }}
 
           container_name="fq-$(uuidgen)"
-          podman run --entrypoint /bin/bash \
+          podman run \
+            --entrypoint /bin/bash \
+            --env FEDORA_VERSION=${{ matrix.fedora_version }} \
+            --env KERNEL_VERSION=${{ steps.kernel-version.outputs.kernel_release }} \
+            --env KERNEL_BUILD_TAG=${{ steps.kernel-version.outputs.kernel_build_tag }} \
+            --env KERNEL_FLAVOR=${{ matrix.kernel_flavor }} \
+            --env DUAL_SIGN=true \
             --name "$container_name" \
-            --env-host \
             -v ${{ env.CKWD }}:${{ env.CKWD }}:rw \
             -dt "quay.io/fedora/fedora:${{ matrix.fedora_version }}"
 
