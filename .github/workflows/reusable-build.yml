@@ -41,7 +41,7 @@ jobs:
         id: kernel-version
         uses: ./.github/actions/get-kernel-version
         with:
-          fedora_version: ${{ inputs.fedora_version}}
+          fedora_version: ${{ inputs.fedora_version }}
           kernel_flavor: ${{ inputs.kernel_flavor }}
 
       - name: Cache Kernel RPMs
