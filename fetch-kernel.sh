@@ -182,6 +182,8 @@ if [[ "${kernel_flavor}" =~ surface ]]; then
 else
     rpmrebuild --additional=--buildroot=/tmp/buildroot --batch kernel-core-"${kernel_version}"
     rm -f /usr/lib/modules/"${kernel_version}"/vmlinuz
+    find /tmp
+    find /root
     dnf reinstall -y \
         /kernel-"$kernel_version".rpm \
         /kernel-modules-"$kernel_version".rpm \
