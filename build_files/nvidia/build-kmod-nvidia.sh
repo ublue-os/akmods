@@ -1,6 +1,7 @@
-#!/bin/sh
+#!/usr/bin/bash
 
 set -oeux pipefail
+export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 
 RELEASE="$(rpm -E '%fedora.%_arch')"
 KERNEL_MODULE_TYPE="${1:-kernel}"

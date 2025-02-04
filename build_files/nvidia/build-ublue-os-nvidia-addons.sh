@@ -1,6 +1,7 @@
-#!/bin/sh
+#!/usr/bin/bash
 
 set -oeux pipefail
+export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 
 curl -L https://negativo17.org/repos/fedora-nvidia.repo \
     -o /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-fedora-nvidia.repo

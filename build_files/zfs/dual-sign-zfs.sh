@@ -1,6 +1,7 @@
 #!/usr/bin/bash
 
-set -eoux pipefail
+set -oeux pipefail
+export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 SIGNING_KEY_1="/tmp/certs/signing_key_1.pem"

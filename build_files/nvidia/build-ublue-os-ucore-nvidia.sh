@@ -1,6 +1,7 @@
-#!/bin/sh
+#!/usr/bin/bash
 
 set -oeux pipefail
+export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 
 ### SETUP nvidia container stuffs
 
