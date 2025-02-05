@@ -3,7 +3,11 @@ on:
   workflow_call:
     inputs:
       fedora_version:
-        description: "The Fedora release version: 39, 40, etc"
+        description: "The Fedora release version: 40, 41, etc"
+        required: true
+        type: string
+      kernel_flavor:
+        description: "The Kernel flavor: main, bazzite, coreos-stable, etc"
         required: true
         type: string
 env:
@@ -11,13 +15,134 @@ env:
   IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}-${{ inputs.fedora_version }}
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}-${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}
   cancel-in-progress: true
 
 jobs:
-  build_ublue:
-    name: akmods
+  cache-kernel:
+    name: Kernel ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}
+    runs-on: ubuntu-24.04
+    env:
+      KCWD: /tmp/kernel-cache
+      KCPATH: kernel_cache
+    outputs:
+      KCKEY: ${{ inputs.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_release }}
+      KCWD: ${{ env.KCWD }}
+      KCPATH: ${{ env.KCPATH }}
+      kernel_build_tag: ${{ steps.kernel-version.outputs.kernel_build_tag }}
+      kernel_major_minor_patch: ${{ steps.kernel-version.outputs.kernel_major_minor_patch }}
+      KERNEL_VERSION: ${{ steps.kernel-version.outputs.kernel_release }}
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Get Kernel Version
+        id: kernel-version
+        uses: ./.github/actions/get-kernel-version
+        with:
+          fedora_version: ${{ inputs.fedora_version }}
+          kernel_flavor: ${{ inputs.kernel_flavor }}
+
+      - name: Cache Kernel RPMs
+        id: cache-kernel
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.KCPATH }}
+          key: ${{ inputs.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_release }} # job outputs KCKEY
+
+      - name: Retrieve Signing Key
+        if: steps.cache-kernel.outputs.cache-hit != 'true' && github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group'
+        shell: bash
+        run: |
+          mkdir -p certs
+          if [[ "${{ github.event_name }}"  == 'pull_request' ]]; then
+            echo "This should not have run... exiting..."
+            exit 1
+          else
+            echo "${{ secrets.KERNEL_PRIVKEY }}" > certs/private_key.priv
+            echo "${{ secrets.AKMOD_PRIVKEY_20230518 }}" > certs/private_key_2.priv
+            # DEBUG: get character count of key
+            wc -c certs/private_key.priv
+            wc -c certs/private_key_2.priv
+          fi
+
+      - name: Fetch and Sign Kernel Packages
+        if: steps.cache-kernel.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          build_image="quay.io/fedora/fedora:${{ inputs.fedora_version }}"
+          podman pull "$build_image"
+
+          mkdir -p ${{ env.KCWD }}
+          cp -a fetch-kernel.sh certs ${{ env.KCWD }}
+
+          echo "${{toJSON(steps.kernel-version.outputs)}}"
+
+          container_name="fq-$(uuidgen)"
+          podman run \
+            --entrypoint /bin/bash \
+            --env FEDORA_VERSION=${{ inputs.fedora_version }} \
+            --env KERNEL_BUILD_TAG=${{ steps.kernel-version.outputs.kernel_build_tag }} \
+            --env KERNEL_VERSION=${{ steps.kernel-version.outputs.kernel_release }} \
+            --env KERNEL_FLAVOR=${{ inputs.kernel_flavor }} \
+            --env DUAL_SIGN=true \
+            --name "$container_name" \
+            -v ${{ env.KCWD }}:${{ env.KCWD }}:rw \
+            -dt "$build_image"
+
+          podman exec "$container_name" bash -x ${{ env.KCWD }}/fetch-kernel.sh ${{ env.KCWD }}
+
+          find ${{ env.KCWD }}
+
+      - name: Check Secureboot Signatures
+        if: steps.cache-kernel.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          set -x
+          if [[ ! $(command -v sbverify) || ! $(command -v curl) || ! $(command -v openssl) || ! $(command -v rpm2cpio) ]]; then
+            sudo apt update
+            sudo apt install sbsigntool curl openssl rpm2cpio
+          fi
+
+          cd ${{ env.KCWD }}/rpms
+          if [[ "${{ inputs.kernel_flavor }}" == "surface" ]]; then
+            rpm2cpio kernel-surface-core-"${{ steps.kernel-version.outputs.kernel_release }}".rpm | cpio -idmv
+          else
+            rpm2cpio kernel-core-"${{ steps.kernel-version.outputs.kernel_release }}".rpm | cpio -idmv
+          fi
+          cd ./lib/modules/"${{ steps.kernel-version.outputs.kernel_release }}"/
+          sbverify --list vmlinuz
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            curl --retry 3 -#fLo kernel-sign.der https://github.com/ublue-os/akmods/raw/main/certs/public_key.der.test
+            curl --retry 3 -#fLo akmods.der https://github.com/ublue-os/akmods/raw/main/certs/public_key_2.der.test
+          else
+            curl --retry 3 -#fLo kernel-sign.der https://github.com/ublue-os/akmods/raw/main/certs/public_key.der
+            curl --retry 3 -#fLo akmods.der https://github.com/ublue-os/akmods/raw/main/certs/public_key_2.der
+          fi
+          openssl x509 -in kernel-sign.der -out kernel-sign.crt
+          openssl x509 -in akmods.der -out akmods.crt
+          sbverify --cert kernel-sign.crt vmlinuz || exit 1
+          sbverify --cert akmods.crt vmlinuz || exit 1
+
+      - name: Finalize Cache Files
+        if: steps.cache-kernel.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          # this should be in runner user's home dir
+          mkdir -p ${{ env.KCPATH }}
+          cp -a ${{ env.KCWD }}/rpms/*.rpm ${{ env.KCPATH }}/
+          echo "$(date '+%Y%m%d.0')" > ${{ env.KCPATH }}/kernel-cache-date
+
+      - name: List Cached Kernel RPMs
+        shell: bash
+        run: |
+          find ${{ env.KCPATH }}
+
+  build-akmods:
+    name: Akmods ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor }}-${{ matrix.cfile_suffix }}
     runs-on: ubuntu-24.04 # Work Around Tar Bug
+    needs: [cache-kernel]
     permissions:
       contents: read
       packages: write
@@ -25,15 +150,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        fedora_version:
-          - ${{ inputs.fedora_version }}
-        kernel_flavor:
-          - main
-          - asus
-          - bazzite
-          - surface
-          - coreos-stable
-          - coreos-testing
+        kernel_flavor:  # this must be in matrix for excludes, but reference inputs.kernel_flavor in workflow
+          - ${{ inputs.kernel_flavor }}
         cfile_suffix:
           - common
           - extra
@@ -41,22 +159,6 @@ jobs:
           - nvidia-open
           - zfs
         exclude:
-          - fedora_version: 39
-            kernel_flavor: coreos-stable
-          - fedora_version: 40
-            kernel_flavor: coreos-testing
-          - fedora_version: 40
-            kernel_flavor: asus
-          - fedora_version: 40
-            kernel_flavor: bazzite
-          - fedora_version: 39
-            kernel_flavor: fsync
-          - fedora_version: 39
-            kernel_flavor: bazzite
-          - fedora_version: 39
-            kernel_flavor: asus
-          - fedora_version: 39
-            kernel_flavor: coreos-testing
           - kernel_flavor: main
             cfile_suffix: zfs
           - kernel_flavor: asus
@@ -65,11 +167,49 @@ jobs:
             cfile_suffix: zfs
           - kernel_flavor: surface
             cfile_suffix: zfs
+    env:
+      KCWD: ${{ needs.cache-kernel.outputs.KCWD }}
+      KCPATH: ${{ needs.cache-kernel.outputs.KCPATH }}
+      kernel_build_tag: ${{ needs.cache-kernel.outputs.kernel_build_tag }}
+      KERNEL_VERSION: ${{ needs.cache-kernel.outputs.KERNEL_VERSION }}
 
     steps:
-      # Checkout push-to-registry action GitHub repository
-      - name: Checkout Push to Registry action
+      - name: Checkout Repo
         uses: actions/checkout@v4
+
+      - name: Create cache parent dir
+        shell: bash
+        run: |
+          mkdir -p ${{ env.KCWD }}
+
+      - name: Cache Kernel RPMs
+        id: cache-kernel
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.KCPATH }}
+          key: ${{ needs.cache-kernel.outputs.KCKEY }}
+
+      - name: Fail Absent Kernel Cache
+        if: steps.cache-kernel.outputs.cache-hit != 'true'
+        run: |
+          echo "Kernel Cache not found for key: ${{ needs.cache-kernel.outputs.KCKEY }}"
+          exit 1
+
+      - name: Get Cached Kernel Date/Version
+        shell: bash
+        run: |
+          set -exo pipefail
+
+          find ${{ env.KCPATH }}
+          KCDATE=$(cat ${{ env.KCPATH }}/kernel-cache-date)
+          if [ -z "${KCDATE}" ]; then
+            echo "kernel-cache-date must not be empty"
+          fi
+          if [ -z "${{ env.KERNEL_VERSION }}" ]; then
+            echo "KERNEL_VERSION must not be empty"
+          fi
+          KERNEL_IMAGE_VERSION=${{ env.KERNEL_VERSION }}-${KCDATE}
+          echo "KERNEL_IMAGE_VERSION=$KERNEL_IMAGE_VERSION" >> $GITHUB_ENV
 
       - name: Matrix Variables
         shell: bash
@@ -81,10 +221,10 @@ jobs:
           fi
           export BUILDER_IMAGE=quay.io/fedora/fedora
           echo "BUILDER_IMAGE=${BUILDER_IMAGE}" >> $GITHUB_ENV
-          echo "FQ_BUILDER_IMAGE=${BUILDER_IMAGE}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
-          export KERNEL_IMAGE=${{ matrix.kernel_flavor }}-kernel
-          echo "KERNEL_IMAGE=${KERNEL_IMAGE}" >> $GITHUB_ENV
-          echo "FQ_KERNEL_IMAGE=${{ env.IMAGE_REGISTRY }}/${KERNEL_IMAGE}:${{ matrix.fedora_version }}" >> $GITHUB_ENV
+
+      - name: Pull build image
+        shell: bash
+        run: podman pull ${{ env.BUILDER_IMAGE }}:${{ inputs.fedora_version }}
 
       - name: AppArmor Disable
         run: |
@@ -93,50 +233,13 @@ jobs:
           sudo systemctl stop apparmor
           systemctl status apparmor || true
 
-      - name: Pull build images
-        uses: Wandalen/wretry.action@v3.8.0
-        with:
-          attempt_limit: 3
-          attempt_delay: 15000
-          command: |
-            # pull the base image used for FROM in containerfile so
-            # we can retry on that unfortunately common failure case
-            podman pull ${{ env.FQ_BUILDER_IMAGE }}
-            podman pull ${{ env.FQ_KERNEL_IMAGE }}
-
-      - name: Get current version
-        shell: bash
-        run: |
-          set -eo pipefail
-
-          #skopeo inspect containers-storage:${{ env.FQ_KERNEL_IMAGE }} > kernel.json
-          # We SHOULD be able to use container-storage to inspect already pulled image here
-          # BUT... ubuntu-24.04 builders prevent with this error:
-          #     Error during unshare(...): Operation not permitted
-          # I intend to investigate/fix later, but need to move forward
-          skopeo inspect docker://${{ env.FQ_KERNEL_IMAGE }} > kernel.json
-
-          linux=$(jq -r '.["Labels"]["ostree.linux"]' kernel.json)
-          if [ -z "$linux" ] || [ "null" = "$linux" ]; then
-            echo "inspected linux version must not be empty or null"
-            exit 1
-          fi
-          echo "KERNEL_VERSION=$linux" >> $GITHUB_ENV
-
-          img_version=$(jq -r '.["Labels"]["org.opencontainers.image.version"]' kernel.json)
-          if [ -z "$img_version" ] || [ "null" = "$img_version" ]; then
-            echo "inspected image version must not be empty or null"
-            exit 1
-          fi
-          echo "KERNEL_IMAGE_VERSION=$img_version" >> $GITHUB_ENV
-
       - name: Generate tags
         id: generate-tags
         shell: bash
         run: |
           # Generate a timestamp for creating an image version history
           TIMESTAMP="$(date +%Y%m%d)"
-          VARIANT="${{ matrix.kernel_flavor }}-${{ matrix.fedora_version }}"
+          VARIANT="${{ inputs.kernel_flavor }}-${{ inputs.fedora_version }}"
 
           COMMIT_TAGS=()
           BUILD_TAGS=()
@@ -211,9 +314,8 @@ jobs:
             ${{ steps.generate-tags.outputs.alias_tags }}
           build-args: |
             BUILDER_IMAGE=${{ env.BUILDER_IMAGE }}
-            KERNEL_ORG=${{ github.repository_owner }}
-            KERNEL_FLAVOR=${{ matrix.kernel_flavor }}
-            FEDORA_MAJOR_VERSION=${{ matrix.fedora_version }}
+            KERNEL_FLAVOR=${{ inputs.kernel_flavor }}
+            FEDORA_MAJOR_VERSION=${{ inputs.fedora_version }}
             RPMFUSION_MIRROR=${{ vars.RPMFUSION_MIRROR }}
             DUAL_SIGN=true
           labels: ${{ steps.meta.outputs.labels }}
@@ -228,9 +330,8 @@ jobs:
           tags: latest
           build-args: |
             BUILDER_IMAGE=${{ env.BUILDER_IMAGE }}
-            KERNEL_ORG=${{ github.repository_owner }}
-            KERNEL_FLAVOR=${{ matrix.kernel_flavor }}
-            FEDORA_MAJOR_VERSION=${{ matrix.fedora_version }}
+            KERNEL_FLAVOR=${{ inputs.kernel_flavor }}
+            FEDORA_MAJOR_VERSION=${{ inputs.fedora_version }}
             INPUT_AKMODS=${{ env.IMAGE_NAME }}
             INPUT_TAG=${{ env.default_tag }}
             DUAL_SIGN=true
@@ -300,12 +401,12 @@ jobs:
           echo "${{ toJSON(steps.push.outputs) }}"
 
   check:
-    name: Check all ${{ inputs.fedora_version }} builds successful
+    name: Check all ${{ inputs.fedora_version }}-${{ inputs.kernel_flavor}} builds successful
     runs-on: ubuntu-latest
-    needs: [build_ublue]
+    needs: [build-akmods]
     steps:
       - name: Exit on failure
-        if: ${{ needs.build_ublue.result == 'failure' }}
+        if: ${{ needs.build-akmods.result == 'failure' }}
         shell: bash
         run: exit 1
       - name: Exit

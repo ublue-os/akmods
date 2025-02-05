@@ -7,13 +7,24 @@ on:
     paths-ignore:
       - '**.md'
   schedule:
-    - cron: '15 0 * * *'  # 10 minutes after kernel-cache
+    - cron: '25 0 * * *'  # 0025 UTC everyday (20 minutes after 41)
   workflow_dispatch:
 
+
 jobs:
-  build:
-    name: build
+  kernel-akmods:
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
+    strategy:
+      fail-fast: false
+      matrix:
+        fedora_version:
+          - 40
+        kernel_flavor:
+          - surface
+          - main
+          - coreos-stable
+          - coreos-testing
     with:
-      fedora_version: 40
+      fedora_version: ${{ matrix.fedora_version }}
+      kernel_flavor: ${{ matrix.kernel_flavor }}
