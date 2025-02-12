@@ -13,6 +13,6 @@ dnf install -y \
     akmod-framework-laptop-*.fc${RELEASE}.${ARCH}
 akmods --force --kernels "${KERNEL}" --kmod framework-laptop
 modinfo /usr/lib/modules/${KERNEL}/extra/framework-laptop/framework_laptop.ko.xz > /dev/null \
-|| (find /var/cache/akmods/framework_laptop/ -name \*.log -print -exec cat {} \; && exit 1)
+|| (find /var/cache/akmods/framework-laptop/ -name \*.log -print -exec cat {} \; && exit 1)
 
 rm -f /etc/yum.repos.d/_copr_ublue-os-akmods.repo
