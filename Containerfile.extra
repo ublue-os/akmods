@@ -40,16 +40,18 @@ RUN --mount=type=bind,src=kernel_cache,dst=/tmp/kernel_cache,ro \
     /tmp/build-kmod-ayaneo-platform.sh && \
     /tmp/build-kmod-ayn-platform.sh && \
     /tmp/build-kmod-bmi260.sh && \
-    /tmp/build-kmod-facetimehd.sh && \
+    if grep -qv "bazzite" <<< "${KERNEL_FLAVOR}"; then \
+        /tmp/build-kmod-facetimehd.sh && \
+        /tmp/build-kmod-rtl8814au.sh && \
+        /tmp/build-kmod-rtl88xxau.sh && \
+        /tmp/build-kmod-VirtualBox.sh \
+    ; fi && \
     /tmp/build-kmod-gcadapter_oc.sh && \
     /tmp/build-kmod-nct6687d.sh && \
-    /tmp/build-kmod-rtl8814au.sh && \
-    /tmp/build-kmod-rtl88xxau.sh && \
     /tmp/build-kmod-system76.sh && \
     /tmp/build-kmod-system76-io.sh && \
     /tmp/build-kmod-ryzen-smu.sh && \
     /tmp/build-kmod-vhba.sh && \
-    /tmp/build-kmod-VirtualBox.sh && \
     /tmp/dual-sign.sh && \
     /tmp/build-post.sh
 
