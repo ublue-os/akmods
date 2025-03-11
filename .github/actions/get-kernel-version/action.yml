@@ -2,7 +2,7 @@
 name: Get Kernel Version
 inputs:
   fedora_version:
-    description: "The Fedora release version: 40, 41, etc"
+    description: "The Fedora release version: 41, 42, etc"
     required: true
     type: string
   kernel_flavor:

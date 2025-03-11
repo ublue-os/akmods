@@ -7,12 +7,7 @@ ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
 
-if [[ "$RELEASE" -lt 39 ]]; then
-  echo "SKIPPED BUILD of vhba on Fedora $RELEASE"
-  exit 0
-fi
-
-if [[ "${RELEASE}" -ge 42 ]]; then
+if [[ "${RELEASE}" -ge 43 ]]; then
     COPR_RELEASE="rawhide"
 else
     COPR_RELEASE="${RELEASE}"
