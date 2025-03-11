@@ -26,6 +26,8 @@ runs:
       id: kernel
       shell: bash
       run: |
+        set -x
+
         if [[ ${{ inputs.kernel_flavor }} =~ asus|surface ]]; then
           build_image="quay.io/fedora/fedora:${{ inputs.fedora_version }}"
           podman pull "$build_image"
