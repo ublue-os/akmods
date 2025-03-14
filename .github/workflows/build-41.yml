@@ -8,6 +8,8 @@ on:
       - '**.md'
   schedule:
     - cron: '5 0 * * *'  # 0005 UTC everyday
+  repository_dispatch:
+    types: [trigger-workflow]
   workflow_dispatch:
 
 jobs:
