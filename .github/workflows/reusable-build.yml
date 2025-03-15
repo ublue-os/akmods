@@ -10,6 +10,10 @@ on:
         description: "The Kernel flavor: main, bazzite, coreos-stable, etc"
         required: true
         type: string
+      bazzite_tag:
+        description: "The release tag for the bazzite kernel"
+        required: false
+        type: string
 env:
   IMAGE_BASE_NAME: akmods
   IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
@@ -43,6 +47,7 @@ jobs:
         with:
           fedora_version: ${{ inputs.fedora_version }}
           kernel_flavor: ${{ inputs.kernel_flavor }}
+          bazzite_tag: ${{ inputs.bazzite_tag }}
 
       - name: Cache Kernel RPMs
         id: cache-kernel
