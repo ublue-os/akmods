@@ -164,11 +164,23 @@ jobs:
           - nvidia-open
           - zfs
         exclude:
+          # extra
+          - kernel_flavor: main
+            cfile_suffix: extra
+          - kernel_flavor: asus
+            cfile_suffix: extra
+          - kernel_flavor: surface
+            cfile_suffix: extra
+          - kernel_flavor: coreos-stable
+            cfile_suffix: extra
+          - kernel_flavor: coreos-testing
+            cfile_suffix: extra
+          # zfs
           - kernel_flavor: main
             cfile_suffix: zfs
-          - kernel_flavor: asus
-            cfile_suffix: zfs
           - kernel_flavor: bazzite
+            cfile_suffix: zfs
+          - kernel_flavor: asus
             cfile_suffix: zfs
           - kernel_flavor: surface
             cfile_suffix: zfs

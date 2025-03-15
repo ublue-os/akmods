@@ -69,13 +69,9 @@ The majority of the drivers are tagged with `KERNEL_TYPE-FEDORA_RELEASE`. NVIDIA
 
 | KERNEL_TYPE | FEDORA_RELEASE | TAG |
 | - | - | - |
-| Fedora stock kernel | 39 | `main-39` |
-| | 40 | `main-40` |
-| [patched for ASUS devices](https://copr.fedorainfracloud.org/coprs/lukenukem/asus-kernel) | 39 | `asus-39`|
-| | 40 | `asus-40` |
-| [patched fsync](https://copr.fedorainfracloud.org/coprs/sentry/kernel-fsync) | 39 | `fsync-39` |
-| [patched Microsoft Surface devices](https://github.com/linux-surface/linux-surface/) | 39 | `surface-39` |
-| | 40 | `surface-40` |
+| Fedora stock kernel | 40 | `main-40` |
+| | 41 | `main-41` |
+| [bazzite kernel](https://github.com/bazzite-org/kernel-bazzite) | 41 | `bazzite-41` |
 
 ## Usage
 
