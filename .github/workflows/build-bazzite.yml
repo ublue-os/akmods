@@ -1,0 +1,20 @@
+name: bazzite akmods
+on:
+  repository_dispatch:
+    types: [bazzite-kernel-build]
+
+jobs:
+  kernel-akmods:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    strategy:
+      fail-fast: false
+      matrix:
+        fedora_version:
+          - 41
+        kernel_flavor:
+          - bazzite
+    with:
+      fedora_version: ${{ matrix.fedora_version }}
+      kernel_flavor: ${{ matrix.kernel_flavor }}
+      bazzite_tag: ${{ github.event.client_payload.release_tag }}

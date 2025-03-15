@@ -9,6 +9,10 @@ inputs:
     description: "The Kernel flavor: main, bazzite, coreos-stable, etc"
     required: true
     type: string
+  bazzite_tag:
+    description: "Optional (bazzite kernel) tag to use instead of latest"
+    required: false
+    type: string
 outputs:
   kernel_build_tag:
     description: "Optional (bazzite specific) tag"
@@ -99,7 +103,11 @@ runs:
             linux=$($dnf repoquery --repoid copr:copr.fedorainfracloud.org:sentry:kernel-ba --whatprovides kernel | sort -V | tail -n1 | sed 's/.*://')
             ;;
           "bazzite")
-            latest="$(curl "https://api.github.com/repos/hhd-dev/kernel-bazzite/releases/latest" )"
+            if [[ -n "${{ inputs.bazzite_tag }}" ]]; then
+              latest="$(curl "https://api.github.com/repos/bazzite-org/kernel-bazzite/releases/tags/${{ inputs.bazzite_tag }}" )"
+            else
+              latest="$(curl "https://api.github.com/repos/bazzite-org/kernel-bazzite/releases/latest" )"
+            fi
             linux=$(echo -E "$latest" | jq -r '.assets[].name' | grep -E 'kernel-.*.rpm' | grep "fc${{ inputs.fedora_version }}.x86_64" | head -1 | sed "s/kernel-//g" | sed "s/.rpm//g" )
             build_tag=$(echo -E $latest | jq -r '.tag_name')
             ;;

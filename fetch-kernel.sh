@@ -60,15 +60,15 @@ elif [[ "${kernel_flavor}" == "surface" ]]; then
         libwacom-surface-data
 elif [[ "${kernel_flavor}" == "bazzite" ]]; then
     # Using curl for bazzite release
-    curl -#fLO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-"$kernel_version".rpm
-    curl -#fLO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-core-"$kernel_version".rpm
-    curl -#fLO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-modules-"$kernel_version".rpm
-    curl -#fLO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-modules-core-"$kernel_version".rpm
-    curl -#fLO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-modules-extra-"$kernel_version".rpm
-    curl -#fLO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-devel-"$kernel_version".rpm
-    curl -#fLO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-devel-matched-"$kernel_version".rpm
-    curl -#fLO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-uki-virt-"$kernel_version".rpm
-    # curl -LO https://github.com/hhd-dev/kernel-bazzite/releases/download/"$build_tag"/kernel-uki-virt-addons-"$kernel_version".rpm
+    curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-"$kernel_version".rpm
+    curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-core-"$kernel_version".rpm
+    curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-modules-"$kernel_version".rpm
+    curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-modules-core-"$kernel_version".rpm
+    curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-modules-extra-"$kernel_version".rpm
+    curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-devel-"$kernel_version".rpm
+    curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-devel-matched-"$kernel_version".rpm
+    curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-uki-virt-"$kernel_version".rpm
+    # curl -LO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-uki-virt-addons-"$kernel_version".rpm
 else
     KERNEL_MAJOR_MINOR_PATCH=$(echo "$kernel_version" | cut -d '-' -f 1)
     KERNEL_RELEASE="$(echo "$kernel_version" | cut -d - -f 2 | cut -d . -f 1).$(echo "$kernel_version" | cut -d - -f 2 | cut -d . -f 2)"
