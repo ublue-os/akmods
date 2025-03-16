@@ -21,6 +21,7 @@ jobs:
           - 42
         kernel_flavor:
           - main
+          - bazzite
     with:
       fedora_version: ${{ matrix.fedora_version }}
       kernel_flavor: ${{ matrix.kernel_flavor }}
