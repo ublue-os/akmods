@@ -71,7 +71,7 @@ elif [[ "${kernel_flavor}" == "bazzite" ]]; then
     # curl -LO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-uki-virt-addons-"$kernel_version".rpm
 else
     KERNEL_MAJOR_MINOR_PATCH=$(echo "$kernel_version" | cut -d '-' -f 1)
-    KERNEL_RELEASE="$(echo "$kernel_version" | cut -d - -f 2 | cut -d . -f 1).$(echo "$kernel_version" | cut -d - -f 2 | cut -d . -f 2)"
+    KERNEL_RELEASE="$(echo "$kernel_version" | cut -d - -f 2 | rev | cut -d . -f 2- | rev)"
     ARCH=$(uname -m)
     
     # Using curl instead of dnf download for https links
