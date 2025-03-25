@@ -24,7 +24,35 @@ dnf install -y libtirpc-devel libblkid-devel libuuid-devel libudev-devel openssl
 
 ### BUILD zfs
 echo "getting zfs-${ZFS_VERSION}.tar.gz"
-curl -L -O https://github.com/openzfs/zfs/releases/download/zfs-${ZFS_VERSION}/zfs-${ZFS_VERSION}.tar.gz
+curl -L -O "https://github.com/openzfs/zfs/releases/download/zfs-${ZFS_VERSION}/zfs-${ZFS_VERSION}.tar.gz"
+curl -L -O "https://github.com/openzfs/zfs/releases/download/zfs-${ZFS_VERSION}/zfs-${ZFS_VERSION}.tar.gz.asc"
+curl -L -O "https://github.com/openzfs/zfs/releases/download/zfs-${ZFS_VERSION}/zfs-${ZFS_VERSION}.sha256.asc"
+
+echo "Import key"
+# https://openzfs.github.io/openzfs-docs/Project%20and%20Community/Signing%20Keys.html
+gpg --yes --keyserver keyserver.ubuntu.com --recv D4598027
+
+echo "Verifying tar.gz signature"
+gpg --verify "zfs-${ZFS_VERSION}.tar.gz.asc" "zfs-${ZFS_VERSION}.tar.gz"
+if [ $? -ne 0 ]; then
+    echo "ZFS tarball signature verification FAILED! Exiting..."
+    exit 1
+fi
+
+echo "Verifying checksum signature"
+gpg --verify "zfs-${ZFS_VERSION}.sha256.asc"
+if [ $? -ne 0 ]; then
+    echo "Checksum signature verification FAILED! Exiting..."
+    exit 1
+fi
+
+echo "Verifying encrypted checksum"
+gpg --decrypt "zfs-${ZFS_VERSION}.sha256.asc" | sha256sum -c
+if [ $? -ne 0 ]; then
+    echo "Checksum verification FAILED! Exiting..."
+    exit 1
+fi
+
 # no-same-owner/no-same-permissions required for F40 based images building on podman 3.4.4 (ubuntu 22.04)
 tar -z -x --no-same-owner --no-same-permissions -f zfs-${ZFS_VERSION}.tar.gz
 
