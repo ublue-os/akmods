@@ -1,6 +1,6 @@
 # ublue-os akmods
 
-[![build-39](https://github.com/ublue-os/akmods/actions/workflows/build-39.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-39.yml) [![build-40](https://github.com/ublue-os/akmods/actions/workflows/build-40.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-40.yml)
+[![build-40](https://github.com/ublue-os/akmods/actions/workflows/build-40.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-40.yml) [![build-41](https://github.com/ublue-os/akmods/actions/workflows/build-41.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-41.yml) [![build-42](https://github.com/ublue-os/akmods/actions/workflows/build-42.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-42.yml)
 
 A layer for adding extra kernel modules to your image. Use for better hardware support and a few other features!
 
