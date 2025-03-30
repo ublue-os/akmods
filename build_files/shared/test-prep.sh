@@ -61,6 +61,11 @@ curl -LsSf -o /etc/yum.repos.d/_copr_mulderje-facetimehd-kmod.repo \
     "https://copr.fedorainfracloud.org/coprs/mulderje/facetimehd-kmod/repo/fedora-${COPR_RELEASE}/mulderje-facetimehd-kmod-fedora-${COPR_RELEASE}.repo"
 fi
 
+if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-it87-extras-*.rpm) ]]; then
+curl -LsSf -o /etc/yum.repos.d/_copr_grandpares-it87-extras.repo \
+    "https://copr.fedorainfracloud.org/coprs/grandpares/it87-extras/repo/fedora-${COPR_RELEASE}/grandpares-it87-extras--fedora-${COPR_RELEASE}.repo"
+fi
+
 if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-kvmfr-*.rpm) ]]; then
 curl -LsSf -o /etc/yum.repos.d/_copr_hikariknight-looking-glass-kvmfr.repo \
     "https://copr.fedorainfracloud.org/coprs/hikariknight/looking-glass-kvmfr/repo/fedora-${COPR_RELEASE}/hikariknight-looking-glass-kvmfr-fedora-${COPR_RELEASE}.repo"
