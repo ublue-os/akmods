@@ -109,7 +109,7 @@ If you have a kmod you want to contribute send a pull request by adding a script
 
 ## Verification
 
-These images are signed with sisgstore's [cosign](https://docs.sigstore.dev/cosign/overview/). You can verify the signature by downloading the `cosign.pub` key from this repo and running the following command, replacing `RELEASE` with either `39` or `40`:
+These images are signed with sisgstore's [cosign](https://docs.sigstore.dev/about/overview/). You can verify the signature by downloading the `cosign.pub` key from this repo and running the following command, replacing `RELEASE` with either `40`, `41` or `42`:
 
     cosign verify --key cosign.pub ghcr.io/ublue-os/akmods:RELEASE
 
