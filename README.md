@@ -105,7 +105,7 @@ These examples show:
 
 ## Adding kmods
 
-If you have a kmod you want to contribute send a pull request by adding a script using [build-kmod-wl.sh](https://github.com/ublue-os/akmods/blob/main/build-kmod-wl.sh) as an example.
+If you have a kmod you want to contribute send a pull request by adding a script using [build-kmod-wl.sh](https://github.com/ublue-os/akmods/blob/main/build_files/common/build-kmod-wl.sh) as an example.
 
 ## Verification
 
