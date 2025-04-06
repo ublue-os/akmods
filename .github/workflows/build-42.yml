@@ -20,7 +20,6 @@ jobs:
         fedora_version:
           - 42
         kernel_flavor:
-          - bazzite
           - main
           - coreos-stable
           - coreos-testing

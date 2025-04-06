@@ -18,6 +18,7 @@ jobs:
       matrix:
         fedora_version:
           - 41
+          - 42
         kernel_flavor:
           - bazzite
     with:
