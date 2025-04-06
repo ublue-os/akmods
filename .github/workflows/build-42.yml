@@ -21,6 +21,8 @@ jobs:
           - 42
         kernel_flavor:
           - main
+          - coreos-stable
+          - coreos-testing
     with:
       fedora_version: ${{ matrix.fedora_version }}
       kernel_flavor: ${{ matrix.kernel_flavor }}
