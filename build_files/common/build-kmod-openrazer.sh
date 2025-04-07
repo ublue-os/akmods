@@ -6,11 +6,6 @@ ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
 
-# OpenRazer builds are broken on Fedora 42
-if [[ "${FEDORA_MAJOR_VERSION}" -eq 42 ]]; then
-    exit 0
-fi
-
 cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo /etc/yum.repos.d/
 
 ### BUILD openrazer (succeed or fail-fast with debug output)
