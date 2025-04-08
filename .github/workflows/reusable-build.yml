@@ -77,7 +77,7 @@ jobs:
         shell: bash
         run: |
           if [[ ${{ inputs.kernel_flavor }} =~ centos ]]; then
-            build_image="quay.io/centos-bootc/centos-bootc:c${{ inputs.fedora_version }}s"
+            build_image="quay.io/centos-bootc/centos-bootc:stream${{ inputs.fedora_version }}"
           else
             build_image="quay.io/fedora/fedora:${{ inputs.fedora_version }}"
           fi
