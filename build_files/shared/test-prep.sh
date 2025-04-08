@@ -52,6 +52,7 @@ if [ -n "${RPMFUSION_MIRROR}" ]; then
     sed -i "s%^#baseurl=http://download1.rpmfusion.org%baseurl=${RPMFUSION_MIRROR}%" /etc/yum.repos.d/rpmfusion-*.repo
 fi
 
+# after F42 launches, bump to 43
 if [[ "${RELEASE}" -ge 42 ]]; then
     COPR_RELEASE="rawhide"
 else
