@@ -1,5 +1,5 @@
 ###
-### Containerfile.zfs - used to build ONLY ZFS kmod
+### Containerfile.zfs - used to build ONLY ZFS kmod and utilities
 ###
 
 ARG FEDORA_MAJOR_VERSION="${FEDORA_MAJOR_VERSION:-42}"
