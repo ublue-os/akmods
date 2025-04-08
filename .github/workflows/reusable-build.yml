@@ -76,7 +76,11 @@ jobs:
         if: steps.cache-kernel.outputs.cache-hit != 'true'
         shell: bash
         run: |
-          build_image="quay.io/fedora/fedora:${{ inputs.fedora_version }}"
+          if [[ ${{ inputs.kernel_flavor }} =~ centos ]]; then
+            build_image="quay.io/centos-bootc/centos-bootc:c${{ inputs.fedora_version }}s"
+          else
+            build_image="quay.io/fedora/fedora:${{ inputs.fedora_version }}"
+          fi
           podman pull "$build_image"
 
           mkdir -p ${{ env.KCWD }}
