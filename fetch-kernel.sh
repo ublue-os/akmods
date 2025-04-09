@@ -229,7 +229,9 @@ mkdir -p "${KCWD}"/rpms
 
 # Move RPMs over
 mv /kernel-*.rpm "${KCWD}"/rpms
-mv /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm "${KCWD}"/rpms
+if [ -d /root/rpmbuild/RPMS/"$(uname -m)" ]; then
+  mv /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm "${KCWD}"/rpms
+fi
 
 if [[ "${kernel_flavor}" =~ surface ]]; then
     cp iptsd-*.rpm libwacom-*.rpm "${KCWD}"/rpms
