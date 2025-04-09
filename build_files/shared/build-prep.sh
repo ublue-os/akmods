@@ -28,8 +28,8 @@ dnf install -y \
     "${RPMFUSION_MIRROR_RPMS}"/nonfree/fedora/rpmfusion-nonfree-release-"${RELEASE}".noarch.rpm \
     fedora-repos-archive
 
-# after F41 launches, bump to 42
-if [[ "${FEDORA_MAJOR_VERSION}" -ge 41 ]]; then
+# after F42 launches, bump to 43
+if [[ "${FEDORA_MAJOR_VERSION}" -ge 42 ]]; then
     # pre-release rpmfusion is in a different location
     sed -i "s%free/fedora/releases%free/fedora/development%" /etc/yum.repos.d/rpmfusion-*.repo
     # pre-release rpmfusion needs to enable testing
