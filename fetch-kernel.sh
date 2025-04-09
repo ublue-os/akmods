@@ -10,7 +10,11 @@ kernel_version="${KERNEL_VERSION}"
 kernel_flavor="${KERNEL_FLAVOR}"
 build_tag="${KERNEL_BUILD_TAG:-latest}"
 
-dnf install -y --setopt=install_weak_deps=False dnf-plugins-core rpmrebuild sbsigntools openssl
+dnf install -y --setopt=install_weak_deps=False dnf-plugins-core openssl
+# TODO: enable rpm rebuild and dual signing when EPEL provides required packages
+if [[ "$kernel_flavor" != "centos" ]]; then
+    dnf install -y --setopt=install_weak_deps=False rpmrebuild sbsigntools
+fi
 
 case "$kernel_flavor" in
     "asus")
@@ -150,6 +154,9 @@ else
         https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-core-"$kernel_version".rpm
 fi
 
+# TODO: enable rpm rebuild and dual signing when EPEL provides required packages
+if [[ "$kernel_flavor" != "centos" ]]; then
+
 # Strip Signatures from non-fedora Kernels
 if [[ ${kernel_flavor} =~ main|coreos|centos ]]; then
     echo "Will not strip Fedora signature(s) from ${kernel_flavor} kernel."
@@ -214,6 +221,9 @@ else
 fi
 
 sbverify --list /usr/lib/modules/"${kernel_version}"/vmlinuz
+
+# TODO: enable rpm rebuild and dual signing when EPEL provides required packages
+fi
 
 # Make Temp Dir
 mkdir -p "${KCWD}"/rpms

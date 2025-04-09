@@ -109,6 +109,12 @@ jobs:
         shell: bash
         run: |
           set -x
+          # TODO: enable rpm rebuild, signing, and sig cheks when EPEL provides required packages
+          if [[ ${{ inputs.kernel_flavor }} =~ centos ]]; then
+            echo "skip secureboot signature check for centos"
+            exit 0
+          fi
+
           if [[ ! $(command -v sbverify) || ! $(command -v curl) || ! $(command -v openssl) || ! $(command -v rpm2cpio) ]]; then
             sudo apt update
             sudo apt install sbsigntool curl openssl rpm2cpio
