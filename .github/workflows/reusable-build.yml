@@ -76,7 +76,11 @@ jobs:
         if: steps.cache-kernel.outputs.cache-hit != 'true'
         shell: bash
         run: |
-          build_image="quay.io/fedora/fedora:${{ inputs.fedora_version }}"
+          if [[ ${{ inputs.kernel_flavor }} =~ centos ]]; then
+            build_image="quay.io/centos-bootc/centos-bootc:stream${{ inputs.fedora_version }}"
+          else
+            build_image="quay.io/fedora/fedora:${{ inputs.fedora_version }}"
+          fi
           podman pull "$build_image"
 
           mkdir -p ${{ env.KCWD }}
@@ -105,6 +109,12 @@ jobs:
         shell: bash
         run: |
           set -x
+          # TODO: enable rpm rebuild, signing, and sig cheks when EPEL provides required packages
+          if [[ ${{ inputs.kernel_flavor }} =~ centos ]]; then
+            echo "skip secureboot signature check for centos"
+            exit 0
+          fi
+
           if [[ ! $(command -v sbverify) || ! $(command -v curl) || ! $(command -v openssl) || ! $(command -v rpm2cpio) ]]; then
             sudo apt update
             sudo apt install sbsigntool curl openssl rpm2cpio
@@ -184,6 +194,15 @@ jobs:
             cfile_suffix: zfs
           - kernel_flavor: surface
             cfile_suffix: zfs
+          # centos
+          - kernel_flavor: centos
+            cfile_suffix: common
+          - kernel_flavor: centos
+            cfile_suffix: extra
+          - kernel_flavor: centos
+            cfile_suffix: nvidia
+          - kernel_flavor: centos
+            cfile_suffix: nvidia-open
     env:
       KCWD: ${{ needs.cache-kernel.outputs.KCWD }}
       KCPATH: ${{ needs.cache-kernel.outputs.KCPATH }}
