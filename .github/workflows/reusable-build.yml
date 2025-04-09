@@ -194,6 +194,15 @@ jobs:
             cfile_suffix: zfs
           - kernel_flavor: surface
             cfile_suffix: zfs
+          # centos
+          - kernel_flavor: centos
+            cfile_suffix: common
+          - kernel_flavor: centos
+            cfile_suffix: extra
+          - kernel_flavor: centos
+            cfile_suffix: nvidia
+          - kernel_flavor: centos
+            cfile_suffix: nvidia-open
     env:
       KCWD: ${{ needs.cache-kernel.outputs.KCWD }}
       KCPATH: ${{ needs.cache-kernel.outputs.KCPATH }}
