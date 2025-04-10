@@ -7,6 +7,11 @@ set -oeux pipefail
 # ARCH="$(rpm -E '%_arch')"
 RELEASE="$(rpm -E '%fedora')"
 
+# fixme: Remove when rpmfusion is updated for F42.
+if [ "$RELEASE" = "42" ]; then
+    RELEASE="rawhide"
+fi
+
 sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/fedora-cisco-openh264.repo
 
 # enable RPMs with alternatives to create them in this image build
