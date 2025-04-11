@@ -12,7 +12,7 @@ do
     if [[ "$module_suffix" == ".xz" ]]; then
             xz --decompress "$module"
             /tmp/dual-sign-check.sh "${KERNEL}" "${module_basename}" "${PUBLIC_CHAIN}"
-            xz -f "${module_basename}"
+            xz -C crc32 -f "${module_basename}"
     elif [[ "$module_suffix" == ".gz" ]]; then
             gzip -d "$module"
             /tmp/dual-sign-check.sh "${KERNEL}" "${module_basename}" "${PUBLIC_CHAIN}"

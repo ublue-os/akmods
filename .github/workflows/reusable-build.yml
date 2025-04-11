@@ -349,6 +349,7 @@ jobs:
             BUILDER_IMAGE=${{ env.BUILDER_IMAGE }}
             KERNEL_FLAVOR=${{ inputs.kernel_flavor }}
             FEDORA_MAJOR_VERSION=${{ inputs.fedora_version }}
+            RPMFUSION_MIRROR=${{ vars.RPMFUSION_MIRROR }}
             INPUT_AKMODS=${{ env.IMAGE_NAME }}
             INPUT_TAG=${{ env.default_tag }}
             DUAL_SIGN=true
