@@ -49,6 +49,7 @@ dnf -y install --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/ter
 ### PREPARE BUILD ENV
 dnf install -y \
     akmods \
+    help2man \
     mock \
     ruby-devel
 
