@@ -37,6 +37,7 @@ RUN --mount=type=bind,src=kernel_cache,dst=/tmp/kernel_cache,ro \
     if [[ "${FEDORA_MAJOR_VERSION}" -ge 41 ]]; then \
         /tmp/build-kmod-gpd-fan.sh \
     ; fi && \
+    /tmp/build-kmod-acpi-call.sh && \
     /tmp/build-kmod-ayaneo-platform.sh && \
     /tmp/build-kmod-ayn-platform.sh && \
     /tmp/build-kmod-bmi260.sh && \
