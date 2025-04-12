@@ -7,8 +7,10 @@ ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
 
-# akmod-wl appears broken with terra
-exit 0
+# Skip on 40 and Below...
+if [[ "$RELEASE" -le 40 ]]; then
+    exit 0
+fi
 
 ### BUILD wl (succeed or fail-fast with debug output)
 dnf install -y \
