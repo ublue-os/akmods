@@ -33,9 +33,9 @@ if [ -n "${RPMFUSION_MIRROR}" ]; then
     RPMFUSION_MIRROR_RPMS=${RPMFUSION_MIRROR}
 fi
 dnf install -y \
+    fedora-repos-archive
     # "${RPMFUSION_MIRROR_RPMS}"/free/fedora/rpmfusion-free-release-"${RELEASE}".noarch.rpm \
     # "${RPMFUSION_MIRROR_RPMS}"/nonfree/fedora/rpmfusion-nonfree-release-"${RELEASE}".noarch.rpm \
-    fedora-repos-archive
 
 # TerraPkgs
 dnf -y install --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release{,-extras} || true
