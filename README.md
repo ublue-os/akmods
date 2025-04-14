@@ -37,6 +37,7 @@ The `nvidia` stream image contains
 
 | Package | Stream | Description | Source |
 |---------|--------|-------------|--------|
+| [acpi_call](https://github.com/nix-community/acpi_call) | extra | kernel module for manually issuing ACPI method calls | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/acpi_call-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/acpi_call-kmod) | 
 | [ayaneo-platform](https://github.com/ShadowBlip/ayaneo-platform) | extra | Linux drivers for AYANEO x86 handhelds | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/ayaneo-platform-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/ayaneo-platform-kmod) |
 | [ayn-platform](https://github.com/ShadowBlip/ayn-platform) | extra | Linux drivers for AYN x86 handhelds | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/ayn-platform-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/ayn-platform-kmod) |
 | [bmi260](https://github.com/hhd-dev/bmi260) | extra | kernel module driver for the Bosch BMI260 IMU | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/bmi260-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/bmi260-kmod) |
