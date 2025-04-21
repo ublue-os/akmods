@@ -16,7 +16,7 @@ dnf install -y --setopt=install_weak_deps=False dnf-plugins-core openssl
 if [[ "$kernel_flavor" == "centos" ]]; then
     CENTOS_VER=$(rpm -E %centos)
     dnf config-manager --set-enabled crb
-    dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+    dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${CENTOS_VER}.noarch.rpm
 fi
 dnf -y install --setopt=install_weak_deps=False rpmrebuild sbsigntools
 
