@@ -10,11 +10,15 @@ kernel_version="${KERNEL_VERSION}"
 kernel_flavor="${KERNEL_FLAVOR}"
 build_tag="${KERNEL_BUILD_TAG:-latest}"
 
+ARCH=$(uname -m)
+
 dnf install -y --setopt=install_weak_deps=False dnf-plugins-core openssl
-# TODO: enable rpm rebuild and dual signing when EPEL provides required packages
-if [[ "$kernel_flavor" != "centos" ]]; then
-    dnf install -y --setopt=install_weak_deps=False rpmrebuild sbsigntools
+if [[ "$kernel_flavor" == "centos" ]]; then
+    CENTOS_VER=$(rpm -E %centos)
+    dnf config-manager --set-enabled crb
+    dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
 fi
+dnf -y install --setopt=install_weak_deps=False rpmrebuild sbsigntools
 
 case "$kernel_flavor" in
     "asus")
@@ -76,9 +80,6 @@ elif [[ "${kernel_flavor}" == "bazzite" ]]; then
     curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-uki-virt-"$kernel_version".rpm
     # curl -LO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-uki-virt-addons-"$kernel_version".rpm
 elif [[ "${kernel_flavor}" == "centos" ]]; then
-    ARCH=$(uname -m)
-    CENTOS_VER=$(rpm -E %centos)
-
     # Using curl instead of dnf download for https links
     curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-"$kernel_version".rpm
     curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-core-"$kernel_version".rpm
@@ -89,7 +90,6 @@ elif [[ "${kernel_flavor}" == "centos" ]]; then
 else
     KERNEL_MAJOR_MINOR_PATCH=$(echo "$kernel_version" | cut -d '-' -f 1)
     KERNEL_RELEASE="$(echo "$kernel_version" | cut -d - -f 2 | rev | cut -d . -f 2- | rev)"
-    ARCH=$(uname -m)
     
     # Using curl instead of dnf download for https links
     curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-"$kernel_version".rpm
