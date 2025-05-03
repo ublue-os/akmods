@@ -5,8 +5,11 @@ set -oeux pipefail
 
 ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q kernel --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
-RELEASE="$(rpm -E '%fedora')"
-
+if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
+    RELEASE="$(rpm -E '%centos')"
+else
+    RELEASE="$(rpm -E '%fedora')"
+fi
 # allow pinning to a specific release series (eg, 2.0.x or 2.1.x)
 ZFS_MINOR_VERSION="${ZFS_MINOR_VERSION:-}"
 
