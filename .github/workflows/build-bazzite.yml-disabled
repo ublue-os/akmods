@@ -1,5 +1,10 @@
 name: bazzite akmods
 on:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
   repository_dispatch:
     types: [bazzite-kernel-build]
   workflow_dispatch:

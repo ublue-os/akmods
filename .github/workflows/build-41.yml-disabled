@@ -20,9 +20,7 @@ jobs:
         fedora_version:
           - 41
         kernel_flavor:
-          - asus
           - bazzite
-          - surface
           - main
           - coreos-stable
           - coreos-testing
