@@ -111,11 +111,7 @@ jobs:
           fi
 
           cd ${{ env.KCWD }}/rpms
-          if [[ "${{ inputs.kernel_flavor }}" == "surface" ]]; then
-            rpm2cpio kernel-surface-core-"${{ steps.kernel-version.outputs.kernel_release }}".rpm | cpio -idmv
-          else
-            rpm2cpio kernel-core-"${{ steps.kernel-version.outputs.kernel_release }}".rpm | cpio -idmv
-          fi
+          rpm2cpio kernel-core-"${{ steps.kernel-version.outputs.kernel_release }}".rpm | cpio -idmv
           cd ./lib/modules/"${{ steps.kernel-version.outputs.kernel_release }}"/
           sbverify --list vmlinuz
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
@@ -167,10 +163,6 @@ jobs:
           # extra
           - kernel_flavor: main
             cfile_suffix: extra
-          - kernel_flavor: asus
-            cfile_suffix: extra
-          - kernel_flavor: surface
-            cfile_suffix: extra
           - kernel_flavor: coreos-stable
             cfile_suffix: extra
           - kernel_flavor: coreos-testing
@@ -179,10 +171,6 @@ jobs:
           - kernel_flavor: main
             cfile_suffix: zfs
           - kernel_flavor: bazzite
-            cfile_suffix: zfs
-          - kernel_flavor: asus
-            cfile_suffix: zfs
-          - kernel_flavor: surface
             cfile_suffix: zfs
     env:
       KCWD: ${{ needs.cache-kernel.outputs.KCWD }}
