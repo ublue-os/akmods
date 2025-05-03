@@ -51,7 +51,7 @@ fi
 echo "Installing ${KERNEL_FLAVOR} kernel-cache RPMs..."
 
 # build image has no kernel so this needs nothing fancy, just install, but not UKIs
-dnf install -y `find /tmp/kernel_cache/ -type f | grep -v uki | xargs`
+dnf install -y `find /tmp/kernel_cache/*.rpm -type f | grep -v uki | xargs`
 KERNEL_VERSION=$(rpm -q "${KERNEL_NAME}" | cut -d '-' -f2-)
 
 ### PREPARE BUILD ENV
