@@ -243,10 +243,10 @@ jobs:
           else
               echo "IMAGE_NAME=${{ env.IMAGE_BASE_NAME }}-${{ matrix.cfile_suffix }}" >> $GITHUB_ENV
           fi
-          if [[ ${{ inputs.kernel_flavor }} =~ centos ]]; then
-            build_image="quay.io/centos-bootc/centos-bootc
+          if [[ ${{ inputs.kernel_flavor }} =~ "centos" ]]; then
+            build_image="quay.io/centos-bootc/centos-bootc"
           else
-            build_image="quay.io/fedora/fedora
+            build_image="quay.io/fedora/fedora"
           fi
           export BUILDER_IMAGE=${build_image}
           echo "BUILDER_IMAGE=${BUILDER_IMAGE}" >> $GITHUB_ENV
