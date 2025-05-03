@@ -18,7 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         fedora_version:
-          - 10
+          - stream10
         kernel_flavor:
           - centos
     with:
