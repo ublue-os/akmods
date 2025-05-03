@@ -57,7 +57,6 @@ KERNEL_VERSION=$(rpm -q "${KERNEL_NAME}" | cut -d '-' -f2-)
 ### PREPARE BUILD ENV
 dnf install -y \
     akmods \
-    jq \
     mock \
     ruby-devel
 
@@ -86,8 +85,8 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
     cat /tmp/certs/public_key.crt <(echo) /tmp/certs/public_key_2.crt >> /tmp/certs/public_key_chain.pem
 fi
 
-# This is for ZFS more than CoreOS
-if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]]; then
+# This is for ZFS more than CentOS|CoreOS
+if [[ "${KERNEL_FLAVOR}" =~ "centos" ]] || [[ "${KERNEL_FLAVOR}" =~ "coreos" ]]; then
     install -Dm644 /tmp/certs/public_key.der /lib/modules/"${KERNEL_VERSION}"/build/certs/signing_key.x509
     install -Dm644 /tmp/certs/private_key.priv /lib/modules/"${KERNEL_VERSION}"/build/certs/signing_key.pem
     dnf install -y \
