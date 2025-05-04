@@ -51,9 +51,9 @@ runs:
           coreos_version=${1}
           image_linux=$(skopeo inspect docker://quay.io/fedora/fedora-coreos:${coreos_version} | jq -r '.Labels["ostree.linux"]')
           # Pin a kernel here, gross workaround TODO: Make this cleaner
-          # if [[ "${{ inputs.kernel_flavor }}" == "coreos-stable" ]]; then
-          #    image_linux="6.11.3-300.fc41.x86_64"
-          # fi
+          if [[ "${{ inputs.kernel_flavor }}" == "coreos-stable" ]]; then
+             image_linux="6.13.8-200.fc41.x86_64"
+          fi
           major_minor_patch=$(echo $image_linux | grep -oP '^\d+\.\d+\.\d+')
           kernel_rel_part=$(echo $image_linux | grep -oP '^\d+\.\d+\.\d+\-\K([123][0]{2})')
           arch=$(echo $image_linux | grep -oP 'fc\d+\.\K.*$')
