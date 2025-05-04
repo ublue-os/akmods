@@ -85,7 +85,8 @@ if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]]; then
         git \
         jq \
         libtool \
-        ncompress
+        ncompress \
+        python-cffi
 fi
 
 # protect against incorrect permissions in tmp dirs which can break akmods builds
