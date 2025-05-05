@@ -24,8 +24,8 @@ jobs:
           - stream9
           - stream10
         exclude:
-          kernel_flavor: centos-hsk
-          fedora_version: stream9
+          - kernel_flavor: centos-hsk
+            fedora_version: stream9
     with:
       kernel_flavor: ${{ matrix.kernel_flavor }}
       fedora_version: ${{ matrix.fedora_version }}
