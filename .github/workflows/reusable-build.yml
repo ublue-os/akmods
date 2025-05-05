@@ -7,7 +7,7 @@ on:
         required: true
         type: string
       kernel_flavor:
-        description: "The Kernel flavor: main, bazzite, coreos-stable, etc"
+        description: "The Kernel flavor: main, bazzite, coreos-stable, centos-hsk, etc"
         required: true
         type: string
       bazzite_tag:
