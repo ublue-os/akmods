@@ -81,7 +81,7 @@ elif [[ "${kernel_flavor}" == "bazzite" ]]; then
     curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-devel-matched-"$kernel_version".rpm
     curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-uki-virt-"$kernel_version".rpm
     # curl -LO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-uki-virt-addons-"$kernel_version".rpm
-elif [[ "${kernel_flavor}" =~ "centos" ]]; then
+elif [[ "${kernel_flavor}" == "centos" ]]; then
     # Using curl instead of dnf download for https links
     curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-"$kernel_version".rpm
     curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-core-"$kernel_version".rpm
@@ -91,6 +91,16 @@ elif [[ "${kernel_flavor}" =~ "centos" ]]; then
     curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-uki-virt-"$kernel_version".rpm
     curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/AppStream/"$ARCH"/os/Packages/kernel-devel-"$kernel_version".rpm
     curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/AppStream/"$ARCH"/os/Packages/kernel-devel-matched-"$kernel_version".rpm
+elif [[ "${kernel_flavor}" == "centos-hsk" ]]; then
+    dnf download -y \
+        kernel-"${kernel_version}" \
+        kernel-core-"${kernel_version}" \
+        kernel-modules-"${kernel_version}" \
+        kernel-modules-core-"${kernel_version}" \
+        kernel-modules-extra-"${kernel_version}" \
+        kernel-devel-"${kernel_version}" \
+        kernel-devel-matched-"${kernel_version}" \
+        kernel-uki-virt-"${kernel_version}"
 else
     KERNEL_MAJOR_MINOR_PATCH=$(echo "$kernel_version" | cut -d '-' -f 1)
     KERNEL_RELEASE="$(echo "$kernel_version" | cut -d - -f 2 | rev | cut -d . -f 2- | rev)"
