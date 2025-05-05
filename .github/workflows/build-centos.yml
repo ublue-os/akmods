@@ -23,7 +23,7 @@ jobs:
         fedora_version:
           - stream9
           - stream10
-        excludes:
+        exclude:
           kernel_flavor: centos-hsk
           fedora_version: stream9
     with:
