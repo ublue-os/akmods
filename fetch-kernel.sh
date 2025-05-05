@@ -92,7 +92,8 @@ elif [[ "${kernel_flavor}" == "centos" ]]; then
     curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/AppStream/"$ARCH"/os/Packages/kernel-devel-"$kernel_version".rpm
     curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/AppStream/"$ARCH"/os/Packages/kernel-devel-matched-"$kernel_version".rpm
 elif [[ "${kernel_flavor}" == "centos-hsk" ]]; then
-    dnf download -y \
+    dnf -y install centos-release-hyperscale-kernel
+    dnf download -y --enablerepo="centos-hyperscale" \
         kernel-"${kernel_version}" \
         kernel-core-"${kernel_version}" \
         kernel-modules-"${kernel_version}" \
