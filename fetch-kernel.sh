@@ -152,7 +152,7 @@ elif [[ "${kernel_flavor}" == "bazzite" ]]; then
         /kernel-modules-"$kernel_version".rpm \
         /kernel-modules-core-"$kernel_version".rpm \
         /kernel-modules-extra-"$kernel_version".rpm
-elif [[ "${kernel_flavor}" == "centos" ]]; then
+elif [[ "${kernel_flavor}" =~ "centos" ]]; then
     dnf install -y \
         /kernel-"$kernel_version".rpm \
         /kernel-core-"$kernel_version".rpm \
