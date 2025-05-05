@@ -39,6 +39,8 @@ case "$kernel_flavor" in
         ;;
     "centos")
         ;;
+    "centos-hsk")
+        ;;
     "main")
         ;;
     *)
