@@ -77,7 +77,7 @@ jobs:
         shell: bash
         run: |
           if [[ ${{ inputs.kernel_flavor }} =~ centos ]]; then
-            build_image="quay.io/centos-bootc/centos-bootc:${{ inputs.fedora_version }}"
+            build_image="quay.io/centos/centos:${{ inputs.fedora_version }}"
           else
             build_image="quay.io/fedora/fedora:${{ inputs.fedora_version }}"
           fi
@@ -185,11 +185,19 @@ jobs:
           # centos
           - kernel_flavor: centos
             cfile_suffix: common
+          - kernel_flavor: centos-hsk
+            cfile_suffix: common
           - kernel_flavor: centos
+            cfile_suffix: extra
+          - kernel_flavor: centos-hsk
             cfile_suffix: extra
           - kernel_flavor: centos
             cfile_suffix: nvidia
+          - kernel_flavor: centos-hsk
+            cfile_suffix: nvidia
           - kernel_flavor: centos
+            cfile_suffix: nvidia-open
+          - kernel_flavor: centos-hsk
             cfile_suffix: nvidia-open
     env:
       KCWD: ${{ needs.cache-kernel.outputs.KCWD }}

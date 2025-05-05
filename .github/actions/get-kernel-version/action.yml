@@ -34,7 +34,7 @@ runs:
 
         if [[ ${{ inputs.kernel_flavor }} =~ asus|surface|centos ]]; then
           if [[ ${{ inputs.kernel_flavor }} =~ centos ]]; then
-            build_image="quay.io/centos-bootc/centos-bootc:${{ inputs.fedora_version }}"
+            build_image="quay.io/centos/centos:${{ inputs.fedora_version }}"
           else
             build_image="quay.io/fedora/fedora:${{ inputs.fedora_version }}"
           fi
@@ -103,13 +103,9 @@ runs:
           "centos")
             linux=$($dnf repoquery --whatprovides kernel | sort -V | tail -n1 | sed 's/.*://')
             ;;
-          "fsync")
-            $dnf copr enable -y sentry/kernel-fsync
-            linux=$($dnf repoquery --repoid copr:copr.fedorainfracloud.org:sentry:kernel-fsync --whatprovides kernel | sort -V | tail -n1 | sed 's/.*://')
-            ;;
-          "fsync-ba")
-            $dnf copr enable -y sentry/kernel-ba
-            linux=$($dnf repoquery --repoid copr:copr.fedorainfracloud.org:sentry:kernel-ba --whatprovides kernel | sort -V | tail -n1 | sed 's/.*://')
+          "centos-hsk")
+            $dnf -y install centos-release-hyperscale-kernel
+            linux=$($dnf repoquery --enablerepo="centos-hyperscale" --whatprovides kernel | sort -V | tail -n1 | sed 's/.*://')
             ;;
           "bazzite")
             if [[ -n "${{ inputs.bazzite_tag }}" ]]; then

@@ -19,6 +19,7 @@ jobs:
       matrix:
         kernel_flavor:
           - centos
+          - centos-hsk
         fedora_version:
           - stream9
           - stream10
