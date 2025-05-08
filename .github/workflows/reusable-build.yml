@@ -109,12 +109,6 @@ jobs:
         shell: bash
         run: |
           set -x
-          # TODO: enable rpm rebuild, signing, and sig cheks when EPEL provides required packages
-          if [[ ${{ inputs.kernel_flavor }} =~ centos ]]; then
-            echo "skip secureboot signature check for centos"
-            exit 0
-          fi
-
           if [[ ! $(command -v sbverify) || ! $(command -v curl) || ! $(command -v openssl) || ! $(command -v rpm2cpio) ]]; then
             sudo apt update
             sudo apt install sbsigntool curl openssl rpm2cpio
@@ -359,7 +353,6 @@ jobs:
           oci: false
 
       - name: Build Test Image
-        if: ${{ ! contains(inputs.kernel_flavor, 'centos') }}
         uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2
         with:
           containerfiles: |
@@ -377,7 +370,6 @@ jobs:
           oci: false
 
       - name: Test Akmods Signature
-        if: ${{ ! contains(inputs.kernel_flavor, 'centos') }}
         id: test_akmods
         shell: bash
         run: |

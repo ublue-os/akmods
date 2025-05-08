@@ -168,12 +168,9 @@ else
         https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-core-"$kernel_version".rpm
 fi
 
-# TODO: enable rpm rebuild and dual signing when EPEL provides required packages
-if [[ "$kernel_flavor" != "centos" ]]; then
-
 # Strip Signatures from non-fedora Kernels
 if [[ ${kernel_flavor} =~ main|coreos|centos ]]; then
-    echo "Will not strip Fedora signature(s) from ${kernel_flavor} kernel."
+    echo "Will not strip Fedora/CentOS signature(s) from ${kernel_flavor} kernel."
 else
     EXISTING_SIGNATURES="$(sbverify --list /usr/lib/modules/"$kernel_version"/vmlinuz | grep '^signature \([0-9]\+\)$' | sed 's/^signature \([0-9]\+\)$/\1/')" || true
     if [[ -n "$EXISTING_SIGNATURES" ]]; then
@@ -235,9 +232,6 @@ else
 fi
 
 sbverify --list /usr/lib/modules/"${kernel_version}"/vmlinuz
-
-# TODO: enable rpm rebuild and dual signing when EPEL provides required packages
-fi
 
 # Make Temp Dir
 mkdir -p "${KCWD}"/rpms
