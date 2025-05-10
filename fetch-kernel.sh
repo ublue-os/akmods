@@ -10,7 +10,15 @@ kernel_version="${KERNEL_VERSION}"
 kernel_flavor="${KERNEL_FLAVOR}"
 build_tag="${KERNEL_BUILD_TAG:-latest}"
 
-dnf install -y --setopt=install_weak_deps=False dnf-plugins-core rpmrebuild sbsigntools openssl
+ARCH=$(uname -m)
+
+dnf install -y --setopt=install_weak_deps=False dnf-plugins-core openssl
+if [[ "$kernel_flavor" =~ "centos" ]]; then
+    CENTOS_VER=$(rpm -E %centos)
+    dnf config-manager --set-enabled crb
+    dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${CENTOS_VER}.noarch.rpm
+fi
+dnf -y install --setopt=install_weak_deps=False rpmrebuild sbsigntools
 
 case "$kernel_flavor" in
     "asus")
@@ -28,6 +36,10 @@ case "$kernel_flavor" in
     "coreos-testing")
         ;;
     "bazzite")
+        ;;
+    "centos")
+        ;;
+    "centos-hsk")
         ;;
     "main")
         ;;
@@ -69,10 +81,30 @@ elif [[ "${kernel_flavor}" == "bazzite" ]]; then
     curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-devel-matched-"$kernel_version".rpm
     curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-uki-virt-"$kernel_version".rpm
     # curl -LO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-uki-virt-addons-"$kernel_version".rpm
+elif [[ "${kernel_flavor}" == "centos" ]]; then
+    # Using curl instead of dnf download for https links
+    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-"$kernel_version".rpm
+    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-core-"$kernel_version".rpm
+    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-modules-"$kernel_version".rpm
+    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-modules-core-"$kernel_version".rpm
+    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-modules-extra-"$kernel_version".rpm
+    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-uki-virt-"$kernel_version".rpm
+    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/AppStream/"$ARCH"/os/Packages/kernel-devel-"$kernel_version".rpm
+    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/AppStream/"$ARCH"/os/Packages/kernel-devel-matched-"$kernel_version".rpm
+elif [[ "${kernel_flavor}" == "centos-hsk" ]]; then
+    dnf -y install centos-release-hyperscale-kernel
+    dnf download -y --enablerepo="centos-hyperscale" \
+        kernel-"${kernel_version}" \
+        kernel-core-"${kernel_version}" \
+        kernel-modules-"${kernel_version}" \
+        kernel-modules-core-"${kernel_version}" \
+        kernel-modules-extra-"${kernel_version}" \
+        kernel-devel-"${kernel_version}" \
+        kernel-devel-matched-"${kernel_version}" \
+        kernel-uki-virt-"${kernel_version}"
 else
     KERNEL_MAJOR_MINOR_PATCH=$(echo "$kernel_version" | cut -d '-' -f 1)
     KERNEL_RELEASE="$(echo "$kernel_version" | cut -d - -f 2 | rev | cut -d . -f 2- | rev)"
-    ARCH=$(uname -m)
     
     # Using curl instead of dnf download for https links
     curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-"$kernel_version".rpm
@@ -120,6 +152,13 @@ elif [[ "${kernel_flavor}" == "bazzite" ]]; then
         /kernel-modules-"$kernel_version".rpm \
         /kernel-modules-core-"$kernel_version".rpm \
         /kernel-modules-extra-"$kernel_version".rpm
+elif [[ "${kernel_flavor}" =~ "centos" ]]; then
+    dnf install -y \
+        /kernel-"$kernel_version".rpm \
+        /kernel-core-"$kernel_version".rpm \
+        /kernel-modules-"$kernel_version".rpm \
+        /kernel-modules-core-"$kernel_version".rpm \
+        /kernel-modules-extra-"$kernel_version".rpm
 else
     dnf install -y \
         /kernel-"$kernel_version".rpm \
@@ -130,8 +169,8 @@ else
 fi
 
 # Strip Signatures from non-fedora Kernels
-if [[ ${kernel_flavor} =~ main|coreos ]]; then
-    echo "Will not strip Fedora signature(s) from ${kernel_flavor} kernel."
+if [[ ${kernel_flavor} =~ main|coreos|centos ]]; then
+    echo "Will not strip Fedora/CentOS signature(s) from ${kernel_flavor} kernel."
 else
     EXISTING_SIGNATURES="$(sbverify --list /usr/lib/modules/"$kernel_version"/vmlinuz | grep '^signature \([0-9]\+\)$' | sed 's/^signature \([0-9]\+\)$/\1/')" || true
     if [[ -n "$EXISTING_SIGNATURES" ]]; then
@@ -199,7 +238,9 @@ mkdir -p "${KCWD}"/rpms
 
 # Move RPMs over
 mv /kernel-*.rpm "${KCWD}"/rpms
-mv /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm "${KCWD}"/rpms
+if [ -d /root/rpmbuild/RPMS/"$(uname -m)" ]; then
+  mv /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm "${KCWD}"/rpms
+fi
 
 if [[ "${kernel_flavor}" =~ surface ]]; then
     cp iptsd-*.rpm libwacom-*.rpm "${KCWD}"/rpms

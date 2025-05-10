@@ -1,0 +1,31 @@
+name: ublue akmods centos
+on:
+  merge_group:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+  schedule:
+    - cron: '5 0 * * *'  # 0005 UTC everyday
+  workflow_dispatch:
+
+jobs:
+  kernel-akmods:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    strategy:
+      fail-fast: false
+      matrix:
+        kernel_flavor:
+          - centos
+          - centos-hsk
+        fedora_version:
+          - stream9
+          - stream10
+        exclude:
+          - kernel_flavor: centos-hsk
+            fedora_version: stream9
+    with:
+      kernel_flavor: ${{ matrix.kernel_flavor }}
+      fedora_version: ${{ matrix.fedora_version }}

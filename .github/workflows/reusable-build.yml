@@ -7,7 +7,7 @@ on:
         required: true
         type: string
       kernel_flavor:
-        description: "The Kernel flavor: main, bazzite, coreos-stable, etc"
+        description: "The Kernel flavor: main, bazzite, coreos-stable, centos-hsk, etc"
         required: true
         type: string
       bazzite_tag:
@@ -76,7 +76,11 @@ jobs:
         if: steps.cache-kernel.outputs.cache-hit != 'true'
         shell: bash
         run: |
-          build_image="quay.io/fedora/fedora:${{ inputs.fedora_version }}"
+          if [[ ${{ inputs.kernel_flavor }} =~ centos ]]; then
+            build_image="quay.io/centos/centos:${{ inputs.fedora_version }}"
+          else
+            build_image="quay.io/fedora/fedora:${{ inputs.fedora_version }}"
+          fi
           podman pull "$build_image"
 
           mkdir -p ${{ env.KCWD }}
@@ -172,6 +176,23 @@ jobs:
             cfile_suffix: zfs
           - kernel_flavor: bazzite
             cfile_suffix: zfs
+          # centos
+          - kernel_flavor: centos
+            cfile_suffix: common
+          - kernel_flavor: centos-hsk
+            cfile_suffix: common
+          - kernel_flavor: centos
+            cfile_suffix: extra
+          - kernel_flavor: centos-hsk
+            cfile_suffix: extra
+          - kernel_flavor: centos
+            cfile_suffix: nvidia
+          - kernel_flavor: centos-hsk
+            cfile_suffix: nvidia
+          - kernel_flavor: centos
+            cfile_suffix: nvidia-open
+          - kernel_flavor: centos-hsk
+            cfile_suffix: nvidia-open
     env:
       KCWD: ${{ needs.cache-kernel.outputs.KCWD }}
       KCPATH: ${{ needs.cache-kernel.outputs.KCPATH }}
@@ -224,7 +245,12 @@ jobs:
           else
               echo "IMAGE_NAME=${{ env.IMAGE_BASE_NAME }}-${{ matrix.cfile_suffix }}" >> $GITHUB_ENV
           fi
-          export BUILDER_IMAGE=quay.io/fedora/fedora
+          if [[ ${{ inputs.kernel_flavor }} =~ "centos" ]]; then
+            build_image="quay.io/centos/centos"
+          else
+            build_image="quay.io/fedora/fedora"
+          fi
+          export BUILDER_IMAGE=${build_image}
           echo "BUILDER_IMAGE=${BUILDER_IMAGE}" >> $GITHUB_ENV
 
       - name: Pull build image
