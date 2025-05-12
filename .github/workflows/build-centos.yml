@@ -1,4 +1,4 @@
-name: ublue akmods 40
+name: ublue akmods centos
 on:
   merge_group:
   pull_request:
@@ -7,9 +7,8 @@ on:
     paths-ignore:
       - '**.md'
   schedule:
-    - cron: '45 0 * * *'  # 0045 UTC everyday (20 minutes after 41)
+    - cron: '5 0 * * *'  # 0005 UTC everyday
   workflow_dispatch:
-
 
 jobs:
   kernel-akmods:
@@ -18,13 +17,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        fedora_version:
-          - 40
         kernel_flavor:
-          - surface
-          - main
-          - coreos-stable
-          - coreos-testing
+          - centos
+          - centos-hsk
+        fedora_version:
+          - stream9
+          - stream10
+        exclude:
+          - kernel_flavor: centos-hsk
+            fedora_version: stream9
     with:
-      fedora_version: ${{ matrix.fedora_version }}
       kernel_flavor: ${{ matrix.kernel_flavor }}
+      fedora_version: ${{ matrix.fedora_version }}
