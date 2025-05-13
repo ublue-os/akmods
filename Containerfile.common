@@ -43,7 +43,6 @@ RUN --mount=type=bind,src=kernel_cache,dst=/tmp/kernel_cache,ro \
     /tmp/build-kmod-openrazer.sh && \
     /tmp/build-kmod-v4l2loopback.sh && \
     /tmp/build-kmod-wl.sh && \
-    /tmp/build-kmod-xpadneo.sh && \
     /tmp/build-kmod-xone.sh && \
     /tmp/dual-sign.sh && \
     /tmp/build-post.sh
