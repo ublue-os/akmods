@@ -25,8 +25,7 @@ cd /tmp
 ### BUILD nvidia
 
 
-dnf install -y \
-    akmod-nvidia*.${DISTREL}
+dnf install -y akmod-nvidia
 
 # Either successfully build and install the kernel modules, or fail early with debug output
 rpm -qa |grep nvidia
