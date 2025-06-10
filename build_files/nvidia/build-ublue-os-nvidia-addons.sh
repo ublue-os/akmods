@@ -2,6 +2,9 @@
 
 set -oeux pipefail
 
+curl -L https://negativo17.org/repos/epel-nvidia.repo \
+    -o /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-epel-nvidia.repo
+
 curl -L https://negativo17.org/repos/fedora-nvidia.repo \
     -o /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-fedora-nvidia.repo
 
