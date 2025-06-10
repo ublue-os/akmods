@@ -5,13 +5,23 @@ set -oeux pipefail
 RELEASE="$(rpm -E '%fedora.%_arch')"
 KERNEL_MODULE_TYPE="${1:-kernel}"
 
+ARCH="$(rpm -E '%_arch')"
+KERNEL="$(rpm -q kernel --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
+if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
+    RELEASE="$(rpm -E '%centos')"
+    # enable negativo17
+    cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-epel-nvidia.repo /etc/yum.repos.d/
+else
+    RELEASE="$(rpm -E '%fedora')"
+    # disable rpmfusion and enable negativo17
+    sed -i 's/enabled=1/enabled=0/' /etc/yum.repos.d/rpmfusion-*.repo
+    cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-fedora-nvidia.repo /etc/yum.repos.d/
+fi
+
 cd /tmp
 
 ### BUILD nvidia
 
-# disable rpmfusion and enable negativo17
-sed -i 's/enabled=1/enabled=0/' /etc/yum.repos.d/rpmfusion-*.repo
-cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-fedora-nvidia.repo /etc/yum.repos.d/
 
 dnf install -y \
     akmod-nvidia*.fc${RELEASE}
