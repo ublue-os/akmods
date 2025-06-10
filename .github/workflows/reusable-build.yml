@@ -185,12 +185,8 @@ jobs:
             cfile_suffix: extra
           - kernel_flavor: centos-hsk
             cfile_suffix: extra
-          - kernel_flavor: centos
-            cfile_suffix: nvidia
           - kernel_flavor: centos-hsk
             cfile_suffix: nvidia
-          - kernel_flavor: centos
-            cfile_suffix: nvidia-open
           - kernel_flavor: centos-hsk
             cfile_suffix: nvidia-open
     env:
