@@ -2,6 +2,7 @@
 
 set -oeux pipefail
 
+ARCH="$(rpm -E '%_arch')"
 KERNEL_MODULE_TYPE="${1:-kernel}"
 
 if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
@@ -23,7 +24,7 @@ cd /tmp
 
 
 dnf install -y \
-    akmod-nvidia*.${DIST_ARCH}
+    akmod-nvidia*.${DIST}.${ARCH}
 
 # Either successfully build and install the kernel modules, or fail early with debug output
 rpm -qa |grep nvidia
@@ -45,7 +46,7 @@ mkdir -p /var/cache/rpms/kmods/nvidia
 
 # TODO: remove deprecated RELEASE var which clobbers more typical meanings/usages of RELEASE
 cat <<EOF > /var/cache/rpms/kmods/nvidia-vars
-DIST_ARCH="${DIST}.$(rpm -E '%_arch')"
+DIST_ARCH="${DIST}.${ARCH}"
 KERNEL_VERSION=${KERNEL_VERSION}
 KERNEL_MODULE_TYPE=${KERNEL_MODULE_TYPE}
 RELEASE="${DEPRECATED_RELEASE}"
