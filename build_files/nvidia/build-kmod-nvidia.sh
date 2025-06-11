@@ -8,11 +8,15 @@ KERNEL_MODULE_TYPE="${1:-kernel}"
 if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
     DEPRECATED_RELEASE="$(rpm -E '%centos.%_arch')"
     DIST="el$(rpm -E '%centos')"
+    # on Fedora, akmods uses full kernel version, release nubt no arch
+    VARS_KERNEL_VERSION="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}')"
     # enable negativo17
     cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-epel-nvidia.repo /etc/yum.repos.d/
 else
     DEPRECATED_RELEASE="$(rpm -E '%fedora.%_arch')"
     DIST="fc$(rpm -E '%fedora')"
+    # on Fedora, akmods uses full kernel version, release and arch
+    VARS_KERNEL_VERSION="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
     # disable rpmfusion and enable negativo17
     sed -i 's/enabled=1/enabled=0/' /etc/yum.repos.d/rpmfusion-*.repo
     cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-fedora-nvidia.repo /etc/yum.repos.d/
@@ -47,7 +51,7 @@ mkdir -p /var/cache/rpms/kmods/nvidia
 # TODO: remove deprecated RELEASE var which clobbers more typical meanings/usages of RELEASE
 cat <<EOF > /var/cache/rpms/kmods/nvidia-vars
 DIST_ARCH="${DIST}.${ARCH}"
-KERNEL_VERSION=${KERNEL_VERSION}
+KERNEL_VERSION=${VARS_KERNEL_VERSION}
 KERNEL_MODULE_TYPE=${KERNEL_MODULE_TYPE}
 RELEASE="${DEPRECATED_RELEASE}"
 NVIDIA_AKMOD_VERSION=${NVIDIA_AKMOD_VERSION}
