@@ -23,7 +23,7 @@ cd /tmp
 
 
 dnf install -y \
-    akmod-nvidia*.${DIST_RELEASE}.${ARCH}
+    akmod-nvidia*.${DIST_ARCH}
 
 # Either successfully build and install the kernel modules, or fail early with debug output
 rpm -qa |grep nvidia
