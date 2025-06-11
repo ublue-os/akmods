@@ -11,8 +11,8 @@ if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
     # enable negativo17
     cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-epel-nvidia.repo /etc/yum.repos.d/
 else
-    RELEASE="fc$(rpm -E '%fedora')"
-    DIST_RELEASE="el${RELEASE}"
+    RELEASE="$(rpm -E '%fedora')"
+    DIST_RELEASE="fc${RELEASE}"
     # disable rpmfusion and enable negativo17
     sed -i 's/enabled=1/enabled=0/' /etc/yum.repos.d/rpmfusion-*.repo
     cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-fedora-nvidia.repo /etc/yum.repos.d/
