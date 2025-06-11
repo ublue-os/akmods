@@ -9,7 +9,7 @@ if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
     NVIDIA_REPO_NAME="epel-nvidia.repo"
     NVIDIA_EXTRA_PKGS=""
     if [ ${RELEASE} -ge 10 ]; then
-        NVIDIA_EXTRA_PKGS="libva-nvidia-driver nvidia-setting"
+        NVIDIA_EXTRA_PKGS="libva-nvidia-driver nvidia-settings"
     fi
 
     mkdir -p /var/roothome
@@ -21,7 +21,7 @@ else
     echo "Building for Fedora"
     RELEASE="$(rpm -E '%fedora')"
     NVIDIA_REPO_NAME="fedora-nvidia.repo"
-    NVIDIA_EXTRA_PKGS="libva-nvidia-driver libnvidia-ml.i686 mesa-vulkan-drivers.i686 nvidia-driver-cuda-libs.i686 nvidia-driver-libs.i686 nvidia-setting"
+    NVIDIA_EXTRA_PKGS="libva-nvidia-driver libnvidia-ml.i686 mesa-vulkan-drivers.i686 nvidia-driver-cuda-libs.i686 nvidia-driver-libs.i686 nvidia-settings"
 
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/fedora-cisco-openh264.repo
 fi
