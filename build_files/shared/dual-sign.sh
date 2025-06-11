@@ -41,7 +41,7 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
 
     # on CentOS, akmods seems to drop the arch from the kernel version in the kmod package name
     KERNEL_NOARCH="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}')"
-    dnf reinstall -y /root/rpmbuild/RPMS/"$(uname -m)"/kmod-*-"${KERNEL_NOARCH}"-*.rpm
+    dnf reinstall -y /root/rpmbuild/RPMS/"$(uname -m)"/kmod-*-"${KERNEL_NOARCH}"*.rpm
     for module in /usr/lib/modules/"${KERNEL}"/extra/*/*.ko*; do
         if ! modinfo "${module}" >/dev/null; then
             exit 1
