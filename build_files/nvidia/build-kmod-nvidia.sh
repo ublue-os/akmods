@@ -2,24 +2,37 @@
 
 set -oeux pipefail
 
-RELEASE="$(rpm -E '%fedora.%_arch')"
+ARCH="$(rpm -E '%_arch')"
 KERNEL_MODULE_TYPE="${1:-kernel}"
+
+if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
+    DIST="el$(rpm -E '%centos')"
+    # on CentOS, akmods uses full kernel version and release but no arch
+    VARS_KERNEL_VERSION="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}')"
+    # enable negativo17
+    cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-epel-nvidia.repo /etc/yum.repos.d/
+else
+    DIST="fc$(rpm -E '%fedora')"
+    # on Fedora, akmods uses full kernel version, release and arch
+    VARS_KERNEL_VERSION="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
+    # disable rpmfusion and enable negativo17
+    sed -i 's/enabled=1/enabled=0/' /etc/yum.repos.d/rpmfusion-*.repo
+    cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-fedora-nvidia.repo /etc/yum.repos.d/
+fi
+DEPRECATED_RELEASE="${DIST}.${ARCH}"
 
 cd /tmp
 
 ### BUILD nvidia
 
-# disable rpmfusion and enable negativo17
-sed -i 's/enabled=1/enabled=0/' /etc/yum.repos.d/rpmfusion-*.repo
-cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-fedora-nvidia.repo /etc/yum.repos.d/
 
 dnf install -y \
-    akmod-nvidia*.fc${RELEASE}
+    "akmod-nvidia*.${DIST}.${ARCH}"
 
 # Either successfully build and install the kernel modules, or fail early with debug output
 rpm -qa |grep nvidia
 KERNEL_VERSION="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
-NVIDIA_AKMOD_VERSION="$(basename "$(rpm -q "akmod-nvidia" --queryformat '%{VERSION}-%{RELEASE}')" ".fc${RELEASE%%.*}")"
+NVIDIA_AKMOD_VERSION="$(basename "$(rpm -q "akmod-nvidia" --queryformat '%{VERSION}-%{RELEASE}')" ".${DIST}")"
 
 sed -i "s/^MODULE_VARIANT=.*/MODULE_VARIANT=$KERNEL_MODULE_TYPE/" /etc/nvidia/kernel.conf
 
@@ -34,10 +47,11 @@ modinfo -l /usr/lib/modules/${KERNEL_VERSION}/extra/nvidia/nvidia{,-drm,-modeset
 # create a directory for later copying of resulting nvidia specific artifacts
 mkdir -p /var/cache/rpms/kmods/nvidia
 
-
+# TODO: remove deprecated RELEASE var which clobbers more typical meanings/usages of RELEASE
 cat <<EOF > /var/cache/rpms/kmods/nvidia-vars
-KERNEL_VERSION=${KERNEL_VERSION}
+DIST_ARCH="${DIST}.${ARCH}"
+KERNEL_VERSION=${VARS_KERNEL_VERSION}
 KERNEL_MODULE_TYPE=${KERNEL_MODULE_TYPE}
-RELEASE=${RELEASE}
+RELEASE="${DEPRECATED_RELEASE}"
 NVIDIA_AKMOD_VERSION=${NVIDIA_AKMOD_VERSION}
 EOF

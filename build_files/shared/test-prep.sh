@@ -1,12 +1,14 @@
 #!/usr/bin/bash
+#shellcheck disable=SC2086
 
 set -oeux pipefail
 
 ### PREPARE REPOS
-# ARCH="$(rpm -E '%_arch')"
 if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
     echo "Building for CentOS"
     RELEASE="$(rpm -E '%centos')"
+    NVIDIA_REPO_NAME="epel-nvidia.repo"
+    NVIDIA_EXTRA_PKGS=""
 
     mkdir -p /var/roothome
 
@@ -16,6 +18,8 @@ if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
 else
     echo "Building for Fedora"
     RELEASE="$(rpm -E '%fedora')"
+    NVIDIA_REPO_NAME="fedora-nvidia.repo"
+    NVIDIA_EXTRA_PKGS="libva-nvidia-driver libnvidia-ml.i686 mesa-vulkan-drivers.i686 nvidia-driver-cuda-libs.i686 nvidia-driver-libs.i686"
 
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/fedora-cisco-openh264.repo
 fi
@@ -109,8 +113,8 @@ curl -LsSf -o /etc/yum.repos.d/_copr_ssweeny-system76-hwe.repo \
 fi
 
 if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm) ]]; then
-    curl -Lo /etc/yum.repos.d/negativo17-fedora-nvidia.repo \
-        "https://negativo17.org/repos/fedora-nvidia.repo"
+    curl -Lo /etc/yum.repos.d/negativo17-${NVIDIA_REPO_NAME} \
+        "https://negativo17.org/repos/${NVIDIA_REPO_NAME}"
     curl -Lo /etc/yum.repos.d/nvidia-container-toolkit.repo \
         "https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo"
     curl -Lo /etc/yum.repos.d/nvidia-container.pp \
@@ -146,23 +150,22 @@ fi
 rm -f /tmp/certs/private_key_2.priv
 
 if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm 2> /dev/null) ]]; then
-    sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/negativo17-fedora-nvidia.repo
+    sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/negativo17-${NVIDIA_REPO_NAME}
     sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/nvidia-container-toolkit.repo
     source /tmp/akmods-rpms/kmods/nvidia-vars
     dnf install -y \
         libnvidia-fbc \
-        libnvidia-ml.i686 \
         libva-nvidia-driver \
-        mesa-vulkan-drivers.i686 \
         nvidia-driver \
         nvidia-driver-cuda \
-        nvidia-driver-cuda-libs.i686 \
-        nvidia-driver-libs.i686 \
         nvidia-modprobe \
         nvidia-persistenced \
         nvidia-settings \
         nvidia-container-toolkit \
-        /tmp/akmods-rpms/kmods/kmod-nvidia-"${KERNEL_VERSION}"-"${NVIDIA_AKMOD_VERSION}".fc"${RELEASE}".rpm
+        ${NVIDIA_EXTRA_PKGS} \
+        /tmp/akmods-rpms/kmods/kmod-nvidia-"${KERNEL_VERSION}"-"${NVIDIA_AKMOD_VERSION}"."${DIST_ARCH}".rpm
+        # Codacy complains about the lack of quotes on ${NVIDIA_EXTRA_PKGS}, but we don't want quotes here
+        # we want word splitting behavior, thus 'shellcheck disable=SC2086' added to the top of this file
 elif [[ -f $(find /tmp/akmods-rpms/kmods/zfs/kmod-*.rpm 2> /dev/null) ]]; then
     dnf install -y \
         pv \
