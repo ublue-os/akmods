@@ -161,8 +161,9 @@ if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm 2> /dev/null) ]]; then
         nvidia-persistenced \
         nvidia-settings \
         nvidia-container-toolkit \
-        "${NVIDIA_EXTRA_PKGS}" \
+        ${NVIDIA_EXTRA_PKGS} \
         /tmp/akmods-rpms/kmods/kmod-nvidia-"${KERNEL_VERSION}"-"${NVIDIA_AKMOD_VERSION}"."${DIST_ARCH}".rpm
+    # Codacy will complain about the use of ${NVIDIA_EXTRA_PKGS} not having quotes, but we don't want quotes here
 elif [[ -f $(find /tmp/akmods-rpms/kmods/zfs/kmod-*.rpm 2> /dev/null) ]]; then
     dnf install -y \
         pv \
