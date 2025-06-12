@@ -7,7 +7,7 @@ KERNEL_MODULE_TYPE="${1:-kernel}"
 
 if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
     DIST="el$(rpm -E '%centos')"
-    # on Fedora, akmods uses full kernel version, release nubt no arch
+    # on CentOS, akmods uses full kernel version and release but no arch
     VARS_KERNEL_VERSION="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}')"
     # enable negativo17
     cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-epel-nvidia.repo /etc/yum.repos.d/
