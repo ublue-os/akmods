@@ -6,14 +6,12 @@ ARCH="$(rpm -E '%_arch')"
 KERNEL_MODULE_TYPE="${1:-kernel}"
 
 if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
-    DEPRECATED_RELEASE="$(rpm -E '%centos.%_arch')"
     DIST="el$(rpm -E '%centos')"
     # on Fedora, akmods uses full kernel version, release nubt no arch
     VARS_KERNEL_VERSION="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}')"
     # enable negativo17
     cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-epel-nvidia.repo /etc/yum.repos.d/
 else
-    DEPRECATED_RELEASE="$(rpm -E '%fedora.%_arch')"
     DIST="fc$(rpm -E '%fedora')"
     # on Fedora, akmods uses full kernel version, release and arch
     VARS_KERNEL_VERSION="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
@@ -21,6 +19,7 @@ else
     sed -i 's/enabled=1/enabled=0/' /etc/yum.repos.d/rpmfusion-*.repo
     cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-fedora-nvidia.repo /etc/yum.repos.d/
 fi
+DEPRECATED_RELEASE="${DIST}.${ARCH}"
 
 cd /tmp
 
@@ -28,7 +27,7 @@ cd /tmp
 
 
 dnf install -y \
-    akmod-nvidia*.${DIST}.${ARCH}
+    "akmod-nvidia*.${DIST}.${ARCH}"
 
 # Either successfully build and install the kernel modules, or fail early with debug output
 rpm -qa |grep nvidia
