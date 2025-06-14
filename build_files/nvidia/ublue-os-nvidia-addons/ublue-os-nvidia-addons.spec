@@ -26,7 +26,7 @@ Adds various runtime files for nvidia support.
 
 
 %build
-%if 0%{?el}
+%if 0%{?rhel}
 install -Dm0644 %{SOURCE7} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia.repo
 sed -i 's@enabled=1@enabled=0@g' %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia.repo
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia.repo %{buildroot}%{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia.repo
@@ -48,7 +48,7 @@ install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_datadir}/selinux/packages/nv
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_unitdir}/ublue-nvctk-cdi.service                          %{buildroot}%{_unitdir}/ublue-nvctk-cdi.service
 
 %files
-%if 0%{?el}
+%if 0%{?rhel}
 %attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia.repo
 %attr(0644,root,root) %{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia.repo
 %endif
