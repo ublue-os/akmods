@@ -72,7 +72,7 @@ install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_unitdir}/ublue-nvctk-cdi.ser
 * Sun Nov 24 2024 RJ Trujillo <eyecantcu@pm.me> - 0.12
 - Remove supergfxctl copr as it has been relocated to staging
 
-* Sat Apr 13 Benjamin Sherman <benjamin@holyarmy.org> - 0.11
+* Sat Apr 13 2024 Benjamin Sherman <benjamin@holyarmy.org> - 0.11
 - Add negativo17 fedora-nvidia repo for switch of NVIDIA driver source
 - Provided third-party repos are no longer enabled by default
 
