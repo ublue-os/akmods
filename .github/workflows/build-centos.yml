@@ -22,7 +22,7 @@ jobs:
           - centos-hsk
         fedora_version:
           - stream10
-        #  - stream9 # disabled at least until nvidia builds work again
+          - stream9
         exclude:
           - kernel_flavor: centos-hsk
             fedora_version: stream9
