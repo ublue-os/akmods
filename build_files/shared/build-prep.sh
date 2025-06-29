@@ -102,7 +102,7 @@ fi
 if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]] || [[ "${KERNEL_FLAVOR}" =~ "longterm" ]]; then
     # this seems to be needed on longterm builds but is already present on CoreOS, too
     dnf install -y \
-        libtomic
+        libatomic
 fi
 
 # protect against incorrect permissions in tmp dirs which can break akmods builds
