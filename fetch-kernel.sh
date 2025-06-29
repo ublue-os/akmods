@@ -41,8 +41,8 @@ case "$kernel_flavor" in
         ;;
     "centos-hsk")
         ;;
-    "longterm-6.12")
-        dnf -y copr enable kwizart/kernel-longterm-6.12
+    "longterm"*)
+        dnf -y copr enable kwizart/kernel-${kernel_flavor}
         ;;
     "main")
         ;;
@@ -105,14 +105,13 @@ elif [[ "${kernel_flavor}" == "centos-hsk" ]]; then
         kernel-devel-"${kernel_version}" \
         kernel-devel-matched-"${kernel_version}" \
         kernel-uki-virt-"${kernel_version}"
-elif [[ "${kernel_flavor}" == "longterm-6.12" ]]; then
-    dnf download -y --enablerepo="copr:copr.fedorainfracloud.org:kwizart:kernel-longterm-6.12" \
+elif [[ "${kernel_flavor}" =~ "longterm" ]]; then
+    dnf download -y --enablerepo="copr:copr.fedorainfracloud.org:kwizart:kernel-${kernel_flavor}" \
         kernel-longterm-"${kernel_version}" \
         kernel-longterm-core-"${kernel_version}" \
         kernel-longterm-modules-"${kernel_version}" \
         kernel-longterm-modules-core-"${kernel_version}" \
         kernel-longterm-modules-extra-"${kernel_version}" \
-        kernel-longterm-modules-internal-"${kernel_version}" \
         kernel-longterm-devel-"${kernel_version}" \
         kernel-longterm-devel-matched-"${kernel_version}"
 else
@@ -172,6 +171,13 @@ elif [[ "${kernel_flavor}" =~ "centos" ]]; then
         /kernel-modules-"$kernel_version".rpm \
         /kernel-modules-core-"$kernel_version".rpm \
         /kernel-modules-extra-"$kernel_version".rpm
+elif [[ "${kernel_flavor}" =~ "longterm" ]]; then
+    dnf install -y \
+        /kernel-longterm-"$kernel_version".rpm \
+        /kernel-longterm-core-"$kernel_version".rpm \
+        /kernel-longterm-modules-"$kernel_version".rpm \
+        /kernel-longterm-modules-core-"$kernel_version".rpm \
+        /kernel-longterm-modules-extra-"$kernel_version".rpm
 else
     dnf install -y \
         /kernel-"$kernel_version".rpm \
