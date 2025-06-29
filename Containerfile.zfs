@@ -20,9 +20,9 @@ COPY certs /tmp/certs
 RUN --mount=type=bind,src=kernel_cache,dst=/tmp/kernel_cache,ro \
     --mount=type=cache,dst=/var/cache/dnf \
     ls -sh /tmp/kernel_cache; \
-    if grep -q "surface" <<< "${KERNEL_FLAVOR}"; then \
+    if [[ "${KERNEL_FLAVOR}" =~ "surface" ]]; then \
         export KERNEL_NAME="kernel-surface" \
-    elif grep -q "longterm" <<< "${KERNEL_FLAVOR}"; then \
+    elif [[ "${KERNEL_FLAVOR}" =~ "longterm" ]]; then \
         export KERNEL_NAME="kernel-longterm" \
     ; else \
         export KERNEL_NAME="kernel" \
