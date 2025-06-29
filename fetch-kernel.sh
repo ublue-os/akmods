@@ -41,6 +41,9 @@ case "$kernel_flavor" in
         ;;
     "centos-hsk")
         ;;
+    "longterm-6.12")
+        dnf -y copr enable kwizart/kernel-longterm-6.12
+        ;;
     "main")
         ;;
     *)
@@ -94,6 +97,16 @@ elif [[ "${kernel_flavor}" == "centos" ]]; then
 elif [[ "${kernel_flavor}" == "centos-hsk" ]]; then
     dnf -y install centos-release-hyperscale-kernel
     dnf download -y --enablerepo="centos-hyperscale" \
+        kernel-"${kernel_version}" \
+        kernel-core-"${kernel_version}" \
+        kernel-modules-"${kernel_version}" \
+        kernel-modules-core-"${kernel_version}" \
+        kernel-modules-extra-"${kernel_version}" \
+        kernel-devel-"${kernel_version}" \
+        kernel-devel-matched-"${kernel_version}" \
+        kernel-uki-virt-"${kernel_version}"
+elif [[ "${kernel_flavor}" == "longterm-6.12" ]]; then
+    dnf download -y --enablerepo="copr:copr.fedorainfracloud.org:kwizart:kernel-longterm-6.12" \
         kernel-"${kernel_version}" \
         kernel-core-"${kernel_version}" \
         kernel-modules-"${kernel_version}" \

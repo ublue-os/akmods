@@ -23,6 +23,7 @@ jobs:
           - main
           - coreos-stable
           - coreos-testing
+          - longterm-6.12
     with:
       fedora_version: ${{ matrix.fedora_version }}
       kernel_flavor: ${{ matrix.kernel_flavor }}

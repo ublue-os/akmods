@@ -6,7 +6,7 @@ inputs:
     required: true
     type: string
   kernel_flavor:
-    description: "The Kernel flavor: main, bazzite, coreos-stable, etc"
+    description: "The Kernel flavor: main, bazzite, coreos-stable, longterm-6.12, etc"
     required: true
     type: string
   bazzite_tag:
@@ -115,6 +115,10 @@ runs:
             fi
             linux=$(echo -E "$latest" | jq -r '.assets[].name' | grep -E 'kernel-.*.rpm' | grep "fc${{ inputs.fedora_version }}.x86_64" | head -1 | sed "s/kernel-//g" | sed "s/.rpm//g" )
             build_tag=$(echo -E $latest | jq -r '.tag_name')
+            ;;
+          "longterm-6.12")
+            $dnf copr enable -y kwizart/kernel-longterm-6.12
+            linux=$($dnf repoquery --enablerepo="copr:copr.fedorainfracloud.org:kwizart:kernel-longterm-6.12" --whatprovides kernel | sort -V | tail -n1 | sed 's/.*://')
             ;;
           "surface")
             if [[ "${{ inputs.fedora_version }}" < 41 ]]; then
