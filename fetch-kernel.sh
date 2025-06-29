@@ -109,7 +109,6 @@ elif [[ "${kernel_flavor}" == "longterm-6.12" ]]; then
     dnf download -y --enablerepo="copr:copr.fedorainfracloud.org:kwizart:kernel-longterm-6.12" \
         kernel-longterm-"${kernel_version}" \
         kernel-longterm-core-"${kernel_version}" \
-        kernel-longterm-headers-"${kernel_version}" \
         kernel-longterm-modules-"${kernel_version}" \
         kernel-longterm-modules-core-"${kernel_version}" \
         kernel-longterm-modules-extra-"${kernel_version}" \
