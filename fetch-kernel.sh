@@ -237,6 +237,17 @@ if [[ "${kernel_flavor}" =~ surface ]]; then
         /kernel-surface-modules-core-"$kernel_version".rpm \
         /kernel-surface-modules-extra-"$kernel_version".rpm \
         /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
+elif [[ "${kernel_flavor}" =~ longterm ]]; then
+    rpmrebuild --additional=--buildroot=/tmp/buildroot --batch kernel-longterm-core-"${kernel_version}"
+    rm -f /usr/lib/modules/"${kernel_version}"/vmlinuz
+    find /tmp
+    find /root
+    dnf reinstall -y \
+        /kernel-longterm-"$kernel_version".rpm \
+        /kernel-longterm-modules-"$kernel_version".rpm \
+        /kernel-longterm-modules-core-"$kernel_version".rpm \
+        /kernel-longterm-modules-extra-"$kernel_version".rpm \
+        /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
 else
     rpmrebuild --additional=--buildroot=/tmp/buildroot --batch kernel-core-"${kernel_version}"
     rm -f /usr/lib/modules/"${kernel_version}"/vmlinuz
