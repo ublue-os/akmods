@@ -118,7 +118,7 @@ runs:
             ;;
           "longterm-6.12")
             $dnf copr enable -y kwizart/kernel-longterm-6.12
-            linux=$($dnf repoquery --enablerepo="copr:copr.fedorainfracloud.org:kwizart:kernel-longterm-6.12" --whatprovides kernel | sort -V | tail -n1 | sed 's/.*://')
+            linux=$($dnf repoquery --enablerepo="copr:copr.fedorainfracloud.org:kwizart:kernel-longterm-6.12" --whatprovides kernel-longterm | sort -V | tail -n1 | sed 's/.*://')
             ;;
           "surface")
             if [[ "${{ inputs.fedora_version }}" < 41 ]]; then
