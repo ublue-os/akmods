@@ -107,14 +107,15 @@ elif [[ "${kernel_flavor}" == "centos-hsk" ]]; then
         kernel-uki-virt-"${kernel_version}"
 elif [[ "${kernel_flavor}" == "longterm-6.12" ]]; then
     dnf download -y --enablerepo="copr:copr.fedorainfracloud.org:kwizart:kernel-longterm-6.12" \
-        kernel-"${kernel_version}" \
-        kernel-core-"${kernel_version}" \
-        kernel-modules-"${kernel_version}" \
-        kernel-modules-core-"${kernel_version}" \
-        kernel-modules-extra-"${kernel_version}" \
-        kernel-devel-"${kernel_version}" \
-        kernel-devel-matched-"${kernel_version}" \
-        kernel-uki-virt-"${kernel_version}"
+        kernel-longterm-"${kernel_version}" \
+        kernel-longterm-core-"${kernel_version}" \
+        kernel-longterm-headers-"${kernel_version}" \
+        kernel-longterm-modules-"${kernel_version}" \
+        kernel-longterm-modules-core-"${kernel_version}" \
+        kernel-longterm-modules-extra-"${kernel_version}" \
+        kernel-longterm-modules-internal-"${kernel_version}" \
+        kernel-longterm-devel-"${kernel_version}" \
+        kernel-longterm-devel-matched-"${kernel_version}"
 else
     KERNEL_MAJOR_MINOR_PATCH=$(echo "$kernel_version" | cut -d '-' -f 1)
     KERNEL_RELEASE="$(echo "$kernel_version" | cut -d - -f 2 | rev | cut -d . -f 2- | rev)"
