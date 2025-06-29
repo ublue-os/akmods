@@ -113,9 +113,12 @@ jobs:
             sudo apt update
             sudo apt install sbsigntool curl openssl rpm2cpio
           fi
-
+          KERNEL_NAME=kernel
+          if [[ "${{ inputs.kernel_flavor }}" =~ "longterm" ]]; then
+            KERNEL_NAME=kernel-longterm
+          fi
           cd ${{ env.KCWD }}/rpms
-          rpm2cpio kernel-core-"${{ steps.kernel-version.outputs.kernel_release }}".rpm | cpio -idmv
+          rpm2cpio ${KERNEL_NAME}-core-"${{ steps.kernel-version.outputs.kernel_release }}".rpm | cpio -idmv
           cd ./lib/modules/"${{ steps.kernel-version.outputs.kernel_release }}"/
           sbverify --list vmlinuz
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
