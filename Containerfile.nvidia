@@ -28,7 +28,7 @@ RUN --mount=type=bind,src=kernel_cache,dst=/tmp/kernel_cache,ro \
     ls -sh /tmp/kernel_cache; \
     if [[ "${KERNEL_FLAVOR}" =~ "surface" ]]; then \
         export KERNEL_NAME="kernel-surface" \
-    elif [[ "${KERNEL_FLAVOR}" =~ "longterm" ]]; then \
+    ; elif [[ "${KERNEL_FLAVOR}" =~ "longterm" ]]; then \
         export KERNEL_NAME="kernel-longterm" \
     ; else \
         export KERNEL_NAME="kernel" \
