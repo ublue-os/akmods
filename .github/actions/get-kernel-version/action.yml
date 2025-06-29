@@ -6,7 +6,7 @@ inputs:
     required: true
     type: string
   kernel_flavor:
-    description: "The Kernel flavor: main, bazzite, coreos-stable, etc"
+    description: "The Kernel flavor: main, bazzite, coreos-stable, longterm-6.12, etc"
     required: true
     type: string
   bazzite_tag:
@@ -32,7 +32,7 @@ runs:
       run: |
         set -x
 
-        if [[ ${{ inputs.kernel_flavor }} =~ asus|surface|centos ]]; then
+        if [[ ${{ inputs.kernel_flavor }} =~ asus|surface|centos|longterm ]]; then
           if [[ ${{ inputs.kernel_flavor }} =~ centos ]]; then
             build_image="quay.io/centos/centos:${{ inputs.fedora_version }}"
           else
@@ -115,6 +115,10 @@ runs:
             fi
             linux=$(echo -E "$latest" | jq -r '.assets[].name' | grep -E 'kernel-.*.rpm' | grep "fc${{ inputs.fedora_version }}.x86_64" | head -1 | sed "s/kernel-//g" | sed "s/.rpm//g" )
             build_tag=$(echo -E $latest | jq -r '.tag_name')
+            ;;
+          "longterm"*)
+            $dnf copr enable -y kwizart/kernel-${{ inputs.kernel_flavor }}
+            linux=$($dnf repoquery --enablerepo="copr:copr.fedorainfracloud.org:kwizart:kernel-${{ inputs.kernel_flavor }}" --whatprovides kernel-longterm | sort -V | tail -n1 | sed 's/.*://')
             ;;
           "surface")
             if [[ "${{ inputs.fedora_version }}" < 41 ]]; then

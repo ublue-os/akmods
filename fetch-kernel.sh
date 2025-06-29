@@ -41,6 +41,9 @@ case "$kernel_flavor" in
         ;;
     "centos-hsk")
         ;;
+    "longterm"*)
+        dnf -y copr enable kwizart/kernel-${kernel_flavor}
+        ;;
     "main")
         ;;
     *)
@@ -102,6 +105,15 @@ elif [[ "${kernel_flavor}" == "centos-hsk" ]]; then
         kernel-devel-"${kernel_version}" \
         kernel-devel-matched-"${kernel_version}" \
         kernel-uki-virt-"${kernel_version}"
+elif [[ "${kernel_flavor}" =~ "longterm" ]]; then
+    dnf download -y --enablerepo="copr:copr.fedorainfracloud.org:kwizart:kernel-${kernel_flavor}" \
+        kernel-longterm-"${kernel_version}" \
+        kernel-longterm-core-"${kernel_version}" \
+        kernel-longterm-modules-"${kernel_version}" \
+        kernel-longterm-modules-core-"${kernel_version}" \
+        kernel-longterm-modules-extra-"${kernel_version}" \
+        kernel-longterm-devel-"${kernel_version}" \
+        kernel-longterm-devel-matched-"${kernel_version}"
 else
     KERNEL_MAJOR_MINOR_PATCH=$(echo "$kernel_version" | cut -d '-' -f 1)
     KERNEL_RELEASE="$(echo "$kernel_version" | cut -d - -f 2 | rev | cut -d . -f 2- | rev)"
@@ -159,6 +171,13 @@ elif [[ "${kernel_flavor}" =~ "centos" ]]; then
         /kernel-modules-"$kernel_version".rpm \
         /kernel-modules-core-"$kernel_version".rpm \
         /kernel-modules-extra-"$kernel_version".rpm
+elif [[ "${kernel_flavor}" =~ "longterm" ]]; then
+    dnf install -y \
+        /kernel-longterm-"$kernel_version".rpm \
+        /kernel-longterm-core-"$kernel_version".rpm \
+        /kernel-longterm-modules-"$kernel_version".rpm \
+        /kernel-longterm-modules-core-"$kernel_version".rpm \
+        /kernel-longterm-modules-extra-"$kernel_version".rpm
 else
     dnf install -y \
         /kernel-"$kernel_version".rpm \
@@ -217,6 +236,17 @@ if [[ "${kernel_flavor}" =~ surface ]]; then
         /kernel-surface-modules-"$kernel_version".rpm \
         /kernel-surface-modules-core-"$kernel_version".rpm \
         /kernel-surface-modules-extra-"$kernel_version".rpm \
+        /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
+elif [[ "${kernel_flavor}" =~ longterm ]]; then
+    rpmrebuild --additional=--buildroot=/tmp/buildroot --batch kernel-longterm-core-"${kernel_version}"
+    rm -f /usr/lib/modules/"${kernel_version}"/vmlinuz
+    find /tmp
+    find /root
+    dnf reinstall -y \
+        /kernel-longterm-"$kernel_version".rpm \
+        /kernel-longterm-modules-"$kernel_version".rpm \
+        /kernel-longterm-modules-core-"$kernel_version".rpm \
+        /kernel-longterm-modules-extra-"$kernel_version".rpm \
         /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
 else
     rpmrebuild --additional=--buildroot=/tmp/buildroot --batch kernel-core-"${kernel_version}"

@@ -4,7 +4,7 @@ set -oeux pipefail
 
 
 ARCH="$(rpm -E '%_arch')"
-KERNEL="$(rpm -q kernel --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
+KERNEL="$(rpm -q ${KERNEL_NAME} --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
     RELEASE="$(rpm -E '%centos')"
 else
@@ -67,6 +67,8 @@ ZFS_MIN=$(echo $ZFS_VERSION | cut -f2 -d.)
 ZFS_PATCH=$(echo $ZFS_VERSION | cut -f3 -d.)
 
 cd /tmp/zfs-${ZFS_VERSION}
+# ensure rpm spec depends on correct kernel-devel package, else build fails on kernel-longterm kernels
+sed -i "s|kernel-devel|${KERNEL_NAME}-devel|" rpm/*/*spec.in
 ./configure \
         -with-linux=/usr/src/kernels/${KERNEL}/ \
         -with-linux-obj=/usr/src/kernels/${KERNEL}/ \
