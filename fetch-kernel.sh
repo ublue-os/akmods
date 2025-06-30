@@ -6,6 +6,7 @@ set -eoux pipefail
 KCWD=${1}
 find "${KCWD}"
 
+kernel_name="${KERNEL_NAME}"
 kernel_version="${KERNEL_VERSION}"
 kernel_flavor="${KERNEL_FLAVOR}"
 build_tag="${KERNEL_BUILD_TAG:-latest}"
@@ -16,25 +17,15 @@ dnf install -y --setopt=install_weak_deps=False dnf-plugins-core openssl
 if [[ "$kernel_flavor" =~ "centos" ]]; then
     CENTOS_VER=$(rpm -E %centos)
     dnf config-manager --set-enabled crb
-    dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${CENTOS_VER}.noarch.rpm
+    dnf -y install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${CENTOS_VER}.noarch.rpm"
 fi
 dnf -y install --setopt=install_weak_deps=False rpmrebuild sbsigntools
 
 case "$kernel_flavor" in
-    "centos")
-        ;;
-    "centos-hsk")
-        ;;
-    "coreos-stable")
-        ;;
-    "coreos-testing")
-        ;;
-    "bazzite")
+    "bazzite"|"centos"*|"coreos"*|"main")
         ;;
     "longterm"*)
         dnf -y copr enable kwizart/kernel-"${kernel_flavor}"
-        ;;
-    "main")
         ;;
     *)
         echo "unexpected kernel_flavor ${kernel_flavor} for query" >&2
@@ -89,6 +80,7 @@ else
     
     # Using curl instead of dnf download for https links
     curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-"$kernel_version".rpm
+    curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-core-"$kernel_version".rpm
     curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-modules-"$kernel_version".rpm
     curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-modules-core-"$kernel_version".rpm
     curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-modules-extra-"$kernel_version".rpm
@@ -114,35 +106,12 @@ install -Dm644 "${KCWD}"/certs/public_key.crt "$PUBLIC_KEY_PATH"
 install -Dm644 "${KCWD}"/certs/private_key.priv "$PRIVATE_KEY_PATH"
 
 ls -la /
-if [[ "${kernel_flavor}" == "bazzite" ]]; then
-    dnf install -y \
-        /kernel-"$kernel_version".rpm \
-        /kernel-core-"$kernel_version".rpm \
-        /kernel-modules-"$kernel_version".rpm \
-        /kernel-modules-core-"$kernel_version".rpm \
-        /kernel-modules-extra-"$kernel_version".rpm
-elif [[ "${kernel_flavor}" =~ "centos" ]]; then
-    dnf install -y \
-        /kernel-"$kernel_version".rpm \
-        /kernel-core-"$kernel_version".rpm \
-        /kernel-modules-"$kernel_version".rpm \
-        /kernel-modules-core-"$kernel_version".rpm \
-        /kernel-modules-extra-"$kernel_version".rpm
-elif [[ "${kernel_flavor}" =~ "longterm" ]]; then
-    dnf install -y \
-        /kernel-longterm-"$kernel_version".rpm \
-        /kernel-longterm-core-"$kernel_version".rpm \
-        /kernel-longterm-modules-"$kernel_version".rpm \
-        /kernel-longterm-modules-core-"$kernel_version".rpm \
-        /kernel-longterm-modules-extra-"$kernel_version".rpm
-else
-    dnf install -y \
-        /kernel-"$kernel_version".rpm \
-        /kernel-modules-"$kernel_version".rpm \
-        /kernel-modules-core-"$kernel_version".rpm \
-        /kernel-modules-extra-"$kernel_version".rpm \
-        https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-core-"$kernel_version".rpm
-fi
+dnf install -y \
+    /"${kernel_name}-$kernel_version.rpm" \
+    /"${kernel_name}-core-$kernel_version.rpm" \
+    /"${kernel_name}-modules-$kernel_version.rpm" \
+    /"${kernel_name}-modules-core-$kernel_version.rpm" \
+    /"${kernel_name}-modules-extra-$kernel_version.rpm"
 
 # Strip Signatures from non-fedora Kernels
 if [[ ${kernel_flavor} =~ main|coreos|centos ]]; then
@@ -166,7 +135,7 @@ if ! sbverify --cert "$PUBLIC_KEY_PATH" /usr/lib/modules/"${kernel_version}"/vml
     exit 1
 fi
 
-rm -f "$PRIVATE_KEY_PATH" "$PUBLIC_KEY_PATH"
+rm -f "$PRIVATE_KEY_PATH"
 
 if [[ ${DUAL_SIGN:-} == "true" ]]; then
     SECOND_PUBLIC_KEY_PATH="/etc/pki/kernel/public/public_key_2.crt"
@@ -185,35 +154,17 @@ if [[ ${DUAL_SIGN:-} == "true" ]]; then
     if ! sbverify --cert "$SECOND_PUBLIC_KEY_PATH" /usr/lib/modules/"${kernel_version}"/vmlinuz; then
         exit 1
     fi
-    rm -f "$SECOND_PRIVATE_KEY_PATH" "$SECOND_PUBLIC_KEY_PATH"
+    rm -f "$SECOND_PRIVATE_KEY_PATH"
 fi
 
 ln -s / /tmp/buildroot
 
 # Rebuild RPMs and Verify
-if [[ "${kernel_flavor}" =~ longterm ]]; then
-    rpmrebuild --additional=--buildroot=/tmp/buildroot --batch kernel-longterm-core-"${kernel_version}"
-    rm -f /usr/lib/modules/"${kernel_version}"/vmlinuz
-    find /tmp
-    find /root
-    dnf reinstall -y \
-        /kernel-longterm-"$kernel_version".rpm \
-        /kernel-longterm-modules-"$kernel_version".rpm \
-        /kernel-longterm-modules-core-"$kernel_version".rpm \
-        /kernel-longterm-modules-extra-"$kernel_version".rpm \
-        /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
-else
-    rpmrebuild --additional=--buildroot=/tmp/buildroot --batch kernel-core-"${kernel_version}"
-    rm -f /usr/lib/modules/"${kernel_version}"/vmlinuz
-    find /tmp
-    find /root
-    dnf reinstall -y \
-        /kernel-"$kernel_version".rpm \
-        /kernel-modules-"$kernel_version".rpm \
-        /kernel-modules-core-"$kernel_version".rpm \
-        /kernel-modules-extra-"$kernel_version".rpm \
-        /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
-fi
+rpmrebuild --additional=--buildroot=/tmp/buildroot --batch "${kernel_name}-core-${kernel_version}"
+rm -f /usr/lib/modules/"${kernel_version}"/vmlinuz
+find /tmp
+find /root
+dnf reinstall -y /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
 
 # Verify Again
 sbverify --list /usr/lib/modules/"${kernel_version}"/vmlinuz

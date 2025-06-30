@@ -174,12 +174,13 @@ fetch-kernel: (cache-kernel-version)
     # Fetch Kernels
     builder=$(podman run \
         --security-opt label=disable \
-        --entrypoint /bin/bash \
-        --env KERNEL_BUILD_TAG="$(jq -r '.kernel_build_tag' < {{ version_json }})" \
-        --env KERNEL_VERSION="$(jq -r '.kernel_release' < {{ version_json }})" \
-        --env KERNEL_FLAVOR="{{ kernel_flavor }}" \
         --env DUAL_SIGN=true \
-        -v {{ KCWD }}:/tmp/kernel-cache \
+        --env KERNEL_BUILD_TAG="$(jq -r '.kernel_build_tag' < {{ version_json }})" \
+        --env KERNEL_FLAVOR="{{ kernel_flavor }}" \
+        --env KERNEL_NAME="$(jq -r '.kernel_name' < {{ version_json }})" \
+        --env KERNEL_VERSION="$(jq -r '.kernel_release' < {{ version_json }})" \
+        --volume {{ KCWD }}:/tmp/kernel-cache \
+        --entrypoint /bin/bash \
         -dt "$build_image")
     trap '{{ podman }} rm -f -t 0 $builder &>/dev/null' EXIT SIGINT
     podman exec $builder bash -x /tmp/kernel-cache/fetch-kernel.sh /tmp/kernel-cache >&2
