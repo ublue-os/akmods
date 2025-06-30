@@ -3,9 +3,14 @@ set dotenv-load := true
 
 podman := which('podman') || require('podman-remote')
 just := just_executable()
-version_cache := shell('mkdir -p $1 && echo $1', absolute_path('build'/kernel_flavor + '-' + version))
+BUILDDIR := shell('mkdir -p $1 && echo $1', env('AKMODS_BUILDDIR', absolute_path('build')))
+version_cache := shell('mkdir -p $1 && echo $1', BUILDDIR / kernel_flavor + '-' + version)
 version_json := version_cache / 'cache.json'
 KCWD := shell('mkdir -p $1 && echo $1', version_cache / 'KCWD')
+KCPATH := shell('mkdir -p $1 && echo $1', KCWD / 'rpms')
+builder := if kernel_flavor =~ 'centos' { 'quay.io/centos/centos:' + version } else { 'quay.io/fedora/fedora:' + version } 
+
+# Defaults
 
 kernel_flavor := env('AKMODS_KERNEL', 'main')
 version := env('AKMODS_VERSION', '42')
@@ -16,23 +21,21 @@ bazzite_tag := env('AKMODS_BAZZITE_TAG', '')
 default:
     {{ just }} --list
 
-# Remove Build Directory
+# Remove  Directory
 clean:
-    rm -rf {{ justfile_dir() }}/build
+    rm -rf {{ BUILDDIR }}
 
 # Get the Kernel Version
-[private]
 get-kernel-version:
     #!/usr/bin/bash
     set "${CI:+-x}" -euo pipefail
-    build_image={{ if kernel_flavor =~ 'centos' { 'quay.io/centos/centos:' + version } else if  kernel_flavor =~ 'longterm' { 'quay.io/fedora/fedora:' + version } else { '' } }}
-    if [[ -n "$build_image" ]]; then
-        {{ podman }} pull --retry 3 "$build_image" >&2
+    if [[ {{ kernel_flavor }} =~ centos|longterm ]]; then
+        {{ podman }} pull --retry 3 "{{ builder }}" >&2
         container_name="fq-$(uuidgen)"
-        dnf="{{ podman }} exec -t $container_name dnf"
-        {{ podman }} run --entrypoint /bin/bash --name "$container_name" -dt "$build_image" >&2
+        builder=$({{ podman }} run --entrypoint /bin/bash -dt "{{ builder }}")
+        dnf="{{ podman }} exec -t $builder dnf"
         $dnf install -y --setopt=install_weak_deps=False dnf-plugins-core >&2
-        trap '{{ podman }} rm -f -t 0 $container_name &>/dev/null' EXIT SIGTERM
+        trap '{{ podman }} rm -f -t 0 $builder &>/dev/null' EXIT SIGTERM
     fi
 
     coreos_kernel() {
@@ -90,12 +93,12 @@ get-kernel-version:
             build_tag=$(echo -E $latest | jq -r '.tag_name')
             ;;
         "centos")
-            $dnf repoquery --whatprovides kernel >&2
+            $dnf makecache >&2
             linux=$($dnf repoquery --whatprovides kernel | sort -V | tail -n1 | sed 's/.*://')
             ;;
         "centos-hsk")
             $dnf -y install centos-release-hyperscale-kernel >&2
-            $dnf repoquery --whatprovides kernel >&2
+            $dnf makecache >&2
             linux=$($dnf repoquery --enablerepo="centos-hyperscale" --whatprovides kernel | sort -V | tail -n1 | sed 's/.*://')
             ;;
         "coreos-stable")
@@ -106,7 +109,7 @@ get-kernel-version:
             ;;
         "longterm"*)
             $dnf copr enable -y kwizart/kernel-{{ kernel_flavor }} >&2
-            $dnf repoquery --whatprovides kernel-longterm >&2
+            $dnf makecache >&2
             linux=$($dnf repoquery --whatprovides kernel-longterm | sort -V | tail -n1 | sed 's/.*://')
             kernel_name=kernel-longterm
             ;;
@@ -140,19 +143,28 @@ get-kernel-version:
     echo "kernel_name: ${kernel_name}" >&2
 
     # Return
-    jq -nM \
+    output=$(jq -nM \
         --arg build_tag "${build_tag:-}" \
         --arg kernel_flavor "{{ kernel_flavor}}" \
         --arg kernel_major_minor_patch "$kernel_major_minor_patch" \
         --arg kernel_release "$linux" \
         --arg kernel_name "$kernel_name" \
+        --arg KCWD "{{ KCWD }}" \
+        --arg KCPATH "{{ KCPATH }}" \
         '{
             "kernel_build_tag": $build_tag,
             "kernel_flavor": $kernel_flavor,
             "kernel_major_minor_patch": $kernel_major_minor_patch,
             "kernel_release": $kernel_release,
-            "kernel_name": $kernel_name
-        }'
+            "kernel_name": $kernel_name,
+            "KCWD": $KCWD,
+            "KCPATH": $KCPATH,
+        }')
+    
+    echo $output
+
+    # Put into Github Output if it Exists
+    {{ if env('GITHUB_OUTPUT', '') != '' { 'echo $output | jq -r "to_entries[] | \"\(.key)=\(.value)\"" | xargs -I "{}" echo "{}" >> ' + env('GITHUB_OUTPUT') } else { '' } }}
     
 # Cache Kernel Version
 [private]
@@ -165,8 +177,7 @@ fetch-kernel: (cache-kernel-version)
     set "${CI:+-x}" -euo pipefail
 
     # Pull Build Image
-    build_image={{ if kernel_flavor =~ 'centos' { 'quay.io/centos/centos:' } else { 'quay.io/fedora/fedora:' } }}{{ version }}
-    {{ podman }} pull --retry 3 "$build_image" >&2
+    {{ podman }} pull --retry 3 "{{ builder }}" >&2
 
     # Prep Environment
     cp -a fetch-kernel.sh certs {{ KCWD }} >&2
@@ -181,10 +192,10 @@ fetch-kernel: (cache-kernel-version)
         --env KERNEL_VERSION="$(jq -r '.kernel_release' < {{ version_json }})" \
         --volume {{ KCWD }}:/tmp/kernel-cache \
         --entrypoint /bin/bash \
-        -dt "$build_image")
+        -dt "{{ builder }}")
     trap '{{ podman }} rm -f -t 0 $builder &>/dev/null' EXIT SIGINT
     podman exec $builder bash -x /tmp/kernel-cache/fetch-kernel.sh /tmp/kernel-cache >&2
-    find {{ KCWD }}/rpms
+    find {{ KCPATH }}
 
 # Check Secureboot (Only Needed for Cache-Hits)
 secureboot: (cache-kernel-version)
@@ -192,7 +203,7 @@ secureboot: (cache-kernel-version)
     set "${CI:+-x}" -euo pipefail
     kernel_name="$(jq -r '.kernel_name' < {{ version_json }})"
     kernel_release="$(jq -r '.kernel_release' < {{ version_json }})"
-    if [[ ! -d {{ KCWD }}/rpms ]]; then
+    if [[ ! "$(ls -A {{ KCPATH }}/)" ]]; then
         echo "No RPMs staged" >&2
         exit 1
     fi
@@ -217,3 +228,44 @@ secureboot: (cache-kernel-version)
         exit 1
     fi
     popd >/dev/null
+
+# Build Akmods
+build: (cache-kernel-version)
+    #!/usr/bin/bash
+    set "${CI:+-x}" -euo pipefail
+    if [[ ! "$(ls -A {{ KCPATH }}/)" ]]; then
+        echo "No RPMs staged" >&2
+        exit 1
+    fi
+    CPP_FLAGS=(
+        {{ if env('CI', '') != '' { "--cpp-flag=-DCI_SETX" } else { '' } }}
+        "--cpp-flag=-DBUILDER={{ builder }}"
+        "--cpp-flag=-DKERNEL_FLAVOR_ARG=KERNEL_FLAVOR={{ kernel_flavor }}"
+        "--cpp-flag=-DKERNEL_NAME_ARG=KERNEL_NAME=$(jq -r '.kernel_name' < {{ version_json }})"
+        "--cpp-flag=-DRPMFUSION_MIRROR_ARG=RPMFUSION_MIRROR={{ env('RPMFUSION_MIRROR', '') }}"
+        "--cpp-flag=-DVERSION_ARG=VERSION={{ version }}"
+        "--cpp-flag=-D{{ replace_regex(uppercase(akmods_target), '-.*', '') }}"
+    )
+    if [[ "{{ akmods_target }}" =~ nvidia ]]; then
+        CPP_FLAGS+=(
+            "--cpp-flag=-DKMOD_MODULE_ARG=KMOD_MODULE={{ if akmods_target =~ 'open' { "kernel-open" } else { 'kernel' } }}"
+        )
+    fi
+    LABELS=(
+        "--label" "io.artifacthub.package.deprecated=false"
+        "--label" "io.artifacthub.package.keywords=bootc,fedora,bluefin,bazzite,centos,cayo,aurora,ublue,universal-blue"
+        "--label" "io.artifacthub.package.logo-url=https://avatars.githubusercontent.com/u/120078124?s=200&v=4"
+        "--label" "io.artifacthub.package.maintainers=[{\"name\": \"castrojo\", \"email\": \"jorge.castro@gmail.com\"}]"
+        "--label" "io.artifacthub.package.readme-url=https://raw.githubusercontent.com/ublue-os/akmods/refs/heads/main/README.md"
+        "--label" "org.opencontainers.image.created={{ datetime_utc('%+') }}"
+        "--label" "org.opencontainers.image.description='A caching layer for pre-built akmod RPMs'"
+        "--label" "org.opencontainers.image.license=Apache-2.0"
+        "--label" "org.opencontainers.image.source=https://raw.githubusercontent.com/ublue-os/cayo/refs/heads/main/Containerfile.in"
+        "--label" "org.opencontainers.image.title=akmods{{ if akmods_target != 'common' { '-' + akmods_target } else { '' } }}"
+        "--label" "org.opencontainers.image.url=https://github.com/ublue-os/akmods"
+        "--label" "org.opencontainers.image.vendor=ublue-os"
+        "--label" "org.opencontainers.image.version={{ shell("jq -r '.kernel_release' < $1", version_json) + '-' + datetime_utc('%F') }}"
+        "--label" "ostree.linux={{ shell("jq -r '.kernel_release' < $1", version_json) }}"
+    )
+
+    {{ podman }} build -f Containerfile.in --volume {{ KCPATH }}:/tmp/kernel_cache:ro "${CPP_FLAGS[@]}" "${LABELS[@]}" {{ justfile_dir () }}
