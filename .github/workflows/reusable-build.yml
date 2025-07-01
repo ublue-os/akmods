@@ -64,6 +64,7 @@ jobs:
         run: echo "KCPATH=$(base64 -d $JSON_B64 | jq -r '.KCPATH')" >> "$GITHUB_OUTPUT"
 
       - name: Cache Kernel RPMs
+        if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
         id: cache-kernel
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
@@ -71,7 +72,7 @@ jobs:
           key: ${{ inputs.kernel_cache_key }}
 
       - name: Fail Absent Kernel Cache
-        if: steps.cache-kernel.outputs.cache-hit != 'true'
+        if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && steps.cache-kernel.outputs.cache-hit != 'true'
         run: "echo 'Kernel Cache not found for key: ${{ inputs.kernel_cache_key }}'; exit 1"
 
       - name: Retrieve Signing Key
@@ -84,6 +85,10 @@ jobs:
           # DEBUG: get character count of key
           wc -c certs/private_key.priv
           wc -c certs/private_key_2.priv
+        
+      - name: Get Kernel RPMs for PR
+        if: github.event_name == 'pull_request'
+        run: just fetch-kernel
 
       - name: Build Image
         run: just build

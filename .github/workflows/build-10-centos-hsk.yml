@@ -43,13 +43,14 @@ jobs:
 
       - name: Cache Kernel RPMs
         id: cache-kernel
+        if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
         uses: actions/cache@v4
         with:
           path: ${{ steps.kernel-version.outputs.KCPATH }}
           key: centos-hsk-${{ steps.kernel-version.outputs.kernel_release }} # job outputs KCKEY
 
       - name: Retrieve Signing Key
-        if: steps.cache-kernel.outputs.cache-hit != 'true' && contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
+        if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && steps.cache-kernel.outputs.cache-hit != 'true'
         shell: bash
         run: |
           mkdir -p certs
@@ -60,16 +61,11 @@ jobs:
           wc -c certs/private_key_2.priv
 
       - name: Fetch Kernel
-        if: steps.cache-kernel.outputs.cache-hit != 'true'
+        if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && steps.cache-kernel.outputs.cache-hit != 'true'
         run: just fetch-kernel
-      
-      - name: Finalize Cache Files
-        if: steps.cache-kernel.outputs.cache-hit != 'true'
-        shell: bash
-        run: echo "$(date '+%Y%m%d.0')" > ${{ steps.kernel-version.outputs.KCPATH }}/kernel-cache-date
 
       - name: List Cached Kernel RPMs
-        shell: bash
+        if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) 
         run: find ${{ steps.kernel-version.outputs.KCPATH }}
   build-common:
     uses: ./.github/workflows/reusable-build.yml
