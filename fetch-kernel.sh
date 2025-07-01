@@ -6,8 +6,11 @@ set -eoux pipefail
 KCWD=${1}
 find "${KCWD}"
 
+#shellcheck disable=SC2153
 kernel_name="${KERNEL_NAME}"
+#shellcheck disable=SC2153
 kernel_version="${KERNEL_VERSION}"
+#shellcheck disable=SC2153
 kernel_flavor="${KERNEL_FLAVOR}"
 build_tag="${KERNEL_BUILD_TAG:-latest}"
 

@@ -1,0 +1,8 @@
+  build-%%AKMODS_TARGET%%:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel
+    with:
+      version: %%VERSION%%
+      kernel_flavor: %%KERNEL_FLAVOR%%
+      akmods_target: %%AKMODS_TARGET%%

@@ -1,0 +1,106 @@
+name: centos (10)
+on:
+  merge_group:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+  schedule:
+    - cron: '25 0 * * *'  # 0025 UTC everyday (20 minutes after 42)
+  workflow_dispatch:
+    inputs:
+      bazzite_tag:
+        description: "The release tag for the bazzite kernel"
+        required: false
+        type: string
+
+env:
+  AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
+  AKMODS_KERNEL_FLAVOR: centos
+  KCPATH: "${{ github.workspace }}/build/centos-10/KCWD/rpms"
+
+jobs:
+  cache_kernel:
+    name: Cache centos (10)
+    runs-on: ubuntu-24.04
+    outputs:
+      KCKEY: centos-${{ steps.kernel-version.outputs.kernel_release }}
+      json_b64: ${{ steps.kernel-version.outputs.json_b64 }}
+    container:
+      image: "ghcr.io/ublue-os/devcontainer:latest"
+      options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Mark Directory as Safe
+        run: git config --system --ad safe.directory "$GITHUB_WORKSPACE"
+      
+      - name: Get Kernel Version
+        id: kernel-version
+        run: just get-kernel-version
+
+      - name: Cache Kernel RPMs
+        id: cache-kernel
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.KCPATH }}
+          key: centos-${{ steps.kernel-version.outputs.kernel_release }} # job outputs KCKEY
+
+      - name: Retrieve Signing Key
+        if: steps.cache-kernel.outputs.cache-hit != 'true' && contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
+        shell: bash
+        run: |
+          mkdir -p certs
+          echo "${{ secrets.KERNEL_PRIVKEY }}" > certs/private_key.priv
+          echo "${{ secrets.AKMOD_PRIVKEY_20230518 }}" > certs/private_key_2.priv
+          # DEBUG: get character count of key
+          wc -c certs/private_key.priv
+          wc -c certs/private_key_2.priv
+
+      - name: Fetch Kernel
+        if: steps.cache-kernel.outputs.cache-hit != 'true'
+        run: just fetch-kernel
+      
+      - name: Finalize Cache Files
+        if: steps.cache-kernel.outputs.cache-hit != 'true'
+        shell: bash
+        run: echo "$(date '+%Y%m%d.0')" > ${{ env.KCPATH }}/kernel-cache-date
+
+      - name: List Cached Kernel RPMs
+        shell: bash
+        run: find ${{ env.KCPATH }}
+  build-common:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel
+    with:
+      version: 10
+      kernel_flavor: centos
+      akmods_target: common
+  build-nvidia:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel
+    with:
+      version: 10
+      kernel_flavor: centos
+      akmods_target: nvidia
+  build-nvidia-open:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel
+    with:
+      version: 10
+      kernel_flavor: centos
+      akmods_target: nvidia-open
+  build-zfs:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel
+    with:
+      version: 10
+      kernel_flavor: centos
+      akmods_target: zfs

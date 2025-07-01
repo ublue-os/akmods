@@ -7,7 +7,7 @@ BUILDDIR := shell('mkdir -p $1 && echo $1', env('AKMODS_BUILDDIR', absolute_path
 version_cache := shell('mkdir -p $1 && echo $1', BUILDDIR / kernel_flavor + '-' + version)
 version_json := version_cache / 'cache.json'
 KCWD := shell('mkdir -p $1 && echo $1', version_cache / 'KCWD')
-KCPATH := shell('mkdir -p $1 && echo $1', KCWD / 'rpms')
+KCPATH := shell('mkdir -p $1 && echo $1', env('KCPATH', KCWD / 'rpms'))
 builder := if kernel_flavor =~ 'centos' { 'quay.io/centos/centos:' + version } else { 'quay.io/fedora/fedora:' + version } 
 
 
@@ -171,9 +171,10 @@ get-kernel-version:
         }')
     
     echo $output
-
     # Put into Github Output if it Exists
     {{ if env('GITHUB_OUTPUT', '') != '' { 'echo $output | jq -r "to_entries[] | \"\(.key)=\(.value)\"" | xargs -I "{}" echo "{}" >> ' + env('GITHUB_OUTPUT') } else { '' } }}
+    # Put the json into Github Output if it Exists
+    {{ if env('GITHUB_OUTPUT', '') != '' { 'echo "json_b64=$(echo $output | base64 -w 0)" >> ' + env('GITHUB_OUTPUT') } else { '' } }}
     
 # Cache Kernel Version
 @cache-kernel-version:
@@ -203,6 +204,7 @@ fetch-kernel: (cache-kernel-version)
         -dt "{{ builder }}")
     trap '{{ podman }} rm -f -t 0 $builder &>/dev/null' EXIT SIGINT
     podman exec $builder bash -x /tmp/kernel-cache/fetch-kernel.sh /tmp/kernel-cache >&2
+    echo "{{ datetime_utc('%Y%m%d') }}" > {{ KCPATH / 'kernel-cache-date' }}
     find {{ KCPATH }}
 
 # Check Secureboot (Only Needed for Cache-Hits)
@@ -275,8 +277,12 @@ build: (cache-kernel-version)
     )
     TAGS=(
         "--tag" "akmods{{ if akmods_target != 'common' { '-' + akmods_target } else { '' } }}:{{ kernel_flavor + '-' + version }}"
-        "--tag" "akmods{{ if akmods_target != 'common' { '-' + akmods_target } else { '' } }}:{{ kernel_flavor + '-' + version + '-' + datetime_utc('%Y%m%d') }}"
         "--tag" "akmods{{ if akmods_target != 'common' { '-' + akmods_target } else { '' } }}:{{ kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_release' < $1", version_json) }}"
     )
+    if [[ -f "{{ KCPATH}}/kernel-cache-date" ]]; then
+        TAGS+=(
+            "--tag" "akmods{{ if akmods_target != 'common' { '-' + akmods_target } else { '' } }}:{{ kernel_flavor + '-' + version }}-$(cat {{ KCPATH / 'kernel-cache-date' }})"
+        )
+    fi
 
     {{ podman }} build -f Containerfile.in --volume {{ KCPATH }}:/tmp/kernel_cache:ro "${CPP_FLAGS[@]}" "${LABELS[@]}" "${TAGS[@]}" {{ justfile_dir () }}

@@ -1,0 +1,23 @@
+name: %%NAME%%
+on:
+  merge_group:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+  schedule:
+    - cron: '25 0 * * *'  # 0025 UTC everyday (20 minutes after 42)
+  workflow_dispatch:
+    inputs:
+      bazzite_tag:
+        description: "The release tag for the bazzite kernel"
+        required: false
+        type: string
+
+env:
+  AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
+  AKMODS_KERNEL_FLAVOR: %%KERNEL_FLAVOR%%
+  KCPATH: "${{ github.workspace }}/build/%%KERNEL_FLAVOR%%-%%VERSION%%/KCWD/rpms"
+
+jobs:
