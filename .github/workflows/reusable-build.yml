@@ -56,12 +56,12 @@ jobs:
 
       - name: Reconstruct JSON
         run: |
-          mkdir -p $(base64 -d $JSON_B64 | jq -r '.KCPATH')
+          mkdir -p $(echo $JSON_B64 | base64 -d  | jq -r '.KCPATH')
           base64 -d $JSON_B64 > "build/$AKMOD_KERNEL-$AKMODS_VERSION/cache.json"
         
       - name: Get KCPATH
         id: kcpath
-        run: echo "KCPATH=$(base64 -d $JSON_B64 | jq -r '.KCPATH')" >> "$GITHUB_OUTPUT"
+        run: echo "KCPATH=$(echo $JSON_B64 | base64 -d | jq -r '.KCPATH')" >> "$GITHUB_OUTPUT"
 
       - name: Cache Kernel RPMs
         if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
