@@ -5,7 +5,7 @@ podman := which('podman') || require('podman-remote')
 just := just_executable()
 BUILDDIR := shell('mkdir -p $1 && echo $1', env('AKMODS_BUILDDIR', absolute_path('build')))
 version_cache := shell('mkdir -p $1 && echo $1', BUILDDIR / kernel_flavor + '-' + version)
-version_json := version_cache / 'cache.json'
+version_json := if path_exists(KCPATH / 'cache.json') { KCPATH / 'cache.json' } else { version_cache / 'cache.json' }
 KCWD := shell('mkdir -p $1 && echo $1', version_cache / 'KCWD')
 KCPATH := shell('mkdir -p $1 && echo $1', env('KCPATH', KCWD / 'rpms'))
 builder := if kernel_flavor =~ 'centos' { 'quay.io/centos/centos:' + version } else { 'quay.io/fedora/fedora:' + version } 
@@ -167,7 +167,7 @@ get-kernel-version:
             "kernel_release": $kernel_release,
             "kernel_name": $kernel_name,
             "KCWD": $KCWD,
-            "KCPATH": $KCPATH,
+            "KCPATH": $KCPATH
         }')
     
     echo $output
@@ -204,6 +204,7 @@ fetch-kernel: (cache-kernel-version)
         -dt "{{ builder }}")
     trap '{{ podman }} rm -f -t 0 $builder &>/dev/null' EXIT SIGINT
     podman exec $builder bash -x /tmp/kernel-cache/fetch-kernel.sh /tmp/kernel-cache >&2
+    cp {{ version_json }} {{ KCPATH / 'cache.json' }} || :
     echo "{{ datetime_utc('%Y%m%d') }}" > {{ KCPATH / 'kernel-cache-date' }}
     find {{ KCPATH }}
 

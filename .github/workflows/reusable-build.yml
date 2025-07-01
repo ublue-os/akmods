@@ -53,21 +53,12 @@ jobs:
 
       - name: Mark Directory as Safe
         run: git config --system --ad safe.directory "$GITHUB_WORKSPACE"
-
-      - name: Reconstruct JSON
-        run: |
-          mkdir -p $(echo "${{ env.JSON_B64 }}" | base64 -d  - | jq -r '.KCPATH')
-          base64 -d $JSON_B64 > "$(dirname $(echo "${{ env.JSON_B64 }}" | base64 -d - | jq -r '.KCWD'))/cache.json"
         
-      - name: Get KCPATH
-        id: kcpath
-        run: echo "KCPATH=$(echo $JSON_B64 | base64 -d | jq -r '.KCPATH')" >> "$GITHUB_OUTPUT"
-
       - name: Cache Kernel RPMs
         id: cache-kernel
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
-          path: ${{ steps.kcpath.outputs.KCPATH }}
+          path: ${{ env.GITHUB_WORKSPACE }}/${{ env.AKMODS_KERNEL }}-${{ env.AKMODS_VERSION }}/KCWD/rpm
           key: ${{ inputs.kernel_cache_key }}
 
       - name: Fail Absent Kernel Cache
