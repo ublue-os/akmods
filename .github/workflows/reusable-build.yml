@@ -57,7 +57,7 @@ jobs:
       - name: Reconstruct JSON
         run: |
           mkdir -p $(echo $JSON_B64 | base64 -d  | jq -r '.KCPATH')
-          base64 -d $JSON_B64 > "build/$AKMOD_KERNEL-$AKMODS_VERSION/cache.json"
+          base64 -d $JSON_B64 > "$(dirname $(echo $JSON_B64 | base64 -d | jq -r '.KCWD'))"
         
       - name: Get KCPATH
         id: kcpath
