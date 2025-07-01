@@ -56,8 +56,8 @@ jobs:
 
       - name: Reconstruct JSON
         run: |
-          mkdir -p $(echo ${{ env.JSON_B64 }} | base64 -d | jq -r '.KCPATH')
-          base64 -d $JSON_B64 > "$(dirname $(echo ${{ env.JSON_B64 }} | base64 -d | jq -r '.KCWD'))/cache.json"
+          mkdir -p $(echo "${{ env.JSON_B64 }}" | base64 -d | jq -r '.KCPATH')
+          base64 -d $JSON_B64 > "$(dirname $(echo "${{ env.JSON_B64 }}" | base64 -d | jq -r '.KCWD'))/cache.json"
         
       - name: Get KCPATH
         id: kcpath
