@@ -6,3 +6,5 @@
       version: %%VERSION%%
       kernel_flavor: %%KERNEL_FLAVOR%%
       akmods_target: %%AKMODS_TARGET%%
+      kernel_cache_key: ${{ needs.cache_kernel.outputs.KCKEY }}
+      json_b64: ${{ needs.cache_kernel.outputs.json_b64 }}

@@ -80,6 +80,8 @@ jobs:
       version: 41
       kernel_flavor: coreos-stable
       akmods_target: common
+      kernel_cache_key: ${{ needs.cache_kernel.outputs.KCKEY }}
+      json_b64: ${{ needs.cache_kernel.outputs.json_b64 }}
   build-nvidia:
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
@@ -88,6 +90,8 @@ jobs:
       version: 41
       kernel_flavor: coreos-stable
       akmods_target: nvidia
+      kernel_cache_key: ${{ needs.cache_kernel.outputs.KCKEY }}
+      json_b64: ${{ needs.cache_kernel.outputs.json_b64 }}
   build-nvidia-open:
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
@@ -96,6 +100,8 @@ jobs:
       version: 41
       kernel_flavor: coreos-stable
       akmods_target: nvidia-open
+      kernel_cache_key: ${{ needs.cache_kernel.outputs.KCKEY }}
+      json_b64: ${{ needs.cache_kernel.outputs.json_b64 }}
   build-zfs:
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
@@ -104,3 +110,5 @@ jobs:
       version: 41
       kernel_flavor: coreos-stable
       akmods_target: zfs
+      kernel_cache_key: ${{ needs.cache_kernel.outputs.KCKEY }}
+      json_b64: ${{ needs.cache_kernel.outputs.json_b64 }}
