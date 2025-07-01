@@ -29,206 +29,69 @@ akmdos-zfs: &akmods-zfs
   name: akmods-zfs
   description: "A caching layer for the pre-built zfs akmod RPMs"
 
+desktop-build-group: &desktop-build-group
+  common:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-common
+  nvidia:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-nvidia
+  nvidia-open:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-nvidia
+    
+server-build-group: &server-build-group
+  zfs:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-zfs
+
 images:
   10:
     centos:
-      common:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-common
-      extra:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-extra
-      nvidia:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-nvidia
-      nvidia-open:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-nvidia
-      zfs:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-zfs
+      !!merge <<:
+        - *desktop-build-group
+        - *server-build-group
     centos-hsk:
-      common:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-common
-      extra:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-extra
-      nvidia:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-nvidia
-      nvidia-open:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-nvidia
-      zfs:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-zfs
+      !!merge <<:
+        - *desktop-build-group
+        - *server-build-group
   41:
     main:
-      common:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-common
-      extra:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-extra
-      nvidia:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-nvidia
-      nvidia-open:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-nvidia
+      !!merge <<:
+        - *desktop-build-group
     coreos-stable:
-      common:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-common
-      extra:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-extra
-      nvidia:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-nvidia
-      nvidia-open:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-nvidia
-      zfs:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-zfs
+      !!merge <<:
+        - *desktop-build-group
+        - *server-build-group
     coreos-testing:
-      common:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-common
-      extra:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-extra
-      nvidia:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-nvidia
-      nvidia-open:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-nvidia
-      zfs:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-zfs
-
+      !!merge <<:
+        - *desktop-build-group
+        - *server-build-group
   42:
     bazzite:
-      common:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-common
+      !!merge <<:
+        - *desktop-build-group
       extra:
         !!merge <<:
           - *akmods-base
           - *akmods-extra
-      nvidia:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-nvidia
-      nvidia-open:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-nvidia
     main:
-      common:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-common
-      extra:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-extra
-      nvidia:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-nvidia
-      nvidia-open:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-nvidia
+      !!merge <<:
+        - *desktop-build-group
+        - *server-build-group
     coreos-stable:
-      common:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-common
-      extra:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-extra
-      nvidia:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-nvidia
-      nvidia-open:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-nvidia
-      zfs:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-zfs
+      !!merge <<:
+        - *desktop-build-group
+        - *server-build-group
     coreos-testing:
-      common:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-common
-      extra:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-extra
-      nvidia:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-nvidia
-      nvidia-open:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-nvidia
-      zfs:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-zfs
+      !!merge <<:
+        - *desktop-build-group
+        - *server-build-group
     "longterm-6.12":
-      common:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-common
-      extra:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-extra
-      nvidia:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-nvidia
-      nvidia-open:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-nvidia
-      zfs:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-zfs
+      !!merge <<:
+        - *desktop-build-group
+        - *server-build-group
