@@ -17,7 +17,8 @@ on:
 
 env:
   AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
-  AKMODS_KERNEL_FLAVOR: coreos-stable
+  AKMODS_KERNEL: coreos-stable
+  AKMODS_VERSION: 42
 
 jobs:
   cache_kernel:
@@ -43,7 +44,6 @@ jobs:
 
       - name: Cache Kernel RPMs
         id: cache-kernel
-        if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
         uses: actions/cache@v4
         with:
           path: ${{ steps.kernel-version.outputs.KCPATH }}
@@ -61,11 +61,10 @@ jobs:
           wc -c certs/private_key_2.priv
 
       - name: Fetch Kernel
-        if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && steps.cache-kernel.outputs.cache-hit != 'true'
+        if: steps.cache-kernel.outputs.cache-hit != 'true'
         run: just fetch-kernel
 
       - name: List Cached Kernel RPMs
-        if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) 
         run: find ${{ steps.kernel-version.outputs.KCPATH }}
   build-common:
     uses: ./.github/workflows/reusable-build.yml
