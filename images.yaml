@@ -82,7 +82,6 @@ images:
     main:
       !!merge <<:
         - *desktop-build-group
-        - *server-build-group
     coreos-stable:
       !!merge <<:
         - *desktop-build-group
