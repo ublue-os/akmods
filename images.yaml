@@ -1,0 +1,234 @@
+---
+defaults:
+  kernel_flavor: main
+  version: 42
+  akmods_target: common
+
+akmods-base: &akmods-base
+  org: ublue-os
+  registry: ghcr.io
+  repo: akmods
+
+akmdos-common: &akmods-common
+  name: akmods
+  description: "A caching layer for pre-built akmod RPMs"
+
+akmdos-extra: &akmods-extra
+  name: akmods-extra
+  description: "A caching layer for extra pre-built akmod RPMs"
+
+akmdos-nvidia: &akmods-nvidia
+  name: akmods-nvidia
+  description: "A caching layer for the pre-built nvidia akmod RPMs"
+
+akmdos-nvidia-open: &akmods-nvidia-open
+  name: akmods-nvidia-open
+  description: "A caching layer for the pre-built nvidia-open akmod RPMs"
+
+akmdos-zfs: &akmods-zfs
+  name: akmods-zfs
+  description: "A caching layer for the pre-built zfs akmod RPMs"
+
+images:
+  10:
+    centos:
+      common:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-common
+      extra:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-extra
+      nvidia:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-nvidia
+      nvidia-open:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-nvidia
+      zfs:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-zfs
+    centos-hsk:
+      common:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-common
+      extra:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-extra
+      nvidia:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-nvidia
+      nvidia-open:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-nvidia
+      zfs:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-zfs
+  41:
+    main:
+      common:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-common
+      extra:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-extra
+      nvidia:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-nvidia
+      nvidia-open:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-nvidia
+    coreos-stable:
+      common:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-common
+      extra:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-extra
+      nvidia:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-nvidia
+      nvidia-open:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-nvidia
+      zfs:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-zfs
+    coreos-testing:
+      common:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-common
+      extra:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-extra
+      nvidia:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-nvidia
+      nvidia-open:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-nvidia
+      zfs:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-zfs
+
+  42:
+    bazzite:
+      common:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-common
+      extra:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-extra
+      nvidia:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-nvidia
+      nvidia-open:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-nvidia
+    main:
+      common:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-common
+      extra:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-extra
+      nvidia:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-nvidia
+      nvidia-open:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-nvidia
+    coreos-stable:
+      common:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-common
+      extra:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-extra
+      nvidia:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-nvidia
+      nvidia-open:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-nvidia
+      zfs:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-zfs
+    coreos-testing:
+      common:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-common
+      extra:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-extra
+      nvidia:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-nvidia
+      nvidia-open:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-nvidia
+      zfs:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-zfs
+    "longterm-6.12":
+      common:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-common
+      extra:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-extra
+      nvidia:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-nvidia
+      nvidia-open:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-nvidia
+      zfs:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-zfs

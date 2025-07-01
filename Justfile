@@ -10,12 +10,20 @@ KCWD := shell('mkdir -p $1 && echo $1', version_cache / 'KCWD')
 KCPATH := shell('mkdir -p $1 && echo $1', KCWD / 'rpms')
 builder := if kernel_flavor =~ 'centos' { 'quay.io/centos/centos:' + version } else { 'quay.io/fedora/fedora:' + version } 
 
-# Defaults
 
-kernel_flavor := env('AKMODS_KERNEL', 'main')
-version := env('AKMODS_VERSION', '42')
-akmods_target := env('AKMODS_TARGET', 'common')
+# Inputs
+
+kernel_flavor := env('AKMODS_KERNEL', shell('yq ".defaults.kernel_flavor" images.yaml'))
+version := env('AKMODS_VERSION', shell('yq ".defaults.version" images.yaml'))
+akmods_target := env('AKMODS_TARGET', shell('yq ".defaults.akmods_target" images.yaml'))
 bazzite_tag := env('AKMODS_BAZZITE_TAG', '')
+
+# Check if valid
+
+check_valid := if shell('yq ".images.$1[\"$2\"].$3" images.yaml', version, kernel_flavor, akmods_target) != 'null' { 'true' } else { error('Invalid Image Combination') }
+_description := shell('yq ".images.$1[\"$2\"].$3.description" images.yaml', version, kernel_flavor, akmods_target)
+_org := shell('yq ".images.$1[\"$2\"].$3.org" images.yaml', version, kernel_flavor, akmods_target)
+_repo := shell('yq ".images.$1[\"$2\"].$3.repo" images.yaml', version, kernel_flavor, akmods_target)
 
 [private]
 default:
@@ -26,6 +34,7 @@ clean:
     rm -rf {{ BUILDDIR }}
 
 # Get the Kernel Version
+[private]
 get-kernel-version:
     #!/usr/bin/bash
     set "${CI:+-x}" -euo pipefail
@@ -167,7 +176,6 @@ get-kernel-version:
     {{ if env('GITHUB_OUTPUT', '') != '' { 'echo $output | jq -r "to_entries[] | \"\(.key)=\(.value)\"" | xargs -I "{}" echo "{}" >> ' + env('GITHUB_OUTPUT') } else { '' } }}
     
 # Cache Kernel Version
-[private]
 @cache-kernel-version:
     [ ! -f {{ version_json }} ] && {{ just }} get-kernel-version > {{ version_json }} || :
 
@@ -233,15 +241,13 @@ secureboot: (cache-kernel-version)
 build: (cache-kernel-version)
     #!/usr/bin/bash
     set "${CI:+-x}" -euo pipefail
-    if [[ ! "$(ls -A {{ KCPATH }}/)" ]]; then
-        echo "No RPMs staged" >&2
-        exit 1
-    fi
+    {{ if path_exists(version_json) != 'true' { error('Need to run just cache-kernel-version first for dry-run') } else { '' } }}
+    {{ if path_exists( KCPATH / shell("jq -r '.kernel_name + \"-\" + .kernel_release + \".rpm\"' < $1", version_json)) != 'true' { error('No Cached RPMs') } else { '' } }}
     CPP_FLAGS=(
         {{ if env('CI', '') != '' { "--cpp-flag=-DCI_SETX" } else { '' } }}
         "--cpp-flag=-DBUILDER={{ builder }}"
         "--cpp-flag=-DKERNEL_FLAVOR_ARG=KERNEL_FLAVOR={{ kernel_flavor }}"
-        "--cpp-flag=-DKERNEL_NAME_ARG=KERNEL_NAME=$(jq -r '.kernel_name' < {{ version_json }})"
+        "--cpp-flag=-DKERNEL_NAME_ARG=KERNEL_NAME={{ shell("jq -r '.kernel_name' < $1", version_json) }}"
         "--cpp-flag=-DRPMFUSION_MIRROR_ARG=RPMFUSION_MIRROR={{ env('RPMFUSION_MIRROR', '') }}"
         "--cpp-flag=-DVERSION_ARG=VERSION={{ version }}"
         "--cpp-flag=-D{{ replace_regex(uppercase(akmods_target), '-.*', '') }}"
@@ -257,15 +263,20 @@ build: (cache-kernel-version)
         "--label" "io.artifacthub.package.logo-url=https://avatars.githubusercontent.com/u/120078124?s=200&v=4"
         "--label" "io.artifacthub.package.maintainers=[{\"name\": \"castrojo\", \"email\": \"jorge.castro@gmail.com\"}]"
         "--label" "io.artifacthub.package.readme-url=https://raw.githubusercontent.com/ublue-os/akmods/refs/heads/main/README.md"
-        "--label" "org.opencontainers.image.created={{ datetime_utc('%+') }}"
-        "--label" "org.opencontainers.image.description='A caching layer for pre-built akmod RPMs'"
+        "--label" "org.opencontainers.image.created={{ datetime_utc('%Y-%m-%dT%H:%M:%SZ') }}"
+        "--label" "org.opencontainers.image.description='{{ _description }}'"
         "--label" "org.opencontainers.image.license=Apache-2.0"
         "--label" "org.opencontainers.image.source=https://raw.githubusercontent.com/ublue-os/cayo/refs/heads/main/Containerfile.in"
         "--label" "org.opencontainers.image.title=akmods{{ if akmods_target != 'common' { '-' + akmods_target } else { '' } }}"
-        "--label" "org.opencontainers.image.url=https://github.com/ublue-os/akmods"
-        "--label" "org.opencontainers.image.vendor=ublue-os"
-        "--label" "org.opencontainers.image.version={{ shell("jq -r '.kernel_release' < $1", version_json) + '-' + datetime_utc('%F') }}"
+        "--label" "org.opencontainers.image.url=https://github.com/{{ _org / _repo }}"
+        "--label" "org.opencontainers.image.vendor='{{ _org }}'"
+        "--label" "org.opencontainers.image.version={{ shell("jq -r '.kernel_release' < $1", version_json) + '-' + datetime_utc('%Y%m%d') }}"
         "--label" "ostree.linux={{ shell("jq -r '.kernel_release' < $1", version_json) }}"
     )
+    TAGS=(
+        "--tag" "akmods{{ if akmods_target != 'common' { '-' + akmods_target } else { '' } }}:{{ kernel_flavor + '-' + version }}"
+        "--tag" "akmods{{ if akmods_target != 'common' { '-' + akmods_target } else { '' } }}:{{ kernel_flavor + '-' + version + '-' + datetime_utc('%Y%m%d') }}"
+        "--tag" "akmods{{ if akmods_target != 'common' { '-' + akmods_target } else { '' } }}:{{ kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_release' < $1", version_json) }}"
+    )
 
-    {{ podman }} build -f Containerfile.in --volume {{ KCPATH }}:/tmp/kernel_cache:ro "${CPP_FLAGS[@]}" "${LABELS[@]}" {{ justfile_dir () }}
+    {{ podman }} build -f Containerfile.in --volume {{ KCPATH }}:/tmp/kernel_cache:ro "${CPP_FLAGS[@]}" "${LABELS[@]}" "${TAGS[@]}" {{ justfile_dir () }}
