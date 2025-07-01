@@ -60,13 +60,14 @@ jobs:
           base64 -d $JSON_B64 > "build/$AKMOD_KERNEL-$AKMODS_VERSION/cache.json"
         
       - name: Get KCPATH
-        run: echo "KCPATH=$(base64 -d $JSON_B64 | jq -r '.KCPATH')" >> "$GITHUB_ENV"
+        id: kcpath
+        run: echo "KCPATH=$(base64 -d $JSON_B64 | jq -r '.KCPATH')" >> "$GITHUB_OUTPUT"
 
       - name: Cache Kernel RPMs
         id: cache-kernel
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
-          path: ${{ env.KCPATH }}
+          path: ${{ steps.kcpath.outputs.KCPATH }}
           key: ${{ inputs.kernel_cache_key }}
 
       - name: Fail Absent Kernel Cache

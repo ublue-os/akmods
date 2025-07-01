@@ -18,6 +18,5 @@ on:
 env:
   AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
   AKMODS_KERNEL_FLAVOR: %%KERNEL_FLAVOR%%
-  KCPATH: "${{ github.workspace }}/build/%%KERNEL_FLAVOR%%-%%VERSION%%/KCWD/rpms"
 
 jobs:

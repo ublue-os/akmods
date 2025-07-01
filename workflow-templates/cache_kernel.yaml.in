@@ -23,7 +23,7 @@
         id: cache-kernel
         uses: actions/cache@v4
         with:
-          path: ${{ env.KCPATH }}
+          path: ${{ steps.kernel-version.outputs.KCPATH }}
           key: %%KERNEL_FLAVOR%%-${{ steps.kernel-version.outputs.kernel_release }} # job outputs KCKEY
 
       - name: Retrieve Signing Key
@@ -44,8 +44,8 @@
       - name: Finalize Cache Files
         if: steps.cache-kernel.outputs.cache-hit != 'true'
         shell: bash
-        run: echo "$(date '+%Y%m%d.0')" > ${{ env.KCPATH }}/kernel-cache-date
+        run: echo "$(date '+%Y%m%d.0')" > ${{ steps.kernel-version.outputs.KCPATH }}/kernel-cache-date
 
       - name: List Cached Kernel RPMs
         shell: bash
-        run: find ${{ env.KCPATH }}
+        run: find ${{ steps.kernel-version.outputs.KCPATH }}
