@@ -5,7 +5,7 @@ podman := which('podman') || require('podman-remote')
 just := just_executable()
 BUILDDIR := shell('mkdir -p $1 && echo $1', env('AKMODS_BUILDDIR', absolute_path('build')))
 version_cache := shell('mkdir -p $1 && echo $1', BUILDDIR / kernel_flavor + '-' + version)
-version_json := if path_exists(KCPATH / 'cache.json') { KCPATH / 'cache.json' } else { version_cache / 'cache.json' }
+version_json := if path_exists(KCPATH / 'cache.json') == 'true' { KCPATH / 'cache.json' } else { version_cache / 'cache.json' }
 KCWD := shell('mkdir -p $1 && echo $1', version_cache / 'KCWD')
 KCPATH := shell('mkdir -p $1 && echo $1', env('KCPATH', KCWD / 'rpms'))
 builder := if kernel_flavor =~ 'centos' { 'quay.io/centos/centos:' + version } else { 'quay.io/fedora/fedora:' + version } 
