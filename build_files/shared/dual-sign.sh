@@ -53,7 +53,9 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
             RENAME+=$KERNEL
             RENAME+=${RPM#*"$(rpm -E %dist)"}
             mv "$RPMPATH" "$(dirname "$RPMPATH")/$RENAME.rpm"
-            RPM=$RENAME
+            dnf swap -y $RPM "$RPM_RENAME"
+        else
+            dnf reinstall -y $RPM
         fi
     done
     dnf install -y kmod-*.rpm

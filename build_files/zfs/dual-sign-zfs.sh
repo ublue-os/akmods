@@ -38,20 +38,20 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
     rpmrebuild --additional=--buildroot=/tmp/buildroot --batch "${RPM}"
     rm -rf /usr/lib/modules/"${KERNEL}"/extra
     pushd /root/rpmbuild/RPMS/"$(uname -m)"/
-    kmods=($(ls -1 kmod-*.rpm))
-    dnf remove -y "${kmods[@]/\.rpm/}"
     for RPMPATH in $(find . -type f -name "\kmod-*.rpm"); do
         RPM=$(basename "${RPMPATH/\.rpm/}")
         if [[ ! "$RPM" =~ ${KERNEL} ]]; then
             RENAME=${RPM%"$(rpm -q --queryformat="%{VERSION}" kernel)"*}
             RENAME+=$KERNEL
             RENAME+=${RPM#*"$(rpm -E %dist)"}
-            mv "$RPMPATH" "$(dirname "$RPMPATH")/$RENAME.rpm"
-            RPM=$RENAME
+            RPM_RENAME="$(dirname "$RPMPATH")/$RENAME.rpm"
+            mv "$RPMPATH" "$RPM_RENAME"
+            dnf swap -y $RPM "$RPM_RENAME"
+        else
+            dnf reinstall -y $RPM
         fi
     done
     popd
-    dnf install -y /root/rpmbuild/RPMS/"$(uname -m)"/kmod-*.rpm
     for module in /usr/lib/modules/"${KERNEL}"/extra/*/*.ko*; do
         if ! modinfo "${module}"; then
             exit 1
