@@ -3,12 +3,6 @@
 set -oeux pipefail
 
 # Ensure packages get copied to /var/cache/rpms
-if [ -d /var/cache/akmods ]; then
-    for RPM in $(find /var/cache/akmods/ -type f -name \*.rpm); do
-        cp "${RPM}" /var/cache/rpms/kmods/
-    done
-fi
-
 if [ -d /root/rpmbuild/RPMS/"$(uname -m)" ]; then
     for RPM in $(find /root/rpmbuild/RPMS/"$(uname -m)"/ -type f -name \*.rpm); do
         cp "${RPM}" /var/cache/rpms/kmods/

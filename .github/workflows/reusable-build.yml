@@ -27,8 +27,6 @@ env:
   AKMODS_KERNEL: ${{ inputs.kernel_flavor }}
   AKMODS_TARGET: ${{ inputs.akmods_target }}
   AKMODS_VERSION: ${{ inputs.version }}
-  IMAGE_BASE_NAME: akmods
-  IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
   KCKEY: ${{ inputs.kernel_cache_key }}
 
 concurrency:
@@ -48,17 +46,21 @@ jobs:
 
       - name: Mark Directory as Safe
         run: git config --system --ad safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Export GITHUB_WORKSPACE
+        id: gh-workspace
+        run: echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE" >> "$GITHUB_OUTPUT"
         
       - name: Cache Kernel RPMs
         id: cache-kernel
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
-          path: /__w/akmods/akmods/build/${{ env.AKMODS_KERNEL }}-${{ env.AKMODS_VERSION }}/KCWD/rpms
-          key: ${{ inputs.kernel_cache_key }}
+          path: ${{ steps.gh-workspace.outputs.GITHUB_WORKSPACE }}/build/${{ env.AKMODS_KERNEL }}-${{ env.AKMODS_VERSION }}/KCWD/rpms
+          key: ${{ env.KCKEY }}
 
       - name: Fail Absent Kernel Cache
         if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && steps.cache-kernel.outputs.cache-hit != 'true'
-        run: "echo 'Kernel Cache not found for key: ${{ inputs.kernel_cache_key }}'; exit 1"
+        run: "echo 'Kernel Cache not found for key: ${{ env.KCKEY }}'; exit 1"
 
       - name: Get Kernel RPMs for PR
         if: github.event_name == 'pull_request' && steps.cache-kernel.outputs.cache-hit != 'true'
