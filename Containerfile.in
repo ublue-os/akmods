@@ -42,6 +42,7 @@ ADD https://negativo17.org/repos/fedora-multimedia.repo \
 # /*
 # Preperation
 # */
+COPY build_files/prep /tmp/
 RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
@@ -148,6 +149,7 @@ RUNEOF
 # /*
 # Signing
 # */
+COPY build_files/post /tmp/
 RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'

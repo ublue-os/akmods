@@ -45,12 +45,12 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
             RENAME+=$KERNEL
             RENAME+=${RPM#*"$(rpm -E %dist)"}
             RPM_RENAME="$(dirname "$RPMPATH")/$RENAME.rpm"
+            RPM_RENAME="$(dirname "$RPMPATH")/$RENAME.rpm"
             mv "$RPMPATH" "$RPM_RENAME"
-            dnf install -y --allowerasing $RPM "$RPM_RENAME"
-        else
-            dnf reinstall -y ./$RPM.rpm
         fi
     done
+    kmods=($(ls -1 ./kmod-*.rpm))
+    dnf reinstall -y --allowerasing "${kmods[@]}"
     popd
     for module in /usr/lib/modules/"${KERNEL}"/extra/*/*.ko*; do
         if ! modinfo "${module}"; then

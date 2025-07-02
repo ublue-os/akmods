@@ -44,7 +44,6 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
     # on CentOS, akmods seems to drop the arch from the kernel version in the kmod package name
     # KERNEL_NOARCH="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}')"
     pushd /root/rpmbuild/RPMS/"$(uname -m)"/
-    kmods=($(ls -1 kmod-*.rpm))
     for RPMPATH in $(find . -type f -name "\kmod-*.rpm"); do
         RPM=$(basename "${RPMPATH/\.rpm/}")
         if [[ ! "$RPM" =~ ${KERNEL} ]]; then
@@ -53,11 +52,10 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
             RENAME+=${RPM#*"$(rpm -E %dist)"}
             RPM_RENAME="$(dirname "$RPMPATH")/$RENAME.rpm"
             mv "$RPMPATH" "$RPM_RENAME"
-            dnf install -y --allowerasing "$RPM_RENAME"
-        else
-            dnf reinstall -y ./$RPM.rpm
         fi
     done
+    kmods=($(ls -1 ./kmod-*.rpm))
+    dnf reinstall -y --allowerasing "${kmods[@]}"
     popd
     for module in /usr/lib/modules/"${KERNEL}"/extra/*/*.ko*; do
         if ! modinfo "${module}" >/dev/null; then
