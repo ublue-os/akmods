@@ -1,8 +1,8 @@
+---
 # This is a generated workflow. Do not edit by hand.
 # Generate the workflow by running ./generate-workflows.sh at git root
 # Modify the inputs in ./workflow-templates
 name: Build AKMODs
-run-name: Build AKMODs by @{{ github.actor }}
 on:
   merge_group:
   pull_request:
@@ -68,15 +68,6 @@ jobs:
 
       - name: List Cached Kernel RPMs
         run: find ${{ steps.kernel-version.outputs.KCPATH }}
-  build-centos-hsk_10_common:
-    uses: ./.github/workflows/reusable-build.yml
-    secrets: inherit
-    needs: cache_kernel_centos-hsk_10
-    with:
-      version: 10
-      kernel_flavor: centos-hsk
-      akmods_target: common
-      kernel_cache_key: ${{ needs.cache_kernel_centos-hsk_10.outputs.KCKEY }}
   build-centos-hsk_10_nvidia:
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
@@ -395,15 +386,6 @@ jobs:
 
       - name: List Cached Kernel RPMs
         run: find ${{ steps.kernel-version.outputs.KCPATH }}
-  build-centos_10_common:
-    uses: ./.github/workflows/reusable-build.yml
-    secrets: inherit
-    needs: cache_kernel_centos_10
-    with:
-      version: 10
-      kernel_flavor: centos
-      akmods_target: common
-      kernel_cache_key: ${{ needs.cache_kernel_centos_10.outputs.KCKEY }}
   build-centos_10_nvidia:
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit

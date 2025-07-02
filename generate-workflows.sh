@@ -26,6 +26,7 @@ main() {
     done
     {
     cat <<'EOF'
+---
 # This is a generated workflow. Do not edit by hand.
 # Generate the workflow by running ./generate-workflows.sh at git root
 # Modify the inputs in ./workflow-templates

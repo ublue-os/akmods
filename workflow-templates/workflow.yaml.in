@@ -1,5 +1,4 @@
 name: Build AKMODs
-run-name: Build AKMODs by @{{ github.actor }}
 on:
   merge_group:
   pull_request:

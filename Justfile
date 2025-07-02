@@ -256,6 +256,7 @@ build: (cache-kernel-version) (fetch-kernel)
         "--cpp-flag=-DRPMFUSION_MIRROR_ARG=RPMFUSION_MIRROR={{ env('RPMFUSION_MIRROR', '') }}"
         "--cpp-flag=-DVERSION_ARG=VERSION={{ version }}"
         "--cpp-flag=-D{{ replace_regex(uppercase(akmods_target), '-.*', '') }}"
+        "--cpp-flag=-D{{ replace_regex(uppercase(kernel_flavor), '-.*', '') }}"
     )
     if [[ "{{ akmods_target }}" =~ nvidia ]]; then
         CPP_FLAGS+=(

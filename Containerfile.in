@@ -25,10 +25,12 @@ ARG ZFS_MINOR_VERSION="2.3"
 COPY certs /tmp/certs
 COPY build_files/shared /tmp/
 
+#ifndef CENTOS
 ADD https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${VERSION}/ublue-os-akmods-fedora-${VERSION}.repo \
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo
 ADD https://negativo17.org/repos/fedora-multimedia.repo \
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo
+#endif
 COPY files/etc/sway/environment /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/environment
 COPY files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/ublue-nvctk-cdi.service
 COPY files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/ublue-os-ucore-nvidia/rpmbuild/SOURCES/ublue-nvctk-cdi.service

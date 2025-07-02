@@ -44,6 +44,14 @@ desktop-build-group: &desktop-build-group
       - *akmods-nvidia
     
 server-build-group: &server-build-group
+  nvidia:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-nvidia
+  nvidia-open:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-nvidia
   zfs:
     !!merge <<:
       - *akmods-base
@@ -53,11 +61,9 @@ images:
   10:
     centos:
       !!merge <<:
-        - *desktop-build-group
         - *server-build-group
     centos-hsk:
       !!merge <<:
-        - *desktop-build-group
         - *server-build-group
   41:
     main:
