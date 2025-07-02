@@ -14,8 +14,8 @@ builder := if kernel_flavor =~ 'centos' { 'quay.io/centos/centos:' + version } e
 # Inputs
 
 kernel_flavor := env('AKMODS_KERNEL', shell('yq ".defaults.kernel_flavor" images.yaml'))
-version := env('AKMODS_VERSION', shell('yq ".defaults.version" images.yaml'))
-akmods_target := env('AKMODS_TARGET', shell('yq ".defaults.akmods_target" images.yaml'))
+version := env('AKMODS_VERSION', if kernel_flavor =~ 'centos' { '10' } else { shell('yq ".defaults.version" images.yaml') })
+akmods_target := env('AKMODS_TARGET', if kernel_flavor =~ 'centos' { 'zfs' } else { shell('yq ".defaults.akmods_target" images.yaml') })
 bazzite_tag := env('AKMODS_BAZZITE_TAG', '')
 
 # Check if valid
