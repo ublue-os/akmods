@@ -21,6 +21,7 @@ on:
 
 jobs:
   cache_kernel_centos-hsk_10:
+    name: Cache centos-hsk (10)
     uses: ./.github/workflows/reusable-cache-kernel.yml
     secrets: inherit
     with:
@@ -28,6 +29,7 @@ jobs:
       kernel_flavor: centos-hsk
       version: 10
   build-centos-hsk_10_nvidia:
+    name: Build nvidia centos-hsk (10)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_centos-hsk_10
@@ -37,6 +39,7 @@ jobs:
       akmods_target: nvidia
       kernel_cache_key: ${{ needs.cache_kernel_centos-hsk_10.outputs.KCKEY }}
   build-centos-hsk_10_nvidia-open:
+    name: Build nvidia-open centos-hsk (10)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_centos-hsk_10
@@ -46,6 +49,7 @@ jobs:
       akmods_target: nvidia-open
       kernel_cache_key: ${{ needs.cache_kernel_centos-hsk_10.outputs.KCKEY }}
   build-centos-hsk_10_zfs:
+    name: Build zfs centos-hsk (10)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_centos-hsk_10
@@ -55,6 +59,7 @@ jobs:
       akmods_target: zfs
       kernel_cache_key: ${{ needs.cache_kernel_centos-hsk_10.outputs.KCKEY }}
   cache_kernel_bazzite_42:
+    name: Cache bazzite (42)
     uses: ./.github/workflows/reusable-cache-kernel.yml
     secrets: inherit
     with:
@@ -62,6 +67,7 @@ jobs:
       kernel_flavor: bazzite
       version: 42
   build-bazzite_42_common:
+    name: Build common bazzite (42)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_bazzite_42
@@ -71,6 +77,7 @@ jobs:
       akmods_target: common
       kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
   build-bazzite_42_extra:
+    name: Build extra bazzite (42)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_bazzite_42
@@ -80,6 +87,7 @@ jobs:
       akmods_target: extra
       kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
   build-bazzite_42_nvidia:
+    name: Build nvidia bazzite (42)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_bazzite_42
@@ -89,6 +97,7 @@ jobs:
       akmods_target: nvidia
       kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
   build-bazzite_42_nvidia-open:
+    name: Build nvidia-open bazzite (42)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_bazzite_42
@@ -98,6 +107,7 @@ jobs:
       akmods_target: nvidia-open
       kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
   cache_kernel_longterm-6-12_42:
+    name: Cache longterm-6.12 (42)
     uses: ./.github/workflows/reusable-cache-kernel.yml
     secrets: inherit
     with:
@@ -105,6 +115,7 @@ jobs:
       kernel_flavor: longterm-6.12
       version: 42
   build-longterm-6-12_42_common:
+    name: Build common longterm-6.12 (42)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_longterm-6-12_42
@@ -114,6 +125,7 @@ jobs:
       akmods_target: common
       kernel_cache_key: ${{ needs.cache_kernel_longterm-6-12_42.outputs.KCKEY }}
   build-longterm-6-12_42_nvidia:
+    name: Build nvidia longterm-6.12 (42)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_longterm-6-12_42
@@ -123,6 +135,7 @@ jobs:
       akmods_target: nvidia
       kernel_cache_key: ${{ needs.cache_kernel_longterm-6-12_42.outputs.KCKEY }}
   build-longterm-6-12_42_nvidia-open:
+    name: Build nvidia-open longterm-6.12 (42)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_longterm-6-12_42
@@ -132,6 +145,7 @@ jobs:
       akmods_target: nvidia-open
       kernel_cache_key: ${{ needs.cache_kernel_longterm-6-12_42.outputs.KCKEY }}
   build-longterm-6-12_42_zfs:
+    name: Build zfs longterm-6.12 (42)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_longterm-6-12_42
@@ -141,6 +155,7 @@ jobs:
       akmods_target: zfs
       kernel_cache_key: ${{ needs.cache_kernel_longterm-6-12_42.outputs.KCKEY }}
   cache_kernel_main_41:
+    name: Cache main (41)
     uses: ./.github/workflows/reusable-cache-kernel.yml
     secrets: inherit
     with:
@@ -148,6 +163,7 @@ jobs:
       kernel_flavor: main
       version: 41
   build-main_41_common:
+    name: Build common main (41)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_main_41
@@ -157,6 +173,7 @@ jobs:
       akmods_target: common
       kernel_cache_key: ${{ needs.cache_kernel_main_41.outputs.KCKEY }}
   build-main_41_nvidia:
+    name: Build nvidia main (41)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_main_41
@@ -166,6 +183,7 @@ jobs:
       akmods_target: nvidia
       kernel_cache_key: ${{ needs.cache_kernel_main_41.outputs.KCKEY }}
   build-main_41_nvidia-open:
+    name: Build nvidia-open main (41)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_main_41
@@ -175,6 +193,7 @@ jobs:
       akmods_target: nvidia-open
       kernel_cache_key: ${{ needs.cache_kernel_main_41.outputs.KCKEY }}
   cache_kernel_centos_10:
+    name: Cache centos (10)
     uses: ./.github/workflows/reusable-cache-kernel.yml
     secrets: inherit
     with:
@@ -182,6 +201,7 @@ jobs:
       kernel_flavor: centos
       version: 10
   build-centos_10_nvidia:
+    name: Build nvidia centos (10)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_centos_10
@@ -191,6 +211,7 @@ jobs:
       akmods_target: nvidia
       kernel_cache_key: ${{ needs.cache_kernel_centos_10.outputs.KCKEY }}
   build-centos_10_nvidia-open:
+    name: Build nvidia-open centos (10)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_centos_10
@@ -200,6 +221,7 @@ jobs:
       akmods_target: nvidia-open
       kernel_cache_key: ${{ needs.cache_kernel_centos_10.outputs.KCKEY }}
   build-centos_10_zfs:
+    name: Build zfs centos (10)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_centos_10
@@ -209,6 +231,7 @@ jobs:
       akmods_target: zfs
       kernel_cache_key: ${{ needs.cache_kernel_centos_10.outputs.KCKEY }}
   cache_kernel_coreos-testing_41:
+    name: Cache coreos-testing (41)
     uses: ./.github/workflows/reusable-cache-kernel.yml
     secrets: inherit
     with:
@@ -216,6 +239,7 @@ jobs:
       kernel_flavor: coreos-testing
       version: 41
   build-coreos-testing_41_common:
+    name: Build common coreos-testing (41)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_coreos-testing_41
@@ -225,6 +249,7 @@ jobs:
       akmods_target: common
       kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_41.outputs.KCKEY }}
   build-coreos-testing_41_nvidia:
+    name: Build nvidia coreos-testing (41)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_coreos-testing_41
@@ -234,6 +259,7 @@ jobs:
       akmods_target: nvidia
       kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_41.outputs.KCKEY }}
   build-coreos-testing_41_nvidia-open:
+    name: Build nvidia-open coreos-testing (41)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_coreos-testing_41
@@ -243,6 +269,7 @@ jobs:
       akmods_target: nvidia-open
       kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_41.outputs.KCKEY }}
   build-coreos-testing_41_zfs:
+    name: Build zfs coreos-testing (41)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_coreos-testing_41
@@ -252,6 +279,7 @@ jobs:
       akmods_target: zfs
       kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_41.outputs.KCKEY }}
   cache_kernel_main_42:
+    name: Cache main (42)
     uses: ./.github/workflows/reusable-cache-kernel.yml
     secrets: inherit
     with:
@@ -259,6 +287,7 @@ jobs:
       kernel_flavor: main
       version: 42
   build-main_42_common:
+    name: Build common main (42)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_main_42
@@ -268,6 +297,7 @@ jobs:
       akmods_target: common
       kernel_cache_key: ${{ needs.cache_kernel_main_42.outputs.KCKEY }}
   build-main_42_nvidia:
+    name: Build nvidia main (42)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_main_42
@@ -277,6 +307,7 @@ jobs:
       akmods_target: nvidia
       kernel_cache_key: ${{ needs.cache_kernel_main_42.outputs.KCKEY }}
   build-main_42_nvidia-open:
+    name: Build nvidia-open main (42)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_main_42
@@ -286,6 +317,7 @@ jobs:
       akmods_target: nvidia-open
       kernel_cache_key: ${{ needs.cache_kernel_main_42.outputs.KCKEY }}
   cache_kernel_coreos-stable_42:
+    name: Cache coreos-stable (42)
     uses: ./.github/workflows/reusable-cache-kernel.yml
     secrets: inherit
     with:
@@ -293,6 +325,7 @@ jobs:
       kernel_flavor: coreos-stable
       version: 42
   build-coreos-stable_42_common:
+    name: Build common coreos-stable (42)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_coreos-stable_42
@@ -302,6 +335,7 @@ jobs:
       akmods_target: common
       kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_42.outputs.KCKEY }}
   build-coreos-stable_42_nvidia:
+    name: Build nvidia coreos-stable (42)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_coreos-stable_42
@@ -311,6 +345,7 @@ jobs:
       akmods_target: nvidia
       kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_42.outputs.KCKEY }}
   build-coreos-stable_42_nvidia-open:
+    name: Build nvidia-open coreos-stable (42)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_coreos-stable_42
@@ -320,6 +355,7 @@ jobs:
       akmods_target: nvidia-open
       kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_42.outputs.KCKEY }}
   build-coreos-stable_42_zfs:
+    name: Build zfs coreos-stable (42)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_coreos-stable_42
@@ -329,6 +365,7 @@ jobs:
       akmods_target: zfs
       kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_42.outputs.KCKEY }}
   cache_kernel_coreos-testing_42:
+    name: Cache coreos-testing (42)
     uses: ./.github/workflows/reusable-cache-kernel.yml
     secrets: inherit
     with:
@@ -336,6 +373,7 @@ jobs:
       kernel_flavor: coreos-testing
       version: 42
   build-coreos-testing_42_common:
+    name: Build common coreos-testing (42)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_coreos-testing_42
@@ -345,6 +383,7 @@ jobs:
       akmods_target: common
       kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_42.outputs.KCKEY }}
   build-coreos-testing_42_nvidia:
+    name: Build nvidia coreos-testing (42)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_coreos-testing_42
@@ -354,6 +393,7 @@ jobs:
       akmods_target: nvidia
       kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_42.outputs.KCKEY }}
   build-coreos-testing_42_nvidia-open:
+    name: Build nvidia-open coreos-testing (42)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_coreos-testing_42
@@ -363,6 +403,7 @@ jobs:
       akmods_target: nvidia-open
       kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_42.outputs.KCKEY }}
   build-coreos-testing_42_zfs:
+    name: Build zfs coreos-testing (42)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_coreos-testing_42
@@ -372,6 +413,7 @@ jobs:
       akmods_target: zfs
       kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_42.outputs.KCKEY }}
   cache_kernel_coreos-stable_41:
+    name: Cache coreos-stable (41)
     uses: ./.github/workflows/reusable-cache-kernel.yml
     secrets: inherit
     with:
@@ -379,6 +421,7 @@ jobs:
       kernel_flavor: coreos-stable
       version: 41
   build-coreos-stable_41_common:
+    name: Build common coreos-stable (41)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_coreos-stable_41
@@ -388,6 +431,7 @@ jobs:
       akmods_target: common
       kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_41.outputs.KCKEY }}
   build-coreos-stable_41_nvidia:
+    name: Build nvidia coreos-stable (41)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_coreos-stable_41
@@ -397,6 +441,7 @@ jobs:
       akmods_target: nvidia
       kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_41.outputs.KCKEY }}
   build-coreos-stable_41_nvidia-open:
+    name: Build nvidia-open coreos-stable (41)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_coreos-stable_41
@@ -406,6 +451,7 @@ jobs:
       akmods_target: nvidia-open
       kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_41.outputs.KCKEY }}
   build-coreos-stable_41_zfs:
+    name: Build zfs coreos-stable (41)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     needs: cache_kernel_coreos-stable_41
