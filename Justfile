@@ -308,7 +308,7 @@ test: (cache-kernel-version) (fetch-kernel)
         )
     fi
 
-    {{ podman }} build -f Containerfile.in --volume {{ KCPATH }}:/tmp/kernel_cache:ro "${CPP_FLAGS[@]}" --target test --tag akmods:test {{ justfile_dir () }}
+    {{ podman }} build -f Containerfile.in --volume {{ KCPATH }}:/tmp/kernel_cache:ro "${CPP_FLAGS[@]}" --target test --tag akmods-test:latest {{ justfile_dir () }}
     if ! podman run akmods-test:latest; then
         echo "Signatures Failed" >&2
         exit 1
