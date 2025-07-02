@@ -38,7 +38,7 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
     rpmrebuild --additional=--buildroot=/tmp/buildroot --batch "${RPM}"
     rm -rf /usr/lib/modules/"${KERNEL}"/extra
     pushd /root/rpmbuild/RPMS/"$(uname -m)"/
-    kmods=($(ls -1 ./kmod-*.rpm))
+    kmods=($(ls -1 kmod-*.rpm))
     dnf remove -y "${kmods[@]/\.rpm/}"
     for RPMPATH in $(find . -type f -name "\kmod-*.rpm"); do
         RPM=$(basename "${RPMPATH/\.rpm/}")
