@@ -55,10 +55,9 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
             mv "$RPMPATH" "$(dirname "$RPMPATH")/$RENAME.rpm"
             dnf swap -y $RPM "$RPM_RENAME"
         else
-            dnf reinstall -y $RPM
+            dnf reinstall -y ./$RPM.rpm
         fi
     done
-    dnf install -y kmod-*.rpm
     popd
     for module in /usr/lib/modules/"${KERNEL}"/extra/*/*.ko*; do
         if ! modinfo "${module}" >/dev/null; then

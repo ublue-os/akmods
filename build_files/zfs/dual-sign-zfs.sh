@@ -48,7 +48,7 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
             mv "$RPMPATH" "$RPM_RENAME"
             dnf swap -y $RPM "$RPM_RENAME"
         else
-            dnf reinstall -y $RPM
+            dnf reinstall -y ./$RPM.rpm
         fi
     done
     popd
