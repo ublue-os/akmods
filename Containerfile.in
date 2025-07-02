@@ -52,6 +52,12 @@ RUNEOF
 
 FROM build_prep AS builder
 
+ARG DUAL_SIGN="true"
+ARG KERNEL_FLAVOR_ARG
+ARG KERNEL_NAME_ARG
+ARG RPMFUSION_MIRROR_ARG
+ARG VERSION_ARG
+
 #if defined COMMON
 # /*
 # common akmods
