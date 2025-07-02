@@ -45,7 +45,6 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
     # KERNEL_NOARCH="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}')"
     pushd /root/rpmbuild/RPMS/"$(uname -m)"/
     kmods=($(ls -1 kmod-*.rpm))
-    dnf remove -y "${kmods[@]/\.rpm/}"
     for RPMPATH in $(find . -type f -name "\kmod-*.rpm"); do
         RPM=$(basename "${RPMPATH/\.rpm/}")
         if [[ ! "$RPM" =~ ${KERNEL} ]]; then
