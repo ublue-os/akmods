@@ -1,0 +1,78 @@
+name: cache-kernel
+on:
+  workflow_call:
+    inputs:
+      bazzite_tag:
+        description: "The release tag for the bazzite kernel"
+        required: false
+        type: string
+      kernel_flavor:
+        description: "The Kernel flavor: main, bazzite, coreos-stable, centos-hsk, longterm-6.12, etc"
+        required: true
+        type: string
+      version:
+        description: "Release Version: 10, 41, 42, etc"
+        required: true
+        type: string
+    outputs:
+      KCKEY:
+        description: Cache Key
+        value: ${{ jobs.cache-kernel.outputs.KCKEY }}
+env:
+  AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
+  AKMODS_KERNEL: ${{ inputs.kernel_flavor }}
+  AKMODS_VERSION: ${{ inputs.version }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}-${{ inputs.version }}-${{ inputs.kernel_flavor }}
+  cancel-in-progress: true
+
+jobs:
+  cache-kernel:
+    name: Cache ${{ inputs.kernel_flavor }} (${{ inputs.version }})
+    runs-on: ubuntu-24.04
+    outputs:
+      KCKEY: ${{ inputs.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_release }}
+    container:
+      image: "ghcr.io/ublue-os/devcontainer:latest"
+      options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
+    env:
+      AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
+      AKMODS_KERNEL: ${{ inputs.kernel_flavor }}
+      AKMODS_VERSION: ${{ inputs.version }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Mark Directory as Safe
+        run: git config --system --ad safe.directory "$GITHUB_WORKSPACE"
+      
+      - name: Get Kernel Version
+        id: kernel-version
+        run: just get-kernel-version
+
+      - name: Cache Kernel RPMs
+        id: cache-kernel
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.kernel-version.outputs.KCPATH }}
+          key: ${{ inputs.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_release }} # job outputs KCKEY
+
+      - name: Retrieve Signing Key
+        if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && steps.cache-kernel.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          mkdir -p certs
+          echo "${{ secrets.KERNEL_PRIVKEY }}" > certs/private_key.priv
+          echo "${{ secrets.AKMOD_PRIVKEY_20230518 }}" > certs/private_key_2.priv
+          # DEBUG: get character count of key
+          wc -c certs/private_key.priv
+          wc -c certs/private_key_2.priv
+
+      - name: Fetch Kernel
+        if: steps.cache-kernel.outputs.cache-hit != 'true'
+        run: just fetch-kernel
+
+      - name: List Cached Kernel RPMs
+        run: find ${{ steps.kernel-version.outputs.KCPATH }}

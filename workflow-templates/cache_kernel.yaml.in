@@ -1,48 +1,7 @@
   cache_kernel_%%KERNEL_FLAVOR_CLEAN%%_%%VERSION%%:
-    name: Cache %%KERNEL_FLAVOR%% (%%VERSION%%)
-    runs-on: ubuntu-24.04
-    outputs:
-      KCKEY: %%KERNEL_FLAVOR%%-${{ steps.kernel-version.outputs.kernel_release }}
-    container:
-      image: "ghcr.io/ublue-os/devcontainer:latest"
-      options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
-    env:
-      AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
-      AKMODS_KERNEL: %%KERNEL_FLAVOR%%
-      AKMODS_VERSION: %%VERSION%%
-    
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      
-      - name: Mark Directory as Safe
-        run: git config --system --ad safe.directory "$GITHUB_WORKSPACE"
-      
-      - name: Get Kernel Version
-        id: kernel-version
-        run: just get-kernel-version
-
-      - name: Cache Kernel RPMs
-        id: cache-kernel
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.kernel-version.outputs.KCPATH }}
-          key: %%KERNEL_FLAVOR%%-${{ steps.kernel-version.outputs.kernel_release }} # job outputs KCKEY
-
-      - name: Retrieve Signing Key
-        if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && steps.cache-kernel.outputs.cache-hit != 'true'
-        shell: bash
-        run: |
-          mkdir -p certs
-          echo "${{ secrets.KERNEL_PRIVKEY }}" > certs/private_key.priv
-          echo "${{ secrets.AKMOD_PRIVKEY_20230518 }}" > certs/private_key_2.priv
-          # DEBUG: get character count of key
-          wc -c certs/private_key.priv
-          wc -c certs/private_key_2.priv
-
-      - name: Fetch Kernel
-        if: steps.cache-kernel.outputs.cache-hit != 'true'
-        run: just fetch-kernel
-
-      - name: List Cached Kernel RPMs
-        run: find ${{ steps.kernel-version.outputs.KCPATH }}
+    uses: ./.github/workflows/reusable-cache-kernel.yml
+    secrets: inherit
+    with:
+      bazzite_tag: ${{ inputs.bazzite_tag }}
+      kernel_flavor: %%KERNEL_FLAVOR%%
+      version: %%VERSION%%
