@@ -1,12 +1,15 @@
-  cache_kernel:
+  cache_kernel_%%KERNEL_FLAVOR_CLEAN%%_%%VERSION%%:
     name: Cache %%KERNEL_FLAVOR%% (%%VERSION%%)
     runs-on: ubuntu-24.04
     outputs:
       KCKEY: %%KERNEL_FLAVOR%%-${{ steps.kernel-version.outputs.kernel_release }}
-      json_b64: ${{ steps.kernel-version.outputs.json_b64 }}
     container:
       image: "ghcr.io/ublue-os/devcontainer:latest"
       options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
+    env:
+      AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
+      AKMODS_KERNEL: %%KERNEL_FLAVOR%%
+      AKMODS_VERSION: %%VERSION%%
     
     steps:
       - name: Checkout

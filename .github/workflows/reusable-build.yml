@@ -22,10 +22,6 @@ on:
         description: "The Key for the Kernel Cache"
         required: true
         type: string
-      json_b64:
-        description: "base64 encoded json version"
-        required: true
-        type: string
 env:
   AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
   AKMODS_KERNEL: ${{ inputs.kernel_flavor }}
@@ -33,7 +29,6 @@ env:
   AKMODS_VERSION: ${{ inputs.version }}
   IMAGE_BASE_NAME: akmods
   IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
-  JSON_B64: ${{ inputs.json_b64 }}
   KCKEY: ${{ inputs.kernel_cache_key }}
 
 concurrency:

@@ -1,0 +1,844 @@
+# This is a generated workflow. Do not edit by hand.
+# Generate the workflow by running ./generate-workflows.sh at git root
+# Modify the inputs in ./workflow-templates
+name: Build AKMODs
+run-name: Build AKMODs by @{{ github.actor }}
+on:
+  merge_group:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+  schedule:
+    - cron: '25 0 * * *'  # 0025 UTC everyday (20 minutes after 42)
+  workflow_dispatch:
+    inputs:
+      bazzite_tag:
+        description: "The release tag for the bazzite kernel"
+        required: false
+        type: string
+
+jobs:
+  cache_kernel_centos-hsk_10:
+    name: Cache centos-hsk (10)
+    runs-on: ubuntu-24.04
+    outputs:
+      KCKEY: centos-hsk-${{ steps.kernel-version.outputs.kernel_release }}
+    container:
+      image: "ghcr.io/ublue-os/devcontainer:latest"
+      options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
+    env:
+      AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
+      AKMODS_KERNEL: centos-hsk
+      AKMODS_VERSION: 10
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Mark Directory as Safe
+        run: git config --system --ad safe.directory "$GITHUB_WORKSPACE"
+      
+      - name: Get Kernel Version
+        id: kernel-version
+        run: just get-kernel-version
+
+      - name: Cache Kernel RPMs
+        id: cache-kernel
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.kernel-version.outputs.KCPATH }}
+          key: centos-hsk-${{ steps.kernel-version.outputs.kernel_release }} # job outputs KCKEY
+
+      - name: Retrieve Signing Key
+        if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && steps.cache-kernel.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          mkdir -p certs
+          echo "${{ secrets.KERNEL_PRIVKEY }}" > certs/private_key.priv
+          echo "${{ secrets.AKMOD_PRIVKEY_20230518 }}" > certs/private_key_2.priv
+          # DEBUG: get character count of key
+          wc -c certs/private_key.priv
+          wc -c certs/private_key_2.priv
+
+      - name: Fetch Kernel
+        if: steps.cache-kernel.outputs.cache-hit != 'true'
+        run: just fetch-kernel
+
+      - name: List Cached Kernel RPMs
+        run: find ${{ steps.kernel-version.outputs.KCPATH }}
+  build-centos-hsk_10_common:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_centos-hsk_10
+    with:
+      version: 10
+      kernel_flavor: centos-hsk
+      akmods_target: common
+      kernel_cache_key: ${{ needs.cache_kernel_centos-hsk_10.outputs.KCKEY }}
+  build-centos-hsk_10_nvidia:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_centos-hsk_10
+    with:
+      version: 10
+      kernel_flavor: centos-hsk
+      akmods_target: nvidia
+      kernel_cache_key: ${{ needs.cache_kernel_centos-hsk_10.outputs.KCKEY }}
+  build-centos-hsk_10_nvidia-open:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_centos-hsk_10
+    with:
+      version: 10
+      kernel_flavor: centos-hsk
+      akmods_target: nvidia-open
+      kernel_cache_key: ${{ needs.cache_kernel_centos-hsk_10.outputs.KCKEY }}
+  build-centos-hsk_10_zfs:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_centos-hsk_10
+    with:
+      version: 10
+      kernel_flavor: centos-hsk
+      akmods_target: zfs
+      kernel_cache_key: ${{ needs.cache_kernel_centos-hsk_10.outputs.KCKEY }}
+  cache_kernel_bazzite_42:
+    name: Cache bazzite (42)
+    runs-on: ubuntu-24.04
+    outputs:
+      KCKEY: bazzite-${{ steps.kernel-version.outputs.kernel_release }}
+    container:
+      image: "ghcr.io/ublue-os/devcontainer:latest"
+      options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
+    env:
+      AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
+      AKMODS_KERNEL: bazzite
+      AKMODS_VERSION: 42
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Mark Directory as Safe
+        run: git config --system --ad safe.directory "$GITHUB_WORKSPACE"
+      
+      - name: Get Kernel Version
+        id: kernel-version
+        run: just get-kernel-version
+
+      - name: Cache Kernel RPMs
+        id: cache-kernel
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.kernel-version.outputs.KCPATH }}
+          key: bazzite-${{ steps.kernel-version.outputs.kernel_release }} # job outputs KCKEY
+
+      - name: Retrieve Signing Key
+        if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && steps.cache-kernel.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          mkdir -p certs
+          echo "${{ secrets.KERNEL_PRIVKEY }}" > certs/private_key.priv
+          echo "${{ secrets.AKMOD_PRIVKEY_20230518 }}" > certs/private_key_2.priv
+          # DEBUG: get character count of key
+          wc -c certs/private_key.priv
+          wc -c certs/private_key_2.priv
+
+      - name: Fetch Kernel
+        if: steps.cache-kernel.outputs.cache-hit != 'true'
+        run: just fetch-kernel
+
+      - name: List Cached Kernel RPMs
+        run: find ${{ steps.kernel-version.outputs.KCPATH }}
+  build-bazzite_42_common:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_bazzite_42
+    with:
+      version: 42
+      kernel_flavor: bazzite
+      akmods_target: common
+      kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
+  build-bazzite_42_extra:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_bazzite_42
+    with:
+      version: 42
+      kernel_flavor: bazzite
+      akmods_target: extra
+      kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
+  build-bazzite_42_nvidia:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_bazzite_42
+    with:
+      version: 42
+      kernel_flavor: bazzite
+      akmods_target: nvidia
+      kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
+  build-bazzite_42_nvidia-open:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_bazzite_42
+    with:
+      version: 42
+      kernel_flavor: bazzite
+      akmods_target: nvidia-open
+      kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
+  cache_kernel_longterm-6-12_42:
+    name: Cache longterm-6.12 (42)
+    runs-on: ubuntu-24.04
+    outputs:
+      KCKEY: longterm-6.12-${{ steps.kernel-version.outputs.kernel_release }}
+    container:
+      image: "ghcr.io/ublue-os/devcontainer:latest"
+      options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
+    env:
+      AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
+      AKMODS_KERNEL: longterm-6.12
+      AKMODS_VERSION: 42
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Mark Directory as Safe
+        run: git config --system --ad safe.directory "$GITHUB_WORKSPACE"
+      
+      - name: Get Kernel Version
+        id: kernel-version
+        run: just get-kernel-version
+
+      - name: Cache Kernel RPMs
+        id: cache-kernel
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.kernel-version.outputs.KCPATH }}
+          key: longterm-6.12-${{ steps.kernel-version.outputs.kernel_release }} # job outputs KCKEY
+
+      - name: Retrieve Signing Key
+        if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && steps.cache-kernel.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          mkdir -p certs
+          echo "${{ secrets.KERNEL_PRIVKEY }}" > certs/private_key.priv
+          echo "${{ secrets.AKMOD_PRIVKEY_20230518 }}" > certs/private_key_2.priv
+          # DEBUG: get character count of key
+          wc -c certs/private_key.priv
+          wc -c certs/private_key_2.priv
+
+      - name: Fetch Kernel
+        if: steps.cache-kernel.outputs.cache-hit != 'true'
+        run: just fetch-kernel
+
+      - name: List Cached Kernel RPMs
+        run: find ${{ steps.kernel-version.outputs.KCPATH }}
+  build-longterm-6-12_42_common:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_longterm-6-12_42
+    with:
+      version: 42
+      kernel_flavor: longterm-6.12
+      akmods_target: common
+      kernel_cache_key: ${{ needs.cache_kernel_longterm-6-12_42.outputs.KCKEY }}
+  build-longterm-6-12_42_nvidia:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_longterm-6-12_42
+    with:
+      version: 42
+      kernel_flavor: longterm-6.12
+      akmods_target: nvidia
+      kernel_cache_key: ${{ needs.cache_kernel_longterm-6-12_42.outputs.KCKEY }}
+  build-longterm-6-12_42_nvidia-open:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_longterm-6-12_42
+    with:
+      version: 42
+      kernel_flavor: longterm-6.12
+      akmods_target: nvidia-open
+      kernel_cache_key: ${{ needs.cache_kernel_longterm-6-12_42.outputs.KCKEY }}
+  build-longterm-6-12_42_zfs:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_longterm-6-12_42
+    with:
+      version: 42
+      kernel_flavor: longterm-6.12
+      akmods_target: zfs
+      kernel_cache_key: ${{ needs.cache_kernel_longterm-6-12_42.outputs.KCKEY }}
+  cache_kernel_main_41:
+    name: Cache main (41)
+    runs-on: ubuntu-24.04
+    outputs:
+      KCKEY: main-${{ steps.kernel-version.outputs.kernel_release }}
+    container:
+      image: "ghcr.io/ublue-os/devcontainer:latest"
+      options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
+    env:
+      AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
+      AKMODS_KERNEL: main
+      AKMODS_VERSION: 41
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Mark Directory as Safe
+        run: git config --system --ad safe.directory "$GITHUB_WORKSPACE"
+      
+      - name: Get Kernel Version
+        id: kernel-version
+        run: just get-kernel-version
+
+      - name: Cache Kernel RPMs
+        id: cache-kernel
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.kernel-version.outputs.KCPATH }}
+          key: main-${{ steps.kernel-version.outputs.kernel_release }} # job outputs KCKEY
+
+      - name: Retrieve Signing Key
+        if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && steps.cache-kernel.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          mkdir -p certs
+          echo "${{ secrets.KERNEL_PRIVKEY }}" > certs/private_key.priv
+          echo "${{ secrets.AKMOD_PRIVKEY_20230518 }}" > certs/private_key_2.priv
+          # DEBUG: get character count of key
+          wc -c certs/private_key.priv
+          wc -c certs/private_key_2.priv
+
+      - name: Fetch Kernel
+        if: steps.cache-kernel.outputs.cache-hit != 'true'
+        run: just fetch-kernel
+
+      - name: List Cached Kernel RPMs
+        run: find ${{ steps.kernel-version.outputs.KCPATH }}
+  build-main_41_common:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_main_41
+    with:
+      version: 41
+      kernel_flavor: main
+      akmods_target: common
+      kernel_cache_key: ${{ needs.cache_kernel_main_41.outputs.KCKEY }}
+  build-main_41_nvidia:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_main_41
+    with:
+      version: 41
+      kernel_flavor: main
+      akmods_target: nvidia
+      kernel_cache_key: ${{ needs.cache_kernel_main_41.outputs.KCKEY }}
+  build-main_41_nvidia-open:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_main_41
+    with:
+      version: 41
+      kernel_flavor: main
+      akmods_target: nvidia-open
+      kernel_cache_key: ${{ needs.cache_kernel_main_41.outputs.KCKEY }}
+  cache_kernel_centos_10:
+    name: Cache centos (10)
+    runs-on: ubuntu-24.04
+    outputs:
+      KCKEY: centos-${{ steps.kernel-version.outputs.kernel_release }}
+    container:
+      image: "ghcr.io/ublue-os/devcontainer:latest"
+      options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
+    env:
+      AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
+      AKMODS_KERNEL: centos
+      AKMODS_VERSION: 10
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Mark Directory as Safe
+        run: git config --system --ad safe.directory "$GITHUB_WORKSPACE"
+      
+      - name: Get Kernel Version
+        id: kernel-version
+        run: just get-kernel-version
+
+      - name: Cache Kernel RPMs
+        id: cache-kernel
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.kernel-version.outputs.KCPATH }}
+          key: centos-${{ steps.kernel-version.outputs.kernel_release }} # job outputs KCKEY
+
+      - name: Retrieve Signing Key
+        if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && steps.cache-kernel.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          mkdir -p certs
+          echo "${{ secrets.KERNEL_PRIVKEY }}" > certs/private_key.priv
+          echo "${{ secrets.AKMOD_PRIVKEY_20230518 }}" > certs/private_key_2.priv
+          # DEBUG: get character count of key
+          wc -c certs/private_key.priv
+          wc -c certs/private_key_2.priv
+
+      - name: Fetch Kernel
+        if: steps.cache-kernel.outputs.cache-hit != 'true'
+        run: just fetch-kernel
+
+      - name: List Cached Kernel RPMs
+        run: find ${{ steps.kernel-version.outputs.KCPATH }}
+  build-centos_10_common:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_centos_10
+    with:
+      version: 10
+      kernel_flavor: centos
+      akmods_target: common
+      kernel_cache_key: ${{ needs.cache_kernel_centos_10.outputs.KCKEY }}
+  build-centos_10_nvidia:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_centos_10
+    with:
+      version: 10
+      kernel_flavor: centos
+      akmods_target: nvidia
+      kernel_cache_key: ${{ needs.cache_kernel_centos_10.outputs.KCKEY }}
+  build-centos_10_nvidia-open:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_centos_10
+    with:
+      version: 10
+      kernel_flavor: centos
+      akmods_target: nvidia-open
+      kernel_cache_key: ${{ needs.cache_kernel_centos_10.outputs.KCKEY }}
+  build-centos_10_zfs:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_centos_10
+    with:
+      version: 10
+      kernel_flavor: centos
+      akmods_target: zfs
+      kernel_cache_key: ${{ needs.cache_kernel_centos_10.outputs.KCKEY }}
+  cache_kernel_coreos-testing_41:
+    name: Cache coreos-testing (41)
+    runs-on: ubuntu-24.04
+    outputs:
+      KCKEY: coreos-testing-${{ steps.kernel-version.outputs.kernel_release }}
+    container:
+      image: "ghcr.io/ublue-os/devcontainer:latest"
+      options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
+    env:
+      AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
+      AKMODS_KERNEL: coreos-testing
+      AKMODS_VERSION: 41
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Mark Directory as Safe
+        run: git config --system --ad safe.directory "$GITHUB_WORKSPACE"
+      
+      - name: Get Kernel Version
+        id: kernel-version
+        run: just get-kernel-version
+
+      - name: Cache Kernel RPMs
+        id: cache-kernel
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.kernel-version.outputs.KCPATH }}
+          key: coreos-testing-${{ steps.kernel-version.outputs.kernel_release }} # job outputs KCKEY
+
+      - name: Retrieve Signing Key
+        if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && steps.cache-kernel.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          mkdir -p certs
+          echo "${{ secrets.KERNEL_PRIVKEY }}" > certs/private_key.priv
+          echo "${{ secrets.AKMOD_PRIVKEY_20230518 }}" > certs/private_key_2.priv
+          # DEBUG: get character count of key
+          wc -c certs/private_key.priv
+          wc -c certs/private_key_2.priv
+
+      - name: Fetch Kernel
+        if: steps.cache-kernel.outputs.cache-hit != 'true'
+        run: just fetch-kernel
+
+      - name: List Cached Kernel RPMs
+        run: find ${{ steps.kernel-version.outputs.KCPATH }}
+  build-coreos-testing_41_common:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_coreos-testing_41
+    with:
+      version: 41
+      kernel_flavor: coreos-testing
+      akmods_target: common
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_41.outputs.KCKEY }}
+  build-coreos-testing_41_nvidia:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_coreos-testing_41
+    with:
+      version: 41
+      kernel_flavor: coreos-testing
+      akmods_target: nvidia
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_41.outputs.KCKEY }}
+  build-coreos-testing_41_nvidia-open:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_coreos-testing_41
+    with:
+      version: 41
+      kernel_flavor: coreos-testing
+      akmods_target: nvidia-open
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_41.outputs.KCKEY }}
+  build-coreos-testing_41_zfs:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_coreos-testing_41
+    with:
+      version: 41
+      kernel_flavor: coreos-testing
+      akmods_target: zfs
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_41.outputs.KCKEY }}
+  cache_kernel_main_42:
+    name: Cache main (42)
+    runs-on: ubuntu-24.04
+    outputs:
+      KCKEY: main-${{ steps.kernel-version.outputs.kernel_release }}
+    container:
+      image: "ghcr.io/ublue-os/devcontainer:latest"
+      options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
+    env:
+      AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
+      AKMODS_KERNEL: main
+      AKMODS_VERSION: 42
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Mark Directory as Safe
+        run: git config --system --ad safe.directory "$GITHUB_WORKSPACE"
+      
+      - name: Get Kernel Version
+        id: kernel-version
+        run: just get-kernel-version
+
+      - name: Cache Kernel RPMs
+        id: cache-kernel
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.kernel-version.outputs.KCPATH }}
+          key: main-${{ steps.kernel-version.outputs.kernel_release }} # job outputs KCKEY
+
+      - name: Retrieve Signing Key
+        if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && steps.cache-kernel.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          mkdir -p certs
+          echo "${{ secrets.KERNEL_PRIVKEY }}" > certs/private_key.priv
+          echo "${{ secrets.AKMOD_PRIVKEY_20230518 }}" > certs/private_key_2.priv
+          # DEBUG: get character count of key
+          wc -c certs/private_key.priv
+          wc -c certs/private_key_2.priv
+
+      - name: Fetch Kernel
+        if: steps.cache-kernel.outputs.cache-hit != 'true'
+        run: just fetch-kernel
+
+      - name: List Cached Kernel RPMs
+        run: find ${{ steps.kernel-version.outputs.KCPATH }}
+  build-main_42_common:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_main_42
+    with:
+      version: 42
+      kernel_flavor: main
+      akmods_target: common
+      kernel_cache_key: ${{ needs.cache_kernel_main_42.outputs.KCKEY }}
+  build-main_42_nvidia:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_main_42
+    with:
+      version: 42
+      kernel_flavor: main
+      akmods_target: nvidia
+      kernel_cache_key: ${{ needs.cache_kernel_main_42.outputs.KCKEY }}
+  build-main_42_nvidia-open:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_main_42
+    with:
+      version: 42
+      kernel_flavor: main
+      akmods_target: nvidia-open
+      kernel_cache_key: ${{ needs.cache_kernel_main_42.outputs.KCKEY }}
+  cache_kernel_coreos-stable_42:
+    name: Cache coreos-stable (42)
+    runs-on: ubuntu-24.04
+    outputs:
+      KCKEY: coreos-stable-${{ steps.kernel-version.outputs.kernel_release }}
+    container:
+      image: "ghcr.io/ublue-os/devcontainer:latest"
+      options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
+    env:
+      AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
+      AKMODS_KERNEL: coreos-stable
+      AKMODS_VERSION: 42
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Mark Directory as Safe
+        run: git config --system --ad safe.directory "$GITHUB_WORKSPACE"
+      
+      - name: Get Kernel Version
+        id: kernel-version
+        run: just get-kernel-version
+
+      - name: Cache Kernel RPMs
+        id: cache-kernel
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.kernel-version.outputs.KCPATH }}
+          key: coreos-stable-${{ steps.kernel-version.outputs.kernel_release }} # job outputs KCKEY
+
+      - name: Retrieve Signing Key
+        if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && steps.cache-kernel.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          mkdir -p certs
+          echo "${{ secrets.KERNEL_PRIVKEY }}" > certs/private_key.priv
+          echo "${{ secrets.AKMOD_PRIVKEY_20230518 }}" > certs/private_key_2.priv
+          # DEBUG: get character count of key
+          wc -c certs/private_key.priv
+          wc -c certs/private_key_2.priv
+
+      - name: Fetch Kernel
+        if: steps.cache-kernel.outputs.cache-hit != 'true'
+        run: just fetch-kernel
+
+      - name: List Cached Kernel RPMs
+        run: find ${{ steps.kernel-version.outputs.KCPATH }}
+  build-coreos-stable_42_common:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_coreos-stable_42
+    with:
+      version: 42
+      kernel_flavor: coreos-stable
+      akmods_target: common
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_42.outputs.KCKEY }}
+  build-coreos-stable_42_nvidia:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_coreos-stable_42
+    with:
+      version: 42
+      kernel_flavor: coreos-stable
+      akmods_target: nvidia
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_42.outputs.KCKEY }}
+  build-coreos-stable_42_nvidia-open:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_coreos-stable_42
+    with:
+      version: 42
+      kernel_flavor: coreos-stable
+      akmods_target: nvidia-open
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_42.outputs.KCKEY }}
+  build-coreos-stable_42_zfs:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_coreos-stable_42
+    with:
+      version: 42
+      kernel_flavor: coreos-stable
+      akmods_target: zfs
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_42.outputs.KCKEY }}
+  cache_kernel_coreos-testing_42:
+    name: Cache coreos-testing (42)
+    runs-on: ubuntu-24.04
+    outputs:
+      KCKEY: coreos-testing-${{ steps.kernel-version.outputs.kernel_release }}
+    container:
+      image: "ghcr.io/ublue-os/devcontainer:latest"
+      options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
+    env:
+      AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
+      AKMODS_KERNEL: coreos-testing
+      AKMODS_VERSION: 42
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Mark Directory as Safe
+        run: git config --system --ad safe.directory "$GITHUB_WORKSPACE"
+      
+      - name: Get Kernel Version
+        id: kernel-version
+        run: just get-kernel-version
+
+      - name: Cache Kernel RPMs
+        id: cache-kernel
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.kernel-version.outputs.KCPATH }}
+          key: coreos-testing-${{ steps.kernel-version.outputs.kernel_release }} # job outputs KCKEY
+
+      - name: Retrieve Signing Key
+        if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && steps.cache-kernel.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          mkdir -p certs
+          echo "${{ secrets.KERNEL_PRIVKEY }}" > certs/private_key.priv
+          echo "${{ secrets.AKMOD_PRIVKEY_20230518 }}" > certs/private_key_2.priv
+          # DEBUG: get character count of key
+          wc -c certs/private_key.priv
+          wc -c certs/private_key_2.priv
+
+      - name: Fetch Kernel
+        if: steps.cache-kernel.outputs.cache-hit != 'true'
+        run: just fetch-kernel
+
+      - name: List Cached Kernel RPMs
+        run: find ${{ steps.kernel-version.outputs.KCPATH }}
+  build-coreos-testing_42_common:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_coreos-testing_42
+    with:
+      version: 42
+      kernel_flavor: coreos-testing
+      akmods_target: common
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_42.outputs.KCKEY }}
+  build-coreos-testing_42_nvidia:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_coreos-testing_42
+    with:
+      version: 42
+      kernel_flavor: coreos-testing
+      akmods_target: nvidia
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_42.outputs.KCKEY }}
+  build-coreos-testing_42_nvidia-open:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_coreos-testing_42
+    with:
+      version: 42
+      kernel_flavor: coreos-testing
+      akmods_target: nvidia-open
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_42.outputs.KCKEY }}
+  build-coreos-testing_42_zfs:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_coreos-testing_42
+    with:
+      version: 42
+      kernel_flavor: coreos-testing
+      akmods_target: zfs
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_42.outputs.KCKEY }}
+  cache_kernel_coreos-stable_41:
+    name: Cache coreos-stable (41)
+    runs-on: ubuntu-24.04
+    outputs:
+      KCKEY: coreos-stable-${{ steps.kernel-version.outputs.kernel_release }}
+    container:
+      image: "ghcr.io/ublue-os/devcontainer:latest"
+      options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
+    env:
+      AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
+      AKMODS_KERNEL: coreos-stable
+      AKMODS_VERSION: 41
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Mark Directory as Safe
+        run: git config --system --ad safe.directory "$GITHUB_WORKSPACE"
+      
+      - name: Get Kernel Version
+        id: kernel-version
+        run: just get-kernel-version
+
+      - name: Cache Kernel RPMs
+        id: cache-kernel
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.kernel-version.outputs.KCPATH }}
+          key: coreos-stable-${{ steps.kernel-version.outputs.kernel_release }} # job outputs KCKEY
+
+      - name: Retrieve Signing Key
+        if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && steps.cache-kernel.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          mkdir -p certs
+          echo "${{ secrets.KERNEL_PRIVKEY }}" > certs/private_key.priv
+          echo "${{ secrets.AKMOD_PRIVKEY_20230518 }}" > certs/private_key_2.priv
+          # DEBUG: get character count of key
+          wc -c certs/private_key.priv
+          wc -c certs/private_key_2.priv
+
+      - name: Fetch Kernel
+        if: steps.cache-kernel.outputs.cache-hit != 'true'
+        run: just fetch-kernel
+
+      - name: List Cached Kernel RPMs
+        run: find ${{ steps.kernel-version.outputs.KCPATH }}
+  build-coreos-stable_41_common:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_coreos-stable_41
+    with:
+      version: 41
+      kernel_flavor: coreos-stable
+      akmods_target: common
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_41.outputs.KCKEY }}
+  build-coreos-stable_41_nvidia:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_coreos-stable_41
+    with:
+      version: 41
+      kernel_flavor: coreos-stable
+      akmods_target: nvidia
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_41.outputs.KCKEY }}
+  build-coreos-stable_41_nvidia-open:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_coreos-stable_41
+    with:
+      version: 41
+      kernel_flavor: coreos-stable
+      akmods_target: nvidia-open
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_41.outputs.KCKEY }}
+  build-coreos-stable_41_zfs:
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    needs: cache_kernel_coreos-stable_41
+    with:
+      version: 41
+      kernel_flavor: coreos-stable
+      akmods_target: zfs
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_41.outputs.KCKEY }}

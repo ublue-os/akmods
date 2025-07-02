@@ -1,4 +1,5 @@
-name: %%NAME%%
+name: Build AKMODs
+run-name: Build AKMODs by @{{ github.actor }}
 on:
   merge_group:
   pull_request:
@@ -14,10 +15,5 @@ on:
         description: "The release tag for the bazzite kernel"
         required: false
         type: string
-
-env:
-  AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
-  AKMODS_KERNEL: %%KERNEL_FLAVOR%%
-  AKMODS_VERSION: %%VERSION%%
 
 jobs:

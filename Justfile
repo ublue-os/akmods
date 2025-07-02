@@ -183,6 +183,8 @@ get-kernel-version:
 # Fetch the desired kernel
 fetch-kernel: (cache-kernel-version)
     #!/usr/bin/bash
+    {{ if path_exists(version_json) != 'true' { error('Need to run just cache-kernel-version first for dry-run') } else { '' } }}
+    {{ if path_exists( KCPATH / shell("jq -r '.kernel_name + \"-\" + .kernel_release + \".rpm\"' < $1", version_json)) == 'true' { 'exit 0' } else { '' } }}
     set "${CI:+-x}" -euo pipefail
 
     # Pull Build Image
@@ -209,7 +211,7 @@ fetch-kernel: (cache-kernel-version)
     find {{ KCPATH }}
 
 # Check Secureboot (Only Needed for Cache-Hits)
-secureboot: (cache-kernel-version)
+secureboot: (cache-kernel-version) (fetch-kernel)
     #!/usr/bin/bash
     set "${CI:+-x}" -euo pipefail
     kernel_name="$(jq -r '.kernel_name' < {{ version_json }})"
@@ -241,7 +243,7 @@ secureboot: (cache-kernel-version)
     popd >/dev/null
 
 # Build Akmods
-build: (cache-kernel-version)
+build: (cache-kernel-version) (fetch-kernel)
     #!/usr/bin/bash
     set "${CI:+-x}" -euo pipefail
     {{ if path_exists(version_json) != 'true' { error('Need to run just cache-kernel-version first for dry-run') } else { '' } }}
@@ -279,11 +281,7 @@ build: (cache-kernel-version)
     TAGS=(
         "--tag" "akmods{{ if akmods_target != 'common' { '-' + akmods_target } else { '' } }}:{{ kernel_flavor + '-' + version }}"
         "--tag" "akmods{{ if akmods_target != 'common' { '-' + akmods_target } else { '' } }}:{{ kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_release' < $1", version_json) }}"
+        "--tag" "akmods{{ if akmods_target != 'common' { '-' + akmods_target } else { '' } }}:{{ kernel_flavor + '-' + version + '-' + trim(read(KCPATH / 'kernel-cache-date')) }}"
     )
-    if [[ -f "{{ KCPATH}}/kernel-cache-date" ]]; then
-        TAGS+=(
-            "--tag" "akmods{{ if akmods_target != 'common' { '-' + akmods_target } else { '' } }}:{{ kernel_flavor + '-' + version }}-$(cat {{ KCPATH / 'kernel-cache-date' }})"
-        )
-    fi
 
     {{ podman }} build -f Containerfile.in --volume {{ KCPATH }}:/tmp/kernel_cache:ro "${CPP_FLAGS[@]}" "${LABELS[@]}" "${TAGS[@]}" {{ justfile_dir () }}
