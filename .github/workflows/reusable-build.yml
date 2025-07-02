@@ -1,4 +1,5 @@
 name: build-ublue
+run-name: Build akmods ${{ inputs.akmods_target }}
 on:
   workflow_call:
     inputs:
@@ -35,7 +36,7 @@ concurrency:
 
 jobs:
   build-akmods:
-    name: ${{ inputs.kernel_flavor }}-${{ inputs.version }}
+    name: Build ${{ matrix.platform }}
     runs-on: ${{ matrix.platform == 'x86_64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
     container:
       image: "ghcr.io/ublue-os/devcontainer:latest"

@@ -29,7 +29,7 @@ concurrency:
 
 jobs:
   cache-kernel:
-    name: Cache ${{ inputs.kernel_flavor }} ${{ inputs.version }} (${{ matrix.platform }})
+    name: Cache ${{ matrix.platform }}
     runs-on: ${{ matrix.platform == 'x86_64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
     outputs:
       KCKEY: ${{ inputs.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_major_minor_patch }}
