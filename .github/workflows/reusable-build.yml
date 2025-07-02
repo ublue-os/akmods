@@ -59,12 +59,8 @@ jobs:
           key: ${{ env.KCKEY }}
 
       - name: Fail Absent Kernel Cache
-        if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && steps.cache-kernel.outputs.cache-hit != 'true'
+        if: steps.cache-kernel.outputs.cache-hit != 'true'
         run: "echo 'Kernel Cache not found for key: ${{ env.KCKEY }}'; exit 1"
-
-      - name: Get Kernel RPMs for PR
-        if: github.event_name == 'pull_request' && steps.cache-kernel.outputs.cache-hit != 'true'
-        run: just fetch-kernel
 
       - name: Retrieve Signing Key
         if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
@@ -80,31 +76,8 @@ jobs:
       - name: Build Image
         run: just build
 
-      # - name: Build Test Image
-      #   uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2
-      #   with:
-      #     containerfiles: |
-      #       ./Containerfile.test
-      #     image: akmods-test
-      #     tags: latest
-      #     build-args: |
-      #       BUILDER_IMAGE=${{ env.BUILDER_IMAGE }}
-      #       KERNEL_FLAVOR=${{ inputs.kernel_flavor }}
-      #       FEDORA_MAJOR_VERSION=${{ inputs.fedora_version }}
-      #       RPMFUSION_MIRROR=${{ vars.RPMFUSION_MIRROR }}
-      #       INPUT_AKMODS=${{ env.IMAGE_NAME }}
-      #       INPUT_TAG=${{ env.default_tag }}
-      #       DUAL_SIGN=true
-      #     oci: false
-
-      # - name: Test Akmods Signature
-      #   id: test_akmods
-      #   shell: bash
-      #   run: |
-      #     if ! podman run akmods-test:latest; then
-      #         echo "Signatures Failed"
-      #         exit 1
-      #     fi
+      - name: Test Image
+        run: just test
 
   check:
     name: Check all ${{ inputs.version }}-${{ inputs.kernel_flavor}}-${{ inputs.akmods_target }} builds successful

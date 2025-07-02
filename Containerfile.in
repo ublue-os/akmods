@@ -1,4 +1,4 @@
-FROM BUILDER AS builder
+FROM BUILDER AS build_prep
 
 ARG DUAL_SIGN="true"
 ARG KERNEL_FLAVOR_ARG
@@ -23,7 +23,6 @@ ARG ZFS_MINOR_VERSION="2.3"
 # */
 
 COPY certs /tmp/certs
-COPY build_files/shared /tmp/
 
 COPY files/etc/sway/environment /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/environment
 COPY files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/ublue-nvctk-cdi.service
@@ -50,6 +49,8 @@ set "${CI+-x}" -euo pipefail
 ls -sh /tmp/kernel_cache
 /tmp/build-prep.sh
 RUNEOF
+
+FROM build_prep AS builder
 
 #if defined COMMON
 # /*
@@ -162,7 +163,31 @@ set "${CI+-x}" -euo pipefail
 /tmp/build-post.sh
 RUNEOF
 
-FROM scratch
+FROM scratch AS RPMS
 
 COPY --from=builder /var/cache/kernel-rpms /kernel-rpms
 COPY --from=builder /var/cache/rpms /rpms
+
+FROM build_prep AS test
+
+ARG DUAL_SIGN="true"
+ARG KERNEL_FLAVOR_ARG
+ARG KERNEL_NAME_ARG
+ARG RPMFUSION_MIRROR_ARG
+ARG VERSION_ARG
+
+COPY --from=RPMS /kernel-rpms /tmp/kernel_cache
+COPY --from=RPMS /rpms /tmp/akmods-rpms
+
+COPY build_files/test/test-prep.sh /tmp/
+COPY certs /tmp/certs
+
+RUN --mount=type=cache,dst=/var/cache/dnf \
+    --mount=type=cache,dst=/var/cache/libdnf5 \
+    bash <<'RUNEOF'
+set "${CI+-x}" -euo pipefail
+/tmp/test-prep.sh
+RUNEOF
+
+COPY build_files/test/check-signatures.sh /tmp/
+CMD ["/tmp/check-signatures.sh"]

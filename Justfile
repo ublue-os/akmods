@@ -285,4 +285,31 @@ build: (cache-kernel-version) (fetch-kernel)
         "--tag" "akmods{{ if akmods_target != 'common' { '-' + akmods_target } else { '' } }}:{{ kernel_flavor + '-' + version + '-' + trim(read(KCPATH / 'kernel-cache-date')) }}"
     )
 
-    {{ podman }} build -f Containerfile.in --volume {{ KCPATH }}:/tmp/kernel_cache:ro "${CPP_FLAGS[@]}" "${LABELS[@]}" "${TAGS[@]}" {{ justfile_dir () }}
+    {{ podman }} build -f Containerfile.in --volume {{ KCPATH }}:/tmp/kernel_cache:ro "${CPP_FLAGS[@]}" "${LABELS[@]}" "${TAGS[@]}" --target RPMS {{ justfile_dir () }}
+
+test: (cache-kernel-version) (fetch-kernel)
+    #!/usr/bin/bash
+    set "${CI:+-x}" -euo pipefail
+    {{ if path_exists(version_json) != 'true' { error('Need to run just cache-kernel-version first for dry-run') } else { '' } }}
+    {{ if path_exists( KCPATH / shell("jq -r '.kernel_name + \"-\" + .kernel_release + \".rpm\"' < $1", version_json)) != 'true' { error('No Cached RPMs') } else { '' } }}
+    CPP_FLAGS=(
+        {{ if env('CI', '') != '' { "--cpp-flag=-DCI_SETX" } else { '' } }}
+        "--cpp-flag=-DBUILDER={{ builder }}"
+        "--cpp-flag=-DKERNEL_FLAVOR_ARG=KERNEL_FLAVOR={{ kernel_flavor }}"
+        "--cpp-flag=-DKERNEL_NAME_ARG=KERNEL_NAME={{ shell("jq -r '.kernel_name' < $1", version_json) }}"
+        "--cpp-flag=-DRPMFUSION_MIRROR_ARG=RPMFUSION_MIRROR={{ env('RPMFUSION_MIRROR', '') }}"
+        "--cpp-flag=-DVERSION_ARG=VERSION={{ version }}"
+        "--cpp-flag=-D{{ replace_regex(uppercase(akmods_target), '-.*', '') }}"
+        "--cpp-flag=-D{{ replace_regex(uppercase(kernel_flavor), '-.*', '') }}"
+    )
+    if [[ "{{ akmods_target }}" =~ nvidia ]]; then
+        CPP_FLAGS+=(
+            "--cpp-flag=-DKMOD_MODULE_ARG=KMOD_MODULE={{ if akmods_target =~ 'open' { "kernel-open" } else { 'kernel' } }}"
+        )
+    fi
+
+    {{ podman }} build -f Containerfile.in --volume {{ KCPATH }}:/tmp/kernel_cache:ro "${CPP_FLAGS[@]}" --target test --tag akmods:test {{ justfile_dir () }}
+    if ! podman run akmods-test:latest; then
+        echo "Signatures Failed" >&2
+        exit 1
+    fi

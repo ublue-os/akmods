@@ -54,7 +54,7 @@ else
         fedora-repos-archive
 
     # after F43 launches, bump to 44
-    if [[ "${FEDORA_MAJOR_VERSION}" -ge 43 ]]; then
+    if [[ "${RELEASE}" -ge 43 ]]; then
         # pre-release rpmfusion is in a different location
         sed -i "s%free/fedora/releases%free/fedora/development%" /etc/yum.repos.d/rpmfusion-*.repo
         # pre-release rpmfusion needs to enable testing
