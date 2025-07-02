@@ -51,7 +51,8 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
             RENAME=${RPM%"$(rpm -q --queryformat="%{VERSION}" kernel)"*}
             RENAME+=$KERNEL
             RENAME+=${RPM#*"$(rpm -E %dist)"}
-            mv "$RPMPATH" "$(dirname "$RPMPATH")/$RENAME.rpm"
+            RPM_RENAME="$(dirname "$RPMPATH")/$RENAME.rpm"
+            mv "$RPMPATH" "$RPM_RENAME"
             dnf swap -y $RPM "$RPM_RENAME"
         else
             dnf reinstall -y ./$RPM.rpm
