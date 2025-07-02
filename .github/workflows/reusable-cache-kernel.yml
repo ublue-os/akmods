@@ -29,13 +29,19 @@ concurrency:
 
 jobs:
   cache-kernel:
-    name: Cache ${{ inputs.kernel_flavor }} (${{ inputs.version }})
-    runs-on: ubuntu-24.04
+    name: Cache ${{ inputs.kernel_flavor }} ${{ inputs.version }} (${{ matrix.platform }})
+    runs-on: ${{ matrix.platform == 'x86_64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
     outputs:
-      KCKEY: ${{ inputs.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_release }}
+      KCKEY: ${{ inputs.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_major_minor_patch }}
     container:
       image: "ghcr.io/ublue-os/devcontainer:latest"
       options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - x86_64
+          # - aarch64
     env:
       AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
       AKMODS_KERNEL: ${{ inputs.kernel_flavor }}
@@ -57,7 +63,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ steps.kernel-version.outputs.KCPATH }}
-          key: ${{ inputs.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_release }} # job outputs KCKEY
+          key: ${{ inputs.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_major_minor_patch }}-${{ matrix.platform }} # job outputs KCKEY
 
       - name: Retrieve Signing Key
         if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && steps.cache-kernel.outputs.cache-hit != 'true'
