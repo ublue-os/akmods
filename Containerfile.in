@@ -58,6 +58,14 @@ ARG KERNEL_NAME_ARG
 ARG RPMFUSION_MIRROR_ARG
 ARG VERSION_ARG
 
+#ifdef CI_SETX
+ARG CI=1
+#endif /* CI_SETX */
+
+#ifdef NVIDIA 
+ARG KMOD_MODULE_ARG
+#endif /* NVIDIA */
+
 #if defined COMMON
 # /*
 # common akmods
@@ -181,6 +189,10 @@ ARG KERNEL_FLAVOR_ARG
 ARG KERNEL_NAME_ARG
 ARG RPMFUSION_MIRROR_ARG
 ARG VERSION_ARG
+
+#ifdef CI_SETX
+ARG CI=1
+#endif
 
 COPY --from=RPMS /kernel-rpms /tmp/kernel_cache
 COPY --from=RPMS /rpms /tmp/akmods-rpms

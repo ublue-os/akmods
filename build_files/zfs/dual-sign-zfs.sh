@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-set -eoux pipefail
+set "${CI:+-x}" -euo pipefail
 
 if [[ "${DUAL_SIGN}" != "true" ]]; then
     echo "Not Dual Signing..."

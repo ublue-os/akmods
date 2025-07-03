@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-set -oeux pipefail
+set "${CI:+-x}" -euo pipefail
 
 ARCH="$(rpm -E '%_arch')"
 KERNEL_MODULE_TYPE="${1:-kernel}"

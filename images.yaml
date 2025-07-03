@@ -10,23 +10,23 @@ akmods-base: &akmods-base
   repo: akmods
   transport: docker://
 
-akmdos-common: &akmods-common
+akmods-common: &akmods-common
   name: akmods
   description: "A caching layer for pre-built akmod RPMs"
 
-akmdos-extra: &akmods-extra
+akmods-extra: &akmods-extra
   name: akmods-extra
   description: "A caching layer for extra pre-built akmod RPMs"
 
-akmdos-nvidia: &akmods-nvidia
+akmods-nvidia: &akmods-nvidia
   name: akmods-nvidia
   description: "A caching layer for the pre-built nvidia akmod RPMs"
 
-akmdos-nvidia-open: &akmods-nvidia-open
+akmods-nvidia-open: &akmods-nvidia-open
   name: akmods-nvidia-open
   description: "A caching layer for the pre-built nvidia-open akmod RPMs"
 
-akmdos-zfs: &akmods-zfs
+akmods-zfs: &akmods-zfs
   name: akmods-zfs
   description: "A caching layer for the pre-built zfs akmod RPMs"
 

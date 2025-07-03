@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-set -oeux pipefail
+set "${CI:+-x}" -euo pipefail
 
 ### PREPARE REPOS
 # enable RPMs with alternatives to create them in this image build

@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-set -oeux pipefail
+set "${CI:+-x}" -euo pipefail
 
 # Ensure packages get copied to /var/cache/rpms
 pushd /root/rpmbuild/RPMS/"$(uname -m)"

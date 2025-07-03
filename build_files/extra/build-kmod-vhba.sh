@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-set -oeux pipefail
+set "${CI:+-x}" -euo pipefail
 
 
 ARCH="$(rpm -E '%_arch')"

@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-set -oeux pipefail
+set "${CI:+-x}" -euo pipefail
 
 curl -L https://negativo17.org/repos/epel-nvidia.repo \
     -o /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-epel-nvidia.repo

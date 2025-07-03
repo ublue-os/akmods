@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-set -eoux pipefail
+set "${CI:+-x}" -euo pipefail
 
 # ensures we pass a known dir for volume mount of output rpm files
 KCWD=${1}
