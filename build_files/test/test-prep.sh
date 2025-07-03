@@ -4,7 +4,7 @@
 set -oeux pipefail
 
 pushd /tmp/kernel_cache
-KERNEL_VERSION=$(find "$KERNEL_NAME"-*.rpm | grep -P "$KERNEL_NAME-\d+\.\d+\.\d+-\d+.*$(rpm -E '%{dist}')" | sed -E "s/$KERNEL_NAME-//;s/\.rpm//")
+KERNEL_VERSION=$(find "$KERNEL_NAME"-*.rpm | grep "$(uname -m)" | grep -P "$KERNEL_NAME-\d+\.\d+\.\d+-\d+.*$(rpm -E '%{dist}')" | sed -E "s/$KERNEL_NAME-//;s/\.rpm//")
 popd
 
 ### PREPARE REPOS
@@ -37,7 +37,7 @@ fi
 echo "Installing ${KERNEL_FLAVOR} kernel-cache RPMs..."
 # fedora image has no kernel so this needs nothing fancy, just install
 #shellcheck disable=SC2046 # We want word splitting
-dnf install -y "${RPM_PREP[@]}" $(find /tmp/kernel_cache/*.rpm -type f | grep -v uki)
+dnf install -y "${RPM_PREP[@]}" $(find /tmp/kernel_cache/*.rpm -type f | grep "$(uname -m)" | grep -v uki)
 
 if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
     echo "Building for CentOS does not require more repos"

@@ -7,7 +7,7 @@ set -oeux pipefail
 mkdir -p /var/lib/alternatives
 
 pushd /tmp/kernel_cache
-KERNEL_VERSION=$(find "$KERNEL_NAME"-*.rpm | grep -P "$KERNEL_NAME-\d+\.\d+\.\d+-\d+.*$(rpm -E '%{dist}')" | sed -E "s/$KERNEL_NAME-//;s/\.rpm//")
+KERNEL_VERSION=$(find "$KERNEL_NAME"-*.rpm | grep "$(uname -m)" | grep -P "$KERNEL_NAME-\d+\.\d+\.\d+-\d+.*$(rpm -E '%{dist}')" | sed -E "s/$KERNEL_NAME-//;s/\.rpm//")
 popd
 
 if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
@@ -40,7 +40,7 @@ echo "Installing ${KERNEL_FLAVOR} kernel-cache RPMs..."
 
 # build image has no kernel so this needs nothing fancy, just install, but not UKIs
 #shellcheck disable=SC2046 #we want word splitting
-dnf install -y --allowerasing "${PREP_RPMS[@]}" $(find /tmp/kernel_cache/*.rpm -type f | grep -v uki | xargs)
+dnf install -y --allowerasing "${PREP_RPMS[@]}" $(find /tmp/kernel_cache/*.rpm -type f | grep "$(uname -m)" | grep -v uki | xargs)
 
 # after F43 launches, bump to 44
 if [[ "${VERSION}" -ge 43 && -f /etc/fedora-release ]]; then
