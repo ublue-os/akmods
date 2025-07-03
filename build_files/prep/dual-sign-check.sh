@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-set -x
+set "${CI:+-x}" -euo pipefail
 
 KERNEL="$1"
 module="$2"
