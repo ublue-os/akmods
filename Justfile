@@ -279,9 +279,9 @@ build: (cache-kernel-version) (fetch-kernel)
         "--label" "ostree.linux={{ shell("jq -r '.kernel_release' < $1", version_json) }}"
     )
     TAGS=(
-        "--tag" "akmods{{ if akmods_target != 'common' { '-' + akmods_target } else { '' } }}:{{ kernel_flavor + '-' + version }}"
+        # "--tag" "akmods{{ if akmods_target != 'common' { '-' + akmods_target } else { '' } }}:{{ kernel_flavor + '-' + version }}"
         "--tag" "akmods{{ if akmods_target != 'common' { '-' + akmods_target } else { '' } }}:{{ kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_release' < $1", version_json) }}"
-        "--tag" "akmods{{ if akmods_target != 'common' { '-' + akmods_target } else { '' } }}:{{ kernel_flavor + '-' + version + '-' + trim(read(KCPATH / 'kernel-cache-date')) }}"
+        "--tag" "akmods{{ if akmods_target != 'common' { '-' + akmods_target } else { '' } }}:{{ kernel_flavor + '-' + version + '-' + trim(read(KCPATH / 'kernel-cache-date')) + '-' + arch() }}"
     )
 
     {{ podman }} build -f Containerfile.in --volume {{ KCPATH }}:/tmp/kernel_cache:ro "${CPP_FLAGS[@]}" "${LABELS[@]}" "${TAGS[@]}" --target RPMS {{ justfile_dir () }}
