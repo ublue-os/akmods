@@ -24,6 +24,17 @@ check_valid := if shell('yq ".images.$1[\"$2\"].$3" images.yaml', version, kerne
 _description := shell('yq ".images.$1[\"$2\"].$3.description" images.yaml', version, kernel_flavor, akmods_target)
 _org := shell('yq ".images.$1[\"$2\"].$3.org" images.yaml', version, kernel_flavor, akmods_target)
 _repo := shell('yq ".images.$1[\"$2\"].$3.repo" images.yaml', version, kernel_flavor, akmods_target)
+registry := env('AKMODS_REGISTRY', shell('yq ".images.$1[\"$2\"].$3.registry" images.yaml', version, kernel_flavor, akmods_target))
+transport := env('AKMODS_TRANSPORT', shell('yq ".images.$1[\"$2\"].$3.transport" images.yaml', version, kernel_flavor, akmods_target))
+akmods_name := 'akmods' + if akmods_target != 'common' { '-' +akmods_target } else { '' }
+
+# Functions
+[private]
+logsum := '''
+log_sum() { echo "$1" >> ${GITHUB_STEP_SUMMARY:-/dev/stdout}; }
+log_sum "# Push to GHCR result"
+log_sum "\`\`\`"
+'''
 
 [private]
 default:
@@ -271,17 +282,16 @@ build: (cache-kernel-version) (fetch-kernel)
         "--label" "org.opencontainers.image.created={{ datetime_utc('%Y-%m-%dT%H:%M:%SZ') }}"
         "--label" "org.opencontainers.image.description='{{ _description }}'"
         "--label" "org.opencontainers.image.license=Apache-2.0"
-        "--label" "org.opencontainers.image.source=https://raw.githubusercontent.com/ublue-os/cayo/refs/heads/main/Containerfile.in"
-        "--label" "org.opencontainers.image.title=akmods{{ if akmods_target != 'common' { '-' + akmods_target } else { '' } }}"
+        "--label" "org.opencontainers.image.source=https://raw.githubusercontent.com/ublue-os/akmods/refs/heads/main/Containerfile.in"
+        "--label" "org.opencontainers.image.title={{ akmods_name }}"
         "--label" "org.opencontainers.image.url=https://github.com/{{ _org / _repo }}"
         "--label" "org.opencontainers.image.vendor='{{ _org }}'"
-        "--label" "org.opencontainers.image.version={{ shell("jq -r '.kernel_release' < $1", version_json) + '-' + datetime_utc('%Y%m%d') }}"
+        "--label" "org.opencontainers.image.version={{ shell("jq -r '.major_minor_patch' < $1", version_json) + '-' + trim(read(KCPATH / 'kernel-cache-date')) }}"
         "--label" "ostree.linux={{ shell("jq -r '.kernel_release' < $1", version_json) }}"
     )
     TAGS=(
-        "--tag" "akmods{{ if akmods_target != 'common' { '-' + akmods_target } else { '' } }}:{{ kernel_flavor + '-' + version + '-' + arch() }}"
-        "--tag" "akmods{{ if akmods_target != 'common' { '-' + akmods_target } else { '' } }}:{{ kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_release' < $1", version_json) }}"
-        "--tag" "akmods{{ if akmods_target != 'common' { '-' + akmods_target } else { '' } }}:{{ kernel_flavor + '-' + version + '-' + trim(read(KCPATH / 'kernel-cache-date')) + '-' + arch() }}"
+        "--tag" "{{ akmods_name + ':' + kernel_flavor + '-' + version + '-' + arch() }}"
+        "--tag" "{{ akmods_name + ':' + kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_release' < $1", version_json) }}"
     )
 
     {{ podman }} build -f Containerfile.in --volume {{ KCPATH }}:/tmp/kernel_cache:ro "${CPP_FLAGS[@]}" "${LABELS[@]}" "${TAGS[@]}" --target RPMS {{ justfile_dir () }}
@@ -312,6 +322,76 @@ test: (cache-kernel-version) (fetch-kernel)
         echo "Signatures Failed" >&2
         exit 1
     fi
+
+# Login to Registry
+[group('CI')]
+@login:
+    {{ podman }} login {{ registry }} -u "$REGISTRY_ACTOR"  -p "$REGISTRY_TOKEN"
+
+# Push Images to Registry
+[group('CI')]
+push:
+    #!/usr/bin/bash
+    {{ if env('COSIGN_PRIVATE_KEY', '') != '' { 'printf "%s" "$COSIGN_PRIVATE_KEY" > /tmp/cosign.key' } else { '' } }}
+    {{ if env('CI', '') != '' { logsum } else { '' } }}
+
+    set ${CI:+-x} -eou pipefail
+
+    declare -a TAGS=($({{ podman }} image list {{ 'localhost' / akmods_name + ':' + kernel_flavor + '-' + version + '-' + arch() }} --noheading --format 'table {{{{ .Tag }}'))
+    for tag in "${TAGS[@]}"; do
+        for i in {1..5}; do
+            {{ podman }} push {{ if env('COSIGN_PRIVATE_KEY', '') != '' { '--sign-by-sigstore-private-key=/tmp/cosign.key --sign-passphrase-file=/dev/null' } else { '' } }} "{{ 'localhost' / akmods_name + ':' + kernel_flavor + '-' + version + '-' + arch() }}" "{{ transport + registry / _org / akmods_name }}:$tag" && break || sleep $((5 * i));
+            if [[ $i -eq '5' ]]; then
+                exit 1
+            fi
+        done
+        {{ if env('CI', '') != '' { 'log_sum ' + registry / _org / akmods_name + ':$tag' } else { '' } }}
+    done
+    {{ if env('CI', '') != '' { 'log_sum "\`\`\`"' } else { '' } }}
+
+manifest:
+    #!/usr/bin/bash
+    {{ if env('COSIGN_PRIVATE_KEY', '') != '' { 'printf "%s" "$COSIGN_PRIVATE_KEY" > /tmp/cosign.key' } else { '' } }}
+    {{ if env('CI', '') != '' { logsum } else { '' } }}
+
+    set ${CI:+-x} -eou pipefail
+
+    LABELS=(
+        "io.artifacthub.package.deprecated=false"
+        "io.artifacthub.package.keywords=bootc,fedora,bluefin,bazzite,centos,cayo,aurora,ublue,universal-blue"
+        "io.artifacthub.package.logo-url=https://avatars.githubusercontent.com/u/120078124?s=200&v=4"
+        "io.artifacthub.package.maintainers=[{\"name\": \"castrojo\", \"email\": \"jorge.castro@gmail.com\"}]"
+        "io.artifacthub.package.readme-url=https://raw.githubusercontent.com/ublue-os/akmods/refs/heads/main/README.md"
+        "org.opencontainers.image.created={{ datetime_utc('%Y-%m-%dT%H:%M:%SZ') }}"
+        "org.opencontainers.image.license=Apache-2.0"
+        "org.opencontainers.image.source=https://raw.githubusercontent.com/ublue-os/akmods/refs/heads/main/Containerfile.in"
+        "org.opencontainers.image.title={{ akmods_name }}"
+        "org.opencontainers.image.url=https://github.com/{{ _org / _repo }}"
+        "org.opencontainers.image.vendor={{ _org }}"
+        "org.opencontainers.image.description={{ _description }}"
+    )
+    # Create Manifest
+    MANIFEST=$({{ podman }} manifest create {{ 'ghcr.io' / _org / 'akmods' + if akmods_target != 'common' { '-' + akmods_target } else { '' } }}:{{ kernel_flavor + '-' + version }}) || 
+
+    for label in "${LABELS[@]}"; do
+        echo "Applying label "${label}" to manifest"
+        podman manifest annotate --index --annotation "$label" "${MANIFEST}"
+    done
+
+    # Add to Manifest
+    {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-x86_64' }}
+    # {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-aarch64' }}
+
+    # Push Manifest
+    for i in {1..5}; do
+        {{ podman }} manifest push --all {{ if env('COSIGN_PRIVATE_KEY', '') != '' { '--sign-by-sigstore-private-key=/tmp/cosign.key --sign-passphrase-file=/dev/null' } else { '' } }} {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version }} && break || sleep $((5 * i));
+        if [[ $i -eq '5' ]]; then
+            exit 1
+        fi
+    done
+
+    {{ if env('CI', '') != '' { 'log_sum ' + registry / _org / akmods_name + ':' + kernel_flavor + '-' + version } else { '' } }}
+    {{ if env('CI', '') != '' { 'log_sum "\`\`\`"' } else { '' } }}
 
 # Generate GHA Workflow
 generate-workflows:
