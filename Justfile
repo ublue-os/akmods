@@ -392,9 +392,11 @@ generate-workflows:
         {
         cat <<'EOF'
     ---
-    # This is a generated workflow. Do not edit by hand.
-    # Generate the workflow by running ./generate-workflows.sh at git root
-    # Modify the inputs in ./workflow-templates
+    #
+    # WARNING THIS IS A GENERATED WORKFLOW. DO NOT EDIT BY HAND!
+    #
+    # Generate the workflow by running `just generate-workflows` at git root
+    # Modify the inputs in workflow-templates
     EOF
         cat ./workflow-templates/workflow.yaml.in
         for i in "${!workflows[@]}"; do
