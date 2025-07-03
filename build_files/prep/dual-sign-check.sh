@@ -1,5 +1,7 @@
 #!/usr/bin/bash
 
+set -x
+
 KERNEL="$1"
 module="$2"
 PUBLIC_CERT="$3"
