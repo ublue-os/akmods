@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/bash
 
 set -oeux pipefail
 
@@ -6,7 +6,7 @@ ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q "${KERNEL_NAME:-kernel}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
 
-if [[ "${RELEASE}" -ge 41 ]]; then
+if [[ "${RELEASE}" -ge 43 ]]; then
     COPR_RELEASE="rawhide"
 else
     COPR_RELEASE="${RELEASE}"
@@ -17,7 +17,7 @@ curl -LsSf -o /etc/yum.repos.d/_copr_mulderje-facetimehd-kmod.repo \
 
 ### BUILD facetimehd (succeed or fail-fast with debug output)
 dnf install -y \
-    akmod-facetimehd-*.fc${RELEASE}.${ARCH}
+    akmod-facetimehd-*.fc"${RELEASE}"."${ARCH}"
 akmods --force --kernels "${KERNEL}" --kmod facetimehd
 modinfo "/usr/lib/modules/${KERNEL}/extra/facetimehd/facetimehd.ko.xz" > /dev/null \
 || (find /var/cache/akmods/facetimehd/ -name \*.log -print -exec cat {} \; && exit 1)

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/bash
 
 set -oeux pipefail
 
@@ -12,14 +12,14 @@ else
     COPR_RELEASE="${RELEASE}"
 fi
 
-curl -LsSf -o /etc/yum.repos.d/_copr_ssweeny-system76-io.repo \
+curl -LsSf -o /etc/yum.repos.d/_copr_ssweeny-system76-hwe.repo \
     "https://copr.fedorainfracloud.org/coprs/ssweeny/system76-hwe/repo/fedora-${COPR_RELEASE}/ssweeny-system76-hwe-fedora-${COPR_RELEASE}.repo"
 
 ### BUILD system76-io (succeed or fail-fast with debug output)
 dnf install -y \
-    "akmod-system76-io-*.fc${RELEASE}.${ARCH}"
-akmods --force --kernels "${KERNEL}" --kmod system76-io
-modinfo "/usr/lib/modules/${KERNEL}/extra/system76-io/system76-io.ko.xz" >/dev/null ||
+    "akmod-system76-driver*.fc${RELEASE}.${ARCH}"
+akmods --force --kernels "${KERNEL}" --kmod system76-driver
+modinfo "/usr/lib/modules/${KERNEL}/extra/system76-driver/system76.ko.xz" >/dev/null ||
     (find /var/cache/akmods/system76-io/ -name \*.log -print -exec cat {} \; && exit 1)
 
 rm -f /etc/yum.repos.d/_copr_ssweeny-system76-hwe.repo

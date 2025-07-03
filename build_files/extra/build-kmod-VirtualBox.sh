@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/bash
 
 set -oeux pipefail
 
@@ -9,7 +9,7 @@ RELEASE="$(rpm -E '%fedora')"
 
 ### BUILD VirtualBox (succeed or fail-fast with debug output)
 dnf install -y \
-    akmod-VirtualBox-*.fc${RELEASE}.${ARCH}
+    akmod-VirtualBox-*.fc"${RELEASE}"."${ARCH}"
 akmods --force --kernels "${KERNEL}" --kmod VirtualBox
-modinfo /usr/lib/modules/${KERNEL}/extra/VirtualBox/{vboxdrv,vboxnetadp,vboxnetflt}.ko.xz > /dev/null \
+modinfo /usr/lib/modules/"${KERNEL}"/extra/VirtualBox/{vboxdrv,vboxnetadp,vboxnetflt}.ko.xz > /dev/null \
 || (find /var/cache/akmods/VirtualBox/ -name \*.log -print -exec cat {} \; && exit 1)

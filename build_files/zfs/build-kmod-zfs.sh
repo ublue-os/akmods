@@ -2,7 +2,7 @@
 
 set -oeux pipefail
 
-KERNEL="$(rpm -q ${KERNEL_NAME} --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
+KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 # allow pinning to a specific release series (eg, 2.0.x or 2.1.x)
 ZFS_MINOR_VERSION="${ZFS_MINOR_VERSION:-}"
 

@@ -80,6 +80,8 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
 /tmp/build-kmod-framework-laptop.sh
 /tmp/build-kmod-kvmfr.sh
 /tmp/build-kmod-openrazer.sh
+/tmp/build-kmod-system76-io.sh
+/tmp/build-kmod-system76.sh
 /tmp/build-kmod-v4l2loopback.sh
 /tmp/build-kmod-wl.sh
 /tmp/build-kmod-xone.sh
@@ -101,15 +103,13 @@ fi
 /tmp/build-kmod-ayn-platform.sh
 /tmp/build-kmod-bmi260.sh
 if grep -qv "bazzite" <<< "${KERNEL_FLAVOR}"; then
+    /tmp/build-kmod-VirtualBox.sh
     /tmp/build-kmod-facetimehd.sh
     /tmp/build-kmod-rtl8814au.sh
     /tmp/build-kmod-rtl88xxau.sh
-    /tmp/build-kmod-VirtualBox.sh
 fi
 /tmp/build-kmod-gcadapter_oc.sh
 /tmp/build-kmod-nct6687d.sh
-/tmp/build-kmod-system76.sh
-/tmp/build-kmod-system76-io.sh
 /tmp/build-kmod-ryzen-smu.sh
 /tmp/build-kmod-vhba.sh
 RUNEOF
