@@ -2,14 +2,7 @@
 
 set -oeux pipefail
 
-
-ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q ${KERNEL_NAME} --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
-if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
-    RELEASE="$(rpm -E '%centos')"
-else
-    RELEASE="$(rpm -E '%fedora')"
-fi
 # allow pinning to a specific release series (eg, 2.0.x or 2.1.x)
 ZFS_MINOR_VERSION="${ZFS_MINOR_VERSION:-}"
 
@@ -38,49 +31,42 @@ gpg --yes --keyserver keyserver.ubuntu.com --recv C77B9667
 gpg --yes --keyserver keyserver.ubuntu.com --recv C6AF658B
 
 echo "Verifying tar.gz signature"
-gpg --verify "zfs-${ZFS_VERSION}.tar.gz.asc" "zfs-${ZFS_VERSION}.tar.gz"
-if [ $? -ne 0 ]; then
+if ! gpg --verify "zfs-${ZFS_VERSION}.tar.gz.asc" "zfs-${ZFS_VERSION}.tar.gz"; then
     echo "ZFS tarball signature verification FAILED! Exiting..."
     exit 1
 fi
 
 echo "Verifying checksum signature"
-gpg --verify "zfs-${ZFS_VERSION}.sha256.asc"
-if [ $? -ne 0 ]; then
+if ! gpg --verify "zfs-${ZFS_VERSION}.sha256.asc"; then
     echo "Checksum signature verification FAILED! Exiting..."
     exit 1
 fi
 
 echo "Verifying encrypted checksum"
-gpg --decrypt "zfs-${ZFS_VERSION}.sha256.asc" | sha256sum -c
-if [ $? -ne 0 ]; then
+if ! gpg --decrypt "zfs-${ZFS_VERSION}.sha256.asc" | sha256sum -c; then
     echo "Checksum verification FAILED! Exiting..."
     exit 1
 fi
 
 # no-same-owner/no-same-permissions required for F40 based images building on podman 3.4.4 (ubuntu 22.04)
-tar -z -x --no-same-owner --no-same-permissions -f zfs-${ZFS_VERSION}.tar.gz
+tar -z -x --no-same-owner --no-same-permissions -f "zfs-${ZFS_VERSION}.tar.gz"
 
-# patch the zfs-kmod.spec.in file for older zfs versions
-ZFS_MAJ=$(echo $ZFS_VERSION | cut -f1 -d.)
-ZFS_MIN=$(echo $ZFS_VERSION | cut -f2 -d.)
-ZFS_PATCH=$(echo $ZFS_VERSION | cut -f3 -d.)
-
-cd /tmp/zfs-${ZFS_VERSION}
+cd "/tmp/zfs-${ZFS_VERSION}"
 # ensure rpm spec depends on correct kernel-devel package, else build fails on kernel-longterm kernels
 sed -i "s|kernel-devel|${KERNEL_NAME}-devel|" rpm/*/*spec.in
-./configure \
-        -with-linux=/usr/src/kernels/${KERNEL}/ \
-        -with-linux-obj=/usr/src/kernels/${KERNEL}/ \
-    && make -j $(nproc) rpm-utils rpm-kmod \
-    || (cat config.log && exit 1)
+if ! ./configure \
+        -with-linux="/usr/src/kernels/${KERNEL}/" \
+        -with-linux-obj="/usr/src/kernels/${KERNEL}/" \
+    || ! make -j "$(nproc)" rpm-utils rpm-kmod; then
+    cat config.log && exit 1
+fi
 
 
 # create a directory for later copying of resulting zfs specific artifacts
-mkdir -p /var/cache/rpms/kmods/zfs/{debug,devel,other,src} \
-    && mv *src.rpm /var/cache/rpms/kmods/zfs/src/ \
-    && mv *devel*.rpm /var/cache/rpms/kmods/zfs/devel/ \
-    && mv *debug*.rpm /var/cache/rpms/kmods/zfs/debug/ \
-    && mv zfs-dracut*.rpm /var/cache/rpms/kmods/zfs/other/ \
-    && mv zfs-test*.rpm /var/cache/rpms/kmods/zfs/other/ \
-    && mv *.rpm /var/cache/rpms/kmods/zfs/
+mkdir -p /var/cache/rpms/kmods/zfs/{debug,devel,other,src}
+mv ./*src.rpm /var/cache/rpms/kmods/zfs/src/
+mv ./*devel*.rpm /var/cache/rpms/kmods/zfs/devel/
+mv ./*debug*.rpm /var/cache/rpms/kmods/zfs/debug/
+mv zfs-dracut*.rpm /var/cache/rpms/kmods/zfs/other/
+mv zfs-test*.rpm /var/cache/rpms/kmods/zfs/other/
+mv ./*.rpm /var/cache/rpms/kmods/zfs/

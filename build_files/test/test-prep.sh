@@ -1,7 +1,11 @@
 #!/usr/bin/bash
-#shellcheck disable=SC2086
+#shellcheck disable=SC2206
 
 set -oeux pipefail
+
+pushd /tmp/kernel_cache
+KERNEL_VERSION=$(find "$KERNEL_NAME"-*.rpm | grep -P "$KERNEL_NAME-\d+\.\d+\.\d+-\d+$(rpm -E '%{dist}')" | sed -E "s/$KERNEL_NAME-//;s/\.rpm//")
+popd
 
 ### PREPARE REPOS
 if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
@@ -11,9 +15,7 @@ if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
     NVIDIA_EXTRA_PKGS=""
 
     mkdir -p /var/roothome
-
-    dnf remove -y subscription-manager
-    dnf -y install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${RELEASE}.noarch.rpm"
+    RPM_PREP+=("https://dl.fedoraproject.org/pub/epel/epel-release-latest-${RELEASE}.noarch.rpm")
     dnf config-manager --set-enabled crb
 else
     echo "Building for Fedora"
@@ -28,16 +30,14 @@ fi
 mkdir -p /var/lib/alternatives
 
 if [[ -f $(find /tmp/akmods-rpms/ublue-os/ublue-os-*.rpm 2> /dev/null) ]]; then
-    dnf install -y /tmp/akmods-rpms/ublue-os/ublue-os-*.rpm
+    RPM_PREP+=(/tmp/akmods-rpms/ublue-os/ublue-os-*.rpm)
 fi
-
 
 # install kernel_cache provided kernel
 echo "Installing ${KERNEL_FLAVOR} kernel-cache RPMs..."
 # fedora image has no kernel so this needs nothing fancy, just install
-dnf install -y /tmp/kernel_cache/*.rpm
-
-KERNEL_VERSION=$(rpm -q ${KERNEL_NAME}|cut -d '-' -f2-)
+#shellcheck disable=SC2046 # We want word splitting
+dnf install -y "${RPM_PREP[@]}" $(find /tmp/kernel_cache/*.rpm -type f | grep -v uki)
 
 if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
     echo "Building for CentOS does not require more repos"
@@ -48,25 +48,11 @@ else
     if [ -n "${RPMFUSION_MIRROR}" ]; then
         RPMFUSION_MIRROR_RPMS=${RPMFUSION_MIRROR}
     fi
-    dnf install -y \
-        "${RPMFUSION_MIRROR_RPMS}"/free/fedora/rpmfusion-free-release-"${RELEASE}".noarch.rpm \
-        "${RPMFUSION_MIRROR_RPMS}"/nonfree/fedora/rpmfusion-nonfree-release-"${RELEASE}".noarch.rpm \
+    RPM_PREP+=(
+        "${RPMFUSION_MIRROR_RPMS}"/free/fedora/rpmfusion-free-release-"${RELEASE}".noarch.rpm
+        "${RPMFUSION_MIRROR_RPMS}"/nonfree/fedora/rpmfusion-nonfree-release-"${RELEASE}".noarch.rpm
         fedora-repos-archive
-
-    # after F43 launches, bump to 44
-    if [[ "${RELEASE}" -ge 43 ]]; then
-        # pre-release rpmfusion is in a different location
-        sed -i "s%free/fedora/releases%free/fedora/development%" /etc/yum.repos.d/rpmfusion-*.repo
-        # pre-release rpmfusion needs to enable testing
-        sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/rpmfusion-*-updates-testing.repo
-    fi
-
-    if [ -n "${RPMFUSION_MIRROR}" ]; then
-        # force use of single rpmfusion mirror
-        echo "Using single rpmfusion mirror: ${RPMFUSION_MIRROR}"
-        sed -i.bak "s%^metalink=%#metalink=%" /etc/yum.repos.d/rpmfusion-*.repo
-        sed -i "s%^#baseurl=http://download1.rpmfusion.org%baseurl=${RPMFUSION_MIRROR}%" /etc/yum.repos.d/rpmfusion-*.repo
-    fi
+    )
 
     # after F43 launches, bump to 44
     if [[ "${RELEASE}" -ge 43 ]]; then
@@ -86,6 +72,21 @@ else
 
     curl -Lo /etc/yum.repos.d/negativo17-fedora-multimedia.repo \
         "https://negativo17.org/repos/fedora-multimedia.repo"
+fi
+
+# after F43 launches, bump to 44
+if [[ "${RELEASE}" -ge 43 && -f /etc/fedora-release ]]; then
+    # pre-release rpmfusion is in a different location
+    sed -i "s%free/fedora/releases%free/fedora/development%" /etc/yum.repos.d/rpmfusion-*.repo
+    # pre-release rpmfusion needs to enable testing
+    sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/rpmfusion-*-updates-testing.repo
+fi
+
+if [[ -n "${RPMFUSION_MIRROR}" && -f /etc/fedora-release ]]; then
+    # force use of single rpmfusion mirror
+    echo "Using single rpmfusion mirror: ${RPMFUSION_MIRROR}"
+    sed -i.bak "s%^metalink=%#metalink=%" /etc/yum.repos.d/rpmfusion-*.repo
+    sed -i "s%^#baseurl=http://download1.rpmfusion.org%baseurl=${RPMFUSION_MIRROR}%" /etc/yum.repos.d/rpmfusion-*.repo
 fi
 
 if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-vhba-*.rpm) ]]; then
@@ -122,7 +123,8 @@ if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm) ]]; then
 fi
 
 dnf install -y \
-    openssl
+    openssl \
+    "${RPM_PREP[@]}"
 
 if [[ ! -s "/tmp/certs/private_key.priv" ]]; then
     echo "WARNING: Using test signing key. Run './generate-akmods-key' for production builds."
@@ -148,27 +150,31 @@ rm -f /tmp/certs/private_key_2.priv
 if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm 2> /dev/null) ]]; then
     sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/negativo17-${NVIDIA_REPO_NAME}
     sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/nvidia-container-toolkit.repo
+    #shellcheck disable=SC1091
     source /tmp/akmods-rpms/kmods/nvidia-vars
-    dnf install -y \
-        libnvidia-fbc \
-        libva-nvidia-driver \
-        nvidia-driver \
-        nvidia-driver-cuda \
-        nvidia-modprobe \
-        nvidia-persistenced \
-        nvidia-settings \
-        nvidia-container-toolkit \
-        ${NVIDIA_EXTRA_PKGS} \
+    KMODS_TO_INSTALL+=(
+        libnvidia-fbc
+        libva-nvidia-driver
+        nvidia-driver
+        nvidia-driver-cuda
+        nvidia-modprobe
+        nvidia-persistenced
+        nvidia-settings
+        nvidia-container-toolkit
+        ${NVIDIA_EXTRA_PKGS}
         /tmp/akmods-rpms/kmods/kmod-nvidia-"${KERNEL_VERSION}"-"${NVIDIA_AKMOD_VERSION}"."${DIST_ARCH}".rpm
+    )
         # Codacy complains about the lack of quotes on ${NVIDIA_EXTRA_PKGS}, but we don't want quotes here
-        # we want word splitting behavior, thus 'shellcheck disable=SC2086' added to the top of this file
+        # we want word splitting behavior, thus '#shellcheck disable=SC2206' added to the top of this file
 elif [[ -f $(find /tmp/akmods-rpms/kmods/zfs/kmod-*.rpm 2> /dev/null) ]]; then
-    dnf install -y \
-        pv \
+    KMODS_TO_INSTALL+=(
+        pv
         /tmp/akmods-rpms/kmods/zfs/*.rpm
+    )
 else
-    dnf install -y \
-        /tmp/akmods-rpms/kmods/*.rpm
+    KMODS_TO_INSTALL+=(/tmp/akmods-rpms/kmods/*.rpm)
 fi
+
+dnf install -y "${KMODS_TO_INSTALL[@]}"
 
 printf "KERNEL_NAME=%s" "$KERNEL_NAME" >> /tmp/info.sh

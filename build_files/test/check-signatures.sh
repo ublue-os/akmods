@@ -1,5 +1,8 @@
 #!/usr/bin/bash
 
+set -euo pipefail
+
+#shellcheck disable=SC1091
 source /tmp/info.sh
 
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
