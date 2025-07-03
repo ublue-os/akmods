@@ -328,10 +328,13 @@ generate-workflows:
 
         declare -A images=()
         declare -A workflows=()
-        # TODO: How to make this not static?
-        for i in 10 41 42; do
-            for j in bazzite centos centos-hsk coreos-stable coreos-testing longterm-6.12 main; do
-                for k in common extra nvidia nvidia-open zfs; do
+        versions=($(yq '.images | keys | .[]' images.yaml | sort | uniq))
+        flavors=($(yq '.images.* | keys | .[]' images.yaml | sort | uniq))
+        targets=($(yq 'explode(.) | .images.*.* | keys | .[]' images.yaml | sort | uniq))
+        
+        for i in ${versions[@]}; do
+            for j in ${flavors[@]}; do
+                for k in ${targets[@]}; do
                     #shellcheck disable=SC1087
                     if [[ "$(yq ".images.$i[\"$j\"].$k" images.yaml)" != "null" ]]; then
                         images+=(["$i-$j-$k"]="$i,$j,$k")
