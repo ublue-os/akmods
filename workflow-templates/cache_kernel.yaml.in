@@ -2,6 +2,10 @@
     name: Cache %%KERNEL_FLAVOR%% (%%VERSION%%)
     uses: ./.github/workflows/reusable-cache-kernel.yml
     secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
     with:
       bazzite_tag: ${{ inputs.bazzite_tag }}
       kernel_flavor: %%KERNEL_FLAVOR%%

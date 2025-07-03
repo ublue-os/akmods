@@ -38,6 +38,10 @@ jobs:
   build-akmods:
     name: Build ${{ matrix.platform }}
     runs-on: ${{ matrix.platform == 'x86_64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
+    permissions:
+      actions: read
+      contents: read
+      packages: write
     container:
       image: "ghcr.io/ublue-os/devcontainer:latest"
       options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"

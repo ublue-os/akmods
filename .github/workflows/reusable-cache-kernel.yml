@@ -36,6 +36,10 @@ jobs:
     container:
       image: "ghcr.io/ublue-os/devcontainer:latest"
       options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
+    permissions:
+      actions: read
+      contents: read
+      packages: write
     strategy:
       fail-fast: false
       matrix:

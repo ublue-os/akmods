@@ -2,6 +2,10 @@
     name: Build %%AKMODS_TARGET%% %%KERNEL_FLAVOR%% (%%VERSION%%)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
     needs: cache_kernel_%%KERNEL_FLAVOR_CLEAN%%_%%VERSION%%
     with:
       version: %%VERSION%%
