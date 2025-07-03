@@ -1,5 +1,5 @@
 name: build-ublue
-run-name: Build akmods ${{ inputs.akmods_target }}
+run-name: "Build ${{ inputs.akmods_target != 'common' && format('akmods-{0}', inputs.akmods_target) || 'akmods' }}:${{ inputs.kernel_flavor }}-${{ inputs.version }}"
 on:
   workflow_call:
     inputs:
@@ -100,8 +100,8 @@ jobs:
           REGISTRY_ACTOR: ${{ github.actor }}
           REGISTRY_TOKEN: ${{ github.token }}
 
-  check:
-    name: Check all ${{ inputs.version }}-${{ inputs.kernel_flavor}}-${{ inputs.akmods_target }} builds successful
+  manifest:
+    name: "Generate ${{ inputs.akmods_target != 'common' && format('akmods-{0}', inputs.akmods_target) || 'akmods' }}:${{ inputs.kernel_flavor }}-${{ inputs.version }} Manifest"
     runs-on: ubuntu-latest
     needs: [build-akmods]
     container:
@@ -123,5 +123,5 @@ jobs:
           just manifest
         env:
           COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
-          GITHUB_ACTOR: ${{ github.actor }}
-          GITHUB_TOKEN: ${{ github.token }}
+          REGISTRY_ACTOR: ${{ github.actor }}
+          REGISTRY_TOKEN: ${{ github.token }}
