@@ -184,8 +184,6 @@ get-kernel-version:
     echo $output
     # Put into Github Output if it Exists
     {{ if env('GITHUB_OUTPUT', '') != '' { 'echo $output | jq -r "to_entries[] | \"\(.key)=\(.value)\"" | xargs -I "{}" echo "{}" >> ' + env('GITHUB_OUTPUT') } else { '' } }}
-    # Put the json into Github Output if it Exists
-    {{ if env('GITHUB_OUTPUT', '') != '' { 'echo "json_b64=$(echo $output | base64 -w 0)" >> ' + env('GITHUB_OUTPUT') } else { '' } }}
     
 # Cache Kernel Version
 @cache-kernel-version:
@@ -208,49 +206,17 @@ fetch-kernel: (cache-kernel-version)
     builder=$(podman run \
         --security-opt label=disable \
         --env DUAL_SIGN=true \
-        --env KERNEL_BUILD_TAG="$(jq -r '.kernel_build_tag' < {{ version_json }})" \
+        --env KERNEL_BUILD_TAG="{{ shell('jq -r .kernel_build_tag < $1', version_json) }}" \
         --env KERNEL_FLAVOR="{{ kernel_flavor }}" \
-        --env KERNEL_NAME="$(jq -r '.kernel_name' < {{ version_json }})" \
-        --env KERNEL_VERSION="$(jq -r '.kernel_release' < {{ version_json }})" \
-        --volume {{ KCWD }}:/tmp/kernel-cache \
+        --env KERNEL_NAME="{{ shell('jq -r .kernel_name < $1', version_json) }}" \
+        --env KERNEL_VERSION="{{ shell('jq -r .kernel_release < $1' , version_json) }}" \
+        --volume "{{ KCWD }}":/tmp/kernel-cache \
         --entrypoint /bin/bash \
         -dt "{{ builder }}")
     trap '{{ podman }} rm -f -t 0 $builder &>/dev/null' EXIT SIGINT
     podman exec $builder bash -x /tmp/kernel-cache/fetch-kernel.sh /tmp/kernel-cache >&2
-    echo "{{ datetime_utc('%Y%m%d') }}" > {{ KCPATH / 'kernel-cache-date' }}
-    find {{ KCPATH }}
-
-# Check Secureboot (Only Needed for Cache-Hits)
-secureboot: (cache-kernel-version) (fetch-kernel)
-    #!/usr/bin/bash
-    set "${CI:+-x}" -euo pipefail
-    kernel_name="$(jq -r '.kernel_name' < {{ version_json }})"
-    kernel_release="$(jq -r '.kernel_release' < {{ version_json }})"
-    if [[ ! "$(ls -A {{ KCPATH }}/)" ]]; then
-        echo "No RPMs staged" >&2
-        exit 1
-    fi
-    pushd {{ KCWD }}/rpms >/dev/null
-    SBTEMP="$(mktemp -d -p {{ version_cache }})"
-    trap 'rm -rf $SBTEMP' EXIT SIGINT
-    rpm2cpio "${kernel_name}-core-${kernel_release}.rpm" | cpio -D $SBTEMP -idm &>/dev/null
-    popd >/dev/null
-    if [[ "{{ env('GITHUB_EVENT_NAME', '') }}" =~ schedule|workflow_dispatch|merge_group ]]; then
-        cp certs/public_key.der "$SBTEMP/lib/modules/$kernel_release/kernel-sign.der"
-        cp certs/public_key_2.der "$SBTEMP/lib/modules/$kernel_release/akmods.der"
-    else
-        cp certs/public_key.der.test "$SBTEMP/lib/modules/$kernel_release/kernel-sign.der"
-        cp certs/public_key_2.der.test "$SBTEMP/lib/modules/$kernel_release/akmods.der"
-    fi
-    pushd "$SBTEMP/lib/modules/$kernel_release/" >/dev/null
-    openssl x509 -in kernel-sign.der -out kernel-sign.crt
-    openssl x509 -in akmods.der -out akmods.crt
-    if ! sbverify --cert kernel-sign.crt vmlinuz >/dev/null || ! sbverify --cert akmods.crt vmlinuz >/dev/null; then
-        popd >/dev/null
-        echo "Signatures Failed" >&2
-        exit 1
-    fi
-    popd >/dev/null
+    echo "{{ datetime_utc('%Y%m%d') }}" > "{{ KCPATH / 'kernel-cache-date' }}"
+    find "{{ KCPATH }}"
 
 # Build Akmods
 build: (cache-kernel-version) (fetch-kernel)
