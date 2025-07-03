@@ -86,3 +86,15 @@ jobs:
 
       - name: List Cached Kernel RPMs
         run: find ${{ steps.kernel-version.outputs.KCPATH }}
+  check:
+    name: Check all ${{ inputs.version }}-${{ inputs.kernel_flavor}} cache successful
+    runs-on: ubuntu-latest
+    needs: [cache-kernel]
+    permissions:
+      actions: read
+    steps:
+      - name: Exit on failure
+        if: ${{ needs.cache-kernel.result == 'failure' }}
+        run: exit 1
+      - name: Exit
+        run: exit 0
