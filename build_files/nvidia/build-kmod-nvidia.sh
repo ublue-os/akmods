@@ -1,20 +1,17 @@
-#!/bin/sh
+#!/usr/bin/bash
 
-set -oeux pipefail
+set "${CI:+-x}" -euo pipefail
 
 ARCH="$(rpm -E '%_arch')"
 KERNEL_MODULE_TYPE="${1:-kernel}"
 
+DIST="$(rpm -E '%dist')"
+DIST="${DIST#.}"
+VARS_KERNEL_VERSION="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
-    DIST="el$(rpm -E '%centos')"
-    # on CentOS, akmods uses full kernel version and release but no arch
-    VARS_KERNEL_VERSION="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}')"
     # enable negativo17
     cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-epel-nvidia.repo /etc/yum.repos.d/
 else
-    DIST="fc$(rpm -E '%fedora')"
-    # on Fedora, akmods uses full kernel version, release and arch
-    VARS_KERNEL_VERSION="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
     # disable rpmfusion and enable negativo17
     sed -i 's/enabled=1/enabled=0/' /etc/yum.repos.d/rpmfusion-*.repo
     cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-fedora-nvidia.repo /etc/yum.repos.d/
@@ -24,7 +21,6 @@ DEPRECATED_RELEASE="${DIST}.${ARCH}"
 cd /tmp
 
 ### BUILD nvidia
-
 
 dnf install -y \
     "akmod-nvidia*.${DIST}.${ARCH}"
@@ -38,11 +34,11 @@ sed -i "s/^MODULE_VARIANT=.*/MODULE_VARIANT=$KERNEL_MODULE_TYPE/" /etc/nvidia/ke
 
 akmods --force --kernels "${KERNEL_VERSION}" --kmod "nvidia"
 
-modinfo /usr/lib/modules/${KERNEL_VERSION}/extra/nvidia/nvidia{,-drm,-modeset,-peermem,-uvm}.ko.xz > /dev/null || \
-(cat /var/cache/akmods/nvidia/${NVIDIA_AKMOD_VERSION}-for-${KERNEL_VERSION}.failed.log && exit 1)
+modinfo /usr/lib/modules/"${KERNEL_VERSION}"/extra/nvidia/nvidia{,-drm,-modeset,-peermem,-uvm}.ko.xz > /dev/null || \
+(cat /var/cache/akmods/nvidia/"${NVIDIA_AKMOD_VERSION}"-for-"${KERNEL_VERSION}".failed.log && exit 1)
 
 # View license information
-modinfo -l /usr/lib/modules/${KERNEL_VERSION}/extra/nvidia/nvidia{,-drm,-modeset,-peermem,-uvm}.ko.xz
+modinfo -l /usr/lib/modules/"${KERNEL_VERSION}"/extra/nvidia/nvidia{,-drm,-modeset,-peermem,-uvm}.ko.xz
 
 # create a directory for later copying of resulting nvidia specific artifacts
 mkdir -p /var/cache/rpms/kmods/nvidia

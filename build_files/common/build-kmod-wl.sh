@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/usr/bin/bash
 
-set -oeux pipefail
+set "${CI:+-x}" -euo pipefail
 
 
 ARCH="$(rpm -E '%_arch')"
@@ -10,7 +10,7 @@ RELEASE="$(rpm -E '%fedora')"
 
 ### BUILD wl (succeed or fail-fast with debug output)
 dnf install -y \
-    akmod-wl-*.fc${RELEASE}.${ARCH}
+    akmod-wl-*.fc"${RELEASE}"."${ARCH}"
 akmods --force --kernels "${KERNEL}" --kmod wl
-modinfo /usr/lib/modules/${KERNEL}/extra/wl/wl.ko.xz > /dev/null \
+modinfo /usr/lib/modules/"${KERNEL}"/extra/wl/wl.ko.xz > /dev/null \
 || (find /var/cache/akmods/wl/ -name \*.log -print -exec cat {} \; && exit 1)

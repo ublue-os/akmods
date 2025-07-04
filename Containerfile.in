@@ -1,0 +1,211 @@
+FROM BUILDER AS build_prep
+
+ARG DUAL_SIGN="true"
+ARG KERNEL_FLAVOR_ARG
+ARG KERNEL_NAME_ARG
+ARG RPMFUSION_MIRROR_ARG
+ARG VERSION_ARG
+
+#ifdef CI_SETX
+ARG CI=1
+#endif /* CI_SETX */
+
+#ifdef NVIDIA
+ARG KMOD_MODULE_ARG
+#endif /* NVIDIA */
+
+#ifdef ZFS
+ARG ZFS_MINOR_VERSION="2.3"
+#endif /* ZFS */
+
+# /*
+# common copy/add
+# */
+
+COPY certs /tmp/certs
+
+COPY files/etc/sway/environment /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/environment
+COPY files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/ublue-nvctk-cdi.service
+COPY files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/ublue-os-ucore-nvidia/rpmbuild/SOURCES/ublue-nvctk-cdi.service
+COPY files/usr/lib/systemd/system-preset/70-ublue-nvctk-cdi.preset /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/70-ublue-nvctk-cdi.preset
+COPY files/usr/lib/systemd/system-preset/70-ublue-nvctk-cdi.preset /tmp/ublue-os-ucore-nvidia/rpmbuild/SOURCES/70-ublue-nvctk-cdi.preset
+COPY files/etc/udev/rules.d/60-nvidia-extra-devices-pm.rules /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/60-nvidia-extra-devices-pm.rules
+
+#ifndef CENTOS
+ADD https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${VERSION}/ublue-os-akmods-fedora-${VERSION}.repo \
+    /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo
+ADD https://negativo17.org/repos/fedora-multimedia.repo \
+    /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo
+#endif
+
+# /*
+# Preperation
+# */
+COPY build_files/prep /tmp/
+RUN --mount=type=cache,dst=/var/cache/dnf \
+    --mount=type=cache,dst=/var/cache/libdnf5 \
+    bash <<'RUNEOF'
+set "${CI+-x}" -euo pipefail
+ls -sh /tmp/kernel_cache
+/tmp/build-prep.sh
+RUNEOF
+
+FROM build_prep AS builder
+
+ARG DUAL_SIGN="true"
+ARG KERNEL_FLAVOR_ARG
+ARG KERNEL_NAME_ARG
+ARG RPMFUSION_MIRROR_ARG
+ARG VERSION_ARG
+
+#ifdef CI_SETX
+ARG CI=1
+#endif /* CI_SETX */
+
+#ifdef NVIDIA 
+ARG KMOD_MODULE_ARG
+#endif /* NVIDIA */
+
+#if defined COMMON
+# /*
+# common akmods
+# */
+COPY build_files/common /tmp/
+RUN --mount=type=cache,dst=/var/cache/dnf \
+    --mount=type=cache,dst=/var/cache/libdnf5 \
+    bash <<'RUNEOF'
+set "${CI+-x}" -euo pipefail
+if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]]; then
+    /tmp/build-ublue-os-ucore-addons.sh
+    cp /tmp/ublue-os-ucore-addons/rpmbuild/RPMS/noarch/ublue-os-ucore-addons*.rpm /var/cache/rpms/ucore/
+fi
+/tmp/build-ublue-os-akmods-addons.sh
+cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm /var/cache/rpms/ublue-os/
+RUNEOF
+RUN --mount=type=cache,dst=/var/cache/dnf \
+    --mount=type=cache,dst=/var/cache/libdnf5 \
+    bash <<'RUNEOF'
+/tmp/build-kmod-framework-laptop.sh
+/tmp/build-kmod-kvmfr.sh
+/tmp/build-kmod-openrazer.sh
+/tmp/build-kmod-v4l2loopback.sh
+/tmp/build-kmod-wl.sh
+/tmp/build-kmod-xone.sh
+RUNEOF
+
+#elif defined EXTRA
+# /*
+# extra akmods
+# */
+
+COPY build_files/extra /tmp/
+RUN --mount=type=cache,dst=/var/cache/dnf \
+    --mount=type=cache,dst=/var/cache/libdnf5 \
+    bash <<'RUNEOF'
+if [[ "${VERSION}" -ge 41 ]]; then
+    /tmp/build-kmod-gpd-fan.sh
+fi
+/tmp/build-kmod-ayaneo-platform.sh
+/tmp/build-kmod-ayn-platform.sh
+/tmp/build-kmod-bmi260.sh
+if grep -qv "bazzite" <<< "${KERNEL_FLAVOR}"; then
+    /tmp/build-kmod-VirtualBox.sh
+    /tmp/build-kmod-facetimehd.sh
+    /tmp/build-kmod-rtl8814au.sh
+    /tmp/build-kmod-rtl88xxau.sh
+fi
+/tmp/build-kmod-gcadapter_oc.sh
+/tmp/build-kmod-nct6687d.sh
+/tmp/build-kmod-ryzen-smu.sh
+/tmp/build-kmod-system76-io.sh
+/tmp/build-kmod-system76.sh
+/tmp/build-kmod-vhba.sh
+RUNEOF
+
+#elif defined NVIDIA
+# /*
+# nvidia kmods
+# */
+
+COPY build_files/nvidia /tmp/
+RUN --mount=type=cache,dst=/var/cache/dnf \
+    --mount=type=cache,dst=/var/cache/libdnf5 \
+    bash <<'RUNEOF'
+if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]]; then
+    /tmp/build-ublue-os-ucore-nvidia.sh
+    cp /tmp/ublue-os-ucore-nvidia/rpmbuild/RPMS/noarch/ublue-os-ucore-nvidia*.rpm /var/cache/rpms/ucore/
+fi
+RUNEOF
+RUN --mount=type=cache,dst=/var/cache/dnf \
+    --mount=type=cache,dst=/var/cache/libdnf5 \
+    bash <<'RUNEOF'
+/tmp/build-ublue-os-nvidia-addons.sh
+cp /tmp/ublue-os-nvidia-addons/rpmbuild/RPMS/noarch/ublue-os-nvidia-addons*.rpm /var/cache/rpms/ublue-os/
+RUNEOF
+RUN --mount=type=cache,dst=/var/cache/dnf \
+    --mount=type=cache,dst=/var/cache/libdnf5 \
+    bash <<'RUNEOF'
+/tmp/build-kmod-nvidia.sh "$KMOD_MODULE"
+RUNEOF
+
+#elif defined ZFS
+# /*
+# zfs akmods
+# */
+COPY build_files/zfs /tmp/
+RUN --mount=type=cache,dst=/var/cache/dnf \
+    --mount=type=cache,dst=/var/cache/libdnf5 \
+    bash <<'RUNEOF'
+set "${CI+-x}" -euo pipefail
+/tmp/build-kmod-zfs.sh
+RUNEOF
+#endif
+
+# /*
+# Signing
+# */
+COPY build_files/post /tmp/
+RUN --mount=type=cache,dst=/var/cache/dnf \
+    --mount=type=cache,dst=/var/cache/libdnf5 \
+    bash <<'RUNEOF'
+set "${CI+-x}" -euo pipefail
+#ifdef ZFS
+/tmp/dual-sign-zfs.sh
+#else
+/tmp/dual-sign.sh
+#endif /* ZFS */
+/tmp/build-post.sh
+RUNEOF
+
+FROM scratch AS RPMS
+
+COPY --from=builder /var/cache/kernel-rpms /kernel-rpms
+COPY --from=builder /var/cache/rpms /rpms
+
+FROM build_prep AS test
+
+ARG DUAL_SIGN="true"
+ARG KERNEL_FLAVOR_ARG
+ARG KERNEL_NAME_ARG
+ARG RPMFUSION_MIRROR_ARG
+ARG VERSION_ARG
+
+#ifdef CI_SETX
+ENV CI=1
+#endif
+
+COPY --from=RPMS /kernel-rpms /tmp/kernel_cache
+COPY --from=RPMS /rpms /tmp/akmods-rpms
+
+COPY build_files/test/test-prep.sh /tmp/
+COPY certs /tmp/certs
+
+RUN --mount=type=cache,dst=/var/cache/dnf \
+    --mount=type=cache,dst=/var/cache/libdnf5 \
+    bash <<'RUNEOF'
+set "${CI+-x}" -euo pipefail
+/tmp/test-prep.sh
+RUNEOF
+
+COPY build_files/test/check-signatures.sh /tmp/
+CMD ["/tmp/check-signatures.sh"]

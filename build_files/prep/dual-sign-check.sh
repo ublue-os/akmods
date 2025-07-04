@@ -1,5 +1,7 @@
 #!/usr/bin/bash
 
+set "${CI:+-x}" -euo pipefail
+
 KERNEL="$1"
 module="$2"
 PUBLIC_CERT="$3"

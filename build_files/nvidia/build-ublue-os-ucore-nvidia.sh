@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/usr/bin/bash
 
-set -oeux pipefail
+set "${CI:+-x}" -euo pipefail
 
 ### SETUP nvidia container stuffs
 

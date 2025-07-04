@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/usr/bin/bash
 
-set -oeux pipefail
+set "${CI:+-x}" -euo pipefail
 
 ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
@@ -10,9 +10,9 @@ cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo /etc/
 
 ### BUILD framework-laptop (succeed or fail-fast with debug output)
 dnf install -y \
-    akmod-framework-laptop-*.fc${RELEASE}.${ARCH}
+    akmod-framework-laptop-*.fc"${RELEASE}"."${ARCH}"
 akmods --force --kernels "${KERNEL}" --kmod framework-laptop
-modinfo /usr/lib/modules/${KERNEL}/extra/framework-laptop/framework_laptop.ko.xz > /dev/null \
+modinfo /usr/lib/modules/"${KERNEL}"/extra/framework-laptop/framework_laptop.ko.xz > /dev/null \
 || (find /var/cache/akmods/framework-laptop/ -name \*.log -print -exec cat {} \; && exit 1)
 
 rm -f /etc/yum.repos.d/_copr_ublue-os-akmods.repo

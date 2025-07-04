@@ -1,12 +1,16 @@
 #!/usr/bin/bash
 
-set -eoux pipefail
+set "${CI:+-x}" -euo pipefail
 
 # ensures we pass a known dir for volume mount of output rpm files
-KCWD=${1}
+KCWD=/tmp/kernel-cache
 find "${KCWD}"
 
+#shellcheck disable=SC2153
+kernel_name="${KERNEL_NAME}"
+#shellcheck disable=SC2153
 kernel_version="${KERNEL_VERSION}"
+#shellcheck disable=SC2153
 kernel_flavor="${KERNEL_FLAVOR}"
 build_tag="${KERNEL_BUILD_TAG:-latest}"
 
@@ -16,64 +20,23 @@ dnf install -y --setopt=install_weak_deps=False dnf-plugins-core openssl
 if [[ "$kernel_flavor" =~ "centos" ]]; then
     CENTOS_VER=$(rpm -E %centos)
     dnf config-manager --set-enabled crb
-    dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-${CENTOS_VER}.noarch.rpm
+    dnf -y install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${CENTOS_VER}.noarch.rpm"
 fi
 dnf -y install --setopt=install_weak_deps=False rpmrebuild sbsigntools
 
 case "$kernel_flavor" in
-    "asus")
-        dnf copr enable -y lukenukem/asus-kernel
-        ;;
-    "surface")
-        if [[ "$(rpm -E %fedora)" -lt 41 ]]; then
-            dnf config-manager --add-repo=https://pkg.surfacelinux.com/fedora/linux-surface.repo
-        else
-            dnf config-manager addrepo --from-repofile=https://pkg.surfacelinux.com/fedora/linux-surface.repo
-        fi
-        ;;
-    "coreos-stable")
-        ;;
-    "coreos-testing")
-        ;;
-    "bazzite")
-        ;;
-    "centos")
-        ;;
-    "centos-hsk")
+    "bazzite"|"centos"*|"coreos"*|"main")
         ;;
     "longterm"*)
-        dnf -y copr enable kwizart/kernel-${kernel_flavor}
-        ;;
-    "main")
+        dnf -y copr enable kwizart/kernel-"${kernel_flavor}"
         ;;
     *)
-        echo "unexpected kernel_flavor ${kernel_flavor} for query"
+        echo "unexpected kernel_flavor ${kernel_flavor} for query" >&2
+        exit 1
         ;;
 esac
 
-if [[ "${kernel_flavor}" =~ asus ]]; then
-    dnf download -y \
-        kernel-"${kernel_version}" \
-        kernel-modules-"${kernel_version}" \
-        kernel-modules-core-"${kernel_version}" \
-        kernel-modules-extra-"${kernel_version}" \
-        kernel-devel-"${kernel_version}" \
-        kernel-devel-matched-"${kernel_version}" \
-        kernel-uki-virt-"${kernel_version}"
-
-elif [[ "${kernel_flavor}" == "surface" ]]; then
-    dnf download -y \
-        kernel-surface-"${kernel_version}" \
-        kernel-surface-modules-"${kernel_version}" \
-        kernel-surface-modules-core-"${kernel_version}" \
-        kernel-surface-modules-extra-"${kernel_version}" \
-        kernel-surface-devel-"${kernel_version}" \
-        kernel-surface-devel-matched-"${kernel_version}" \
-        kernel-surface-default-watchdog-"${kernel_version}" \
-        iptsd \
-        libwacom-surface \
-        libwacom-surface-data
-elif [[ "${kernel_flavor}" == "bazzite" ]]; then
+if [[ "${kernel_flavor}" == "bazzite" ]]; then
     # Using curl for bazzite release
     curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-"$kernel_version".rpm
     curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-core-"$kernel_version".rpm
@@ -120,6 +83,7 @@ else
     
     # Using curl instead of dnf download for https links
     curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-"$kernel_version".rpm
+    curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-core-"$kernel_version".rpm
     curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-modules-"$kernel_version".rpm
     curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-modules-core-"$kernel_version".rpm
     curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-modules-extra-"$kernel_version".rpm
@@ -134,6 +98,8 @@ if [[ ! -s "${KCWD}"/certs/private_key.priv ]]; then
     cp "${KCWD}"/certs/public_key.der{.test,}
 fi
 
+trap 'rm -rf "${KCWD}/certs" /etc/pki/kernel/private/private_key*.priv /etc/pki/kernel/public/public_key*.crt' EXIT SIGINT
+
 PUBLIC_KEY_PATH="/etc/pki/kernel/public/public_key.crt"
 PRIVATE_KEY_PATH="/etc/pki/kernel/private/private_key.priv"
 
@@ -143,49 +109,12 @@ install -Dm644 "${KCWD}"/certs/public_key.crt "$PUBLIC_KEY_PATH"
 install -Dm644 "${KCWD}"/certs/private_key.priv "$PRIVATE_KEY_PATH"
 
 ls -la /
-if [[ "${kernel_flavor}" =~ asus ]]; then
-    dnf install -y \
-        /kernel-"$kernel_version".rpm \
-        /kernel-modules-"$kernel_version".rpm \
-        /kernel-modules-core-"$kernel_version".rpm \
-        /kernel-modules-extra-"$kernel_version".rpm \
-        kernel-core-"${kernel_version}"
-elif [[ "${kernel_flavor}" =~ surface ]]; then
-    dnf install -y \
-        /kernel-surface-"$kernel_version".rpm \
-        /kernel-surface-modules-"$kernel_version".rpm \
-        /kernel-surface-modules-core-"$kernel_version".rpm \
-        /kernel-surface-modules-extra-"$kernel_version".rpm \
-        kernel-surface-core-"${kernel_version}"
-elif [[ "${kernel_flavor}" == "bazzite" ]]; then
-    dnf install -y \
-        /kernel-"$kernel_version".rpm \
-        /kernel-core-"$kernel_version".rpm \
-        /kernel-modules-"$kernel_version".rpm \
-        /kernel-modules-core-"$kernel_version".rpm \
-        /kernel-modules-extra-"$kernel_version".rpm
-elif [[ "${kernel_flavor}" =~ "centos" ]]; then
-    dnf install -y \
-        /kernel-"$kernel_version".rpm \
-        /kernel-core-"$kernel_version".rpm \
-        /kernel-modules-"$kernel_version".rpm \
-        /kernel-modules-core-"$kernel_version".rpm \
-        /kernel-modules-extra-"$kernel_version".rpm
-elif [[ "${kernel_flavor}" =~ "longterm" ]]; then
-    dnf install -y \
-        /kernel-longterm-"$kernel_version".rpm \
-        /kernel-longterm-core-"$kernel_version".rpm \
-        /kernel-longterm-modules-"$kernel_version".rpm \
-        /kernel-longterm-modules-core-"$kernel_version".rpm \
-        /kernel-longterm-modules-extra-"$kernel_version".rpm
-else
-    dnf install -y \
-        /kernel-"$kernel_version".rpm \
-        /kernel-modules-"$kernel_version".rpm \
-        /kernel-modules-core-"$kernel_version".rpm \
-        /kernel-modules-extra-"$kernel_version".rpm \
-        https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-core-"$kernel_version".rpm
-fi
+dnf install -y \
+    /"${kernel_name}-$kernel_version.rpm" \
+    /"${kernel_name}-core-$kernel_version.rpm" \
+    /"${kernel_name}-modules-$kernel_version.rpm" \
+    /"${kernel_name}-modules-core-$kernel_version.rpm" \
+    /"${kernel_name}-modules-extra-$kernel_version.rpm"
 
 # Strip Signatures from non-fedora Kernels
 if [[ ${kernel_flavor} =~ main|coreos|centos ]]; then
@@ -205,8 +134,11 @@ sbsign --cert "$PUBLIC_KEY_PATH" --key "$PRIVATE_KEY_PATH" /usr/lib/modules/"${k
 
 # Verify Signatures
 sbverify --list /usr/lib/modules/"${kernel_version}"/vmlinuz
+if ! sbverify --cert "$PUBLIC_KEY_PATH" /usr/lib/modules/"${kernel_version}"/vmlinuz; then
+    exit 1
+fi
 
-rm -f "$PRIVATE_KEY_PATH" "$PUBLIC_KEY_PATH"
+rm -f "$PRIVATE_KEY_PATH"
 
 if [[ ${DUAL_SIGN:-} == "true" ]]; then
     SECOND_PUBLIC_KEY_PATH="/etc/pki/kernel/public/public_key_2.crt"
@@ -222,46 +154,29 @@ if [[ ${DUAL_SIGN:-} == "true" ]]; then
     install -Dm644 "${KCWD}"/certs/private_key_2.priv "$SECOND_PRIVATE_KEY_PATH"
     sbsign --cert "$SECOND_PUBLIC_KEY_PATH" --key "$SECOND_PRIVATE_KEY_PATH" /usr/lib/modules/"${kernel_version}"/vmlinuz --output /usr/lib/modules/"${kernel_version}"/vmlinuz
     sbverify --list /usr/lib/modules/"${kernel_version}"/vmlinuz
-    rm -f "$SECOND_PRIVATE_KEY_PATH" "$SECOND_PUBLIC_KEY_PATH"
+    if ! sbverify --cert "$SECOND_PUBLIC_KEY_PATH" /usr/lib/modules/"${kernel_version}"/vmlinuz; then
+        exit 1
+    fi
+    rm -f "$SECOND_PRIVATE_KEY_PATH"
 fi
 
 ln -s / /tmp/buildroot
 
 # Rebuild RPMs and Verify
-if [[ "${kernel_flavor}" =~ surface ]]; then
-    rpmrebuild --additional=--buildroot=/tmp/buildroot --batch kernel-surface-core-"${kernel_version}"
-    rm -f /usr/lib/modules/"${kernel_version}"/vmlinuz
-    dnf reinstall -y \
-        /kernel-surface-"$kernel_version".rpm \
-        /kernel-surface-modules-"$kernel_version".rpm \
-        /kernel-surface-modules-core-"$kernel_version".rpm \
-        /kernel-surface-modules-extra-"$kernel_version".rpm \
-        /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
-elif [[ "${kernel_flavor}" =~ longterm ]]; then
-    rpmrebuild --additional=--buildroot=/tmp/buildroot --batch kernel-longterm-core-"${kernel_version}"
-    rm -f /usr/lib/modules/"${kernel_version}"/vmlinuz
-    find /tmp
-    find /root
-    dnf reinstall -y \
-        /kernel-longterm-"$kernel_version".rpm \
-        /kernel-longterm-modules-"$kernel_version".rpm \
-        /kernel-longterm-modules-core-"$kernel_version".rpm \
-        /kernel-longterm-modules-extra-"$kernel_version".rpm \
-        /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
-else
-    rpmrebuild --additional=--buildroot=/tmp/buildroot --batch kernel-core-"${kernel_version}"
-    rm -f /usr/lib/modules/"${kernel_version}"/vmlinuz
-    find /tmp
-    find /root
-    dnf reinstall -y \
-        /kernel-"$kernel_version".rpm \
-        /kernel-modules-"$kernel_version".rpm \
-        /kernel-modules-core-"$kernel_version".rpm \
-        /kernel-modules-extra-"$kernel_version".rpm \
-        /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
-fi
+rpmrebuild --additional=--buildroot=/tmp/buildroot --batch "${kernel_name}-core-${kernel_version}"
+rm -f /usr/lib/modules/"${kernel_version}"/vmlinuz
+find /tmp
+find /root
+dnf reinstall -y /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
 
+# Verify Again
 sbverify --list /usr/lib/modules/"${kernel_version}"/vmlinuz
+if ! sbverify --cert "$PUBLIC_KEY_PATH" /usr/lib/modules/"${kernel_version}"/vmlinuz; then
+    exit 1
+fi
+if [[ "${DUAL_SIGN:-}" == "true" ]] && ! sbverify --cert "${SECOND_PUBLIC_KEY_PATH:-}" /usr/lib/modules/"${kernel_version}"/vmlinuz; then
+    exit 1
+fi
 
 # Make Temp Dir
 mkdir -p "${KCWD}"/rpms
@@ -270,10 +185,6 @@ mkdir -p "${KCWD}"/rpms
 mv /kernel-*.rpm "${KCWD}"/rpms
 if [ -d /root/rpmbuild/RPMS/"$(uname -m)" ]; then
   mv /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm "${KCWD}"/rpms
-fi
-
-if [[ "${kernel_flavor}" =~ surface ]]; then
-    cp iptsd-*.rpm libwacom-*.rpm "${KCWD}"/rpms
 fi
 
 # Delete keys in /tmp if we decide to publish this later

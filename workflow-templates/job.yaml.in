@@ -1,0 +1,14 @@
+  build-%%KERNEL_FLAVOR_CLEAN%%_%%VERSION%%_%%AKMODS_TARGET%%:
+    name: Build %%AKMODS_TARGET%% %%KERNEL_FLAVOR%% (%%VERSION%%)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_%%KERNEL_FLAVOR_CLEAN%%_%%VERSION%%
+    with:
+      version: %%VERSION%%
+      kernel_flavor: %%KERNEL_FLAVOR%%
+      akmods_target: %%AKMODS_TARGET%%
+      kernel_cache_key: ${{ needs.cache_kernel_%%KERNEL_FLAVOR_CLEAN%%_%%VERSION%%.outputs.KCKEY }}

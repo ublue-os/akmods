@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eoux pipefail
+set "${CI:+-x}" -euo pipefail
 
 ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"

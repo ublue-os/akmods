@@ -1,20 +1,21 @@
 #!/usr/bin/bash
 
-set -oeux pipefail
+set "${CI:+-x}" -euo pipefail
 
 ### PREPARE REPOS
 # enable RPMs with alternatives to create them in this image build
 mkdir -p /var/lib/alternatives
 
-# ARCH="$(rpm -E '%_arch')"
+pushd /tmp/kernel_cache
+KERNEL_VERSION=$(find "$KERNEL_NAME"-*.rpm | grep "$(uname -m)" | grep -P "$KERNEL_NAME-\d+\.\d+\.\d+-\d+.*$(rpm -E '%{dist}')" | sed -E "s/$KERNEL_NAME-//;s/\.rpm//")
+popd
+
 if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
     echo "Building for CentOS"
     RELEASE="$(rpm -E '%centos')"
 
     mkdir -p /var/roothome
-
-    dnf remove -y subscription-manager
-    dnf -y install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${RELEASE}.noarch.rpm"
+    PREP_RPMS+=("https://dl.fedoraproject.org/pub/epel/epel-release-latest-${RELEASE}.noarch.rpm")
     dnf config-manager --set-enabled crb
 else
     echo "Building for Fedora"
@@ -26,41 +27,42 @@ else
     if [ -n "${RPMFUSION_MIRROR}" ]; then
         RPMFUSION_MIRROR_RPMS=${RPMFUSION_MIRROR}
     fi
-    dnf install -y \
+    PREP_RPMS+=(
         "${RPMFUSION_MIRROR_RPMS}"/free/fedora/rpmfusion-free-release-"${RELEASE}".noarch.rpm \
         "${RPMFUSION_MIRROR_RPMS}"/nonfree/fedora/rpmfusion-nonfree-release-"${RELEASE}".noarch.rpm \
         fedora-repos-archive
+    )
 
-    # after F43 launches, bump to 44
-    if [[ "${FEDORA_MAJOR_VERSION}" -ge 43 ]]; then
-        # pre-release rpmfusion is in a different location
-        sed -i "s%free/fedora/releases%free/fedora/development%" /etc/yum.repos.d/rpmfusion-*.repo
-        # pre-release rpmfusion needs to enable testing
-        sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/rpmfusion-*-updates-testing.repo
-    fi
-
-    if [ -n "${RPMFUSION_MIRROR}" ]; then
-        # force use of single rpmfusion mirror
-        echo "Using single rpmfusion mirror: ${RPMFUSION_MIRROR}"
-        sed -i.bak "s%^metalink=%#metalink=%" /etc/yum.repos.d/rpmfusion-*.repo
-        sed -i "s%^#baseurl=http://download1.rpmfusion.org%baseurl=${RPMFUSION_MIRROR}%" /etc/yum.repos.d/rpmfusion-*.repo
-    fi
 fi
 
 # install kernel_cache provided kernel
 echo "Installing ${KERNEL_FLAVOR} kernel-cache RPMs..."
 
 # build image has no kernel so this needs nothing fancy, just install, but not UKIs
-dnf install -y `find /tmp/kernel_cache/*.rpm -type f | grep -v uki | xargs`
-KERNEL_VERSION=$(rpm -q "${KERNEL_NAME}" | cut -d '-' -f2-)
+#shellcheck disable=SC2046 #we want word splitting
+dnf install -y --allowerasing "${PREP_RPMS[@]}" $(find /tmp/kernel_cache/*.rpm -type f | grep "$(uname -m)" | grep -v uki | xargs)
+
+# after F43 launches, bump to 44
+if [[ "${VERSION}" -ge 43 && -f /etc/fedora-release ]]; then
+    # pre-release rpmfusion is in a different location
+    sed -i "s%free/fedora/releases%free/fedora/development%" /etc/yum.repos.d/rpmfusion-*.repo
+    # pre-release rpmfusion needs to enable testing
+    sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/rpmfusion-*-updates-testing.repo
+fi
+
+if [[ -n "${RPMFUSION_MIRROR}" && -f /etc/fedora-release ]]; then
+    # force use of single rpmfusion mirror
+    echo "Using single rpmfusion mirror: ${RPMFUSION_MIRROR}"
+    sed -i.bak "s%^metalink=%#metalink=%" /etc/yum.repos.d/rpmfusion-*.repo
+    sed -i "s%^#baseurl=http://download1.rpmfusion.org%baseurl=${RPMFUSION_MIRROR}%" /etc/yum.repos.d/rpmfusion-*.repo
+fi
 
 ### PREPARE BUILD ENV
-dnf install -y \
-    akmods \
-    mock \
+RPMS_TO_INSTALL+=(
+    akmods
+    mock
     ruby-devel
-
-gem install fpm
+)
 
 if [[ ! -s "/tmp/certs/private_key.priv" ]]; then
     echo "WARNING: Using test signing key. Run './generate-akmods-key' for production builds."
@@ -72,7 +74,35 @@ install -Dm644 /tmp/certs/public_key.der   /etc/pki/akmods/certs/public_key.der
 install -Dm644 /tmp/certs/private_key.priv /etc/pki/akmods/private/private_key.priv
 
 if [[ "${DUAL_SIGN}" == "true" ]]; then
-    dnf install -y rpmrebuild
+    RPMS_TO_INSTALL+=(rpmrebuild)
+fi
+
+# This is for ZFS more than CentOS|CoreOS
+if [[ "${KERNEL_FLAVOR}" =~ "centos" ]] || [[ "${KERNEL_FLAVOR}" =~ "coreos" ]] || [[ "${KERNEL_FLAVOR}" =~ "longterm" ]]; then
+    mkdir -p "$(dirname /lib/modules/"${KERNEL_VERSION}"/build/certs/signing_key.x509)"
+    install -Dm644 /tmp/certs/public_key.der /lib/modules/"${KERNEL_VERSION}"/build/certs/signing_key.x509
+    install -Dm644 /tmp/certs/private_key.priv /lib/modules/"${KERNEL_VERSION}"/build/certs/signing_key.pem
+    RPMS_TO_INSTALL+=(
+        autoconf
+        automake
+        dkms
+        git
+        jq
+        libtool
+        ncompress
+        python-cffi
+    )
+fi
+if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]] || [[ "${KERNEL_FLAVOR}" =~ "longterm" ]]; then
+    # this seems to be needed on longterm builds but is already present on CoreOS, too
+    RPMS_TO_INSTALL+=(libatomic)
+fi
+
+# Install RPMs
+dnf install -y --allowerasing "${RPMS_TO_INSTALL[@]}"
+
+# Configure Dual Signing
+if [[ "${DUAL_SIGN}" == 'true' ]]; then
     if [[ ! -s "/tmp/certs/private_key_2.priv" ]]; then
         echo "WARNING: Using test signing key. Run './generate-akmods-key' for production builds."
         cp /tmp/certs/private_key_2.priv{.test,}
@@ -85,25 +115,8 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
     cat /tmp/certs/public_key.crt <(echo) /tmp/certs/public_key_2.crt >> /tmp/certs/public_key_chain.pem
 fi
 
-# This is for ZFS more than CentOS|CoreOS
-if [[ "${KERNEL_FLAVOR}" =~ "centos" ]] || [[ "${KERNEL_FLAVOR}" =~ "coreos" ]] || [[ "${KERNEL_FLAVOR}" =~ "longterm" ]]; then
-    install -Dm644 /tmp/certs/public_key.der /lib/modules/"${KERNEL_VERSION}"/build/certs/signing_key.x509
-    install -Dm644 /tmp/certs/private_key.priv /lib/modules/"${KERNEL_VERSION}"/build/certs/signing_key.pem
-    dnf install -y \
-        autoconf \
-        automake \
-        dkms \
-        git \
-        jq \
-        libtool \
-        ncompress \
-        python-cffi
-fi
-if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]] || [[ "${KERNEL_FLAVOR}" =~ "longterm" ]]; then
-    # this seems to be needed on longterm builds but is already present on CoreOS, too
-    dnf install -y \
-        libatomic
-fi
+# Install FPM
+gem install fpm
 
 # protect against incorrect permissions in tmp dirs which can break akmods builds
 chmod 1777 /tmp /var/tmp

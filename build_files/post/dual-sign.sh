@@ -12,10 +12,7 @@ SIGNING_KEY_1="/tmp/certs/signing_key_1.pem"
 SIGNING_KEY_2="/tmp/certs/signing_key_2.pem"
 PUBLIC_CHAIN="/tmp/certs/public_key_chain.pem"
 
-ln -s / /tmp/buildroot
-dnf install -y /var/cache/rpms/kmods/zfs/*.rpm pv
-modinfo /usr/lib/modules/"${KERNEL}"/extra/zfs/spl.ko
-for module in /usr/lib/modules/"${KERNEL}"/extra/zfs/*.ko*; do
+for module in /usr/lib/modules/"${KERNEL}"/extra/*/*.ko*; do
     module_basename=${module:0:-3}
     module_suffix=${module: -3}
     if [[ "$module_suffix" == ".xz" ]]; then
@@ -36,11 +33,20 @@ for module in /usr/lib/modules/"${KERNEL}"/extra/zfs/*.ko*; do
         /tmp/dual-sign-check.sh "${KERNEL}" "${module}" "${PUBLIC_CHAIN}"
     fi
 done
-find /var/cache/rpms/kmods/zfs -type f -name "\kmod-*.rpm" | grep -v debug | grep -v devel
-RPMPATH=$(find /var/cache/rpms/kmods/zfs -type f -name "\kmod-*.rpm" | grep -v debug | grep -v devel)
-RPM=$(basename "${RPMPATH/\.rpm/}")
-rpmrebuild --additional=--buildroot=/tmp/buildroot --batch "${RPM}"
+find /var/cache/akmods -type f -name "\kmod-*.rpm"
+pushd /var/cache/akmods
+mapfile -t RPMPATHS < <(find . -type f -name "\kmod-*.rpm")
+for RPMPATH in "${RPMPATHS[@]}"; do
+    RPM=$(basename "${RPMPATH/\.rpm/}")
+    mkdir -p /tmp/buildroot
+    cp -r /{usr,lib} /tmp/buildroot
+    rpmrebuild --additional=--buildroot=/tmp/buildroot --batch "$RPM"
+    rm -rf /tmp/buildroot
+done
+popd
 rm -rf /usr/lib/modules/"${KERNEL}"/extra
+
+# on CentOS, akmods/rpmbuild seems to mangle kernel version in the kmod package name
 pushd /root/rpmbuild/RPMS/"$(uname -m)"/
 mapfile -t RPMPATHS < <(find . -type f -name "\kmod-*.rpm")
 for RPMPATH in "${RPMPATHS[@]}"; do
@@ -50,7 +56,6 @@ for RPMPATH in "${RPMPATHS[@]}"; do
         RENAME+=$KERNEL
         RENAME+=${RPM#*"$(rpm -E %dist)"}
         RPM_RENAME="$(dirname "$RPMPATH")/$RENAME.rpm"
-        RPM_RENAME="$(dirname "$RPMPATH")/$RENAME.rpm"
         mv "$RPMPATH" "$RPM_RENAME"
     fi
 done
@@ -59,8 +64,7 @@ mapfile -t kmods < <(ls -1 ./kmod-*.rpm)
 dnf reinstall -y --allowerasing "${kmods[@]}"
 popd
 for module in /usr/lib/modules/"${KERNEL}"/extra/*/*.ko*; do
-    if ! modinfo "${module}"; then
+    if ! modinfo "${module}" >/dev/null; then
         exit 1
     fi
 done
-mv -f /root/rpmbuild/RPMS/"$(uname -m)"/kmod-*.rpm /var/cache/rpms/kmods/zfs/
