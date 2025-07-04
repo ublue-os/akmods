@@ -3,7 +3,7 @@
 set "${CI:+-x}" -euo pipefail
 
 # ensures we pass a known dir for volume mount of output rpm files
-KCWD=${1}
+KCWD=/tmp/kernel-cache
 find "${KCWD}"
 
 #shellcheck disable=SC2153

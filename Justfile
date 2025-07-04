@@ -214,7 +214,7 @@ fetch-kernel: (cache-kernel-version)
         --entrypoint /bin/bash \
         -dt "{{ builder }}")
     trap '{{ podman }} rm -f -t 0 $builder &>/dev/null' EXIT SIGINT
-    podman exec $builder bash -x /tmp/kernel-cache/fetch-kernel.sh /tmp/kernel-cache >&2
+    podman exec $builder bash -x /tmp/kernel-cache/fetch-kernel.sh >&2
     echo "{{ datetime_utc('%Y%m%d') }}" > "{{ KCPATH / 'kernel-cache-date' }}"
     find "{{ KCPATH }}"
 
