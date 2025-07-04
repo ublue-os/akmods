@@ -205,6 +205,7 @@ fetch-kernel: (cache-kernel-version)
     # Fetch Kernels
     builder=$(podman run \
         --security-opt label=disable \
+        {{ if env('CI', '') != '' { '--env CI=1' } else { '' } }} \
         --env DUAL_SIGN=true \
         --env KERNEL_BUILD_TAG="{{ shell('jq -r .kernel_build_tag < $1', version_json) }}" \
         --env KERNEL_FLAVOR="{{ kernel_flavor }}" \
@@ -214,7 +215,7 @@ fetch-kernel: (cache-kernel-version)
         --entrypoint /bin/bash \
         -dt "{{ builder }}")
     trap '{{ podman }} rm -f -t 0 $builder &>/dev/null' EXIT SIGINT
-    podman exec $builder bash -x /tmp/kernel-cache/fetch-kernel.sh >&2
+    podman exec $builder bash /tmp/kernel-cache/fetch-kernel.sh >&2
     echo "{{ datetime_utc('%Y%m%d') }}" > "{{ KCPATH / 'kernel-cache-date' }}"
     find "{{ KCPATH }}"
 

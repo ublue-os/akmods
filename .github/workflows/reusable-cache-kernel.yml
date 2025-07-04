@@ -61,7 +61,7 @@ jobs:
       
       - name: Get Kernel Version
         id: kernel-version
-        run: just get-kernel-version
+        run: just cache-kernel-version
 
       - name: Cache Kernel RPMs
         id: cache-kernel
