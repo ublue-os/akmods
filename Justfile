@@ -350,7 +350,7 @@ manifest:
 
     # Push Manifest
     for i in {1..5}; do
-        {{ podman }} manifest push --all {{ if env('COSIGN_PRIVATE_KEY', '') != '' { '--sign-by-sigstore-private-key=/tmp/cosign.key --sign-passphrase-file=/dev/null' } else { '' } }} {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version }} && break || sleep $((5 * i));
+        {{ podman }} manifest push --all {{ if env('COSIGN_PRIVATE_KEY', '') != '' { '--sign-by-sigstore=/etc/ublue-os-param-file.yaml' } else { '' } }} {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version }} && break || sleep $((5 * i));
         if [[ $i -eq '5' ]]; then
             exit 1
         fi
