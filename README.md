@@ -137,7 +137,7 @@ just build
 Since nothing additional was set. The following will occur. The build scripts will determine the current fedora kernel version, download the RPMs, and sign the kernel with the test key. It will then build the common set of akmods. To modify what gets built, modify the following environment variables:
 
 - AKMODS_KERNEL - The kernel flavor you are building
-- AKMODS_V ERSION - The release version
+- AKMODS_VERSION - The release version
 - AKMODS_TARGET - The akmods package to build
 
 ```bash
