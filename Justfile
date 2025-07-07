@@ -182,12 +182,14 @@ get-kernel-version:
         }')
     
     echo $output
-    # Put into Github Output if it Exists
-    {{ if env('GITHUB_OUTPUT', '') != '' { 'echo $output | jq -r "to_entries[] | \"\(.key)=\(.value)\"" | xargs -I "{}" echo "{}" >> ' + env('GITHUB_OUTPUT') } else { '' } }}
     
 # Cache Kernel Version
-@cache-kernel-version:
+@cache-kernel-version: && populate-github-output
     [ ! -f {{ version_json }} ] && {{ just }} get-kernel-version > {{ version_json }} || :
+
+# Populate Github Output
+@populate-github-output:
+    {{ if env('GITHUB_OUTPUT', '') != '' { 'jq -r "to_entries[] | \"\(.key)=\(.value)\"" < ' + version_json + ' | xargs -I "{}" echo "{}" >> ' + env('GITHUB_OUTPUT') } else { '' } }}
 
 # Fetch the desired kernel
 fetch-kernel: (cache-kernel-version)
@@ -316,6 +318,7 @@ push:
     done
     {{ if env('CI', '') != '' { 'log_sum "\`\`\`"' } else { '' } }}
 
+# Generate Manifest
 manifest:
     #!/usr/bin/bash
     {{ if env('COSIGN_PRIVATE_KEY', '') != '' { 'printf "%s" "$COSIGN_PRIVATE_KEY" > /tmp/cosign.key' } else { '' } }}
@@ -330,12 +333,13 @@ manifest:
         "io.artifacthub.package.maintainers=[{\"name\": \"castrojo\", \"email\": \"jorge.castro@gmail.com\"}]"
         "io.artifacthub.package.readme-url=https://raw.githubusercontent.com/ublue-os/akmods/refs/heads/main/README.md"
         "org.opencontainers.image.created={{ datetime_utc('%Y-%m-%dT%H:%M:%SZ') }}"
+        "org.opencontainers.image.description={{ _description }}"
         "org.opencontainers.image.license=Apache-2.0"
         "org.opencontainers.image.source=https://raw.githubusercontent.com/ublue-os/akmods/refs/heads/main/Containerfile.in"
         "org.opencontainers.image.title={{ akmods_name }}"
         "org.opencontainers.image.url=https://github.com/{{ _org / _repo }}"
         "org.opencontainers.image.vendor={{ _org }}"
-        "org.opencontainers.image.description={{ _description }}"
+        "org.opencontainers.image.version={{ kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_major_minor_patch' < $1", version_json) }}"
     )
     # Create Manifest
     MANIFEST=$({{ podman }} manifest create {{ 'ghcr.io' / _org / 'akmods' + if akmods_target != 'common' { '-' + akmods_target } else { '' } }}:{{ kernel_flavor + '-' + version }}) || 
@@ -348,6 +352,8 @@ manifest:
     # Add to Manifest
     {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-x86_64' }}
     # {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-aarch64' }}
+    {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_major_minor_patch' < $1", version_json) }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_release' < $1", version_json) }}
+    # {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_major_minor_patch' < $1", version_json) }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + replace(shell("jq -r '.kernel_release' < $1", version_json), 'x86_64', 'aarch64') }}
 
     # Push Manifest
     for i in {1..5}; do

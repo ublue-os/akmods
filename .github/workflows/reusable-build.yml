@@ -85,6 +85,7 @@ jobs:
           wc -c certs/private_key_2.priv
         
       - name: Build Image
+        id: build
         run: just build
 
       - name: Test Image
@@ -115,6 +116,17 @@ jobs:
       - name: Exit on failure
         if: ${{ needs.build-akmods.result == 'failure' }}
         run: exit 1
+
+      - name: Export GITHUB_WORKSPACE
+        id: gh-workspace
+        run: echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Kernel RPMs
+        id: cache-kernel
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: ${{ steps.gh-workspace.outputs.GITHUB_WORKSPACE }}/build/${{ env.AKMODS_KERNEL }}-${{ env.AKMODS_VERSION }}/KCWD/rpms
+          key: ${{ env.KCKEY }}-x86_64
 
       - name: Generate Manifest
         if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
