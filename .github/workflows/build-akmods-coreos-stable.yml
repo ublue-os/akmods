@@ -1,0 +1,152 @@
+---
+#
+# WARNING THIS IS A GENERATED WORKFLOW. DO NOT EDIT BY HAND!
+#
+# Generate the workflow by running `just generate-workflows` at git root
+# Modify the inputs in workflow-templates
+name: Build COREOS-STABLE akmods
+on:
+  merge_group:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+  schedule:
+    - cron: '27 0 * * *'  # 0027 UTC everyday
+  workflow_dispatch:
+jobs:
+  cache_kernel_coreos-stable_42:
+    name: Cache coreos-stable (42)
+    uses: ./.github/workflows/reusable-cache-kernel.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    with:
+      kernel_flavor: coreos-stable
+      version: 42
+  build-coreos-stable_42_common:
+    name: Build common coreos-stable (42)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_coreos-stable_42
+    with:
+      version: 42
+      kernel_flavor: coreos-stable
+      akmods_target: common
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_42.outputs.KCKEY }}
+  build-coreos-stable_42_nvidia:
+    name: Build nvidia coreos-stable (42)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_coreos-stable_42
+    with:
+      version: 42
+      kernel_flavor: coreos-stable
+      akmods_target: nvidia
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_42.outputs.KCKEY }}
+  build-coreos-stable_42_nvidia-open:
+    name: Build nvidia-open coreos-stable (42)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_coreos-stable_42
+    with:
+      version: 42
+      kernel_flavor: coreos-stable
+      akmods_target: nvidia-open
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_42.outputs.KCKEY }}
+  build-coreos-stable_42_zfs:
+    name: Build zfs coreos-stable (42)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_coreos-stable_42
+    with:
+      version: 42
+      kernel_flavor: coreos-stable
+      akmods_target: zfs
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_42.outputs.KCKEY }}
+  cache_kernel_coreos-stable_41:
+    name: Cache coreos-stable (41)
+    uses: ./.github/workflows/reusable-cache-kernel.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    with:
+      kernel_flavor: coreos-stable
+      version: 41
+  build-coreos-stable_41_common:
+    name: Build common coreos-stable (41)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_coreos-stable_41
+    with:
+      version: 41
+      kernel_flavor: coreos-stable
+      akmods_target: common
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_41.outputs.KCKEY }}
+  build-coreos-stable_41_nvidia:
+    name: Build nvidia coreos-stable (41)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_coreos-stable_41
+    with:
+      version: 41
+      kernel_flavor: coreos-stable
+      akmods_target: nvidia
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_41.outputs.KCKEY }}
+  build-coreos-stable_41_nvidia-open:
+    name: Build nvidia-open coreos-stable (41)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_coreos-stable_41
+    with:
+      version: 41
+      kernel_flavor: coreos-stable
+      akmods_target: nvidia-open
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_41.outputs.KCKEY }}
+  build-coreos-stable_41_zfs:
+    name: Build zfs coreos-stable (41)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_coreos-stable_41
+    with:
+      version: 41
+      kernel_flavor: coreos-stable
+      akmods_target: zfs
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_41.outputs.KCKEY }}

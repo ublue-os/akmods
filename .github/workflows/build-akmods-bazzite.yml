@@ -4,7 +4,7 @@
 #
 # Generate the workflow by running `just generate-workflows` at git root
 # Modify the inputs in workflow-templates
-name: Build Bazzite AKMODs
+name: Build BAZZITE akmods
 on:
   merge_group:
   pull_request:
@@ -13,7 +13,7 @@ on:
     paths-ignore:
       - '**.md'
   schedule:
-    - cron: '15 0 * * *'  # 0015 UTC everyday
+    - cron: '22 0 * * *'  # 0022 UTC everyday
   workflow_dispatch:
     inputs:
       bazzite_tag:
