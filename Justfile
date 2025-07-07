@@ -321,7 +321,7 @@ push:
                 exit 1
             fi
         done
-        {{ if env('CI', '') != '' { 'log_sum ' + registry / _org / akmods_name + ':$tag' } else { '' } }}
+        {{ if env('CI', '') != '' { 'log_sum "' + registry / _org / akmods_name + ':$tag"' } else { '' } }}
     done
     {{ if env('CI', '') != '' { 'log_sum "\`\`\`"' } else { '' } }}
 
@@ -350,7 +350,14 @@ manifest:
         "org.opencontainers.image.version={{ kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_major_minor_patch' < $1", version_json) }}"
     )
     # Create Manifest
-    MANIFEST=$({{ podman }} manifest create {{ 'ghcr.io' / _org / 'akmods' + if akmods_target != 'common' { '-' + akmods_target } else { '' } }}:{{ kernel_flavor + '-' + version }}) || 
+    MANIFEST=$({{ podman }} manifest create {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version }})
+
+    for label in "${LABELS[@]}"; do
+        echo "Applying label "${label}" to manifest"
+        podman manifest annotate --index --annotation "$label" "${MANIFEST}"
+    done
+
+    MANIFEST=$({{ podman }} manifest create {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_major_minor_patch' < $1", version_json) }})
 
     for label in "${LABELS[@]}"; do
         echo "Applying label "${label}" to manifest"
@@ -370,8 +377,16 @@ manifest:
             exit 1
         fi
     done
+    {{ if env('CI', '') != '' { 'log_sum "' + registry / _org / akmods_name + ':' + kernel_flavor + '-' + version + '"' } else { '' } }}
 
-    {{ if env('CI', '') != '' { 'log_sum ' + registry / _org / akmods_name + ':' + kernel_flavor + '-' + version } else { '' } }}
+    for i in {1..5}; do
+        {{ podman }} manifest push --all {{ if env('COSIGN_PRIVATE_KEY', '') != '' { '--sign-by-sigstore=/etc/ublue-os-param-file.yaml' } else { '' } }} {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_major_minor_patch' < $1", version_json) }} && break || sleep $((5 * i));
+        if [[ $i -eq '5' ]]; then
+            exit 1
+        fi
+    done
+    {{ if env('CI', '') != '' { 'log_sum "' + registry / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_major_minor_patch' < $1", version_json) + '"' } else { '' } }}
+
     {{ if env('CI', '') != '' { 'log_sum "\`\`\`"' } else { '' } }}
 
 # Generate GHA Workflows
