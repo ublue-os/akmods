@@ -1,4 +1,4 @@
-name: build-ublue
+name: build-akmod
 run-name: "Build ${{ inputs.akmods_target != 'common' && format('akmods-{0}', inputs.akmods_target) || 'akmods' }}:${{ inputs.kernel_flavor }}-${{ inputs.version }}"
 on:
   workflow_call:
