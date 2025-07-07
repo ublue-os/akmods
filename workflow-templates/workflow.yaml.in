@@ -7,12 +7,5 @@ on:
     paths-ignore:
       - '**.md'
   schedule:
-    - cron: '25 0 * * *'  # 0025 UTC everyday (20 minutes after 42)
+    - cron: '05 0 * * *'  # 0005 UTC everyday
   workflow_dispatch:
-    inputs:
-      bazzite_tag:
-        description: "The release tag for the bazzite kernel"
-        required: false
-        type: string
-
-jobs:

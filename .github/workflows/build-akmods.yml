@@ -1,7 +1,9 @@
 ---
-# This is a generated workflow. Do not edit by hand.
-# Generate the workflow by running ./generate-workflows.sh at git root
-# Modify the inputs in ./workflow-templates
+#
+# WARNING THIS IS A GENERATED WORKFLOW. DO NOT EDIT BY HAND!
+#
+# Generate the workflow by running `just generate-workflows` at git root
+# Modify the inputs in workflow-templates
 name: Build AKMODs
 on:
   merge_group:
@@ -11,14 +13,8 @@ on:
     paths-ignore:
       - '**.md'
   schedule:
-    - cron: '25 0 * * *'  # 0025 UTC everyday (20 minutes after 42)
+    - cron: '05 0 * * *'  # 0005 UTC everyday
   workflow_dispatch:
-    inputs:
-      bazzite_tag:
-        description: "The release tag for the bazzite kernel"
-        required: false
-        type: string
-
 jobs:
   cache_kernel_centos-hsk_10:
     name: Cache centos-hsk (10)
@@ -29,7 +25,6 @@ jobs:
       contents: read
       packages: write
     with:
-      bazzite_tag: ${{ inputs.bazzite_tag }}
       kernel_flavor: centos-hsk
       version: 10
   build-centos-hsk_10_nvidia:
@@ -74,74 +69,6 @@ jobs:
       kernel_flavor: centos-hsk
       akmods_target: zfs
       kernel_cache_key: ${{ needs.cache_kernel_centos-hsk_10.outputs.KCKEY }}
-  cache_kernel_bazzite_42:
-    name: Cache bazzite (42)
-    uses: ./.github/workflows/reusable-cache-kernel.yml
-    secrets: inherit
-    permissions:
-      actions: read
-      contents: read
-      packages: write
-    with:
-      bazzite_tag: ${{ inputs.bazzite_tag }}
-      kernel_flavor: bazzite
-      version: 42
-  build-bazzite_42_common:
-    name: Build common bazzite (42)
-    uses: ./.github/workflows/reusable-build.yml
-    secrets: inherit
-    permissions:
-      actions: read
-      contents: read
-      packages: write
-    needs: cache_kernel_bazzite_42
-    with:
-      version: 42
-      kernel_flavor: bazzite
-      akmods_target: common
-      kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
-  build-bazzite_42_extra:
-    name: Build extra bazzite (42)
-    uses: ./.github/workflows/reusable-build.yml
-    secrets: inherit
-    permissions:
-      actions: read
-      contents: read
-      packages: write
-    needs: cache_kernel_bazzite_42
-    with:
-      version: 42
-      kernel_flavor: bazzite
-      akmods_target: extra
-      kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
-  build-bazzite_42_nvidia:
-    name: Build nvidia bazzite (42)
-    uses: ./.github/workflows/reusable-build.yml
-    secrets: inherit
-    permissions:
-      actions: read
-      contents: read
-      packages: write
-    needs: cache_kernel_bazzite_42
-    with:
-      version: 42
-      kernel_flavor: bazzite
-      akmods_target: nvidia
-      kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
-  build-bazzite_42_nvidia-open:
-    name: Build nvidia-open bazzite (42)
-    uses: ./.github/workflows/reusable-build.yml
-    secrets: inherit
-    permissions:
-      actions: read
-      contents: read
-      packages: write
-    needs: cache_kernel_bazzite_42
-    with:
-      version: 42
-      kernel_flavor: bazzite
-      akmods_target: nvidia-open
-      kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
   cache_kernel_longterm-6-12_42:
     name: Cache longterm-6.12 (42)
     uses: ./.github/workflows/reusable-cache-kernel.yml
@@ -151,7 +78,6 @@ jobs:
       contents: read
       packages: write
     with:
-      bazzite_tag: ${{ inputs.bazzite_tag }}
       kernel_flavor: longterm-6.12
       version: 42
   build-longterm-6-12_42_common:
@@ -219,7 +145,6 @@ jobs:
       contents: read
       packages: write
     with:
-      bazzite_tag: ${{ inputs.bazzite_tag }}
       kernel_flavor: main
       version: 41
   build-main_41_common:
@@ -273,7 +198,6 @@ jobs:
       contents: read
       packages: write
     with:
-      bazzite_tag: ${{ inputs.bazzite_tag }}
       kernel_flavor: centos
       version: 10
   build-centos_10_nvidia:
@@ -327,7 +251,6 @@ jobs:
       contents: read
       packages: write
     with:
-      bazzite_tag: ${{ inputs.bazzite_tag }}
       kernel_flavor: coreos-testing
       version: 41
   build-coreos-testing_41_common:
@@ -395,7 +318,6 @@ jobs:
       contents: read
       packages: write
     with:
-      bazzite_tag: ${{ inputs.bazzite_tag }}
       kernel_flavor: main
       version: 42
   build-main_42_common:
@@ -449,7 +371,6 @@ jobs:
       contents: read
       packages: write
     with:
-      bazzite_tag: ${{ inputs.bazzite_tag }}
       kernel_flavor: coreos-stable
       version: 42
   build-coreos-stable_42_common:
@@ -517,7 +438,6 @@ jobs:
       contents: read
       packages: write
     with:
-      bazzite_tag: ${{ inputs.bazzite_tag }}
       kernel_flavor: coreos-testing
       version: 42
   build-coreos-testing_42_common:
@@ -585,7 +505,6 @@ jobs:
       contents: read
       packages: write
     with:
-      bazzite_tag: ${{ inputs.bazzite_tag }}
       kernel_flavor: coreos-stable
       version: 41
   build-coreos-stable_41_common:
