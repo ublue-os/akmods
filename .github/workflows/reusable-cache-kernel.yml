@@ -19,6 +19,20 @@ on:
       KCKEY:
         description: Cache Key
         value: ${{ jobs.cache-kernel.outputs.KCKEY }}
+  workflow_dispatch:
+    inputs:
+      bazzite_tag:
+        description: "The release tag for the bazzite kernel"
+        required: false
+        type: string
+      kernel_flavor:
+        description: "The Kernel flavor: main, bazzite, coreos-stable, centos-hsk, longterm-6.12, etc"
+        required: true
+        type: string
+      version:
+        description: "Release Version: 10, 41, 42, etc"
+        required: true
+        type: string
 env:
   AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
   AKMODS_KERNEL: ${{ inputs.kernel_flavor }}
