@@ -40,7 +40,8 @@ log_sum "\`\`\`"
 default:
     {{ just }} --list
 
-# Remove  Directory
+# Remove Build Directory
+[group('Utility')]
 clean:
     rm -rf {{ BUILDDIR }}
 
@@ -183,15 +184,18 @@ get-kernel-version:
     
     echo $output
     
-# Cache Kernel Version
+# Cache Version Json
+[group('Build')]
 @cache-kernel-version: && populate-github-output
     [ ! -f {{ version_json }} ] && {{ just }} get-kernel-version > {{ version_json }} || :
 
 # Populate Github Output
+[private]
 @populate-github-output:
     {{ if env('GITHUB_OUTPUT', '') != '' { 'jq -r "to_entries[] | \"\(.key)=\(.value)\"" < ' + version_json + ' | xargs -I "{}" echo "{}" >> ' + env('GITHUB_OUTPUT') } else { '' } }}
 
-# Fetch the desired kernel
+# Fetch and Sign Kernel RPMs
+[group('Build')]
 fetch-kernel: (cache-kernel-version)
     #!/usr/bin/bash
     {{ if path_exists(version_json) != 'true' { error('Need to run just cache-kernel-version first for dry-run') } else { '' } }}
@@ -221,7 +225,8 @@ fetch-kernel: (cache-kernel-version)
     echo "{{ datetime_utc('%Y%m%d') }}" > "{{ KCPATH / 'kernel-cache-date' }}"
     find "{{ KCPATH }}"
 
-# Build Akmods
+# Build Akmod Image
+[group('Build')]
 build: (cache-kernel-version) (fetch-kernel)
     #!/usr/bin/bash
     set "${CI:+-x}" -euo pipefail
@@ -265,6 +270,8 @@ build: (cache-kernel-version) (fetch-kernel)
 
     {{ podman }} build -f Containerfile.in --volume {{ KCPATH }}:/tmp/kernel_cache:ro "${CPP_FLAGS[@]}" "${LABELS[@]}" "${TAGS[@]}" --target RPMS {{ justfile_dir () }}
 
+# Test Cached Akmod RPMs
+[group('Build')]
 test: (cache-kernel-version) (fetch-kernel)
     #!/usr/bin/bash
     set "${CI:+-x}" -euo pipefail
@@ -287,18 +294,18 @@ test: (cache-kernel-version) (fetch-kernel)
     fi
 
     {{ podman }} build -f Containerfile.in --volume {{ KCPATH }}:/tmp/kernel_cache:ro "${CPP_FLAGS[@]}" --target test --tag akmods-test:latest {{ justfile_dir () }}
-    if ! podman run akmods-test:latest; then
+    if ! podman run --rm akmods-test:latest; then
         echo "Signatures Failed" >&2
         exit 1
     fi
 
 # Login to Registry
-[group('CI')]
+[group('Registry')]
 @login:
     {{ podman }} login {{ registry }} -u "$REGISTRY_ACTOR"  -p "$REGISTRY_TOKEN"
 
 # Push Images to Registry
-[group('CI')]
+[group('Registry')]
 push:
     #!/usr/bin/bash
     {{ if env('COSIGN_PRIVATE_KEY', '') != '' { 'printf "%s" "$COSIGN_PRIVATE_KEY" > /tmp/cosign.key' } else { '' } }}
@@ -318,7 +325,8 @@ push:
     done
     {{ if env('CI', '') != '' { 'log_sum "\`\`\`"' } else { '' } }}
 
-# Generate Manifest
+# Generate Manifest and Push to Registry
+[group('Registry')]
 manifest:
     #!/usr/bin/bash
     {{ if env('COSIGN_PRIVATE_KEY', '') != '' { 'printf "%s" "$COSIGN_PRIVATE_KEY" > /tmp/cosign.key' } else { '' } }}
@@ -366,7 +374,8 @@ manifest:
     {{ if env('CI', '') != '' { 'log_sum ' + registry / _org / akmods_name + ':' + kernel_flavor + '-' + version } else { '' } }}
     {{ if env('CI', '') != '' { 'log_sum "\`\`\`"' } else { '' } }}
 
-# Generate GHA Workflow
+# Generate GHA Workflows
+[group('Utility')]
 generate-workflows:
     #!/usr/bin/bash
     set -euo pipefail
