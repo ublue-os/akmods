@@ -68,7 +68,7 @@ The `nvidia` and `nvidia-open` images contains
 | extra | [zenergy](https://github.com/BoukeHaarsma23/zenergy) | Based on AMD_ENERGY driver, but with some jiffies added so non-root users can read it safely | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/zenergy-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/zenergy-kmod) |
 | nvidia | [nvidia](https://negativo17.org/nvidia-driver/) | nvidia GPU drivers | [negativo17 - fedora-nvidia](https://negativo17.org/) |
 | nvidia-open | [nvidia](https://negativo17.org/nvidia-driver/) | nvidia-open GPU drivers | [negativo17 - fedora-nvidia](https://negativo17.org/) |
-| zfs | [zfs](https://github.com/openzfs/zfs) | OpenZFS advanced file system and volume manager |
+| zfs | [zfs](https://github.com/openzfs/zfs) | OpenZFS advanced file system and volume manager | [zfs](https://github.com/openzfs/zfs) |
 
 ## Notes
 
@@ -124,14 +124,18 @@ These images are signed with sisgstore's [cosign](https://docs.sigstore.dev/abou
     cosign verify --key cosign.pub ghcr.io/ublue-os/akmods:KERNEL_FLAVOR-RELEASE
 
 ## Local Building/Testing
+
 You can build these akmods locally with our test keys using the included `Justfile`. We strongly recommend using the provided devcontainer which contains all dependencies for building this project.
 
 ### How to Use the Justfile
+
 To build an akmods package, run the following:
+
 ```bash
 just build
 ```
 Since nothing additional was set. The following will occur. The build scripts will determine the current fedora kernel version, download the RPMs, and sign the kernel with the test key. It will then build the common set of akmods. To modify what gets built, modify the following environment variables:
+
 - AKMODS_KERNEL - The kernel flavor you are building
 - AKMODS_V ERSION - The release version
 - AKMODS_TARGET - The akmods package to build
@@ -139,6 +143,7 @@ Since nothing additional was set. The following will occur. The build scripts wi
 ```bash
 AKMODS_KERNEL=centos AKMODS_VERSION=10 AKMODS_TARGET=zfs just build
 ```
+
 Will determine the current centos kernel version, download the rpms and sign them, and will then build the zfs package.
 
 You can also populate a `.env` file to store your current settings.
@@ -146,20 +151,25 @@ You can also populate a `.env` file to store your current settings.
 You can see your current settings with `just --evaluate`
 
 Additionally you can pass values as key/value pairs.
+
 ```bash
 just kernel_flavor=bazzite version=42 akmods_target=extra build
 ```
+
 Which will build the extra package for Bazzite.
 
 Note, the `Justfile` will compare your inputs to the `images.yaml` file to ensure you have a valid combination.
 
 ### How to Use images.yaml
+
 All build targets are defined in the `images.yaml` file. This is where the top level targets are defined. You can view the targets using:
+
 ```bash
 yq 'explode(.).images' images.yaml
 ```
 
 ### Adding Kernels and KMODs
+
 Generally speaking, Kernels are only added if they will be used internally to Universal Blue.
 
 KMODs as well will likely only be included if there is a need/desire to include them within the Universal Blue Project. Generally, KMODs for hardware enablement will be considered for inclusion or ones that fix/resolve a known feature gap.
