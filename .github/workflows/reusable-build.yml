@@ -65,7 +65,7 @@ jobs:
       contents: read
       packages: write
     container:
-      image: "ghcr.io/ublue-os/devcontainer:latest"
+      image: "ghcr.io/ublue-os/devcontainer:latest@sha256:5816753147a81b0216ae3649fdebf25c734d63c94f208313cec7aad77963bf82"
       options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
     strategy:
       fail-fast: false
@@ -128,7 +128,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-akmods]
     container:
-      image: "ghcr.io/ublue-os/devcontainer:latest"
+      image: "ghcr.io/ublue-os/devcontainer:latest@sha256:5816753147a81b0216ae3649fdebf25c734d63c94f208313cec7aad77963bf82"
       options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
     permissions:
       actions: read
