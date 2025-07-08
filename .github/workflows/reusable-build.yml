@@ -105,13 +105,12 @@ jobs:
           # DEBUG: get character count of key
           wc -c certs/private_key.priv
           wc -c certs/private_key_2.priv
-        
-      - name: Build Image
-        id: build
-        run: just build
 
       - name: Test Image
         run: just test
+        
+      - name: Build Image
+        run: just build
 
       - name: Push and Sign Image
         if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
