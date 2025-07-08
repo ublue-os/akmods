@@ -260,7 +260,7 @@ build: (cache-kernel-version) (fetch-kernel)
         "--label" "org.opencontainers.image.title={{ akmods_name }}"
         "--label" "org.opencontainers.image.url=https://github.com/{{ _org / _repo }}"
         "--label" "org.opencontainers.image.vendor='{{ _org }}'"
-        "--label" "org.opencontainers.image.version={{ shell("jq -r '.major_minor_patch' < $1", version_json) + '-' + trim(read(KCPATH / 'kernel-cache-date')) }}"
+        "--label" "org.opencontainers.image.version={{ shell("jq -r '.kernel_release' < $1", version_json) + '-' + trim(read(KCPATH / 'kernel-cache-date')) }}"
         "--label" "ostree.linux={{ shell("jq -r '.kernel_release' < $1", version_json) }}"
     )
     TAGS=(
