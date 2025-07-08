@@ -136,7 +136,7 @@ jobs:
       packages: write
     steps:
       - name: Exit on failure
-        if: ${{ needs.build-akmods.result == 'failure' }}
+        if: needs.build-akmods.result != 'success'
         run: exit 1
       
       - name: Checkout Repo
