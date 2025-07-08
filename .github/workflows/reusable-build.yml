@@ -138,6 +138,12 @@ jobs:
       - name: Exit on failure
         if: ${{ needs.build-akmods.result == 'failure' }}
         run: exit 1
+      
+      - name: Checkout Repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Mark Directory as Safe
+        run: git config --system --ad safe.directory "$GITHUB_WORKSPACE"
 
       - name: Export GITHUB_WORKSPACE
         id: gh-workspace
