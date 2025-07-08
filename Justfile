@@ -407,7 +407,7 @@ generate-workflows:
         declare -A workflows=()
         versions=($(yq '.images | keys | .[]' images.yaml | sort | uniq))
         flavors=($(yq '.images.* | keys | .[]' images.yaml | sort | uniq))
-        targets=($(yq 'explode(.) | .images.*.* | keys | .[]' images.yaml | sort | uniq))
+        targets=($(yq 'explode(.).images.*.* | keys | .[]' images.yaml | sort | uniq))
         
         for i in "${versions[@]}"; do
             for j in "${flavors[@]}"; do
@@ -452,14 +452,19 @@ generate-workflows:
                 if [[ "$i" =~ bazzite ]]; then
                     printf '      %s\n' 'bazzite_tag: ${{{{ inputs.bazzite_tag }}'
                 fi
-                for k in common extra nvidia nvidia-open zfs; do
+                workflow_targets=()
+                for k in "${targets[@]}"; do
                     value="${images[$j-$k]:-}"
                     if [ -z "$value" ]; then
                         continue
                     fi
                     akmods_target="$(echo "$value" | cut -d "," -f 3)"
+                    workflow_targets+=(build-"$kernel_flavor_clean"_"$version"_"$akmods_target")
                     sed "s/%%VERSION%%/$version/;s/%%KERNEL_FLAVOR%%/$kernel_flavor/;s/%%AKMODS_TARGET%%/$akmods_target/;s/%%KERNEL_FLAVOR_CLEAN%%/$kernel_flavor_clean/" "./workflow-templates/job.yaml.in"
                 done
+                json_needs="$(jq -nM '$ARGS.positional' --args ${workflow_targets[@]} | jq @json)"
+                json_needs=${json_needs//[\\\"]}
+                sed -e "s|%%KERNEL_FLAVOR%%|$kernel_flavor|;s|%%KERNEL_FLAVOR_CLEAN%%|$kernel_flavor_clean|;s|%%VERSION%%|$version|;s|%%NEEDS%%|$json_needs|" ./workflow-templates/check-status.yaml.in
             done
             } > "./.github/workflows/build-akmods-$i.yml"
         done

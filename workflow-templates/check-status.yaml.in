@@ -1,0 +1,15 @@
+  check-%%KERNEL_FLAVOR_CLEAN%%_%%VERSION%%:
+    name: Check %%KERNEL_FLAVOR%% (%%VERSION%%)
+    permissions:
+      actions: read
+      contents: read
+    needs: %%NEEDS%%
+    runs-on: ubuntu-24.04
+    if: always()
+    steps:
+      - name: Check for Build Failures
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped')
+        run: exit 1
+
+      - name: Exit if Success
+        run: exit 0
