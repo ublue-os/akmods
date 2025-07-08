@@ -116,7 +116,7 @@ jobs:
       - name: Push and Sign Image
         if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
         run:
-          just login-to-ghcr
+          just login
           just push
         env:
           COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
@@ -153,7 +153,7 @@ jobs:
       - name: Generate Manifest
         if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
         run:
-          just login-to-ghcr
+          just login
           just manifest
         env:
           COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
