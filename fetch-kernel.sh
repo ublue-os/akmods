@@ -45,6 +45,8 @@ if [[ "${kernel_flavor}" == "bazzite" ]]; then
     curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-modules-extra-"$kernel_version".rpm
     curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-devel-"$kernel_version".rpm
     curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-devel-matched-"$kernel_version".rpm
+    curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-tools-"$kernel_version".rpm
+    curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-tools-libs-"$kernel_version".rpm
     # curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-uki-virt-"$kernel_version".rpm
     # curl -LO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-uki-virt-addons-"$kernel_version".rpm
 elif [[ "${kernel_flavor}" == "centos" ]]; then
