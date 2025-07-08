@@ -115,7 +115,7 @@ jobs:
 
       - name: Push and Sign Image
         if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
-        run:
+        run: |
           just login
           just push
         env:
@@ -152,7 +152,7 @@ jobs:
 
       - name: Generate Manifest
         if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
-        run:
+        run: |
           just login
           just manifest
         env:
