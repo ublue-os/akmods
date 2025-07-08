@@ -177,7 +177,7 @@ set "${CI+-x}" -euo pipefail
 /tmp/build-post.sh
 RUNEOF
 
-FROM scratch AS RPMS
+FROM scratch AS RPM_CACHE
 
 COPY --from=builder /var/cache/kernel-rpms /kernel-rpms
 COPY --from=builder /var/cache/rpms /rpms
@@ -194,8 +194,8 @@ ARG VERSION_ARG
 ENV CI=1
 #endif
 
-COPY --from=RPMS /kernel-rpms /tmp/kernel_cache
-COPY --from=RPMS /rpms /tmp/akmods-rpms
+COPY --from=RPM_CACHE /kernel-rpms /tmp/kernel_cache
+COPY --from=RPM_CACHE /rpms /tmp/akmods-rpms
 
 COPY build_files/test/test-prep.sh /tmp/
 COPY certs /tmp/certs
@@ -209,3 +209,6 @@ RUNEOF
 
 COPY build_files/test/check-signatures.sh /tmp/
 CMD ["/tmp/check-signatures.sh"]
+
+FROM scratch AS RPMS
+COPY --from=RPM_CACHE / /
