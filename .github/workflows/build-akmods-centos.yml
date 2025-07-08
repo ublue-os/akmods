@@ -13,62 +13,9 @@ on:
     paths-ignore:
       - '**.md'
   schedule:
-    - cron: '05 0 * * *'  # 0005 UTC everyday
+    - cron: '26 0 * * *'  # 0026 UTC everyday
   workflow_dispatch:
 jobs:
-  cache_kernel_centos-hsk_10:
-    name: Cache centos-hsk (10)
-    uses: ./.github/workflows/reusable-cache-kernel.yml
-    secrets: inherit
-    permissions:
-      actions: read
-      contents: read
-      packages: write
-    with:
-      kernel_flavor: centos-hsk
-      version: 10
-  build-centos-hsk_10_nvidia:
-    name: Build nvidia centos-hsk (10)
-    uses: ./.github/workflows/reusable-build.yml
-    secrets: inherit
-    permissions:
-      actions: read
-      contents: read
-      packages: write
-    needs: cache_kernel_centos-hsk_10
-    with:
-      version: 10
-      kernel_flavor: centos-hsk
-      akmods_target: nvidia
-      kernel_cache_key: ${{ needs.cache_kernel_centos-hsk_10.outputs.KCKEY }}
-  build-centos-hsk_10_nvidia-open:
-    name: Build nvidia-open centos-hsk (10)
-    uses: ./.github/workflows/reusable-build.yml
-    secrets: inherit
-    permissions:
-      actions: read
-      contents: read
-      packages: write
-    needs: cache_kernel_centos-hsk_10
-    with:
-      version: 10
-      kernel_flavor: centos-hsk
-      akmods_target: nvidia-open
-      kernel_cache_key: ${{ needs.cache_kernel_centos-hsk_10.outputs.KCKEY }}
-  build-centos-hsk_10_zfs:
-    name: Build zfs centos-hsk (10)
-    uses: ./.github/workflows/reusable-build.yml
-    secrets: inherit
-    permissions:
-      actions: read
-      contents: read
-      packages: write
-    needs: cache_kernel_centos-hsk_10
-    with:
-      version: 10
-      kernel_flavor: centos-hsk
-      akmods_target: zfs
-      kernel_cache_key: ${{ needs.cache_kernel_centos-hsk_10.outputs.KCKEY }}
   cache_kernel_centos_10:
     name: Cache centos (10)
     uses: ./.github/workflows/reusable-cache-kernel.yml
