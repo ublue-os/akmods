@@ -13,7 +13,7 @@ on:
     paths-ignore:
       - '**.md'
   schedule:
-    - cron: '08 0 * * *'  # 0008 UTC everyday
+    - cron: '21 0 * * *'  # 0021 UTC everyday
   workflow_dispatch:
 jobs:
   cache_kernel_coreos-stable_42:
@@ -98,9 +98,6 @@ jobs:
 
       - name: Exit if Success
         run: exit 0
-            
-        
-           
   cache_kernel_coreos-stable_41:
     name: Cache coreos-stable (41)
     uses: ./.github/workflows/reusable-cache-kernel.yml
@@ -183,6 +180,3 @@ jobs:
 
       - name: Exit if Success
         run: exit 0
-            
-        
-           

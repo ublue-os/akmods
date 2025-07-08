@@ -13,7 +13,7 @@ on:
     paths-ignore:
       - '**.md'
   schedule:
-    - cron: '06 0 * * *'  # 0006 UTC everyday
+    - cron: '00 0 * * *'  # 0000 UTC everyday
   workflow_dispatch:
     inputs:
       bazzite_tag:
@@ -104,6 +104,3 @@ jobs:
 
       - name: Exit if Success
         run: exit 0
-            
-        
-           
