@@ -442,7 +442,7 @@ generate-workflows:
             fi
             echo "jobs:"
             for j in "${!workflows[@]}"; do
-                if [[ ! "$j" =~ $i ]]; then
+                if [[ ! "$j" =~ $i$ ]]; then
                     continue
                 fi
                 version=$(echo "${workflows[$j]}" | cut -d "," -f 1)

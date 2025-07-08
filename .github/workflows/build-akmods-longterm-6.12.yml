@@ -13,7 +13,7 @@ on:
     paths-ignore:
       - '**.md'
   schedule:
-    - cron: '15 0 * * *'  # 0015 UTC everyday
+    - cron: '14 0 * * *'  # 0014 UTC everyday
   workflow_dispatch:
 jobs:
   cache_kernel_longterm-6-12_42:
