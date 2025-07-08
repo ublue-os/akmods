@@ -347,7 +347,7 @@ manifest:
         "org.opencontainers.image.title={{ akmods_name }}"
         "org.opencontainers.image.url=https://github.com/{{ _org / _repo }}"
         "org.opencontainers.image.vendor={{ _org }}"
-        "org.opencontainers.image.version={{ kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_major_minor_patch' < $1", version_json) }}"
+        "org.opencontainers.image.version={{ kernel_flavor + '-' + version + '-' + replace_regex(shell("jq -r '.kernel_release' < $1", version_json), '.x86_64|.aarch64', '' ) }}"
     )
     # Create Manifest
     MANIFEST=$({{ podman }} manifest create {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version }})
@@ -357,7 +357,7 @@ manifest:
         podman manifest annotate --index --annotation "$label" "${MANIFEST}"
     done
 
-    MANIFEST=$({{ podman }} manifest create {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_major_minor_patch' < $1", version_json) }})
+    MANIFEST=$({{ podman }} manifest create {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + replace_regex(shell("jq -r '.kernel_release' < $1", version_json), '.x86_64|.aarch64', '' ) }})
 
     for label in "${LABELS[@]}"; do
         echo "Applying label "${label}" to manifest"
@@ -367,8 +367,8 @@ manifest:
     # Add to Manifest
     {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-x86_64' }}
     # {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-aarch64' }}
-    {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_major_minor_patch' < $1", version_json) }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_release' < $1", version_json) }}
-    # {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_major_minor_patch' < $1", version_json) }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + replace(shell("jq -r '.kernel_release' < $1", version_json), 'x86_64', 'aarch64') }}
+    {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + replace_regex(shell("jq -r '.kernel_release' < $1", version_json), '.x86_64|.aarch64', '' ) }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_release' < $1", version_json) }}
+    # {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + replace_regex(shell("jq -r '.kernel_release' < $1", version_json), '.x86_64|.aarch64', '' ) }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + replace(shell("jq -r '.kernel_release' < $1", version_json), 'x86_64', 'aarch64') }}
 
     # Push Manifest
     for i in {1..5}; do
@@ -380,7 +380,7 @@ manifest:
     {{ if env('CI', '') != '' { 'log_sum "' + registry / _org / akmods_name + ':' + kernel_flavor + '-' + version + '"' } else { '' } }}
 
     for i in {1..5}; do
-        {{ podman }} manifest push --all {{ if env('COSIGN_PRIVATE_KEY', '') != '' { '--sign-by-sigstore=/etc/ublue-os-param-file.yaml' } else { '' } }} {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_major_minor_patch' < $1", version_json) }} && break || sleep $((5 * i));
+        {{ podman }} manifest push --all {{ if env('COSIGN_PRIVATE_KEY', '') != '' { '--sign-by-sigstore=/etc/ublue-os-param-file.yaml' } else { '' } }} {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + replace_regex(shell("jq -r '.kernel_release' < $1", version_json), '.x86_64|.aarch64', '' ) }} && break || sleep $((5 * i));
         if [[ $i -eq '5' ]]; then
             exit 1
         fi
