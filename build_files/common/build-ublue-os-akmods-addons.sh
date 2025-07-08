@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/usr/bin/bash
 
-set -oeux pipefail
+set "${CI:+-x}" -euo pipefail
 
 
 ### BUILD UBLUE AKMODS-ADDONS RPM

@@ -1,0 +1,91 @@
+---
+#
+# WARNING THIS IS A GENERATED WORKFLOW. DO NOT EDIT BY HAND!
+#
+# Generate the workflow by running `just generate-workflows` at git root
+# Modify the inputs in workflow-templates
+name: Build BAZZITE akmods
+on:
+  merge_group:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+  schedule:
+    - cron: '22 0 * * *'  # 0022 UTC everyday
+  workflow_dispatch:
+    inputs:
+      bazzite_tag:
+        description: "The release tag for the bazzite kernel"
+        required: false
+        type: string
+jobs:
+  cache_kernel_bazzite_42:
+    name: Cache bazzite (42)
+    uses: ./.github/workflows/reusable-cache-kernel.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    with:
+      kernel_flavor: bazzite
+      version: 42
+      bazzite_tag: ${{ inputs.bazzite_tag }}
+  build-bazzite_42_common:
+    name: Build common bazzite (42)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_bazzite_42
+    with:
+      version: 42
+      kernel_flavor: bazzite
+      akmods_target: common
+      kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
+  build-bazzite_42_extra:
+    name: Build extra bazzite (42)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_bazzite_42
+    with:
+      version: 42
+      kernel_flavor: bazzite
+      akmods_target: extra
+      kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
+  build-bazzite_42_nvidia:
+    name: Build nvidia bazzite (42)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_bazzite_42
+    with:
+      version: 42
+      kernel_flavor: bazzite
+      akmods_target: nvidia
+      kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
+  build-bazzite_42_nvidia-open:
+    name: Build nvidia-open bazzite (42)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_bazzite_42
+    with:
+      version: 42
+      kernel_flavor: bazzite
+      akmods_target: nvidia-open
+      kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}

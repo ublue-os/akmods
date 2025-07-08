@@ -1,0 +1,103 @@
+---
+defaults:
+  kernel_flavor: main
+  version: 42
+  akmods_target: common
+
+akmods-base: &akmods-base
+  org: ublue-os
+  registry: ghcr.io
+  repo: akmods
+  transport: docker://
+
+akmods-common: &akmods-common
+  name: akmods
+  description: "A caching layer for pre-built akmod RPMs"
+
+akmods-extra: &akmods-extra
+  name: akmods-extra
+  description: "A caching layer for extra pre-built akmod RPMs"
+
+akmods-nvidia: &akmods-nvidia
+  name: akmods-nvidia
+  description: "A caching layer for the pre-built nvidia akmod RPMs"
+
+akmods-nvidia-open: &akmods-nvidia-open
+  name: akmods-nvidia-open
+  description: "A caching layer for the pre-built nvidia-open akmod RPMs"
+
+akmods-zfs: &akmods-zfs
+  name: akmods-zfs
+  description: "A caching layer for the pre-built zfs akmod RPMs"
+
+desktop-build-group: &desktop-build-group
+  common:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-common
+  nvidia:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-nvidia
+  nvidia-open:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-nvidia
+    
+server-build-group: &server-build-group
+  nvidia:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-nvidia
+  nvidia-open:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-nvidia
+  zfs:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-zfs
+
+images:
+  10:
+    centos:
+      !!merge <<:
+        - *server-build-group
+    centos-hsk:
+      !!merge <<:
+        - *server-build-group
+  41:
+    main:
+      !!merge <<:
+        - *desktop-build-group
+    coreos-stable:
+      !!merge <<:
+        - *desktop-build-group
+        - *server-build-group
+    coreos-testing:
+      !!merge <<:
+        - *desktop-build-group
+        - *server-build-group
+  42:
+    bazzite:
+      !!merge <<:
+        - *desktop-build-group
+      extra:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-extra
+    main:
+      !!merge <<:
+        - *desktop-build-group
+    coreos-stable:
+      !!merge <<:
+        - *desktop-build-group
+        - *server-build-group
+    coreos-testing:
+      !!merge <<:
+        - *desktop-build-group
+        - *server-build-group
+    "longterm-6.12":
+      !!merge <<:
+        - *desktop-build-group
+        - *server-build-group

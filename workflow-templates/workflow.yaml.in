@@ -1,0 +1,11 @@
+name: Build AKMODs
+on:
+  merge_group:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+  schedule:
+    - cron: '05 0 * * *'  # 0005 UTC everyday
+  workflow_dispatch:

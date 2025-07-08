@@ -1,0 +1,124 @@
+---
+#
+# WARNING THIS IS A GENERATED WORKFLOW. DO NOT EDIT BY HAND!
+#
+# Generate the workflow by running `just generate-workflows` at git root
+# Modify the inputs in workflow-templates
+name: Build MAIN akmods
+on:
+  merge_group:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+  schedule:
+    - cron: '07 0 * * *'  # 0007 UTC everyday
+  workflow_dispatch:
+jobs:
+  cache_kernel_main_41:
+    name: Cache main (41)
+    uses: ./.github/workflows/reusable-cache-kernel.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    with:
+      kernel_flavor: main
+      version: 41
+  build-main_41_common:
+    name: Build common main (41)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_main_41
+    with:
+      version: 41
+      kernel_flavor: main
+      akmods_target: common
+      kernel_cache_key: ${{ needs.cache_kernel_main_41.outputs.KCKEY }}
+  build-main_41_nvidia:
+    name: Build nvidia main (41)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_main_41
+    with:
+      version: 41
+      kernel_flavor: main
+      akmods_target: nvidia
+      kernel_cache_key: ${{ needs.cache_kernel_main_41.outputs.KCKEY }}
+  build-main_41_nvidia-open:
+    name: Build nvidia-open main (41)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_main_41
+    with:
+      version: 41
+      kernel_flavor: main
+      akmods_target: nvidia-open
+      kernel_cache_key: ${{ needs.cache_kernel_main_41.outputs.KCKEY }}
+  cache_kernel_main_42:
+    name: Cache main (42)
+    uses: ./.github/workflows/reusable-cache-kernel.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    with:
+      kernel_flavor: main
+      version: 42
+  build-main_42_common:
+    name: Build common main (42)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_main_42
+    with:
+      version: 42
+      kernel_flavor: main
+      akmods_target: common
+      kernel_cache_key: ${{ needs.cache_kernel_main_42.outputs.KCKEY }}
+  build-main_42_nvidia:
+    name: Build nvidia main (42)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_main_42
+    with:
+      version: 42
+      kernel_flavor: main
+      akmods_target: nvidia
+      kernel_cache_key: ${{ needs.cache_kernel_main_42.outputs.KCKEY }}
+  build-main_42_nvidia-open:
+    name: Build nvidia-open main (42)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_main_42
+    with:
+      version: 42
+      kernel_flavor: main
+      akmods_target: nvidia-open
+      kernel_cache_key: ${{ needs.cache_kernel_main_42.outputs.KCKEY }}
