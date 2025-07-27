@@ -64,7 +64,7 @@ get-kernel-version:
         image_linux="$(skopeo inspect docker://quay.io/fedora/fedora-coreos:$coreos_version --format '{{{{ index .Labels "ostree.linux" }}')"
         # Kernel Pin Location
         if [[ "{{ kernel_flavor }}" =~ coreos-stable ]]; then
-            image_linux="6.14.11-300.fc42.x86_64"
+            image_linux="6.14.11-300.fc42.$(uname -m)"
         fi
 
         # Get Variables
