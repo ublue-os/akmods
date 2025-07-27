@@ -63,9 +63,9 @@ get-kernel-version:
         coreos_version=${1}
         image_linux="$(skopeo inspect docker://quay.io/fedora/fedora-coreos:$coreos_version --format '{{{{ index .Labels "ostree.linux" }}')"
         # Kernel Pin Location
-        # if [[ "{{ kernel_flavor }}" =~ coreos-stable ]]; then
-        #     image_linux=""
-        # fi
+        if [[ "{{ kernel_flavor }}" =~ coreos-stable ]]; then
+            image_linux="6.14.11-300.fc42.$(uname -m)"
+        fi
 
         # Get Variables
         major_minor_patch="$(echo $image_linux | grep -oP '^\d+\.\d+\.\d+')"
