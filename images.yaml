@@ -1,6 +1,6 @@
 ---
 defaults:
-  kernel_flavor: main
+  kernel_flavor: bazzite
   version: 42
   akmods_target: common
 
@@ -59,25 +59,25 @@ server-build-group: &server-build-group
       - *akmods-zfs
 
 images:
-  10:
-    centos:
-      !!merge <<:
-        - *server-build-group
-    centos-hsk:
-      !!merge <<:
-        - *server-build-group
-  41:
-    main:
-      !!merge <<:
-        - *desktop-build-group
-    coreos-stable:
-      !!merge <<:
-        - *desktop-build-group
-        - *server-build-group
-    coreos-testing:
-      !!merge <<:
-        - *desktop-build-group
-        - *server-build-group
+#  10:
+#    centos:
+#      !!merge <<:
+#        - *server-build-group
+#    centos-hsk:
+#      !!merge <<:
+#        - *server-build-group
+#  41:
+#    main:
+#      !!merge <<:
+#        - *desktop-build-group
+#    coreos-stable:
+#      !!merge <<:
+#        - *desktop-build-group
+#        - *server-build-group
+#    coreos-testing:
+#      !!merge <<:
+#        - *desktop-build-group
+#        - *server-build-group
   42:
     bazzite:
       !!merge <<:
@@ -87,18 +87,18 @@ images:
         !!merge <<:
           - *akmods-base
           - *akmods-extra
-    main:
-      !!merge <<:
-        - *desktop-build-group
-    coreos-stable:
-      !!merge <<:
-        - *desktop-build-group
-        - *server-build-group
-    coreos-testing:
-      !!merge <<:
-        - *desktop-build-group
-        - *server-build-group
-    "longterm-6.12":
-      !!merge <<:
-        - *desktop-build-group
-        - *server-build-group
+#    main:
+#      !!merge <<:
+#        - *desktop-build-group
+#    coreos-stable:
+#      !!merge <<:
+#        - *desktop-build-group
+#        - *server-build-group
+#    coreos-testing:
+#      !!merge <<:
+#        - *desktop-build-group
+#        - *server-build-group
+#    "longterm-6.12":
+#      !!merge <<:
+#        - *desktop-build-group
+#        - *server-build-group

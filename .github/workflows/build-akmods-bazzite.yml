@@ -12,8 +12,8 @@ on:
       - main
     paths-ignore:
       - '**.md'
-  schedule:
-    - cron: '00 0 * * *'  # 0000 UTC everyday
+#  schedule:
+#    - cron: '01 0 * * *'  # 0001 UTC everyday
   workflow_dispatch:
     inputs:
       bazzite_tag:
@@ -89,12 +89,26 @@ jobs:
       kernel_flavor: bazzite
       akmods_target: nvidia-open
       kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
+  build-bazzite_42_zfs:
+    name: Build zfs bazzite (42)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_bazzite_42
+    with:
+      version: 42
+      kernel_flavor: bazzite
+      akmods_target: zfs
+      kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
   check-bazzite_42:
     name: Check bazzite (42)
     permissions:
       actions: read
       contents: read
-    needs: [build-bazzite_42_common,build-bazzite_42_extra,build-bazzite_42_nvidia,build-bazzite_42_nvidia-open]
+    needs: [build-bazzite_42_common,build-bazzite_42_extra,build-bazzite_42_nvidia,build-bazzite_42_nvidia-open,build-bazzite_42_zfs]
     runs-on: ubuntu-24.04
     if: always()
     steps:
