@@ -82,6 +82,7 @@ images:
     bazzite:
       !!merge <<:
         - *desktop-build-group
+        - *server-build-group
       extra:
         !!merge <<:
           - *akmods-base

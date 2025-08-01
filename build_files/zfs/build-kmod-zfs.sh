@@ -12,7 +12,10 @@ cd /tmp
 curl "https://api.github.com/repos/openzfs/zfs/releases" -o data.json
 ZFS_VERSION=$(jq -r --arg ZMV "zfs-${ZFS_MINOR_VERSION}" '[ .[] | select(.prerelease==false and .draft==false) | select(.tag_name | startswith($ZMV))][0].tag_name' data.json|cut -f2- -d-)
 echo "ZFS_VERSION==$ZFS_VERSION"
-
+if [[ -e $ZFS_VERSION ]]; then
+  which jq
+  exit 2
+fi
 
 ### zfs specific build deps
 dnf install -y libtirpc-devel libblkid-devel libuuid-devel libudev-devel openssl-devel libaio-devel libattr-devel elfutils-libelf-devel python3-devel libffi-devel libcurl-devel ncompress python3-setuptools

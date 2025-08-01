@@ -62,6 +62,16 @@ RPMS_TO_INSTALL+=(
     akmods
     mock
     ruby-devel
+    jq
+    libunwind-devel
+    gnupg2
+    autoconf
+    automake
+    dkms
+    git
+    libtool
+    ncompress
+    python-cffi
 )
 
 if [[ ! -s "/tmp/certs/private_key.priv" ]]; then
@@ -87,7 +97,6 @@ if [[ "${KERNEL_FLAVOR}" =~ "centos" ]] || [[ "${KERNEL_FLAVOR}" =~ "coreos" ]] 
         automake
         dkms
         git
-        jq
         libtool
         ncompress
         python-cffi
@@ -99,7 +108,13 @@ if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]] || [[ "${KERNEL_FLAVOR}" =~ "longterm" ]
 fi
 
 # Install RPMs
+echo "BUILD prep packages"
+echo dnf install -y --allowerasing "${RPMS_TO_INSTALL[@]}"
 dnf install -y --allowerasing "${RPMS_TO_INSTALL[@]}"
+if [[ $? -ne 0 ]]; then
+  echo "failed to install build dependencies"
+  exit 3
+fi
 
 # Configure Dual Signing
 if [[ "${DUAL_SIGN}" == 'true' ]]; then
