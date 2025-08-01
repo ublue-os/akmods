@@ -6,6 +6,6 @@ on:
       - main
     paths-ignore:
       - '**.md'
-  schedule:
-    - cron: '05 0 * * *'  # 0005 UTC everyday
+#  schedule:
+#    - cron: '05 0 * * *'  # 0005 UTC everyday
   workflow_dispatch:
