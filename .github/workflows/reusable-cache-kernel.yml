@@ -49,7 +49,7 @@ jobs:
     outputs:
       KCKEY: ${{ inputs.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_major_minor_patch }}
     container:
-      image: "ghcr.io/ublue-os/devcontainer:latest"
+      image: "ghcr.io/ublue-os/devcontainer:latest@sha256:e9efa92d3fb28ea94cb38454a765709878cc83256d3a90044f7120200ea83bf4"
       options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
     permissions:
       actions: read
@@ -79,7 +79,7 @@ jobs:
 
       - name: Cache Kernel RPMs
         id: cache-kernel
-        uses: actions/cache@v4
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
         with:
           path: ${{ steps.kernel-version.outputs.KCPATH }}
           key: ${{ inputs.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_major_minor_patch }}-${{ matrix.platform }} # job outputs KCKEY
