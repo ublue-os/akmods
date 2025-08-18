@@ -117,7 +117,7 @@ get-kernel-version:
             $dnf makecache >&2
             linux=$($dnf repoquery --whatprovides kernel | sort -V | tail -n1 | sed 's/.*://')
             ;;
-        "centos-hsk")
+        "centos-kmodsig")
             $dnf -y install centos-release-hyperscale-kernel >&2
             $dnf makecache >&2
             linux=$($dnf repoquery --enablerepo="centos-hyperscale" --whatprovides kernel | sort -V | tail -n1 | sed 's/.*://')

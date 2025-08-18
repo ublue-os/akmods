@@ -59,17 +59,17 @@ elif [[ "${kernel_flavor}" == "centos" ]]; then
     curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-uki-virt-"$kernel_version".rpm
     curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/AppStream/"$ARCH"/os/Packages/kernel-devel-"$kernel_version".rpm
     curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/AppStream/"$ARCH"/os/Packages/kernel-devel-matched-"$kernel_version".rpm
-elif [[ "${kernel_flavor}" == "centos-hsk" ]]; then
-    dnf -y install centos-release-hyperscale-kernel
-    dnf download -y --enablerepo="centos-hyperscale" \
+elif [[ "${kernel_flavor}" == "centos-kmodsig" ]]; then
+    dnf -y install centos-release-kmods-kernel
+    dnf download -y --enablerepo="centos-kmods-kernel" \
         kernel-"${kernel_version}" \
-        kernel-core-"${kernel_version}" \
         kernel-modules-"${kernel_version}" \
-        kernel-modules-core-"${kernel_version}" \
-        kernel-modules-extra-"${kernel_version}" \
         kernel-devel-"${kernel_version}" \
-        kernel-devel-matched-"${kernel_version}" \
-        kernel-uki-virt-"${kernel_version}"
+        kernel-devel-matched-"${kernel_version}"
+        #kernel-core-"${kernel_version}" \
+        #kernel-modules-core-"${kernel_version}" \
+        #kernel-modules-extra-"${kernel_version}" \
+        #kernel-uki-virt-"${kernel_version}"
 elif [[ "${kernel_flavor}" =~ "longterm" ]]; then
     dnf download -y --enablerepo="copr:copr.fedorainfracloud.org:kwizart:kernel-${kernel_flavor}" \
         kernel-longterm-"${kernel_version}" \

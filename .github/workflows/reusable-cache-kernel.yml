@@ -8,7 +8,7 @@ on:
         required: false
         type: string
       kernel_flavor:
-        description: "The Kernel flavor: main, bazzite, coreos-stable, centos-hsk, longterm-6.12, etc"
+        description: "The Kernel flavor: main, bazzite, coreos-stable, centos-kmodsig, longterm-6.12, etc"
         required: true
         type: string
       version:
@@ -26,7 +26,7 @@ on:
         required: false
         type: string
       kernel_flavor:
-        description: "The Kernel flavor: main, bazzite, coreos-stable, centos-hsk, longterm-6.12, etc"
+        description: "The Kernel flavor: main, bazzite, coreos-stable, centos-kmodsig, longterm-6.12, etc"
         required: true
         type: string
       version:
