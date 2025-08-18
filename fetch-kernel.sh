@@ -114,6 +114,7 @@ ls -la /
 if [[ "${kernel_flavor}" == "centos-kmodsig" ]]; then
   dnf install -y \
       /"${kernel_name}-$kernel_version.rpm" \
+      /"${kernel_name}-core-$kernel_version.rpm" \
       /"${kernel_name}-modules-$kernel_version.rpm"
 else
   dnf install -y \
