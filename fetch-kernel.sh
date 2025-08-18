@@ -111,12 +111,18 @@ install -Dm644 "${KCWD}"/certs/public_key.crt "$PUBLIC_KEY_PATH"
 install -Dm644 "${KCWD}"/certs/private_key.priv "$PRIVATE_KEY_PATH"
 
 ls -la /
-dnf install -y \
-    /"${kernel_name}-$kernel_version.rpm" \
-    /"${kernel_name}-core-$kernel_version.rpm" \
-    /"${kernel_name}-modules-$kernel_version.rpm" \
-    /"${kernel_name}-modules-core-$kernel_version.rpm" \
-    /"${kernel_name}-modules-extra-$kernel_version.rpm"
+if [[ "${kernel_flavor}" == "centos-kmodsig" ]]; then
+  dnf install -y \
+      /"${kernel_name}-$kernel_version.rpm" \
+      /"${kernel_name}-modules-$kernel_version.rpm"
+else
+  dnf install -y \
+      /"${kernel_name}-$kernel_version.rpm" \
+      /"${kernel_name}-core-$kernel_version.rpm" \
+      /"${kernel_name}-modules-$kernel_version.rpm" \
+      /"${kernel_name}-modules-core-$kernel_version.rpm" \
+      /"${kernel_name}-modules-extra-$kernel_version.rpm"
+fi
 
 # Strip Signatures from non-fedora Kernels
 if [[ ${kernel_flavor} =~ main|coreos|centos ]]; then
