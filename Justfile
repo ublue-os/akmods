@@ -120,7 +120,7 @@ get-kernel-version:
         "centos-kmodsig")
             $dnf -y install centos-release-kmods-kernel >&2
             $dnf makecache >&2
-            linux=$($dnf repoquery --enablerepo="centos-kmods-kernel" --whatprovides kernel | sort -V | tail -n1 | sed 's/.*://')
+            linux=$($dnf repoquery --enablerepo="centos-kmods-kernel" --whatprovides kernel-core | sort -V | tail -n1 | sed 's/.*://')
             ;;
         "coreos-stable")
             coreos_kernel stable

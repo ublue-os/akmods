@@ -63,10 +63,10 @@ elif [[ "${kernel_flavor}" == "centos-kmodsig" ]]; then
     dnf -y install centos-release-kmods-kernel
     dnf download -y --enablerepo="centos-kmods-kernel" \
         kernel-"${kernel_version}" \
+        kernel-core-"${kernel_version}" \
         kernel-modules-"${kernel_version}" \
         kernel-devel-"${kernel_version}" \
         kernel-devel-matched-"${kernel_version}"
-        #kernel-core-"${kernel_version}" \
         #kernel-modules-core-"${kernel_version}" \
         #kernel-modules-extra-"${kernel_version}" \
         #kernel-uki-virt-"${kernel_version}"
