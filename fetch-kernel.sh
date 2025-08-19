@@ -22,7 +22,7 @@ if [[ "$kernel_flavor" =~ "centos" ]]; then
     dnf config-manager --set-enabled crb
     dnf -y install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${CENTOS_VER}.noarch.rpm"
 fi
-dnf -y install --setopt=install_weak_deps=False rpmrebuild sbsigntools
+dnf -y install --setopt=install_weak_deps=False dracut rpmrebuild sbsigntools
 
 case "$kernel_flavor" in
     "bazzite"|"centos"|"coreos"*|"main")
@@ -110,7 +110,6 @@ install -Dm644 "${KCWD}"/certs/private_key.priv "$PRIVATE_KEY_PATH"
 ls -la /
 if [[ "${kernel_flavor}" == "centos-kmodsig" ]]; then
   dnf install -y \
-      dracut \
       /"${kernel_name}-$kernel_version.rpm" \
       /"${kernel_name}-core-$kernel_version.rpm" \
       /"${kernel_name}-modules-$kernel_version.rpm"
