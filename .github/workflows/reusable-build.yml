@@ -86,7 +86,7 @@ jobs:
         
       - name: Cache Kernel RPMs
         id: cache-kernel
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: ${{ steps.gh-workspace.outputs.GITHUB_WORKSPACE }}/build/${{ env.AKMODS_KERNEL }}-${{ env.AKMODS_VERSION }}/KCWD/rpms
           key: ${{ env.KCKEY }}-${{ matrix.platform }}
@@ -150,7 +150,7 @@ jobs:
 
       - name: Cache Kernel RPMs
         id: cache-kernel
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: ${{ steps.gh-workspace.outputs.GITHUB_WORKSPACE }}/build/${{ env.AKMODS_KERNEL }}-${{ env.AKMODS_VERSION }}/KCWD/rpms
           key: ${{ env.KCKEY }}-x86_64
