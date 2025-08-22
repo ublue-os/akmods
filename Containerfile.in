@@ -118,6 +118,7 @@ fi
 /tmp/build-kmod-ryzen-smu.sh
 /tmp/build-kmod-system76-io.sh
 /tmp/build-kmod-system76.sh
+/tmp/build-kmod-tuxedo-laptop.sh
 /tmp/build-kmod-vhba.sh
 /tmp/build-kmod-zenergy.sh
 RUNEOF
