@@ -60,7 +60,7 @@ jobs:
       matrix:
         platform:
           - x86_64
-          # - aarch64
+          - aarch64
     env:
       AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
       AKMODS_KERNEL: ${{ inputs.kernel_flavor }}
