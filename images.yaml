@@ -63,7 +63,7 @@ images:
     centos:
       !!merge <<:
         - *server-build-group
-    centos-hsk:
+    centos-kmodsig:
       !!merge <<:
         - *server-build-group
   41:
