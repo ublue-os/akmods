@@ -22,10 +22,13 @@ if [[ "$kernel_flavor" =~ "centos" ]]; then
     dnf config-manager --set-enabled crb
     dnf -y install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${CENTOS_VER}.noarch.rpm"
 fi
-dnf -y install --setopt=install_weak_deps=False rpmrebuild sbsigntools
+dnf -y install --setopt=install_weak_deps=False dracut rpmrebuild sbsigntools
 
 case "$kernel_flavor" in
-    "bazzite"|"centos"*|"coreos"*|"main")
+    "bazzite"|"centos"|"coreos"*|"main")
+        ;;
+    "centos-kmodsig")
+        dnf -y install centos-release-kmods-kernel
         ;;
     "longterm"*)
         dnf -y copr enable kwizart/kernel-"${kernel_flavor}"
@@ -47,8 +50,6 @@ if [[ "${kernel_flavor}" == "bazzite" ]]; then
     curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-devel-matched-"$kernel_version".rpm
     curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-tools-"$kernel_version".rpm
     curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-tools-libs-"$kernel_version".rpm
-    # curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-uki-virt-"$kernel_version".rpm
-    # curl -LO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-uki-virt-addons-"$kernel_version".rpm
 elif [[ "${kernel_flavor}" == "centos" ]]; then
     # Using curl instead of dnf download for https links
     curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-"$kernel_version".rpm
@@ -59,17 +60,13 @@ elif [[ "${kernel_flavor}" == "centos" ]]; then
     curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-uki-virt-"$kernel_version".rpm
     curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/AppStream/"$ARCH"/os/Packages/kernel-devel-"$kernel_version".rpm
     curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/AppStream/"$ARCH"/os/Packages/kernel-devel-matched-"$kernel_version".rpm
-elif [[ "${kernel_flavor}" == "centos-hsk" ]]; then
-    dnf -y install centos-release-hyperscale-kernel
-    dnf download -y --enablerepo="centos-hyperscale" \
+elif [[ "${kernel_flavor}" == "centos-kmodsig" ]]; then
+    dnf download -y --enablerepo="centos-kmods-kernel" \
         kernel-"${kernel_version}" \
         kernel-core-"${kernel_version}" \
         kernel-modules-"${kernel_version}" \
-        kernel-modules-core-"${kernel_version}" \
-        kernel-modules-extra-"${kernel_version}" \
         kernel-devel-"${kernel_version}" \
-        kernel-devel-matched-"${kernel_version}" \
-        kernel-uki-virt-"${kernel_version}"
+        kernel-devel-matched-"${kernel_version}"
 elif [[ "${kernel_flavor}" =~ "longterm" ]]; then
     dnf download -y --enablerepo="copr:copr.fedorainfracloud.org:kwizart:kernel-${kernel_flavor}" \
         kernel-longterm-"${kernel_version}" \
@@ -111,12 +108,19 @@ install -Dm644 "${KCWD}"/certs/public_key.crt "$PUBLIC_KEY_PATH"
 install -Dm644 "${KCWD}"/certs/private_key.priv "$PRIVATE_KEY_PATH"
 
 ls -la /
-dnf install -y \
-    /"${kernel_name}-$kernel_version.rpm" \
-    /"${kernel_name}-core-$kernel_version.rpm" \
-    /"${kernel_name}-modules-$kernel_version.rpm" \
-    /"${kernel_name}-modules-core-$kernel_version.rpm" \
-    /"${kernel_name}-modules-extra-$kernel_version.rpm"
+if [[ "${kernel_flavor}" == "centos-kmodsig" ]]; then
+  dnf install -y \
+      /"${kernel_name}-$kernel_version.rpm" \
+      /"${kernel_name}-core-$kernel_version.rpm" \
+      /"${kernel_name}-modules-$kernel_version.rpm"
+else
+  dnf install -y \
+      /"${kernel_name}-$kernel_version.rpm" \
+      /"${kernel_name}-core-$kernel_version.rpm" \
+      /"${kernel_name}-modules-$kernel_version.rpm" \
+      /"${kernel_name}-modules-core-$kernel_version.rpm" \
+      /"${kernel_name}-modules-extra-$kernel_version.rpm"
+fi
 
 # Strip Signatures from non-fedora Kernels
 if [[ ${kernel_flavor} =~ main|coreos|centos ]]; then
