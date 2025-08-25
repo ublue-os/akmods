@@ -12,7 +12,7 @@ cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo /etc/
 dnf install -y \
     akmod-xone-*.fc"${RELEASE}"."${ARCH}"
 akmods --force --kernels "${KERNEL}" --kmod xone
-modinfo /usr/lib/modules/"${KERNEL}"/extra/xone/xone-{dongle,gip,gip-gamepad,gip-headset,gip-chatpad,gip-madcatz-strat,gip-madcatz-glam,gip-pdp-jaguar}.ko.xz > /dev/null \
+modinfo /usr/lib/modules/"${KERNEL}"/extra/xone/xone_{dongle,gip,gip_gamepad,gip_headset,gip_chatpad,gip_madcatz_strat,gip_madcatz_glam,gip_pdp_jaguar}.ko.xz > /dev/null \
 || (find /var/cache/akmods/xone/ -name \*.log -print -exec cat {} \; && exit 1)
 
 rm -f /etc/yum.repos.d/_copr_ublue-os-akmods.repo
