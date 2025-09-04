@@ -61,12 +61,19 @@ elif [[ "${kernel_flavor}" == "centos" ]]; then
     curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/AppStream/"$ARCH"/os/Packages/kernel-devel-"$kernel_version".rpm
     curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/AppStream/"$ARCH"/os/Packages/kernel-devel-matched-"$kernel_version".rpm
 elif [[ "${kernel_flavor}" == "centos-kmodsig" ]]; then
-    dnf download -y --enablerepo="centos-kmods-kernel" \
-        kernel-"${kernel_version}" \
-        kernel-core-"${kernel_version}" \
-        kernel-modules-"${kernel_version}" \
-        kernel-devel-"${kernel_version}" \
-        kernel-devel-matched-"${kernel_version}"
+    KERNEL_MAJOR_MINOR_PATCH=$(echo "$kernel_version" | cut -d '-' -f 1)
+    KERNEL_RELEASE="$(echo "$kernel_version" | cut -d - -f 2 | rev | cut -d . -f 2- | rev)"
+    # https://cbs.centos.org/kojifiles/packages/kernel/6.15.10/1.el10/x86_64/kernel-6.15.10-1.el10.x86_64.rpm
+    BASE_URL="https://cbs.centos.org/kojifiles/packages/kernel/${KERNEL_MAJOR_MINOR_PATCH}/${KERNEL_RELEASE}/${ARCH}"
+    for pkg in \
+        kernel \
+        kernel-core \
+        kernel-devel \
+        kernel-devel-matched \
+        kernel-modules \
+        kernel-headers; do
+        curl -#fLO "${BASE_URL}/${pkg}-${kernel_version}.rpm"
+    done
 elif [[ "${kernel_flavor}" =~ "longterm" ]]; then
     dnf download -y --enablerepo="copr:copr.fedorainfracloud.org:kwizart:kernel-${kernel_flavor}" \
         kernel-longterm-"${kernel_version}" \
@@ -79,16 +86,19 @@ elif [[ "${kernel_flavor}" =~ "longterm" ]]; then
 else
     KERNEL_MAJOR_MINOR_PATCH=$(echo "$kernel_version" | cut -d '-' -f 1)
     KERNEL_RELEASE="$(echo "$kernel_version" | cut -d - -f 2 | rev | cut -d . -f 2- | rev)"
-    
+    BASE_URL="https://kojipkgs.fedoraproject.org//packages/kernel/${KERNEL_MAJOR_MINOR_PATCH}/${KERNEL_RELEASE}/${ARCH}"
     # Using curl instead of dnf download for https links
-    curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-"$kernel_version".rpm
-    curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-core-"$kernel_version".rpm
-    curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-modules-"$kernel_version".rpm
-    curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-modules-core-"$kernel_version".rpm
-    curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-modules-extra-"$kernel_version".rpm
-    curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-devel-"$kernel_version".rpm
-    curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-devel-matched-"$kernel_version".rpm
-    curl -#fLO https://kojipkgs.fedoraproject.org//packages/kernel/"$KERNEL_MAJOR_MINOR_PATCH"/"$KERNEL_RELEASE"/"$ARCH"/kernel-uki-virt-"$kernel_version".rpm
+    for pkg in \
+        kernel \
+        kernel-core \
+        kernel-modules \
+        kernel-modules-core \
+        kernel-modules-extra \
+        kernel-devel \
+        kernel-devel-matched \
+        kernel-uki-virt; do
+        curl -#fLO "${BASE_URL}/${pkg}-${kernel_version}.rpm"
+    done
 fi
 
 if [[ ! -s "${KCWD}"/certs/private_key.priv ]]; then

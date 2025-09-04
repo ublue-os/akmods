@@ -60,14 +60,27 @@ get-kernel-version:
     fi
 
     coreos_kernel() {
+        # query the upstream coreos (stable or testing) image and provide the kernel version
         coreos_version=${1}
         image_linux="$(skopeo inspect docker://quay.io/fedora/fedora-coreos:$coreos_version --format '{{{{ index .Labels "ostree.linux" }}')"
+
         # Kernel Pin Location
+        # this gives us a consistent place to handle pinning for coreos stable dependent usages
+        # including: ucore stable, bluefin/aurora stable, bluefin lts (using centos-kmodsig version matching)
         #if [[ "{{ kernel_flavor }}" =~ coreos-stable ]]; then
         #    image_linux="6.14.11-300.fc42.$(uname -m)"
         #fi
 
+        # This always provides kernel version from the upstream image as the resulting $image_linux variable
+        # It should be verified downloadable by verify_kernel_fedora() and verify_kernel_centos_kmodsig()
+    }
+
+    verify_kernel_fedora() {
+        # using the kernel version from upstream image
+        # verify the expected version exist in koji packages for Fedora of the required version
+
         # Get Variables
+        coreos_version=${1}
         major_minor_patch="$(echo $image_linux | grep -oP '^\d+\.\d+\.\d+')"
         kernel_rel_part=$(echo $image_linux | grep -oP '^\d+\.\d+\.\d+\-\K([123][0][0-9])')
         arch="$(echo $image_linux | grep -oP 'fc\d+\.\K.*$')"
@@ -96,13 +109,48 @@ get-kernel-version:
             echo "$URL" >&2
             HTTP_RESP=$(curl -sI "$URL" | grep ^HTTP)
             if grep -qv "200 OK" <<< "${HTTP_RESP}"; then
-                echo "Koji failed to find $coreos_version kernel: $kernel_version" >&2
+                echo "Koji re-query failed to find $coreos_version kernel: $kernel_version" >&2
             fi
         fi
         if grep -q "200 OK" <<< "${HTTP_RESP}"; then
             linux=$kernel_version
         fi
     }
+
+    verify_kernel_centos_kmodsig() {
+        # using the kernel version from upstream image
+        # verify the expected version exist in koji packages for CentOS KMODSIG of the required version
+
+        # Get Variables
+        major_minor_patch="$(echo $image_linux | grep -oP '^\d+\.\d+\.\d+')"
+        arch="$(echo $image_linux | grep -oP 'fc\d+\.\K.*$')"
+        kernel_rel="1.el{{ version }}"
+        kernel_version="$major_minor_patch-$kernel_rel.$arch"
+        URL="https://cbs.centos.org/kojifiles/packages/kernel/${major_minor_patch}/${kernel_rel}/${arch}/kernel-${kernel_version}.rpm"
+
+        echo "Querying koji for CentOS Kmods SIG kernel: $kernel_version" >&2
+        echo "$URL" >&2
+        HTTP_RESP=$(curl -sI "$URL" | grep ^HTTP)
+        linux=""
+        if grep -qv "200 OK" <<< "${HTTP_RESP}"; then
+            echo "Koji failed to find CentOS Kmods SIG kernel: $kernel_version" >&2
+            # a naive fallback as this could only occur if the .2 release was built and .1 removed
+            # however, it provides an example for possible improvements to trying to use the latest release
+            kernel_rel="2.el{{ version }}"
+            kernel_version="$major_minor_patch-$kernel_rel.$arch"
+            URL="https://cbs.centos.org/kojifiles/packages/kernel/${major_minor_patch}/${kernel_rel}/${arch}/kernel-${kernel_version}.rpm"
+            echo "Re-querying koji for CentOS Kmods SIG kernel: $kernel_version" >&2
+            echo "$URL" >&2
+            HTTP_RESP=$(curl -sI "$URL" | grep ^HTTP)
+            if grep -qv "200 OK" <<< "${HTTP_RESP}"; then
+                echo "Koji re-query failed to find CentOS Kmods SIG kernel: $kernel_version" >&2
+            fi
+        fi
+        if grep -q "200 OK" <<< "${HTTP_RESP}"; then
+            linux=$kernel_version
+        fi
+    }
+
 
     kernel_name=kernel
     case {{ kernel_flavor }} in
@@ -122,13 +170,19 @@ get-kernel-version:
         "centos-kmodsig")
             $dnf -y install centos-release-kmods-kernel >&2
             $dnf makecache >&2
-            linux=$($dnf repoquery --enablerepo="centos-kmods-kernel" --whatprovides kernel-core | sort -V | tail -n1 | sed 's/.*://')
+            coreos_kernel stable
+            verify_kernel_centos_kmodsig
+            # Ideally we could check the value of $linux verified above is available in the `centos-release-kmods-kernel` repo, but at this time,
+            # the current CoreOS 6.15.9 kernel is just slightly too old to be available in the SIG repo. Hopefully caching for kojifiles is adequate
+            #linux_repo=$($dnf repoquery --enablerepo="centos-kmods-kernel" --whatprovides kernel-core | sort -V | tail -n1 | sed 's/.*://')
             ;;
         "coreos-stable")
             coreos_kernel stable
+            verify_kernel_fedora stable
             ;;
         "coreos-testing")
             coreos_kernel testing
+            verify_kernel_fedora testing
             ;;
         "longterm"*)
             $dnf copr enable -y kwizart/kernel-{{ kernel_flavor }} >&2
