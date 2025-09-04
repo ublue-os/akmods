@@ -69,7 +69,7 @@ get-kernel-version:
 
         # Get Variables
         major_minor_patch="$(echo $image_linux | grep -oP '^\d+\.\d+\.\d+')"
-        kernel_rel_part=$(echo $image_linux | grep -oP '^\d+\.\d+\.\d+\-\K([123][0]{2})')
+        kernel_rel_part=$(echo $image_linux | grep -oP '^\d+\.\d+\.\d+\-\K([123][0][0-9])')
         arch="$(echo $image_linux | grep -oP 'fc\d+\.\K.*$')"
         kernel_rel="$kernel_rel_part.fc{{ version }}"
         kernel_version="$major_minor_patch-$kernel_rel.$arch"
@@ -82,9 +82,11 @@ get-kernel-version:
         if grep -qv "200 OK" <<< "${HTTP_RESP}"; then
             echo "Koji failed to find $coreos_version kernel: $kernel_version" >&2
             case "$kernel_rel_part" in
-                "300") kernel_rel_part="200" ;;
-                "200") kernel_rel_part="100" ;;
-                "100") ;;
+                30[0-9]|20[0-9])
+                    kernel_rel_part_new=$((10#$kernel_rel_part - 100))
+                    kernel_rel_part=$(printf "%03d" "$kernel_rel_part_new")   # zero pad to 3 digits
+                    ;;
+                10[0-9]) ;;
                 *) echo "unexpected kernel_rel_part ${kernel_rel_part}" >&2 ;;
             esac
             kernel_rel="$kernel_rel_part.fc{{ version }}"
