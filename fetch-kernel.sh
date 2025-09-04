@@ -72,7 +72,7 @@ elif [[ "${kernel_flavor}" == "centos-kmodsig" ]]; then
         kernel-devel-matched \
         kernel-modules \
         kernel-headers; do
-        curl -#fLO "${BASE_URL}/${pkg}-${KERNEL_MAJOR_MINOR_PATCH}-${KERNEL_RELEASE}-${ARCH}.rpm"
+        curl -#fLO "${BASE_URL}/${pkg}-${kernel_version}.rpm"
     done
 elif [[ "${kernel_flavor}" =~ "longterm" ]]; then
     dnf download -y --enablerepo="copr:copr.fedorainfracloud.org:kwizart:kernel-${kernel_flavor}" \
@@ -97,7 +97,7 @@ else
         kernel-devel \
         kernel-devel-matched \
         kernel-uki-virt; do
-        curl -#fLO "${BASE_URL}/${pkg}-${KERNEL_MAJOR_MINOR_PATCH}-${KERNEL_RELEASE}-${ARCH}.rpm"
+        curl -#fLO "${BASE_URL}/${pkg}-${kernel_version}.rpm"
     done
 fi
 
