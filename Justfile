@@ -69,7 +69,7 @@ get-kernel-version:
 
         # Get Variables
         major_minor_patch="$(echo $image_linux | grep -oP '^\d+\.\d+\.\d+')"
-        kernel_rel_part=$(echo $image_linux | grep -oP '^\d+\.\d+\.\d+\-\K([123][0]{2})')
+        kernel_rel_part=$(echo $image_linux | grep -oP '^\d+\.\d+\.\d+\-\K([123][0][0-9])')
         arch="$(echo $image_linux | grep -oP 'fc\d+\.\K.*$')"
         kernel_rel="$kernel_rel_part.fc{{ version }}"
         kernel_version="$major_minor_patch-$kernel_rel.$arch"
