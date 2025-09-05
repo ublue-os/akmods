@@ -470,7 +470,7 @@ generate-workflows:
                 for k in "${targets[@]}"; do
                     #shellcheck disable=SC1087
                     if [[ "$(yq ".images.$i[\"$j\"].$k" images.yaml)" != "null" ]]; then
-                        arch=$(yq "explode(.).images.$i[\"$j\"].$k.architecture" images.yaml | echo "["$(sed 's/^- //' | paste -sd, -)"]")
+                        arch=$(yq -o json "explode(.).images.$i[\"$j\"].$k.architecture" images.yaml | jq -c)
                         images+=(["$i-$j-$k"]="$i,$j,$k,$arch")
                         workflows+=(["$i-$j"]="$i,$j,$arch")
                     fi

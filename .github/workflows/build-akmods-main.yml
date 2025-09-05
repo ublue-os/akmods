@@ -25,7 +25,7 @@ jobs:
       contents: read
       packages: write
     with:
-      architecture: [x86_64]
+      architecture: ["x86_64"]
       kernel_flavor: main
       version: 41
   build-main_41_common:
@@ -39,7 +39,7 @@ jobs:
     needs: cache_kernel_main_41
     with:
       akmods_target: common
-      architecture: [x86_64]
+      architecture: ["x86_64"]
       kernel_cache_key: ${{ needs.cache_kernel_main_41.outputs.KCKEY }}
       kernel_flavor: main
       version: 41
@@ -54,7 +54,7 @@ jobs:
     needs: cache_kernel_main_41
     with:
       akmods_target: nvidia
-      architecture: [x86_64]
+      architecture: ["x86_64"]
       kernel_cache_key: ${{ needs.cache_kernel_main_41.outputs.KCKEY }}
       kernel_flavor: main
       version: 41
@@ -69,7 +69,7 @@ jobs:
     needs: cache_kernel_main_41
     with:
       akmods_target: nvidia-open
-      architecture: [x86_64]
+      architecture: ["x86_64"]
       kernel_cache_key: ${{ needs.cache_kernel_main_41.outputs.KCKEY }}
       kernel_flavor: main
       version: 41
@@ -97,7 +97,7 @@ jobs:
       contents: read
       packages: write
     with:
-      architecture: [x86_64]
+      architecture: ["x86_64"]
       kernel_flavor: main
       version: 42
   build-main_42_common:
@@ -111,7 +111,7 @@ jobs:
     needs: cache_kernel_main_42
     with:
       akmods_target: common
-      architecture: [x86_64]
+      architecture: ["x86_64"]
       kernel_cache_key: ${{ needs.cache_kernel_main_42.outputs.KCKEY }}
       kernel_flavor: main
       version: 42
@@ -126,7 +126,7 @@ jobs:
     needs: cache_kernel_main_42
     with:
       akmods_target: nvidia
-      architecture: [x86_64]
+      architecture: ["x86_64"]
       kernel_cache_key: ${{ needs.cache_kernel_main_42.outputs.KCKEY }}
       kernel_flavor: main
       version: 42
@@ -141,7 +141,7 @@ jobs:
     needs: cache_kernel_main_42
     with:
       akmods_target: nvidia-open
-      architecture: [x86_64]
+      architecture: ["x86_64"]
       kernel_cache_key: ${{ needs.cache_kernel_main_42.outputs.KCKEY }}
       kernel_flavor: main
       version: 42

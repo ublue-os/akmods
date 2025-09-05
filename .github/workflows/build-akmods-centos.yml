@@ -25,7 +25,7 @@ jobs:
       contents: read
       packages: write
     with:
-      architecture: [aarch64,x86_64]
+      architecture: ["aarch64","x86_64"]
       kernel_flavor: centos
       version: 10
   build-centos_10_nvidia:
@@ -39,7 +39,7 @@ jobs:
     needs: cache_kernel_centos_10
     with:
       akmods_target: nvidia
-      architecture: [aarch64,x86_64]
+      architecture: ["aarch64","x86_64"]
       kernel_cache_key: ${{ needs.cache_kernel_centos_10.outputs.KCKEY }}
       kernel_flavor: centos
       version: 10
@@ -54,7 +54,7 @@ jobs:
     needs: cache_kernel_centos_10
     with:
       akmods_target: nvidia-open
-      architecture: [aarch64,x86_64]
+      architecture: ["aarch64","x86_64"]
       kernel_cache_key: ${{ needs.cache_kernel_centos_10.outputs.KCKEY }}
       kernel_flavor: centos
       version: 10
@@ -69,7 +69,7 @@ jobs:
     needs: cache_kernel_centos_10
     with:
       akmods_target: zfs
-      architecture: [aarch64,x86_64]
+      architecture: ["aarch64","x86_64"]
       kernel_cache_key: ${{ needs.cache_kernel_centos_10.outputs.KCKEY }}
       kernel_flavor: centos
       version: 10

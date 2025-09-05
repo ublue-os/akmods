@@ -30,7 +30,7 @@ jobs:
       contents: read
       packages: write
     with:
-      architecture: [x86_64]
+      architecture: ["x86_64"]
       kernel_flavor: bazzite
       version: 42
       bazzite_tag: ${{ inputs.bazzite_tag }}
@@ -45,7 +45,7 @@ jobs:
     needs: cache_kernel_bazzite_42
     with:
       akmods_target: common
-      architecture: [x86_64]
+      architecture: ["x86_64"]
       kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
       kernel_flavor: bazzite
       version: 42
@@ -60,7 +60,7 @@ jobs:
     needs: cache_kernel_bazzite_42
     with:
       akmods_target: extra
-      architecture: [x86_64]
+      architecture: ["x86_64"]
       kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
       kernel_flavor: bazzite
       version: 42
@@ -75,7 +75,7 @@ jobs:
     needs: cache_kernel_bazzite_42
     with:
       akmods_target: nvidia
-      architecture: [x86_64]
+      architecture: ["x86_64"]
       kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
       kernel_flavor: bazzite
       version: 42
@@ -90,7 +90,7 @@ jobs:
     needs: cache_kernel_bazzite_42
     with:
       akmods_target: nvidia-open
-      architecture: [x86_64]
+      architecture: ["x86_64"]
       kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
       kernel_flavor: bazzite
       version: 42
