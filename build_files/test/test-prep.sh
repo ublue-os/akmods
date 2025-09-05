@@ -20,7 +20,6 @@ if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
 else
     echo "Building for Fedora"
     RELEASE="$(rpm -E '%fedora')"
-    ARCH="$(rpm -E %{_arch})"
     NVIDIA_REPO_NAME="fedora-nvidia.repo"
     if [ "$(rpm -E %{_arch})" = "x86_64" ]; then
         NVIDIA_EXTRA_PKGS="libva-nvidia-driver libnvidia-ml.i686 mesa-vulkan-drivers.i686 nvidia-driver-cuda-libs.i686 nvidia-driver-libs.i686"
