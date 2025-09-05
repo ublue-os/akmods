@@ -7,6 +7,6 @@
       contents: read
       packages: write
     with:
-      architecture: %%ARCHITECTURE%%
+      architecture: '%%ARCHITECTURE%%'
       kernel_flavor: %%KERNEL_FLAVOR%%
       version: %%VERSION%%

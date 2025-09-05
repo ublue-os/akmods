@@ -25,7 +25,7 @@ jobs:
       contents: read
       packages: write
     with:
-      architecture: ["x86_64"]
+      architecture: '["x86_64"]'
       kernel_flavor: coreos-testing
       version: 41
   build-coreos-testing_41_common:
@@ -39,7 +39,7 @@ jobs:
     needs: cache_kernel_coreos-testing_41
     with:
       akmods_target: common
-      architecture: ["x86_64"]
+      architecture: '["x86_64"]'
       kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_41.outputs.KCKEY }}
       kernel_flavor: coreos-testing
       version: 41
@@ -54,7 +54,7 @@ jobs:
     needs: cache_kernel_coreos-testing_41
     with:
       akmods_target: nvidia
-      architecture: ["x86_64"]
+      architecture: '["x86_64"]'
       kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_41.outputs.KCKEY }}
       kernel_flavor: coreos-testing
       version: 41
@@ -69,7 +69,7 @@ jobs:
     needs: cache_kernel_coreos-testing_41
     with:
       akmods_target: nvidia-open
-      architecture: ["x86_64"]
+      architecture: '["x86_64"]'
       kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_41.outputs.KCKEY }}
       kernel_flavor: coreos-testing
       version: 41
@@ -84,7 +84,7 @@ jobs:
     needs: cache_kernel_coreos-testing_41
     with:
       akmods_target: zfs
-      architecture: ["x86_64"]
+      architecture: '["x86_64"]'
       kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_41.outputs.KCKEY }}
       kernel_flavor: coreos-testing
       version: 41
@@ -112,7 +112,7 @@ jobs:
       contents: read
       packages: write
     with:
-      architecture: ["aarch64","x86_64"]
+      architecture: '["aarch64","x86_64"]'
       kernel_flavor: coreos-testing
       version: 42
   build-coreos-testing_42_common:
@@ -126,7 +126,7 @@ jobs:
     needs: cache_kernel_coreos-testing_42
     with:
       akmods_target: common
-      architecture: ["aarch64","x86_64"]
+      architecture: '["aarch64","x86_64"]'
       kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_42.outputs.KCKEY }}
       kernel_flavor: coreos-testing
       version: 42
@@ -141,7 +141,7 @@ jobs:
     needs: cache_kernel_coreos-testing_42
     with:
       akmods_target: nvidia
-      architecture: ["aarch64","x86_64"]
+      architecture: '["aarch64","x86_64"]'
       kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_42.outputs.KCKEY }}
       kernel_flavor: coreos-testing
       version: 42
@@ -156,7 +156,7 @@ jobs:
     needs: cache_kernel_coreos-testing_42
     with:
       akmods_target: nvidia-open
-      architecture: ["aarch64","x86_64"]
+      architecture: '["aarch64","x86_64"]'
       kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_42.outputs.KCKEY }}
       kernel_flavor: coreos-testing
       version: 42
@@ -171,7 +171,7 @@ jobs:
     needs: cache_kernel_coreos-testing_42
     with:
       akmods_target: zfs
-      architecture: ["aarch64","x86_64"]
+      architecture: '["aarch64","x86_64"]'
       kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_42.outputs.KCKEY }}
       kernel_flavor: coreos-testing
       version: 42
