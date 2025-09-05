@@ -470,8 +470,9 @@ generate-workflows:
                 for k in "${targets[@]}"; do
                     #shellcheck disable=SC1087
                     if [[ "$(yq ".images.$i[\"$j\"].$k" images.yaml)" != "null" ]]; then
-                        images+=(["$i-$j-$k"]="$i,$j,$k")
-                        workflows+=(["$i-$j"]="$i,$j")
+                        arch=$(yq "explode(.).images.$i[\"$j\"].$k.architecture" images.yaml | echo "["$(sed 's/^- //' | paste -sd, -)"]")
+                        images+=(["$i-$j-$k"]="$i,$j,$k,$arch")
+                        workflows+=(["$i-$j"]="$i,$j,$arch")
                     fi
                 done
             done
@@ -504,7 +505,8 @@ generate-workflows:
                 version=$(echo "${workflows[$j]}" | cut -d "," -f 1)
                 kernel_flavor=$(echo "${workflows[$j]}" | cut -d "," -f 2)
                 kernel_flavor_clean=$(echo $kernel_flavor | tr '.' '-')
-                sed -e "s/%%KERNEL_FLAVOR%%/$kernel_flavor/;s/%%KERNEL_FLAVOR_CLEAN%%/$kernel_flavor_clean/;s/%%VERSION%%/$version/" ./workflow-templates/cache_kernel.yaml.in
+                kernel_arch=$(echo "${workflows[$j]}" | cut -d "," -f 3-)
+                sed -e "s/%%ARCHITECTURE%%/$kernel_arch/;s/%%KERNEL_FLAVOR%%/$kernel_flavor/;s/%%KERNEL_FLAVOR_CLEAN%%/$kernel_flavor_clean/;s/%%VERSION%%/$version/" ./workflow-templates/cache_kernel.yaml.in
                 if [[ "$i" =~ bazzite ]]; then
                     printf '      %s\n' 'bazzite_tag: ${{{{ inputs.bazzite_tag }}'
                 fi
@@ -514,9 +516,10 @@ generate-workflows:
                     if [ -z "$value" ]; then
                         continue
                     fi
+                    image_arch="$(echo "$value" | cut -d "," -f 4-)"
                     akmods_target="$(echo "$value" | cut -d "," -f 3)"
                     workflow_targets+=(build-"$kernel_flavor_clean"_"$version"_"$akmods_target")
-                    sed "s/%%VERSION%%/$version/;s/%%KERNEL_FLAVOR%%/$kernel_flavor/;s/%%AKMODS_TARGET%%/$akmods_target/;s/%%KERNEL_FLAVOR_CLEAN%%/$kernel_flavor_clean/" "./workflow-templates/job.yaml.in"
+                    sed "s/%%ARCHITECTURE%%/$image_arch/;s/%%VERSION%%/$version/;s/%%KERNEL_FLAVOR%%/$kernel_flavor/;s/%%AKMODS_TARGET%%/$akmods_target/;s/%%KERNEL_FLAVOR_CLEAN%%/$kernel_flavor_clean/" "./workflow-templates/job.yaml.in"
                 done
                 json_needs="$(jq -nM '$ARGS.positional' --args ${workflow_targets[@]} | jq @json)"
                 json_needs=${json_needs//[\\\"]}

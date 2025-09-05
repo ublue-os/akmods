@@ -25,6 +25,7 @@ jobs:
       contents: read
       packages: write
     with:
+      architecture: [aarch64,x86_64]
       kernel_flavor: coreos-stable
       version: 42
   build-coreos-stable_42_common:
@@ -37,10 +38,11 @@ jobs:
       packages: write
     needs: cache_kernel_coreos-stable_42
     with:
-      version: 42
-      kernel_flavor: coreos-stable
       akmods_target: common
+      architecture: [aarch64,x86_64]
       kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_42.outputs.KCKEY }}
+      kernel_flavor: coreos-stable
+      version: 42
   build-coreos-stable_42_nvidia:
     name: Build nvidia coreos-stable (42)
     uses: ./.github/workflows/reusable-build.yml
@@ -51,10 +53,11 @@ jobs:
       packages: write
     needs: cache_kernel_coreos-stable_42
     with:
-      version: 42
-      kernel_flavor: coreos-stable
       akmods_target: nvidia
+      architecture: [aarch64,x86_64]
       kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_42.outputs.KCKEY }}
+      kernel_flavor: coreos-stable
+      version: 42
   build-coreos-stable_42_nvidia-open:
     name: Build nvidia-open coreos-stable (42)
     uses: ./.github/workflows/reusable-build.yml
@@ -65,10 +68,11 @@ jobs:
       packages: write
     needs: cache_kernel_coreos-stable_42
     with:
-      version: 42
-      kernel_flavor: coreos-stable
       akmods_target: nvidia-open
+      architecture: [aarch64,x86_64]
       kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_42.outputs.KCKEY }}
+      kernel_flavor: coreos-stable
+      version: 42
   build-coreos-stable_42_zfs:
     name: Build zfs coreos-stable (42)
     uses: ./.github/workflows/reusable-build.yml
@@ -79,10 +83,11 @@ jobs:
       packages: write
     needs: cache_kernel_coreos-stable_42
     with:
-      version: 42
-      kernel_flavor: coreos-stable
       akmods_target: zfs
+      architecture: [aarch64,x86_64]
       kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_42.outputs.KCKEY }}
+      kernel_flavor: coreos-stable
+      version: 42
   check-coreos-stable_42:
     name: Check coreos-stable (42)
     permissions:
@@ -107,6 +112,7 @@ jobs:
       contents: read
       packages: write
     with:
+      architecture: [x86_64]
       kernel_flavor: coreos-stable
       version: 41
   build-coreos-stable_41_common:
@@ -119,10 +125,11 @@ jobs:
       packages: write
     needs: cache_kernel_coreos-stable_41
     with:
-      version: 41
-      kernel_flavor: coreos-stable
       akmods_target: common
+      architecture: [x86_64]
       kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_41.outputs.KCKEY }}
+      kernel_flavor: coreos-stable
+      version: 41
   build-coreos-stable_41_nvidia:
     name: Build nvidia coreos-stable (41)
     uses: ./.github/workflows/reusable-build.yml
@@ -133,10 +140,11 @@ jobs:
       packages: write
     needs: cache_kernel_coreos-stable_41
     with:
-      version: 41
-      kernel_flavor: coreos-stable
       akmods_target: nvidia
+      architecture: [x86_64]
       kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_41.outputs.KCKEY }}
+      kernel_flavor: coreos-stable
+      version: 41
   build-coreos-stable_41_nvidia-open:
     name: Build nvidia-open coreos-stable (41)
     uses: ./.github/workflows/reusable-build.yml
@@ -147,10 +155,11 @@ jobs:
       packages: write
     needs: cache_kernel_coreos-stable_41
     with:
-      version: 41
-      kernel_flavor: coreos-stable
       akmods_target: nvidia-open
+      architecture: [x86_64]
       kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_41.outputs.KCKEY }}
+      kernel_flavor: coreos-stable
+      version: 41
   build-coreos-stable_41_zfs:
     name: Build zfs coreos-stable (41)
     uses: ./.github/workflows/reusable-build.yml
@@ -161,10 +170,11 @@ jobs:
       packages: write
     needs: cache_kernel_coreos-stable_41
     with:
-      version: 41
-      kernel_flavor: coreos-stable
       akmods_target: zfs
+      architecture: [x86_64]
       kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_41.outputs.KCKEY }}
+      kernel_flavor: coreos-stable
+      version: 41
   check-coreos-stable_41:
     name: Check coreos-stable (41)
     permissions:
