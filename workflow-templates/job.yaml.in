@@ -8,7 +8,8 @@
       packages: write
     needs: cache_kernel_%%KERNEL_FLAVOR_CLEAN%%_%%VERSION%%
     with:
-      version: %%VERSION%%
-      kernel_flavor: %%KERNEL_FLAVOR%%
       akmods_target: %%AKMODS_TARGET%%
+      architecture: '%%ARCHITECTURE%%'
       kernel_cache_key: ${{ needs.cache_kernel_%%KERNEL_FLAVOR_CLEAN%%_%%VERSION%%.outputs.KCKEY }}
+      kernel_flavor: %%KERNEL_FLAVOR%%
+      version: %%VERSION%%
