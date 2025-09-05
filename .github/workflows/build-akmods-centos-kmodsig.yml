@@ -27,6 +27,7 @@ jobs:
     with:
       kernel_flavor: centos-kmodsig
       version: 10
+      platforms: "x86_64,aarch64"
   build-centos-kmodsig_10_nvidia:
     name: Build nvidia centos-kmodsig (10)
     uses: ./.github/workflows/reusable-build.yml
@@ -41,6 +42,7 @@ jobs:
       kernel_flavor: centos-kmodsig
       akmods_target: nvidia
       kernel_cache_key: ${{ needs.cache_kernel_centos-kmodsig_10.outputs.KCKEY }}
+      platforms: "x86_64,aarch64"
   build-centos-kmodsig_10_nvidia-open:
     name: Build nvidia-open centos-kmodsig (10)
     uses: ./.github/workflows/reusable-build.yml
@@ -55,6 +57,7 @@ jobs:
       kernel_flavor: centos-kmodsig
       akmods_target: nvidia-open
       kernel_cache_key: ${{ needs.cache_kernel_centos-kmodsig_10.outputs.KCKEY }}
+      platforms: "x86_64,aarch64"
   build-centos-kmodsig_10_zfs:
     name: Build zfs centos-kmodsig (10)
     uses: ./.github/workflows/reusable-build.yml
@@ -69,6 +72,7 @@ jobs:
       kernel_flavor: centos-kmodsig
       akmods_target: zfs
       kernel_cache_key: ${{ needs.cache_kernel_centos-kmodsig_10.outputs.KCKEY }}
+      platforms: "x86_64,aarch64"
   check-centos-kmodsig_10:
     name: Check centos-kmodsig (10)
     permissions:

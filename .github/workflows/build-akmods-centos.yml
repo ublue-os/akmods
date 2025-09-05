@@ -27,6 +27,7 @@ jobs:
     with:
       kernel_flavor: centos
       version: 10
+      platforms: "x86_64,aarch64"
   build-centos_10_nvidia:
     name: Build nvidia centos (10)
     uses: ./.github/workflows/reusable-build.yml
@@ -41,6 +42,7 @@ jobs:
       kernel_flavor: centos
       akmods_target: nvidia
       kernel_cache_key: ${{ needs.cache_kernel_centos_10.outputs.KCKEY }}
+      platforms: "x86_64,aarch64"
   build-centos_10_nvidia-open:
     name: Build nvidia-open centos (10)
     uses: ./.github/workflows/reusable-build.yml
@@ -55,6 +57,7 @@ jobs:
       kernel_flavor: centos
       akmods_target: nvidia-open
       kernel_cache_key: ${{ needs.cache_kernel_centos_10.outputs.KCKEY }}
+      platforms: "x86_64,aarch64"
   build-centos_10_zfs:
     name: Build zfs centos (10)
     uses: ./.github/workflows/reusable-build.yml
@@ -69,6 +72,7 @@ jobs:
       kernel_flavor: centos
       akmods_target: zfs
       kernel_cache_key: ${{ needs.cache_kernel_centos_10.outputs.KCKEY }}
+      platforms: "x86_64,aarch64"
   check-centos_10:
     name: Check centos (10)
     permissions:

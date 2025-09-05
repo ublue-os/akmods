@@ -420,11 +420,15 @@ manifest:
         podman manifest annotate --index --annotation "$label" "${MANIFEST}"
     done
 
-    # Add to Manifest
+    # Add to Manifest (Allowing for optional aarch64 builds)
     {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-x86_64' }}
-    # {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-aarch64' }}
+    if {{ podman }} manifest exists {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-aarch64' }}; then
+        {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-aarch64' }}
+    fi
     {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + replace_regex(shell("jq -r '.kernel_release' < $1", version_json), '.x86_64|.aarch64', '' ) }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_release' < $1", version_json) }}
-    # {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + replace_regex(shell("jq -r '.kernel_release' < $1", version_json), '.x86_64|.aarch64', '' ) }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + replace(shell("jq -r '.kernel_release' < $1", version_json), 'x86_64', 'aarch64') }}
+    if {{ podman }} manifest exists {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + replace(shell("jq -r '.kernel_release' < $1", version_json), 'x86_64', 'aarch64') }}; then
+        {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + replace_regex(shell("jq -r '.kernel_release' < $1", version_json), '.x86_64|.aarch64', '' ) }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + replace(shell("jq -r '.kernel_release' < $1", version_json), 'x86_64', 'aarch64') }}
+    fi
 
     # Push Manifest
     for i in {1..5}; do

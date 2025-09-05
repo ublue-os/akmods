@@ -23,6 +23,11 @@ on:
         description: "The Key for the Kernel Cache"
         required: true
         type: string
+      platforms:
+        description: "Platforms to build for: amd64 (default) or amd64+arm64"
+        required: false
+        type: string
+        default: "x86_64"
   workflow_dispatch:
     inputs:
       akmods_target:
@@ -45,6 +50,14 @@ on:
         description: "The Key for the Kernel Cache"
         required: true
         type: string
+      platforms:
+        description: "Platforms to build for: amd64 (default) or amd64+arm64"
+        required: false
+        type: choice
+        default: "x86_64"
+        options:
+          - "x86_64"
+          - "x86_64,aarch64"
 env:
   AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
   AKMODS_KERNEL: ${{ inputs.kernel_flavor }}
@@ -70,9 +83,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform:
-          - x86_64
-          # - aarch64
+        platform: >-
+          ${{
+            inputs.platforms == 'x86_64,aarch64' && 
+            fromJSON('["x86_64", "aarch64"]') ||
+            fromJSON('["x86_64"]')
+          }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
