@@ -421,10 +421,18 @@ manifest:
     done
 
     # Add to Manifest
-    {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-x86_64' }}
-    # {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-aarch64' }}
-    {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + replace_regex(shell("jq -r '.kernel_release' < $1", version_json), '.x86_64|.aarch64', '' ) }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_release' < $1", version_json) }}
-    # {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + replace_regex(shell("jq -r '.kernel_release' < $1", version_json), '.x86_64|.aarch64', '' ) }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + replace(shell("jq -r '.kernel_release' < $1", version_json), 'x86_64', 'aarch64') }}
+    if skopeo inspect {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-x86-64' }} &>/dev/null; then
+        {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-x86_64' }}
+    fi
+    if skopeo inspect {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-aarch64' }} &>/dev/null; then
+        {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-aarch64' }}
+    fi
+    if skopeo inspect {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_release' < $1", version_json) }} &>/dev/null; then
+      {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + replace_regex(shell("jq -r '.kernel_release' < $1", version_json), '.x86_64|.aarch64', '' ) }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_release' < $1", version_json) }}
+    fi
+    if skopeo inspect {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + replace(shell("jq -r '.kernel_release' < $1", version_json), 'x86_64', 'aarch64') }} &>/dev/null; then
+      {{ podman }} manifest add {{ 'ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + replace_regex(shell("jq -r '.kernel_release' < $1", version_json), '.x86_64|.aarch64', '' ) }} {{ 'docker://ghcr.io' / _org / akmods_name + ':' + kernel_flavor + '-' + version + '-' + replace(shell("jq -r '.kernel_release' < $1", version_json), 'x86_64', 'aarch64') }}
+    fi
 
     # Push Manifest
     for i in {1..5}; do
