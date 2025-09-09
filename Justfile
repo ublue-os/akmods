@@ -382,8 +382,8 @@ push:
     {{ if env('CI', '') != '' { 'log_sum "\`\`\`"' } else { '' } }}
 
 # Generate Manifest and Push to Registry
-manifest_tag := kernel_flavor + '-' + version
-manifest_tag_kernel := kernel_flavor + '-' + version + '-' + replace_regex(shell("jq -r '.kernel_release' < $1", version_json), '.x86_64|.aarch64', '' )
+manifest_tag := kernel_flavor + "-" + version
+manifest_tag_kernel :=  kernel_flavor + "-" + version + '-' + if path_exists(version_json) != 'true' { 'UNKNOWN' } else { replace_regex(shell("jq -r '.kernel_release' < $1", version_json), '.x86_64|.aarch64', '' ) }
 manifest_image := registry / _org / akmods_name+ ':' + manifest_tag
 manifest_image_kernel := registry / _org / akmods_name + ':' + manifest_tag_kernel
 
