@@ -418,7 +418,7 @@ manifest:
         podman manifest annotate --index --annotation "$label" "${MANIFEST}"
     done
 
-    MANIFEST=$({{ podman }} manifest create {{ manifest_image }})
+    MANIFEST=$({{ podman }} manifest create {{ manifest_image_kernel }})
 
     for label in "${LABELS[@]}"; do
         echo "Applying label "${label}" to manifest"
