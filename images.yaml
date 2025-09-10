@@ -4,6 +4,15 @@ defaults:
   version: 42
   akmods_target: common
 
+arch-arm-x86: &arch-arm-x86
+  architecture:
+    - aarch64
+    - x86_64
+
+arch-only-x86: &arch-only-x86
+  architecture:
+    - x86_64
+
 akmods-base: &akmods-base
   org: ublue-os
   registry: ghcr.io
@@ -35,37 +44,77 @@ desktop-build-group: &desktop-build-group
     !!merge <<:
       - *akmods-base
       - *akmods-common
+      - *arch-only-x86
   nvidia:
     !!merge <<:
       - *akmods-base
       - *akmods-nvidia
+      - *arch-only-x86
   nvidia-open:
     !!merge <<:
       - *akmods-base
       - *akmods-nvidia
+      - *arch-only-x86
+
+desktop-build-group: &desktop-build-group-arm-x86
+  common:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-common
+      - *arch-arm-x86
+  nvidia:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-nvidia
+      - *arch-arm-x86
+  nvidia-open:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-nvidia
+      - *arch-arm-x86
     
 server-build-group: &server-build-group
   nvidia:
     !!merge <<:
       - *akmods-base
       - *akmods-nvidia
+      - *arch-only-x86
   nvidia-open:
     !!merge <<:
       - *akmods-base
       - *akmods-nvidia
+      - *arch-only-x86
   zfs:
     !!merge <<:
       - *akmods-base
       - *akmods-zfs
+      - *arch-only-x86
+
+server-build-group-arm64: &server-build-group-arm-x86
+  nvidia:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-nvidia
+      - *arch-arm-x86
+  nvidia-open:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-nvidia
+      - *arch-arm-x86
+  zfs:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-zfs
+      - *arch-arm-x86
 
 images:
   10:
     centos:
       !!merge <<:
-        - *server-build-group
+        - *server-build-group-arm-x86
     centos-kmodsig:
       !!merge <<:
-        - *server-build-group
+        - *server-build-group-arm-x86
   41:
     main:
       !!merge <<:
@@ -86,18 +135,19 @@ images:
         !!merge <<:
           - *akmods-base
           - *akmods-extra
+          - *arch-only-x86
     main:
       !!merge <<:
         - *desktop-build-group
     coreos-stable:
       !!merge <<:
-        - *desktop-build-group
-        - *server-build-group
+        - *desktop-build-group-arm-x86
+        - *server-build-group-arm-x86
     coreos-testing:
       !!merge <<:
-        - *desktop-build-group
-        - *server-build-group
+        - *desktop-build-group-arm-x86
+        - *server-build-group-arm-x86
     "longterm-6.12":
       !!merge <<:
-        - *desktop-build-group
-        - *server-build-group
+        - *desktop-build-group-arm-x86
+        - *server-build-group-arm-x86

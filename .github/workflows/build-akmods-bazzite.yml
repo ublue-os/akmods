@@ -30,6 +30,7 @@ jobs:
       contents: read
       packages: write
     with:
+      architecture: '["x86_64"]'
       kernel_flavor: bazzite
       version: 42
       bazzite_tag: ${{ inputs.bazzite_tag }}
@@ -43,10 +44,11 @@ jobs:
       packages: write
     needs: cache_kernel_bazzite_42
     with:
-      version: 42
-      kernel_flavor: bazzite
       akmods_target: common
+      architecture: '["x86_64"]'
       kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
+      kernel_flavor: bazzite
+      version: 42
   build-bazzite_42_extra:
     name: Build extra bazzite (42)
     uses: ./.github/workflows/reusable-build.yml
@@ -57,10 +59,11 @@ jobs:
       packages: write
     needs: cache_kernel_bazzite_42
     with:
-      version: 42
-      kernel_flavor: bazzite
       akmods_target: extra
+      architecture: '["x86_64"]'
       kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
+      kernel_flavor: bazzite
+      version: 42
   build-bazzite_42_nvidia:
     name: Build nvidia bazzite (42)
     uses: ./.github/workflows/reusable-build.yml
@@ -71,10 +74,11 @@ jobs:
       packages: write
     needs: cache_kernel_bazzite_42
     with:
-      version: 42
-      kernel_flavor: bazzite
       akmods_target: nvidia
+      architecture: '["x86_64"]'
       kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
+      kernel_flavor: bazzite
+      version: 42
   build-bazzite_42_nvidia-open:
     name: Build nvidia-open bazzite (42)
     uses: ./.github/workflows/reusable-build.yml
@@ -85,10 +89,11 @@ jobs:
       packages: write
     needs: cache_kernel_bazzite_42
     with:
-      version: 42
-      kernel_flavor: bazzite
       akmods_target: nvidia-open
+      architecture: '["x86_64"]'
       kernel_cache_key: ${{ needs.cache_kernel_bazzite_42.outputs.KCKEY }}
+      kernel_flavor: bazzite
+      version: 42
   check-bazzite_42:
     name: Check bazzite (42)
     permissions:
