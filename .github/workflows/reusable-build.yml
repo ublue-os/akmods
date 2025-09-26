@@ -76,6 +76,8 @@ jobs:
     steps:
       - name: Mount BTRFS for podman storage
         uses: ublue-os/container-storage-action@main
+        with:
+          target-dir: /var/lib/containers
   build-akmods:
     name: Build ${{ matrix.architecture }}
     needs: pre-clean
