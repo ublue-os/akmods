@@ -67,20 +67,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  pre-clean:
-    runs-on: ${{ matrix.architecture == 'x86_64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        architecture: ${{ fromJson(inputs.architecture) }}
-    steps:
-      - name: Mount BTRFS for podman storage
-        uses: ublue-os/container-storage-action@main
-        with:
-          target-dir: /var/lib/containers
   build-akmods:
     name: Build ${{ matrix.architecture }}
-    needs: pre-clean
     runs-on: ${{ matrix.architecture == 'x86_64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
     permissions:
       actions: read
@@ -126,11 +114,11 @@ jobs:
           wc -c certs/private_key.priv
           wc -c certs/private_key_2.priv
 
+      - name: Check Disk Free Space
+        run: df -h
+
       - name: Test Image
-        run: |
-          df -h
-          just test
-          df -h
+        run: just test
         
       - name: Build Image
         run: just build
