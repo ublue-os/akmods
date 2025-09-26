@@ -115,7 +115,10 @@ jobs:
           wc -c certs/private_key_2.priv
 
       - name: Test Image
-        run: just test
+        run: |
+          df -h
+          just test
+          df -h
         
       - name: Build Image
         run: just build
