@@ -117,11 +117,17 @@ jobs:
       - name: Check Disk Free Space
         run: df -h
 
-      - name: Test Image
-        run: just test
+#      - name: Test Image
+#        run: just test
+#
+#      - name: Check Disk Free Space
+#        run: df -h
         
       - name: Build Image
         run: just build
+
+      - name: Check Disk Free Space
+        run: df -h
 
       - name: Push and Sign Image
         if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
