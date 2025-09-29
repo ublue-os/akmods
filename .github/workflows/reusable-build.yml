@@ -74,6 +74,9 @@ jobs:
       actions: read
       contents: read
       packages: write
+    container:
+      image: "ghcr.io/ublue-os/devcontainer:latest"
+      options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
     strategy:
       fail-fast: false
       matrix:
@@ -81,6 +84,9 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Mark Directory as Safe
+        run: git config --system --ad safe.directory "$GITHUB_WORKSPACE"
 
       - name: Export GITHUB_WORKSPACE
         id: gh-workspace
