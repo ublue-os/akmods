@@ -179,6 +179,6 @@ else
     KMODS_TO_INSTALL+=(/tmp/akmods-rpms/kmods/*.rpm)
 fi
 
-dnf install -y "${KMODS_TO_INSTALL[@]}"
+dnf install -y --setopt=install_weak_deps=False "${KMODS_TO_INSTALL[@]}"
 
 printf "KERNEL_NAME=%s" "$KERNEL_NAME" >> /tmp/info.sh
