@@ -121,7 +121,7 @@ jobs:
         run: just build
 
       - name: Push and Sign Image
-        if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
+        if: contains(fromJson('["schedule", "merge_group"]'), github.event_name) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
         run: |
           just login
           just push
