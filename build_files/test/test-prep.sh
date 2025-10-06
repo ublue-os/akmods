@@ -164,7 +164,6 @@ if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm 2> /dev/null) ]]; then
         nvidia-modprobe
         nvidia-persistenced
         nvidia-settings
-        nvidia-container-toolkit
         ${NVIDIA_EXTRA_PKGS}
         /tmp/akmods-rpms/kmods/kmod-nvidia-"${KERNEL_VERSION}"-"${NVIDIA_AKMOD_VERSION}"."${DIST_ARCH}".rpm
     )
