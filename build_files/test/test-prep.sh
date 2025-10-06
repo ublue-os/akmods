@@ -116,14 +116,11 @@ fi
 if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm) ]]; then
     curl -Lo /etc/yum.repos.d/negativo17-${NVIDIA_REPO_NAME} \
         "https://negativo17.org/repos/${NVIDIA_REPO_NAME}"
-    curl -Lo /etc/yum.repos.d/nvidia-container-toolkit.repo \
-        "https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo"
     curl -Lo /etc/yum.repos.d/nvidia-container.pp \
         "https://raw.githubusercontent.com/NVIDIA/dgx-selinux/master/bin/RHEL9/nvidia-container.pp"
     curl -Lo /tmp/nvidia-install.sh \
         "https://raw.githubusercontent.com/ublue-os/nvidia/main/build_files/nvidia-install.sh"
     chmod +x /tmp/nvidia-install.sh
-    sed -i "s@gpgcheck=0@gpgcheck=1@" /etc/yum.repos.d/nvidia-container-toolkit.repo
 fi
 
 dnf install -y \
@@ -153,7 +150,6 @@ rm -f /tmp/certs/private_key_2.priv
 
 if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm 2> /dev/null) ]]; then
     sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/negativo17-${NVIDIA_REPO_NAME}
-    sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/nvidia-container-toolkit.repo
     #shellcheck disable=SC1091
     source /tmp/akmods-rpms/kmods/nvidia-vars
     KMODS_TO_INSTALL+=(
@@ -164,7 +160,6 @@ if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm 2> /dev/null) ]]; then
         nvidia-modprobe
         nvidia-persistenced
         nvidia-settings
-        nvidia-container-toolkit
         ${NVIDIA_EXTRA_PKGS}
         /tmp/akmods-rpms/kmods/kmod-nvidia-"${KERNEL_VERSION}"-"${NVIDIA_AKMOD_VERSION}"."${DIST_ARCH}".rpm
     )
