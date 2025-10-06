@@ -7,8 +7,8 @@ BUILDDIR := shell('mkdir -p $1 && echo $1', env('AKMODS_BUILDDIR', absolute_path
 version_cache := shell('mkdir -p $1 && echo $1', BUILDDIR / kernel_flavor + '-' + version)
 KCWD := shell('mkdir -p $1 && echo $1', version_cache / 'KCWD')
 KCPATH := shell('mkdir -p $1 && echo $1', env('KCPATH', KCWD / 'rpms'))
-version_json := KCPATH / 'cache.json' 
-builder := if kernel_flavor =~ 'centos' { 'quay.io/centos/centos:' + version } else { 'quay.io/fedora/fedora:' + version } 
+version_json := KCPATH / 'cache.json'
+builder := if kernel_flavor =~ 'centos' { 'quay.io/centos/centos:' + version } else { 'quay.io/fedora/fedora:' + version }
 
 
 # Inputs
@@ -48,7 +48,7 @@ clean:
 # Get the Kernel Version
 [private]
 get-kernel-version:
-    #!/usr/bin/bash
+    #!/usr/bin/env bash
     set "${CI:+-x}" -euo pipefail
     if [[ {{ kernel_flavor }} =~ centos|longterm ]]; then
         {{ podman }} pull --retry 3 "{{ builder }}" >&2
@@ -237,9 +237,9 @@ get-kernel-version:
             "KCWD": $KCWD,
             "KCPATH": $KCPATH
         }')
-    
+
     echo $output
-    
+
 # Cache Version Json
 [group('Build')]
 @cache-kernel-version: && populate-github-output
@@ -253,7 +253,7 @@ get-kernel-version:
 # Fetch and Sign Kernel RPMs
 [group('Build')]
 fetch-kernel: (cache-kernel-version)
-    #!/usr/bin/bash
+    #!/usr/bin/env bash
     {{ if path_exists(version_json) != 'true' { error('Need to run just cache-kernel-version first for dry-run') } else { '' } }}
     {{ if path_exists( KCPATH / shell("jq -r '.kernel_name + \"-\" + .kernel_release + \".rpm\"' < $1", version_json)) == 'true' { 'exit 0' } else { '' } }}
     set "${CI:+-x}" -euo pipefail
@@ -284,7 +284,7 @@ fetch-kernel: (cache-kernel-version)
 # Build Akmod Image
 [group('Build')]
 build: (cache-kernel-version) (fetch-kernel)
-    #!/usr/bin/bash
+    #!/usr/bin/env bash
     set "${CI:+-x}" -euo pipefail
     {{ if path_exists(version_json) != 'true' { error('Need to run just cache-kernel-version first for dry-run') } else { '' } }}
     {{ if path_exists( KCPATH / shell("jq -r '.kernel_name + \"-\" + .kernel_release + \".rpm\"' < $1", version_json)) != 'true' { error('No Cached RPMs') } else { '' } }}
@@ -329,7 +329,7 @@ build: (cache-kernel-version) (fetch-kernel)
 # Test Cached Akmod RPMs
 [group('Build')]
 test: (cache-kernel-version) (fetch-kernel)
-    #!/usr/bin/bash
+    #!/usr/bin/env bash
     set "${CI:+-x}" -euo pipefail
     {{ if path_exists(version_json) != 'true' { error('Need to run just cache-kernel-version first for dry-run') } else { '' } }}
     {{ if path_exists( KCPATH / shell("jq -r '.kernel_name + \"-\" + .kernel_release + \".rpm\"' < $1", version_json)) != 'true' { error('No Cached RPMs') } else { '' } }}
@@ -363,7 +363,7 @@ test: (cache-kernel-version) (fetch-kernel)
 # Push Images to Registry
 [group('Registry')]
 push:
-    #!/usr/bin/bash
+    #!/usr/bin/env bash
     {{ if env('COSIGN_PRIVATE_KEY', '') != '' { 'printf "%s" "$COSIGN_PRIVATE_KEY" > /tmp/cosign.key' } else { '' } }}
     {{ if env('CI', '') != '' { logsum } else { '' } }}
 
@@ -389,7 +389,7 @@ manifest_image_kernel := registry / _org / akmods_name + ':' + manifest_tag_kern
 
 [group('Registry')]
 manifest:
-    #!/usr/bin/bash
+    #!/usr/bin/env bash
     {{ if env('COSIGN_PRIVATE_KEY', '') != '' { 'printf "%s" "$COSIGN_PRIVATE_KEY" > /tmp/cosign.key' } else { '' } }}
     {{ if env('CI', '') != '' { logsum } else { '' } }}
 
@@ -461,11 +461,11 @@ manifest:
 # Generate GHA Workflows
 [group('Utility')]
 generate-workflows:
-    #!/usr/bin/bash
+    #!/usr/bin/env bash
     set -euo pipefail
 
     main() {
-        if [[ ! -d .github || ! -d .git ]]; then 
+        if [[ ! -d .github ]]; then
             echo "This script must be run at the root of the repo" >&2
             exit 1
         fi
@@ -477,7 +477,7 @@ generate-workflows:
         versions=($(yq '.images | keys | .[]' images.yaml | sort | uniq))
         flavors=($(yq '.images.* | keys | .[]' images.yaml | sort | uniq))
         targets=($(yq 'explode(.).images.*.* | keys | .[]' images.yaml | sort | uniq))
-        
+
         for i in "${versions[@]}"; do
             for j in "${flavors[@]}"; do
                 for k in "${targets[@]}"; do

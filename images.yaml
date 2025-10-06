@@ -72,7 +72,7 @@ desktop-build-group: &desktop-build-group-arm-x86
       - *akmods-base
       - *akmods-nvidia
       - *arch-arm-x86
-    
+
 server-build-group: &server-build-group
   nvidia:
     !!merge <<:
@@ -147,6 +147,23 @@ images:
       !!merge <<:
         - *desktop-build-group-arm-x86
         - *server-build-group-arm-x86
+    "longterm-6.12":
+      !!merge <<:
+        - *desktop-build-group-arm-x86
+        - *server-build-group-arm-x86
+
+  43:
+    bazzite:
+      !!merge <<:
+        - *desktop-build-group
+      extra:
+        !!merge <<:
+          - *akmods-base
+          - *akmods-extra
+          - *arch-only-x86
+    main:
+      !!merge <<:
+        - *desktop-build-group
     "longterm-6.12":
       !!merge <<:
         - *desktop-build-group-arm-x86

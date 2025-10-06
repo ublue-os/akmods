@@ -13,7 +13,7 @@ on:
     paths-ignore:
       - '**.md'
   schedule:
-    - cron: '05 0 * * *'  # 0005 UTC everyday
+    - cron: '25 0 * * *'  # 0025 UTC everyday
   workflow_dispatch:
 jobs:
   cache_kernel_centos_10:
