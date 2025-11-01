@@ -25,7 +25,7 @@ fi
 dnf -y install --setopt=install_weak_deps=False dracut rpmrebuild sbsigntools
 
 case "$kernel_flavor" in
-    "bazzite"|"centos"|"coreos"*|"main")
+    "centos"|"coreos"*|"main")
         ;;
     "centos-kmodsig")
         dnf -y install centos-release-kmods-kernel
@@ -39,18 +39,7 @@ case "$kernel_flavor" in
         ;;
 esac
 
-if [[ "${kernel_flavor}" == "bazzite" ]]; then
-    # Using curl for bazzite release
-    curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-"$kernel_version".rpm
-    curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-core-"$kernel_version".rpm
-    curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-modules-"$kernel_version".rpm
-    curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-modules-core-"$kernel_version".rpm
-    curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-modules-extra-"$kernel_version".rpm
-    curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-devel-"$kernel_version".rpm
-    curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-devel-matched-"$kernel_version".rpm
-    curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-tools-"$kernel_version".rpm
-    curl -#fLO https://github.com/bazzite-org/kernel-bazzite/releases/download/"$build_tag"/kernel-tools-libs-"$kernel_version".rpm
-elif [[ "${kernel_flavor}" == "centos" ]]; then
+if [[ "${kernel_flavor}" == "centos" ]]; then
     # Using curl instead of dnf download for https links
     curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-"$kernel_version".rpm
     curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-core-"$kernel_version".rpm

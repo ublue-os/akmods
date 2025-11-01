@@ -23,7 +23,6 @@ body:
       description: Which specific image do you want?
       options:
         - All Images
-        - Bazzite
         - Kinoite
         - Mate
         - Silverblue

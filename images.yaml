@@ -128,14 +128,6 @@ images:
         - *desktop-build-group
         - *server-build-group
   42:
-    bazzite:
-      !!merge <<:
-        - *desktop-build-group
-      extra:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-extra
-          - *arch-only-x86
     main:
       !!merge <<:
         - *desktop-build-group
@@ -153,14 +145,6 @@ images:
         - *server-build-group-arm-x86
 
   43:
-    bazzite:
-      !!merge <<:
-        - *desktop-build-group
-      extra:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-extra
-          - *arch-only-x86
     main:
       !!merge <<:
         - *desktop-build-group

@@ -8,12 +8,8 @@ on:
         default: "['x86_64']"
         required: false
         type: string
-      bazzite_tag:
-        description: "The release tag for the bazzite kernel"
-        required: false
-        type: string
       kernel_flavor:
-        description: "The Kernel flavor: main, bazzite, coreos-stable, centos-kmodsig, longterm-6.12, etc"
+        description: "The Kernel flavor: main, coreos-stable, centos-kmodsig, longterm-6.12, etc"
         required: true
         type: string
       version:
@@ -31,12 +27,8 @@ on:
         default: "['x86_64']"
         required: false
         type: string
-      bazzite_tag:
-        description: "The release tag for the bazzite kernel"
-        required: false
-        type: string
       kernel_flavor:
-        description: "The Kernel flavor: main, bazzite, coreos-stable, centos-kmodsig, longterm-6.12, etc"
+        description: "The Kernel flavor: main, coreos-stable, centos-kmodsig, longterm-6.12, etc"
         required: true
         type: string
       version:
@@ -44,7 +36,6 @@ on:
         required: true
         type: string
 env:
-  AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
   AKMODS_KERNEL: ${{ inputs.kernel_flavor }}
   AKMODS_VERSION: ${{ inputs.version }}
 
@@ -70,7 +61,6 @@ jobs:
       matrix:
         architecture: ${{ fromJson(inputs.architecture) }}
     env:
-      AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
       AKMODS_KERNEL: ${{ inputs.kernel_flavor }}
       AKMODS_VERSION: ${{ inputs.version }}
     

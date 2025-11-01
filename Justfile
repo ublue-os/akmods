@@ -16,7 +16,6 @@ builder := if kernel_flavor =~ 'centos' { 'quay.io/centos/centos:' + version } e
 kernel_flavor := env('AKMODS_KERNEL', shell('yq ".defaults.kernel_flavor" images.yaml'))
 version := env('AKMODS_VERSION', if kernel_flavor =~ 'centos' { '10' } else { shell('yq ".defaults.version" images.yaml') })
 akmods_target := env('AKMODS_TARGET', if kernel_flavor =~ 'centos' { 'zfs' } else { shell('yq ".defaults.akmods_target" images.yaml') })
-bazzite_tag := env('AKMODS_BAZZITE_TAG', '')
 
 # Check if valid
 
@@ -154,15 +153,6 @@ get-kernel-version:
 
     kernel_name=kernel
     case {{ kernel_flavor }} in
-        "bazzite")
-            if [[ -n "{{ bazzite_tag }}" ]]; then
-                latest="$(curl -s "https://api.github.com/repos/bazzite-org/kernel-bazzite/releases/tags/{{ bazzite_tag }}" )"
-            else
-                latest="$(curl -s "https://api.github.com/repos/bazzite-org/kernel-bazzite/releases/latest")"
-            fi
-            linux=$(echo "$latest" | jq -r '.assets[].name | match("kernel-.*fc{{ version }}.{{ arch() }}.rpm").string' | head -1 | sed "s/kernel-//g;s/.rpm//g")
-            build_tag=$(echo -E $latest | jq -r '.tag_name')
-            ;;
         "centos")
             $dnf makecache >&2
             linux=$($dnf repoquery --whatprovides kernel | sort -V | tail -n1 | sed 's/.*://')
@@ -213,7 +203,6 @@ get-kernel-version:
     linux="$(echo $linux | tr -d '[:cntrl:]')"
 
     # Debug Output
-    {{ if bazzite_tag != '' { 'echo "kernel_build_tag: ${build_tag}" >&2' } else { '' } }}
     echo "kernel_flavor: {{ kernel_flavor }}" >&2
     echo "kernel_major_minor_patch: ${kernel_major_minor_patch}" >&2
     echo "kernel_release: ${linux}" >&2
@@ -305,7 +294,7 @@ build: (cache-kernel-version) (fetch-kernel)
     fi
     LABELS=(
         "--label" "io.artifacthub.package.deprecated=false"
-        "--label" "io.artifacthub.package.keywords=bootc,fedora,bluefin,bazzite,centos,cayo,aurora,ublue,universal-blue"
+        "--label" "io.artifacthub.package.keywords=bootc,fedora,bluefin,centos,cayo,aurora,ublue,universal-blue"
         "--label" "io.artifacthub.package.logo-url=https://avatars.githubusercontent.com/u/120078124?s=200&v=4"
         "--label" "io.artifacthub.package.maintainers=[{\"name\": \"castrojo\", \"email\": \"jorge.castro@gmail.com\"}]"
         "--label" "io.artifacthub.package.readme-url=https://raw.githubusercontent.com/ublue-os/akmods/refs/heads/main/README.md"
@@ -397,7 +386,7 @@ manifest:
 
     LABELS=(
         "io.artifacthub.package.deprecated=false"
-        "io.artifacthub.package.keywords=bootc,fedora,bluefin,bazzite,centos,cayo,aurora,ublue,universal-blue"
+        "io.artifacthub.package.keywords=bootc,fedora,bluefin,centos,cayo,aurora,ublue,universal-blue"
         "io.artifacthub.package.logo-url=https://avatars.githubusercontent.com/u/120078124?s=200&v=4"
         "io.artifacthub.package.maintainers=[{\"name\": \"castrojo\", \"email\": \"jorge.castro@gmail.com\"}]"
         "io.artifacthub.package.readme-url=https://raw.githubusercontent.com/ublue-os/akmods/refs/heads/main/README.md"
@@ -501,13 +490,9 @@ generate-workflows:
     # Modify the inputs in workflow-templates
     EOF
             sed "s/AKMODs/${i^^} akmods/;s/05/$(printf '%02d' $(( RANDOM % 30)))/g" ./workflow-templates/workflow.yaml.in
-            if [[ "$i" =~ bazzite ]]; then
+            if [[ 1 ]]; then
             cat <<'EOF'
         inputs:
-          bazzite_tag:
-            description: "The release tag for the bazzite kernel"
-            required: false
-            type: string
     EOF
             fi
             echo "jobs:"
@@ -520,9 +505,6 @@ generate-workflows:
                 kernel_flavor_clean=$(echo $kernel_flavor | tr '.' '-')
                 kernel_arch=$(echo "${workflows[$j]}" | cut -d "," -f 3-)
                 sed -e "s/%%ARCHITECTURE%%/$kernel_arch/;s/%%KERNEL_FLAVOR%%/$kernel_flavor/;s/%%KERNEL_FLAVOR_CLEAN%%/$kernel_flavor_clean/;s/%%VERSION%%/$version/" ./workflow-templates/cache_kernel.yaml.in
-                if [[ "$i" =~ bazzite ]]; then
-                    printf '      %s\n' 'bazzite_tag: ${{{{ inputs.bazzite_tag }}'
-                fi
                 workflow_targets=()
                 for k in "${targets[@]}"; do
                     value="${images[$j-$k]:-}"
