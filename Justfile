@@ -490,11 +490,7 @@ generate-workflows:
     # Modify the inputs in workflow-templates
     EOF
             sed "s/AKMODs/${i^^} akmods/;s/05/$(printf '%02d' $(( RANDOM % 30)))/g" ./workflow-templates/workflow.yaml.in
-            if [[ 1 ]]; then
-            cat <<'EOF'
-        inputs:
-    EOF
-            fi
+
             echo "jobs:"
             for j in "${!workflows[@]}"; do
                 if [[ ! "$j" =~ $i$ ]]; then
