@@ -91,17 +91,6 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
 /tmp/build-kmod-v4l2loopback.sh
 /tmp/build-kmod-wl.sh
 /tmp/build-kmod-xone.sh
-RUNEOF
-
-#elif defined EXTRA
-# /*
-# extra akmods
-# */
-
-COPY build_files/extra /tmp/
-RUN --mount=type=cache,dst=/var/cache/dnf \
-    --mount=type=cache,dst=/var/cache/libdnf5 \
-    bash <<'RUNEOF'
 /tmp/build-kmod-evdi.sh
 /tmp/build-kmod-system76-io.sh
 /tmp/build-kmod-system76.sh

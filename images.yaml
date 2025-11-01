@@ -23,10 +23,6 @@ akmods-common: &akmods-common
   name: akmods
   description: "A caching layer for pre-built akmod RPMs"
 
-akmods-extra: &akmods-extra
-  name: akmods-extra
-  description: "A caching layer for extra pre-built akmod RPMs"
-
 akmods-nvidia: &akmods-nvidia
   name: akmods-nvidia
   description: "A caching layer for the pre-built nvidia akmod RPMs"
