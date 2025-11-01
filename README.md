@@ -1,6 +1,6 @@
 # ublue-os akmods
 
-[![Build BAZZITE akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-bazzite.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-bazzite.yml)[![Build CENTOS akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-centos.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-centos.yml)[![Build COREOS-STABLE akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-stable.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-stable.yml)[![Build COREOS-TESTING akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-testing.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-testing.yml)[![Build LONGTERM-6.12 akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-longterm-6.12.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-longterm-6.12.yml)[![Build MAIN akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-main.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-main.yml)
+[![Build CENTOS akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-centos.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-centos.yml)[![Build COREOS-STABLE akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-stable.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-stable.yml)[![Build COREOS-TESTING akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-testing.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-testing.yml)[![Build LONGTERM-6.12 akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-longterm-6.12.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-longterm-6.12.yml)[![Build MAIN akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-main.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-main.yml)
 
 OCI images providing a set of cached kernel RPMs and extra kernel modules to Universal Blue images. Used for better hardware support and consistent build process.
 
@@ -11,7 +11,6 @@ The [`akmods` images](https://github.com/orgs/ublue-os/packages?repo_name=akmods
 The akmods packages are divided up for building in a few different "groups":
 
 - `common` - any kmod installed by default in Bluefin/Aurora (or were originally in main images pre-Fedora 39)
-- `extra` - any kmods used by Bazzite but not Bluefine/Aurora
 - `nvidia` - only the nvidia proprietary kmod and addons
 - `nvidia-open` - only the nvidia-open kmod and addons
 - `zfs` - only the zfs kmod and utilities built for select kernels
@@ -20,7 +19,6 @@ Each of these images contains a cached copy of the respective kernel RPMs compat
 
 Builds also run for different kernels:
 
-- `bazzite` - Bazzite [builds a kernel with gaming specific patches](https://github.com/bazzite-org/kernel-bazzite) for the current release of Fedora
 - `main` - Mainline Fedora Kernel
 - `coreos-stable` - Current Fedora CoreOS stable kernel version
 - `coreos-testing` - Current Fedora CoreOS testing kernel version
@@ -50,23 +48,10 @@ The `nvidia` and `nvidia-open` images contains
 | Group | Package | Description | Source |
 |-------|---------|-------------|--------|
 | common | [framework-laptop](https://github.com/DHowett/framework-laptop-kmod) | A kernel module that exposes the Framework Laptop (13, 16)'s battery charge limit and LEDs to userspace | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/framework-laptop-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/framework-laptop-kmod) |
-| common | [kvmfr](https://github.com/gnif/looking-glass) | KVM framebuffer relay kernel module for use with Looking Glass | [![badge](https://copr.fedorainfracloud.org/coprs/hikariknight/looking-glass-kvmfr/package/kvmfr-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/hikariknight/looking-glass-kvmfr/package/kvmfr-kmod) |
 | common | [openrazer](https://openrazer.github.io/) | kernel module adding additional features to Razer hardware | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/openrazer-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/openrazer-kmod) |
 | common | [v4l2loopback](https://github.com/umlaeute/v4l2loopback) | allows creating "virtual video devices" | [RPMFusion - free](https://rpmfusion.org/) |
 | common | [wl](https://github.com/rpmfusion/broadcom-wl/) | support for some legacy broadcom wifi devices | [RPMFusion - nonfree](https://rpmfusion.org/) |
 | common | [xone](https://github.com/BoukeHaarsma23/xonedo/) | xbox one controller USB wired/RF driver modified to work along-side xpad | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/xone-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/xone-kmod) |
-| extra | [ayaneo-platform](https://github.com/ShadowBlip/ayaneo-platform) | Linux drivers for AYANEO x86 handhelds | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/ayaneo-platform-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/ayaneo-platform-kmod) |
-| extra | [ayn-platform](https://github.com/ShadowBlip/ayn-platform) | Linux drivers for AYN x86 handhelds | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/ayn-platform-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/ayn-platform-kmod) |
-| extra | [bmi260](https://github.com/hhd-dev/bmi260) | kernel module driver for the Bosch BMI260 IMU | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/bmi260-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/bmi260-kmod) |
-| extra | [evdi](www.displaylink.com) | kernel module required for use of displaylink | [negativo17 - fedora-multimedia](https://negativo17.org/) |
-| extra | [gcadapter_oc](https://github.com/hannesmann/gcadapter-oc-kmod) | kernel module for overclocking the Nintendo Wii U/Mayflash GameCube adapter | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/gcadapter_oc-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/gcadapter_oc-kmod) |
-| extra | [gpd-fan](https://github.com/KyleGospo/gpd-fan-driver) | kernel module to control fan speeds on GPD handhelds | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/gpd-fan-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/gpd-fan-kmod) |
-| extra | [nct6687d](https://github.com/Fred78290/nct6687d) | Linux kernel module for Nuvoton NCT6687-R found on AMD B550 chipset motherboards | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/nct6687d-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/nct6687d-kmod) |
-| extra | [ryzen-smu](https://gitlab.com/leogx9r/ryzen_smu) | A Linux kernel driver that exposes access to the SMU (System Management Unit) for certain AMD Ryzen Processors | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/ryzen-smu-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/ryzen-smu-kmod) |
-| extra | [system76](https://github.com/pop-os/system76-dkms) | A Linux kernel driver for System76 laptops | [![badge](https://copr.fedorainfracloud.org/coprs/ssweeny/system76-hwe/package/system76-driver-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ssweeny/system76-hwe/package/system76-driver-kmod/) |
-| extra | [system76-io](https://github.com/pop-os/system76-io-dkms) | A Linux kernel driver for the System76 Io board, which is used in System76's Thelio desktop line | [![badge](https://copr.fedorainfracloud.org/coprs/ssweeny/system76-hwe/package/system76-io-akmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ssweeny/system76-hwe/package/system76-io-akmod/) |
-| extra | [zenergy](https://github.com/BoukeHaarsma23/zenergy) | Based on AMD_ENERGY driver, but with some jiffies added so non-root users can read it safely | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/zenergy-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/zenergy-kmod) |
-| nvidia | [nvidia](https://negativo17.org/nvidia-driver/) | nvidia GPU drivers | [negativo17 - fedora-nvidia](https://negativo17.org/) |
 | nvidia-open | [nvidia](https://negativo17.org/nvidia-driver/) | nvidia-open GPU drivers | [negativo17 - fedora-nvidia](https://negativo17.org/) |
 | zfs | [zfs](https://github.com/openzfs/zfs) | OpenZFS advanced file system and volume manager | [zfs](https://github.com/openzfs/zfs) |
 
@@ -153,10 +138,10 @@ You can see your current settings with `just --evaluate`
 Additionally you can pass values as key/value pairs.
 
 ```bash
-just kernel_flavor=bazzite version=42 akmods_target=extra build
+just kernel_flavor=main version=42 akmods_target=extra build
 ```
 
-Which will build the extra package for Bazzite.
+Which will build the extra package for main.
 
 Note, the `Justfile` will compare your inputs to the `images.yaml` file to ensure you have a valid combination.
 

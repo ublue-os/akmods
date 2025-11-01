@@ -86,40 +86,10 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
 /tmp/build-kmod-framework-laptop.sh
-/tmp/build-kmod-kvmfr.sh
 /tmp/build-kmod-openrazer.sh
 /tmp/build-kmod-v4l2loopback.sh
 /tmp/build-kmod-wl.sh
 /tmp/build-kmod-xone.sh
-RUNEOF
-
-#elif defined EXTRA
-# /*
-# extra akmods
-# */
-
-COPY build_files/extra /tmp/
-RUN --mount=type=cache,dst=/var/cache/dnf \
-    --mount=type=cache,dst=/var/cache/libdnf5 \
-    bash <<'RUNEOF'
-if grep -qv "bazzite" <<< "${KERNEL_FLAVOR}"; then
-    /tmp/build-kmod-VirtualBox.sh
-    /tmp/build-kmod-facetimehd.sh
-    /tmp/build-kmod-rtl8814au.sh
-    /tmp/build-kmod-rtl88xxau.sh
-fi
-/tmp/build-kmod-ayaneo-platform.sh
-/tmp/build-kmod-ayn-platform.sh
-/tmp/build-kmod-bmi260.sh
-/tmp/build-kmod-evdi.sh
-/tmp/build-kmod-gcadapter_oc.sh
-/tmp/build-kmod-gpd-fan.sh
-/tmp/build-kmod-nct6687d.sh
-/tmp/build-kmod-ryzen-smu.sh
-/tmp/build-kmod-system76-io.sh
-/tmp/build-kmod-system76.sh
-/tmp/build-kmod-vhba.sh
-/tmp/build-kmod-zenergy.sh
 RUNEOF
 
 #elif defined NVIDIA

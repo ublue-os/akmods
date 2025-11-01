@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       akmods_target:
-        description: "The akmods to build: common, extra, zfs, nvidia, nvidia-open"
+        description: "The akmods to build: common, zfs, nvidia, nvidia-open"
         required: true
         type: string
       architecture:
@@ -12,12 +12,8 @@ on:
         default: "['x86_64']"
         required: false
         type: string
-      bazzite_tag:
-        description: "The release tag for the bazzite kernel"
-        required: false
-        type: string
       kernel_flavor:
-        description: "The Kernel flavor: main, bazzite, coreos-stable, centos-kmodsig, longterm-6.12, etc"
+        description: "The Kernel flavor: main, coreos-stable, centos-kmodsig, longterm-6.12, etc"
         required: true
         type: string
       version:
@@ -31,7 +27,7 @@ on:
   workflow_dispatch:
     inputs:
       akmods_target:
-        description: "The akmods to build: common, extra, zfs, nvidia, nvidia-open"
+        description: "The akmods to build: common, zfs, nvidia, nvidia-open"
         required: true
         type: string
       architecture:
@@ -39,12 +35,8 @@ on:
         default: "['x86_64']"
         required: false
         type: string
-      bazzite_tag:
-        description: "The release tag for the bazzite kernel"
-        required: false
-        type: string
       kernel_flavor:
-        description: "The Kernel flavor: main, bazzite, coreos-stable, centos-kmodsig, longterm-6.12, etc"
+        description: "The Kernel flavor: main, coreos-stable, centos-kmodsig, longterm-6.12, etc"
         required: true
         type: string
       version:
@@ -56,7 +48,6 @@ on:
         required: true
         type: string
 env:
-  AKMODS_BAZZITE_TAG: ${{ inputs.bazzite_tag }}
   AKMODS_KERNEL: ${{ inputs.kernel_flavor }}
   AKMODS_TARGET: ${{ inputs.akmods_target }}
   AKMODS_VERSION: ${{ inputs.version }}

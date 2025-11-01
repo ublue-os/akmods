@@ -23,10 +23,6 @@ akmods-common: &akmods-common
   name: akmods
   description: "A caching layer for pre-built akmod RPMs"
 
-akmods-extra: &akmods-extra
-  name: akmods-extra
-  description: "A caching layer for extra pre-built akmod RPMs"
-
 akmods-nvidia: &akmods-nvidia
   name: akmods-nvidia
   description: "A caching layer for the pre-built nvidia akmod RPMs"
@@ -115,27 +111,7 @@ images:
     centos-kmodsig:
       !!merge <<:
         - *server-build-group-arm-x86
-  41:
-    main:
-      !!merge <<:
-        - *desktop-build-group
-    coreos-stable:
-      !!merge <<:
-        - *desktop-build-group
-        - *server-build-group
-    coreos-testing:
-      !!merge <<:
-        - *desktop-build-group
-        - *server-build-group
   42:
-    bazzite:
-      !!merge <<:
-        - *desktop-build-group
-      extra:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-extra
-          - *arch-only-x86
     main:
       !!merge <<:
         - *desktop-build-group
@@ -153,14 +129,6 @@ images:
         - *server-build-group-arm-x86
 
   43:
-    bazzite:
-      !!merge <<:
-        - *desktop-build-group
-      extra:
-        !!merge <<:
-          - *akmods-base
-          - *akmods-extra
-          - *arch-only-x86
     main:
       !!merge <<:
         - *desktop-build-group

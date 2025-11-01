@@ -93,26 +93,6 @@ if [[ -n "${RPMFUSION_MIRROR}" && -f /etc/fedora-release ]]; then
     sed -i "s%^#baseurl=http://download1.rpmfusion.org%baseurl=${RPMFUSION_MIRROR}%" /etc/yum.repos.d/rpmfusion-*.repo
 fi
 
-if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-vhba-*.rpm) ]]; then
-curl -LsSf -o /etc/yum.repos.d/_copr_rok-cdemu.repo \
-    "https://copr.fedorainfracloud.org/coprs/rok/cdemu/repo/fedora-${COPR_RELEASE}/rok-cdemu-fedora-${COPR_RELEASE}.repo"
-fi
-
-if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-facetimehd-*.rpm) ]]; then
-curl -LsSf -o /etc/yum.repos.d/_copr_mulderje-facetimehd-kmod.repo \
-    "https://copr.fedorainfracloud.org/coprs/mulderje/facetimehd-kmod/repo/fedora-${COPR_RELEASE}/mulderje-facetimehd-kmod-fedora-${COPR_RELEASE}.repo"
-fi
-
-if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-kvmfr-*.rpm) ]]; then
-curl -LsSf -o /etc/yum.repos.d/_copr_hikariknight-looking-glass-kvmfr.repo \
-    "https://copr.fedorainfracloud.org/coprs/hikariknight/looking-glass-kvmfr/repo/fedora-${COPR_RELEASE}/hikariknight-looking-glass-kvmfr-fedora-${COPR_RELEASE}.repo"
-fi
-
-if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-system76-io-*.rpm) || -f $(find /tmp/akmods-rpms/kmods/kmod-system76-driver-*.rpm) ]]; then
-curl -LsSf -o /etc/yum.repos.d/_copr_ssweeny-system76-hwe.repo \
-    "https://copr.fedorainfracloud.org/coprs/ssweeny/system76-hwe/repo/fedora-${COPR_RELEASE}/ssweeny-system76-hwe-fedora-${COPR_RELEASE}.repo"
-fi
-
 if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm) ]]; then
     curl -Lo /etc/yum.repos.d/negativo17-${NVIDIA_REPO_NAME} \
         "https://negativo17.org/repos/${NVIDIA_REPO_NAME}"
