@@ -115,18 +115,6 @@ images:
     centos-kmodsig:
       !!merge <<:
         - *server-build-group-arm-x86
-  41:
-    main:
-      !!merge <<:
-        - *desktop-build-group
-    coreos-stable:
-      !!merge <<:
-        - *desktop-build-group
-        - *server-build-group
-    coreos-testing:
-      !!merge <<:
-        - *desktop-build-group
-        - *server-build-group
   42:
     bazzite:
       !!merge <<:
