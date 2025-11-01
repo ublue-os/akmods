@@ -91,10 +91,12 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
 /tmp/build-kmod-v4l2loopback.sh
 /tmp/build-kmod-wl.sh
 /tmp/build-kmod-xone.sh
-/tmp/build-kmod-evdi.sh
-/tmp/build-kmod-system76-io.sh
-/tmp/build-kmod-system76.sh
-/tmp/build-kmod-vhba.sh
+if [[ "$(uname -m)" == "x86_64" ]]; then
+    /tmp/build-kmod-evdi.sh
+    /tmp/build-kmod-system76-io.sh
+    /tmp/build-kmod-system76.sh
+    /tmp/build-kmod-vhba.sh
+fi
 RUNEOF
 
 #elif defined NVIDIA
