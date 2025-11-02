@@ -51,7 +51,6 @@ get-kernel-version:
     set "${CI:+-x}" -euo pipefail
     if [[ {{ kernel_flavor }} =~ centos|longterm ]]; then
         {{ podman }} pull --retry 3 "{{ builder }}" >&2
-        container_name="fq-$(uuidgen)"
         builder=$({{ podman }} run --entrypoint /bin/bash -dt "{{ builder }}")
         dnf="{{ podman }} exec -t $builder dnf"
         $dnf install -y --setopt=install_weak_deps=False dnf-plugins-core >&2
@@ -60,17 +59,24 @@ get-kernel-version:
 
     coreos_kernel() {
         # query the upstream coreos (stable or testing) image and provide the kernel version
-        coreos_version=${1}
-        image_linux="$(skopeo inspect docker://quay.io/fedora/fedora-coreos:$coreos_version --format '{{{{ index .Labels "ostree.linux" }}')"
+        local coreos_version=${1}
+        local coreos_image="quay.io/fedora/fedora-coreos:$coreos_version"
+        {{ podman }} pull --retry 3 "$coreos_image" >&2
+        kernelinspector=$({{ podman }} run --entrypoint /bin/bash -dt "$coreos_image")
+        local rpm="{{ podman }} exec -t $kernelinspector rpm"
+        trap '{{ podman }} rm -f -t 0 $kernelinspector &>/dev/null' EXIT SIGTERM
+
+        # as of Fedora 43, CoreOS image does not have the ostree.linux label; so query rpm within image
+        coreos_linux=$($rpm -q kernel | sed "s/^kernel-//" | tr -d '\r\n')
 
         # Kernel Pin Location
         # this gives us a consistent place to handle pinning for coreos stable dependent usages
         # including: ucore stable, bluefin/aurora stable, bluefin lts (using centos-kmodsig version matching)
         #if [[ "{{ kernel_flavor }}" =~ coreos-stable ]]; then
-        #    image_linux="6.14.11-300.fc42.$(uname -m)"
+        #    coreos_linux="6.14.11-300.fc42.$(uname -m)"
         #fi
 
-        # This always provides kernel version from the upstream image as the resulting $image_linux variable
+        # This always provides kernel version from the upstream image as the resulting $coreos_linux variable
         # It should be verified downloadable by verify_kernel_fedora() and verify_kernel_centos_kmodsig()
     }
 
@@ -80,9 +86,9 @@ get-kernel-version:
 
         # Get Variables
         coreos_version=${1}
-        major_minor_patch="$(echo $image_linux | grep -oP '^\d+\.\d+\.\d+')"
-        kernel_rel_part=$(echo $image_linux | grep -oP '^\d+\.\d+\.\d+\-\K([123][0][0-9])')
-        arch="$(echo $image_linux | grep -oP 'fc\d+\.\K.*$')"
+        major_minor_patch="$(echo $coreos_linux | grep -oP '^\d+\.\d+\.\d+')"
+        kernel_rel_part=$(echo $coreos_linux | grep -oP '^\d+\.\d+\.\d+\-\K([123][0][0-9])')
+        arch="$(echo $coreos_linux | grep -oP 'fc\d+\.\K.*$')"
         kernel_rel="$kernel_rel_part.fc{{ version }}"
         kernel_version="$major_minor_patch-$kernel_rel.$arch"
         URL="https://kojipkgs.fedoraproject.org/packages/kernel/"$major_minor_patch"/"$kernel_rel"/"$arch"/kernel-"$kernel_version".rpm"
@@ -121,8 +127,8 @@ get-kernel-version:
         # verify the expected version exist in koji packages for CentOS KMODSIG of the required version
 
         # Get Variables
-        major_minor_patch="$(echo $image_linux | grep -oP '^\d+\.\d+\.\d+')"
-        arch="$(echo $image_linux | grep -oP 'fc\d+\.\K.*$')"
+        major_minor_patch="$(echo $coreos_linux | grep -oP '^\d+\.\d+\.\d+')"
+        arch="$(echo $coreos_linux | grep -oP 'fc\d+\.\K.*$')"
         kernel_rel="1.el{{ version }}"
         kernel_version="$major_minor_patch-$kernel_rel.$arch"
         URL="https://cbs.centos.org/kojifiles/packages/kernel/${major_minor_patch}/${kernel_rel}/${arch}/kernel-${kernel_version}.rpm"
@@ -162,17 +168,17 @@ get-kernel-version:
             $dnf makecache >&2
             coreos_kernel stable
             verify_kernel_centos_kmodsig
-            # Ideally we could check the value of $linux verified above is available in the `centos-release-kmods-kernel` repo, but at this time,
-            # the current CoreOS 6.15.9 kernel is just slightly too old to be available in the SIG repo. Hopefully caching for kojifiles is adequate
-            #linux_repo=$($dnf repoquery --enablerepo="centos-kmods-kernel" --whatprovides kernel-core | sort -V | tail -n1 | sed 's/.*://')
+            # '$linux' set by verify_kernel_kmodsig
             ;;
         "coreos-stable")
             coreos_kernel stable
             verify_kernel_fedora stable
+            # '$linux' set by verify_kernel_fedora
             ;;
         "coreos-testing")
             coreos_kernel testing
             verify_kernel_fedora testing
+            # '$linux' set by verify_kernel_fedora
             ;;
         "longterm"*)
             $dnf copr enable -y kwizart/kernel-{{ kernel_flavor }} >&2
