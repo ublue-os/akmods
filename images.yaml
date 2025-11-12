@@ -1,7 +1,7 @@
 ---
 defaults:
   kernel_flavor: main
-  version: 42
+  version: 43
   akmods_target: common
 
 arch-arm-x86: &arch-arm-x86
@@ -108,9 +108,6 @@ images:
     centos:
       !!merge <<:
         - *server-build-group-arm-x86
-    centos-kmodsig:
-      !!merge <<:
-        - *server-build-group-arm-x86
   42:
     main:
       !!merge <<:
@@ -119,15 +116,14 @@ images:
       !!merge <<:
         - *desktop-build-group-arm-x86
         - *server-build-group-arm-x86
-    "longterm-6.12":
-      !!merge <<:
-        - *desktop-build-group-arm-x86
-        - *server-build-group-arm-x86
-
   43:
     main:
       !!merge <<:
         - *desktop-build-group
+    coreos-stable:
+      !!merge <<:
+        - *desktop-build-group-arm-x86
+        - *server-build-group-arm-x86
     coreos-testing:
       !!merge <<:
         - *desktop-build-group-arm-x86

@@ -22,8 +22,13 @@ cd /tmp
 
 ### BUILD nvidia
 
+# query latest available driver in repo
+DRIVER_VERSION=$(dnf info nvidia-driver | grep -E '^Version|^Release' | awk '{print $3}' | xargs | sed 's/\ /-/')
+
+# only install the version of akmod-nviida which matches available nvidia-driver
+# this works around situations where a new version may be released but not for one arch
 dnf install -y \
-    "akmod-nvidia*.${DIST}.${ARCH}"
+    "akmod-nvidia-${DRIVER_VERSION}"
 
 # Either successfully build and install the kernel modules, or fail early with debug output
 rpm -qa |grep nvidia

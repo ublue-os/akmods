@@ -58,8 +58,8 @@ else
         fedora-repos-archive
     )
 
-    # after F43 launches, bump to 44
-    if [[ "${RELEASE}" -ge 43 ]]; then
+    # after F44 launches, bump to 45
+    if [[ "${RELEASE}" -ge 44 ]]; then
         COPR_RELEASE="rawhide"
     else
         COPR_RELEASE="${RELEASE}"
@@ -78,8 +78,8 @@ else
         "https://negativo17.org/repos/fedora-multimedia.repo"
 fi
 
-# after F43 launches, bump to 44
-if [[ "${RELEASE}" -ge 43 && -f /etc/fedora-release ]]; then
+# after F44 launches, bump to 45
+if [[ "${RELEASE}" -ge 44 && -f /etc/fedora-release ]]; then
     # pre-release rpmfusion is in a different location
     sed -i "s%free/fedora/releases%free/fedora/development%" /etc/yum.repos.d/rpmfusion-*.repo
     # pre-release rpmfusion needs to enable testing
