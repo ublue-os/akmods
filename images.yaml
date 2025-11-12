@@ -129,9 +129,9 @@ images:
       !!merge <<:
         - *desktop-build-group
     coreos-stable:
-          !!merge <<:
-            - *desktop-build-group-arm-x86
-            - *server-build-group-arm-x86
+      !!merge <<:
+        - *desktop-build-group-arm-x86
+        - *server-build-group-arm-x86
     "longterm-6.12":
       !!merge <<:
         - *desktop-build-group-arm-x86
