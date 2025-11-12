@@ -4,7 +4,7 @@
 #
 # Generate the workflow by running `just generate-workflows` at git root
 # Modify the inputs in workflow-templates
-name: Build CENTOS-KMODSIG akmods
+name: Build COREOS-TESTING akmods
 on:
   merge_group:
   pull_request:
@@ -16,8 +16,8 @@ on:
     - cron: '16 0 * * *'  # 0016 UTC everyday
   workflow_dispatch:
 jobs:
-  cache_kernel_centos-kmodsig_10:
-    name: Cache centos-kmodsig (10)
+  cache_kernel_coreos-testing_43:
+    name: Cache coreos-testing (43)
     uses: ./.github/workflows/reusable-cache-kernel.yml
     secrets: inherit
     permissions:
@@ -26,59 +26,74 @@ jobs:
       packages: write
     with:
       architecture: '["aarch64","x86_64"]'
-      kernel_flavor: centos-kmodsig
-      version: 10
-  build-centos-kmodsig_10_nvidia:
-    name: Build nvidia centos-kmodsig (10)
+      kernel_flavor: coreos-testing
+      version: 43
+  build-coreos-testing_43_common:
+    name: Build common coreos-testing (43)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     permissions:
       actions: read
       contents: read
       packages: write
-    needs: cache_kernel_centos-kmodsig_10
+    needs: cache_kernel_coreos-testing_43
+    with:
+      akmods_target: common
+      architecture: '["aarch64","x86_64"]'
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_43.outputs.KCKEY }}
+      kernel_flavor: coreos-testing
+      version: 43
+  build-coreos-testing_43_nvidia:
+    name: Build nvidia coreos-testing (43)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_coreos-testing_43
     with:
       akmods_target: nvidia
       architecture: '["aarch64","x86_64"]'
-      kernel_cache_key: ${{ needs.cache_kernel_centos-kmodsig_10.outputs.KCKEY }}
-      kernel_flavor: centos-kmodsig
-      version: 10
-  build-centos-kmodsig_10_nvidia-open:
-    name: Build nvidia-open centos-kmodsig (10)
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_43.outputs.KCKEY }}
+      kernel_flavor: coreos-testing
+      version: 43
+  build-coreos-testing_43_nvidia-open:
+    name: Build nvidia-open coreos-testing (43)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     permissions:
       actions: read
       contents: read
       packages: write
-    needs: cache_kernel_centos-kmodsig_10
+    needs: cache_kernel_coreos-testing_43
     with:
       akmods_target: nvidia-open
       architecture: '["aarch64","x86_64"]'
-      kernel_cache_key: ${{ needs.cache_kernel_centos-kmodsig_10.outputs.KCKEY }}
-      kernel_flavor: centos-kmodsig
-      version: 10
-  build-centos-kmodsig_10_zfs:
-    name: Build zfs centos-kmodsig (10)
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_43.outputs.KCKEY }}
+      kernel_flavor: coreos-testing
+      version: 43
+  build-coreos-testing_43_zfs:
+    name: Build zfs coreos-testing (43)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     permissions:
       actions: read
       contents: read
       packages: write
-    needs: cache_kernel_centos-kmodsig_10
+    needs: cache_kernel_coreos-testing_43
     with:
       akmods_target: zfs
       architecture: '["aarch64","x86_64"]'
-      kernel_cache_key: ${{ needs.cache_kernel_centos-kmodsig_10.outputs.KCKEY }}
-      kernel_flavor: centos-kmodsig
-      version: 10
-  check-centos-kmodsig_10:
-    name: Check centos-kmodsig (10)
+      kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_43.outputs.KCKEY }}
+      kernel_flavor: coreos-testing
+      version: 43
+  check-coreos-testing_43:
+    name: Check coreos-testing (43)
     permissions:
       actions: read
       contents: read
-    needs: [build-centos-kmodsig_10_nvidia,build-centos-kmodsig_10_nvidia-open,build-centos-kmodsig_10_zfs]
+    needs: [build-coreos-testing_43_common,build-coreos-testing_43_nvidia,build-coreos-testing_43_nvidia-open,build-coreos-testing_43_zfs]
     runs-on: ubuntu-24.04
     if: always()
     steps:
