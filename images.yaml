@@ -128,6 +128,10 @@ images:
     main:
       !!merge <<:
         - *desktop-build-group
+    coreos-stable:
+          !!merge <<:
+            - *desktop-build-group-arm-x86
+            - *server-build-group-arm-x86
     coreos-testing:
       !!merge <<:
         - *desktop-build-group-arm-x86
