@@ -76,7 +76,7 @@ jobs:
       - name: Maximize build spce
         shell: bash
         run: |
-          set -x
+          set -xeuo pipefail
           df -h
           # Remove host toolchains, browsers
           shopt -s nullglob
@@ -84,10 +84,12 @@ jobs:
               /usr/lib/llvm-* /usr/local/julia* /usr/local/lib/android /usr/share/dotnet \
               /usr/share/swift /usr/local/.ghcup /usr/lib/firefox /opt/google/chrome \
               /opt/microsoft/msedge \
-              | xargs -0 -n1 -P4 rm -rf
+              | xargs -0 -n1 -P4 rm -vrf
           df -h
           #  remove host swapfile (3gb)
-          swapoff -a; rm -f /host-sys/swapfile
+          swapon
+          swapoff -a; rm -vf /host-sys/swapfile
+          swapon
           df -h
 
       - name: Checkout Repo
