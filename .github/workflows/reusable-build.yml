@@ -67,12 +67,27 @@ jobs:
       packages: write
     container:
       image: "ghcr.io/ublue-os/devcontainer:latest"
-      options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
+      options: "--privileged --volume /:/host-sys --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
     strategy:
       fail-fast: false
       matrix:
         architecture: ${{ fromJson(inputs.architecture) }}
     steps:
+      - name: Free Disk Space
+        run: |
+          df -h
+          # Remove host toolchains, browsers
+          shopt -s nullglob
+          printf '/host-sys%s\0' /opt/PyPy /opt/az /opt/node/ /opt/pipx /opt/go /opt/Ruby \
+              /usr/lib/llvm-* /usr/local/julia* /usr/local/lib/android /usr/share/dotnet \
+              /usr/share/swift /usr/local/.ghcup /usr/lib/firefox /opt/google/chrome \
+              /opt/microsoft/msedge \
+              | xargs -0 -n1 -P4 rm -rf
+          df -h
+          #  remove host swapfile (3gb)
+          swapoff -a; rm -f /host-sys/swapfile
+          df -h
+
       - name: Checkout Repo
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
