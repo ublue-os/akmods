@@ -73,8 +73,10 @@ jobs:
       matrix:
         architecture: ${{ fromJson(inputs.architecture) }}
     steps:
-      - name: Free Disk Space
+      - name: Maximize build spce
+        shell: bash
         run: |
+           set -x
           df -h
           # Remove host toolchains, browsers
           shopt -s nullglob
