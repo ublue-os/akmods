@@ -133,13 +133,7 @@ if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm 2> /dev/null) ]]; then
     #shellcheck disable=SC1091
     source /tmp/akmods-rpms/kmods/nvidia-vars
     KMODS_TO_INSTALL+=(
-        libnvidia-fbc
-        libva-nvidia-driver
-        nvidia-driver
-        nvidia-driver-cuda
         nvidia-modprobe
-        nvidia-persistenced
-        nvidia-settings
         ${NVIDIA_EXTRA_PKGS}
         /tmp/akmods-rpms/kmods/kmod-nvidia-"${KERNEL_VERSION}"-"${NVIDIA_AKMOD_VERSION}"."${DIST_ARCH}".rpm
     )
