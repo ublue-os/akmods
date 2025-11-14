@@ -73,7 +73,7 @@ jobs:
       matrix:
         architecture: ${{ fromJson(inputs.architecture) }}
     steps:
-      - name: Maximize build spce
+      - name: Maximize build space
         shell: bash
         run: |
           set -xeuo pipefail
@@ -85,11 +85,6 @@ jobs:
               /usr/share/swift /usr/local/.ghcup /usr/lib/firefox /opt/google/chrome \
               /opt/microsoft/msedge \
               | xargs -0 -n1 -P4 rm -vrf
-          df -h
-          #  remove host swapfile (3gb)
-          swapon
-          swapoff -a; rm -vf /host-sys/swapfile
-          swapon
           df -h
 
       - name: Checkout Repo
