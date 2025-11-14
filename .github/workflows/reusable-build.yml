@@ -84,7 +84,7 @@ jobs:
               /usr/lib/llvm-* /usr/local/julia* /usr/local/lib/android /usr/share/dotnet \
               /usr/share/swift /usr/local/.ghcup /usr/lib/firefox /opt/google/chrome \
               /opt/microsoft/msedge \
-              | xargs -0 -n1 -P4 rm -vrf
+              | xargs -0 -n1 -P4 rm -rf
           df -h
 
       - name: Checkout Repo
