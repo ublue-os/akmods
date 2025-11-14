@@ -76,7 +76,7 @@ jobs:
       - name: Maximize build spce
         shell: bash
         run: |
-           set -x
+          set -x
           df -h
           # Remove host toolchains, browsers
           shopt -s nullglob
