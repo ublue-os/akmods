@@ -75,7 +75,7 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
 set "${CI+-x}" -euo pipefail
-if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]]; then
+if [[ "${KERNEL_FLAVOR}" =~ (coreos|longterm) ]]; then
     /tmp/build-ublue-os-ucore-addons.sh
     cp /tmp/ublue-os-ucore-addons/rpmbuild/RPMS/noarch/ublue-os-ucore-addons*.rpm /var/cache/rpms/ucore/
 fi
@@ -101,7 +101,7 @@ COPY build_files/nvidia /tmp/
 RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
-if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]]; then
+if [[ "${KERNEL_FLAVOR}" =~ (coreos|longterm) ]]; then
     /tmp/build-ublue-os-ucore-nvidia.sh
     cp /tmp/ublue-os-ucore-nvidia/rpmbuild/RPMS/noarch/ublue-os-ucore-nvidia*.rpm /var/cache/rpms/ucore/
 fi
