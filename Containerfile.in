@@ -75,10 +75,6 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
 set "${CI+-x}" -euo pipefail
-if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]]; then
-    /tmp/build-ublue-os-ucore-addons.sh
-    cp /tmp/ublue-os-ucore-addons/rpmbuild/RPMS/noarch/ublue-os-ucore-addons*.rpm /var/cache/rpms/ucore/
-fi
 /tmp/build-ublue-os-akmods-addons.sh
 cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm /var/cache/rpms/ublue-os/
 RUNEOF
@@ -101,7 +97,8 @@ COPY build_files/nvidia /tmp/
 RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
-if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]]; then
+set "${CI+-x}" -euo pipefail
+if [[ "${KERNEL_FLAVOR}" =~ (coreos|longterm) ]]; then
     /tmp/build-ublue-os-ucore-nvidia.sh
     cp /tmp/ublue-os-ucore-nvidia/rpmbuild/RPMS/noarch/ublue-os-ucore-nvidia*.rpm /var/cache/rpms/ucore/
 fi
@@ -123,6 +120,15 @@ RUNEOF
 # zfs akmods
 # */
 COPY build_files/zfs /tmp/
+RUN --mount=type=cache,dst=/var/cache/dnf \
+    --mount=type=cache,dst=/var/cache/libdnf5 \
+    bash <<'RUNEOF'
+set "${CI+-x}" -euo pipefail
+if [[ "${KERNEL_FLAVOR}" =~ (coreos|longterm) ]]; then
+    /tmp/build-ublue-os-ucore-addons.sh
+    cp /tmp/ublue-os-ucore-addons/rpmbuild/RPMS/noarch/ublue-os-ucore-addons*.rpm /var/cache/rpms/ucore/
+fi
+RUNEOF
 RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
