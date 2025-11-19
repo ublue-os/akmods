@@ -34,7 +34,6 @@ See `images.yaml` for which akmods packages are built for each Kernel
 The `common` images contain related kmod packages, plus:
 
 - `ublue-os-akmods-addons` - installs extra repos and our kmods signing key; install and import to allow SecureBoot systems to use these kmods
-- `ublue-os-ucore-addons` - a slightly lighter `ublue-os-akmods-addons` for CoreOS/uCore systems
 
 The `nvidia` and `nvidia-open` images contains
 
