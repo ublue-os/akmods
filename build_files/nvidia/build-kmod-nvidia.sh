@@ -57,7 +57,7 @@ KERNEL_VERSION=${VARS_KERNEL_VERSION}
 # KERNEL_MODULE_TYPE: deprecated as of 2025-12-07, in favor of KMOD_REPO
 # latest drivers are always "open", and LTS driver is always "kernel"
 KERNEL_MODULE_TYPE=${KERNEL_MODULE_TYPE}
-# KMOD_REPO: latest drivers are "nvidia", and lts driver is from "nvidia-580"
+# KMOD_REPO: latest drivers are "nvidia", and LTS driver is "nvidia-lts"
 KMOD_REPO=${KMOD_REPO}
 RELEASE="${DEPRECATED_RELEASE}"
 NVIDIA_AKMOD_VERSION=${NVIDIA_AKMOD_VERSION}

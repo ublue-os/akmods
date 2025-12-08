@@ -79,7 +79,7 @@ install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_unitdir}/ublue-nvctk-cdi.ser
 - add nvidia-driver version 580 LTS repo support
 - remove sway environment file
 
-* Tue Jun 10 2025 Benjamin Sherman <benjamin@holyarmy.org>> - 0.13
+* Tue Jun 10 2025 Benjamin Sherman <benjamin@holyarmy.org> - 0.13
 - add EPEL support
 
 * Sun Nov 24 2024 RJ Trujillo <eyecantcu@pm.me> - 0.12
