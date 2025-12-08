@@ -10,11 +10,11 @@ DIST="${DIST#.}"
 VARS_KERNEL_VERSION="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
     # enable negativo17
-    cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-epel-${KMOD_REPO}.repo /etc/yum.repos.d/
+    cp "/tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-epel-${KMOD_REPO}.repo" /etc/yum.repos.d/
 else
     # disable rpmfusion and enable negativo17
     sed -i 's/enabled=1/enabled=0/' /etc/yum.repos.d/rpmfusion-*.repo
-    cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-fedora-${KMOD_REPO}.repo /etc/yum.repos.d/
+    cp "/tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-fedora-${KMOD_REPO}.repo" /etc/yum.repos.d/
 fi
 export KERNEL_MODULE_TYPE=open
 if [[ "${KMOD_REPO}" =~ "lts" ]]; then
