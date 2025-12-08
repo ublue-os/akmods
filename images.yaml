@@ -23,9 +23,9 @@ akmods-common: &akmods-common
   name: akmods
   description: "A caching layer for pre-built akmod RPMs"
 
-akmods-nvidia: &akmods-nvidia
-  name: akmods-nvidia
-  description: "A caching layer for the pre-built nvidia akmod RPMs"
+akmods-nvidia-lts: &akmods-nvidia-lts
+  name: akmods-nvidia-lts
+  description: "A caching layer for the pre-built nvidia-lts akmod RPMs"
 
 akmods-nvidia-open: &akmods-nvidia-open
   name: akmods-nvidia-open
@@ -35,50 +35,50 @@ akmods-zfs: &akmods-zfs
   name: akmods-zfs
   description: "A caching layer for the pre-built zfs akmod RPMs"
 
+desktop-build-group-only-x86: &desktop-build-group-only-x86
+  common:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-common
+      - *arch-only-x86
+  nvidia-lts:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-nvidia-lts
+      - *arch-only-x86
+  nvidia-open:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-nvidia-open
+      - *arch-only-x86
+
 desktop-build-group: &desktop-build-group
   common:
     !!merge <<:
       - *akmods-base
       - *akmods-common
-      - *arch-only-x86
-  nvidia:
-    !!merge <<:
-      - *akmods-base
-      - *akmods-nvidia
-      - *arch-only-x86
-  nvidia-open:
-    !!merge <<:
-      - *akmods-base
-      - *akmods-nvidia
-      - *arch-only-x86
-
-desktop-build-group: &desktop-build-group-arm-x86
-  common:
-    !!merge <<:
-      - *akmods-base
-      - *akmods-common
       - *arch-arm-x86
-  nvidia:
+  nvidia-lts:
     !!merge <<:
       - *akmods-base
-      - *akmods-nvidia
+      - *akmods-nvidia-lts
       - *arch-arm-x86
   nvidia-open:
     !!merge <<:
       - *akmods-base
-      - *akmods-nvidia
+      - *akmods-nvidia-open
       - *arch-arm-x86
 
-server-build-group: &server-build-group
-  nvidia:
+server-build-group-only-x86: &server-build-group-only-x86
+  nvidia-lts:
     !!merge <<:
       - *akmods-base
-      - *akmods-nvidia
+      - *akmods-nvidia-lts
       - *arch-only-x86
   nvidia-open:
     !!merge <<:
       - *akmods-base
-      - *akmods-nvidia
+      - *akmods-nvidia-open
       - *arch-only-x86
   zfs:
     !!merge <<:
@@ -86,16 +86,16 @@ server-build-group: &server-build-group
       - *akmods-zfs
       - *arch-only-x86
 
-server-build-group-arm64: &server-build-group-arm-x86
-  nvidia:
+server-build-group: &server-build-group
+  nvidia-lts:
     !!merge <<:
       - *akmods-base
-      - *akmods-nvidia
+      - *akmods-nvidia-lts
       - *arch-arm-x86
   nvidia-open:
     !!merge <<:
       - *akmods-base
-      - *akmods-nvidia
+      - *akmods-nvidia-open
       - *arch-arm-x86
   zfs:
     !!merge <<:
@@ -107,28 +107,27 @@ images:
   10:
     centos:
       !!merge <<:
-        - *server-build-group-arm-x86
+        - *server-build-group
   42:
     main:
       !!merge <<:
-        - *desktop-build-group
+        - *desktop-build-group-only-x86
     coreos-stable:
       !!merge <<:
-        - *desktop-build-group-arm-x86
-        - *server-build-group-arm-x86
+        - *desktop-build-group
+        - *server-build-group
   43:
     main:
       !!merge <<:
-        - *desktop-build-group
+        - *desktop-build-group-only-x86
     coreos-stable:
       !!merge <<:
-        - *desktop-build-group-arm-x86
-        - *server-build-group-arm-x86
+        - *desktop-build-group
+        - *server-build-group
     coreos-testing:
       !!merge <<:
-        - *desktop-build-group-arm-x86
-        - *server-build-group-arm-x86
+        - *desktop-build-group
+        - *server-build-group
     "longterm-6.12":
       !!merge <<:
-        - *desktop-build-group-arm-x86
-        - *server-build-group-arm-x86
+        - *server-build-group

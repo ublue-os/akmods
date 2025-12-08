@@ -60,6 +60,7 @@ fi
 ### PREPARE BUILD ENV
 RPMS_TO_INSTALL+=(
     akmods
+    gcc-c++
     mock
     ruby-devel
 )

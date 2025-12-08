@@ -28,8 +28,8 @@ jobs:
       architecture: '["aarch64","x86_64"]'
       kernel_flavor: centos
       version: 10
-  build-centos_10_nvidia:
-    name: Build nvidia centos (10)
+  build-centos_10_nvidia-lts:
+    name: Build nvidia-lts centos (10)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     permissions:
@@ -38,7 +38,7 @@ jobs:
       packages: write
     needs: cache_kernel_centos_10
     with:
-      akmods_target: nvidia
+      akmods_target: nvidia-lts
       architecture: '["aarch64","x86_64"]'
       kernel_cache_key: ${{ needs.cache_kernel_centos_10.outputs.KCKEY }}
       kernel_flavor: centos
@@ -78,7 +78,7 @@ jobs:
     permissions:
       actions: read
       contents: read
-    needs: [build-centos_10_nvidia,build-centos_10_nvidia-open,build-centos_10_zfs]
+    needs: [build-centos_10_nvidia-lts,build-centos_10_nvidia-open,build-centos_10_zfs]
     runs-on: ubuntu-24.04
     if: always()
     steps:

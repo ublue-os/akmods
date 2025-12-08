@@ -1,5 +1,5 @@
 Name:           ublue-os-nvidia-addons
-Version:        0.13
+Version:        0.14
 Release:        1%{?dist}
 Summary:        Additional files for nvidia driver support
 
@@ -13,10 +13,11 @@ Source0:        nvidia-container-toolkit.repo
 Source1:        nvidia-container.pp
 Source2:        ublue-nvctk-cdi.service
 Source3:        70-ublue-nvctk-cdi.preset
-Source4:        environment
 Source5:        negativo17-fedora-nvidia.repo
 Source6:        60-nvidia-extra-devices-pm.rules
 Source7:        negativo17-epel-nvidia.repo
+Source8:        negativo17-epel-nvidia-lts.repo
+Source9:        negativo17-fedora-nvidia-lts.repo
 
 %description
 Adds various runtime files for nvidia support.
@@ -28,14 +29,19 @@ Adds various runtime files for nvidia support.
 %build
 %if 0%{?rhel}
 install -Dm0644 %{SOURCE7} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia.repo
+install -Dm0644 %{SOURCE8} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia-lts.repo
 sed -i 's@enabled=1@enabled=0@g' %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia.repo
+sed -i 's@enabled=1@enabled=0@g' %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia-lts.repo
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia.repo %{buildroot}%{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia.repo
+install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia-lts.repo %{buildroot}%{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia-lts.repo
 %endif
 %if 0%{?fedora}
-install -Dm0644 %{SOURCE4} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/sway/environment
 install -Dm0644 %{SOURCE5} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo
+install -Dm0644 %{SOURCE9} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia-lts.repo
 sed -i 's@enabled=1@enabled=0@g' %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo
+sed -i 's@enabled=1@enabled=0@g' %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia-lts.repo
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo %{buildroot}%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo
+install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia-lts.repo %{buildroot}%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia-lts.repo
 %endif
 
 install -Dm0644 %{SOURCE0} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
@@ -50,12 +56,15 @@ install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_unitdir}/ublue-nvctk-cdi.ser
 %files
 %if 0%{?rhel}
 %attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia.repo
+%attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia-lts.repo
 %attr(0644,root,root) %{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia.repo
+%attr(0644,root,root) %{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia-lts.repo
 %endif
 %if 0%{?fedora}
-%attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/sway/environment
 %attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo
+%attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia-lts.repo
 %attr(0644,root,root) %{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo
+%attr(0644,root,root) %{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia-lts.repo
 %endif
 %attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
 %attr(0644,root,root) %{_datadir}/ublue-os/%{_datadir}/selinux/packages/nvidia-container.pp
@@ -66,6 +75,10 @@ install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_unitdir}/ublue-nvctk-cdi.ser
 %attr(0644,root,root) %{_presetdir}/70-ublue-nvctk-cdi.preset
 
 %changelog
+* Mon Dec 8 2025 Benjamin Sherman <benjamin@holyarmy.org> - 0.14
+- add nvidia-driver version 580 LTS repo support
+- remove sway environment file
+
 * Tue Jun 10 2025 Benjamin Sherman <benjamin@holyarmy.org>> - 0.13
 - add EPEL support
 

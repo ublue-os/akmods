@@ -295,7 +295,7 @@ build: (cache-kernel-version) (fetch-kernel)
     )
     if [[ "{{ akmods_target }}" =~ nvidia ]]; then
         CPP_FLAGS+=(
-            "--cpp-flag=-DKMOD_MODULE_ARG=KMOD_MODULE={{ if akmods_target =~ 'open' { "kernel-open" } else { 'kernel' } }}"
+            "--cpp-flag=-DKMOD_REPO_ARG=KMOD_REPO={{ if akmods_target =~ 'lts' { "nvidia-lts" } else { 'nvidia' } }}"
         )
     fi
     LABELS=(
@@ -340,7 +340,7 @@ test: (cache-kernel-version) (fetch-kernel)
     )
     if [[ "{{ akmods_target }}" =~ nvidia ]]; then
         CPP_FLAGS+=(
-            "--cpp-flag=-DKMOD_MODULE_ARG=KMOD_MODULE={{ if akmods_target =~ 'open' { "kernel-open" } else { 'kernel' } }}"
+            "--cpp-flag=-DKMOD_REPO_ARG=KMOD_REPO={{ if akmods_target =~ 'lts' { "nvidia-lts" } else { 'nvidia' } }}"
         )
     fi
 

@@ -43,8 +43,8 @@ jobs:
       kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_43.outputs.KCKEY }}
       kernel_flavor: coreos-testing
       version: 43
-  build-coreos-testing_43_nvidia:
-    name: Build nvidia coreos-testing (43)
+  build-coreos-testing_43_nvidia-lts:
+    name: Build nvidia-lts coreos-testing (43)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     permissions:
@@ -53,7 +53,7 @@ jobs:
       packages: write
     needs: cache_kernel_coreos-testing_43
     with:
-      akmods_target: nvidia
+      akmods_target: nvidia-lts
       architecture: '["aarch64","x86_64"]'
       kernel_cache_key: ${{ needs.cache_kernel_coreos-testing_43.outputs.KCKEY }}
       kernel_flavor: coreos-testing
@@ -93,7 +93,7 @@ jobs:
     permissions:
       actions: read
       contents: read
-    needs: [build-coreos-testing_43_common,build-coreos-testing_43_nvidia,build-coreos-testing_43_nvidia-open,build-coreos-testing_43_zfs]
+    needs: [build-coreos-testing_43_common,build-coreos-testing_43_nvidia-lts,build-coreos-testing_43_nvidia-open,build-coreos-testing_43_zfs]
     runs-on: ubuntu-24.04
     if: always()
     steps:
