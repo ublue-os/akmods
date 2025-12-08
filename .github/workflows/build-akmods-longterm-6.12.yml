@@ -54,7 +54,7 @@ jobs:
     needs: cache_kernel_longterm-6-12_43
     with:
       akmods_target: nvidia-open
-      architecture: '["aarch64","x86_64"]'
+      architecture: '["x86_64"]'
       kernel_cache_key: ${{ needs.cache_kernel_longterm-6-12_43.outputs.KCKEY }}
       kernel_flavor: longterm-6.12
       version: 43

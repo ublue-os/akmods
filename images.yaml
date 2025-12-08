@@ -67,7 +67,10 @@ desktop-build-group: &desktop-build-group
     !!merge <<:
       - *akmods-base
       - *akmods-nvidia-open
-      - *arch-arm-x86
+      - *arch-only-x86
+      #- *arch-arm-x86
+      # FIXME: nvidia 590 open is not building on aarch64 at the moment
+      # this will bypass to get builds generally working
 
 server-build-group-only-x86: &server-build-group-only-x86
   nvidia-lts:
@@ -96,7 +99,10 @@ server-build-group: &server-build-group
     !!merge <<:
       - *akmods-base
       - *akmods-nvidia-open
-      - *arch-arm-x86
+      - *arch-only-x86
+      #- *arch-arm-x86
+      # FIXME: nvidia 590 open is not building on aarch64 at the moment
+      # this will bypass to get builds generally working
   zfs:
     !!merge <<:
       - *akmods-base
