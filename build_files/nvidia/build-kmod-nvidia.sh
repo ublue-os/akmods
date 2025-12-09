@@ -3,18 +3,22 @@
 set "${CI:+-x}" -euo pipefail
 
 ARCH="$(rpm -E '%_arch')"
-KERNEL_MODULE_TYPE="${1:-kernel}"
+KMOD_REPO="${1:-nvidia}"
 
 DIST="$(rpm -E '%dist')"
 DIST="${DIST#.}"
 VARS_KERNEL_VERSION="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
     # enable negativo17
-    cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-epel-nvidia.repo /etc/yum.repos.d/
+    cp "/tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-epel-${KMOD_REPO}.repo" /etc/yum.repos.d/
 else
     # disable rpmfusion and enable negativo17
     sed -i 's/enabled=1/enabled=0/' /etc/yum.repos.d/rpmfusion-*.repo
-    cp /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-fedora-nvidia.repo /etc/yum.repos.d/
+    cp "/tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-fedora-${KMOD_REPO}.repo" /etc/yum.repos.d/
+fi
+export KERNEL_MODULE_TYPE=open
+if [[ "${KMOD_REPO}" =~ "lts" ]]; then
+    export KERNEL_MODULE_TYPE=kernel
 fi
 DEPRECATED_RELEASE="${DIST}.${ARCH}"
 
@@ -35,8 +39,6 @@ rpm -qa |grep nvidia
 KERNEL_VERSION="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 NVIDIA_AKMOD_VERSION="$(basename "$(rpm -q "akmod-nvidia" --queryformat '%{VERSION}-%{RELEASE}')" ".${DIST}")"
 
-sed -i "s/^MODULE_VARIANT=.*/MODULE_VARIANT=$KERNEL_MODULE_TYPE/" /etc/nvidia/kernel.conf
-
 akmods --force --kernels "${KERNEL_VERSION}" --kmod "nvidia"
 
 modinfo /usr/lib/modules/"${KERNEL_VERSION}"/extra/nvidia/nvidia{,-drm,-modeset,-peermem,-uvm}.ko.xz > /dev/null || \
@@ -52,7 +54,11 @@ mkdir -p /var/cache/rpms/kmods/nvidia
 cat <<EOF > /var/cache/rpms/kmods/nvidia-vars
 DIST_ARCH="${DIST}.${ARCH}"
 KERNEL_VERSION=${VARS_KERNEL_VERSION}
+# KERNEL_MODULE_TYPE: deprecated as of 2025-12-07, in favor of KMOD_REPO
+# latest drivers are always "open", and LTS driver is always "kernel"
 KERNEL_MODULE_TYPE=${KERNEL_MODULE_TYPE}
+# KMOD_REPO: latest drivers are "nvidia", and LTS driver is "nvidia-lts"
+KMOD_REPO=${KMOD_REPO}
 RELEASE="${DEPRECATED_RELEASE}"
 NVIDIA_AKMOD_VERSION=${NVIDIA_AKMOD_VERSION}
 EOF

@@ -11,7 +11,7 @@ ARG CI=1
 #endif /* CI_SETX */
 
 #ifdef NVIDIA
-ARG KMOD_MODULE_ARG
+ARG KMOD_REPO_ARG
 #endif /* NVIDIA */
 
 #ifdef ZFS
@@ -24,7 +24,6 @@ ARG ZFS_MINOR_VERSION="2.3"
 
 COPY certs /tmp/certs
 
-COPY files/etc/sway/environment /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/environment
 COPY files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/ublue-nvctk-cdi.service
 COPY files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/ublue-os-ucore-nvidia/rpmbuild/SOURCES/ublue-nvctk-cdi.service
 COPY files/usr/lib/systemd/system-preset/70-ublue-nvctk-cdi.preset /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/70-ublue-nvctk-cdi.preset
@@ -63,7 +62,7 @@ ARG CI=1
 #endif /* CI_SETX */
 
 #ifdef NVIDIA 
-ARG KMOD_MODULE_ARG
+ARG KMOD_REPO_ARG
 #endif /* NVIDIA */
 
 #if defined COMMON
@@ -97,22 +96,13 @@ COPY build_files/nvidia /tmp/
 RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
-set "${CI+-x}" -euo pipefail
-if [[ "${KERNEL_FLAVOR}" =~ (coreos|longterm) ]]; then
-    /tmp/build-ublue-os-ucore-nvidia.sh
-    cp /tmp/ublue-os-ucore-nvidia/rpmbuild/RPMS/noarch/ublue-os-ucore-nvidia*.rpm /var/cache/rpms/ucore/
-fi
-RUNEOF
-RUN --mount=type=cache,dst=/var/cache/dnf \
-    --mount=type=cache,dst=/var/cache/libdnf5 \
-    bash <<'RUNEOF'
 /tmp/build-ublue-os-nvidia-addons.sh
 cp /tmp/ublue-os-nvidia-addons/rpmbuild/RPMS/noarch/ublue-os-nvidia-addons*.rpm /var/cache/rpms/ublue-os/
 RUNEOF
 RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
-/tmp/build-kmod-nvidia.sh "$KMOD_MODULE"
+/tmp/build-kmod-nvidia.sh "$KMOD_REPO"
 RUNEOF
 
 #elif defined ZFS

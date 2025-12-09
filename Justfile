@@ -15,7 +15,7 @@ builder := if kernel_flavor =~ 'centos' { 'quay.io/centos/centos:' + version } e
 
 kernel_flavor := env('AKMODS_KERNEL', shell('yq ".defaults.kernel_flavor" images.yaml'))
 version := env('AKMODS_VERSION', if kernel_flavor =~ 'centos' { '10' } else { shell('yq ".defaults.version" images.yaml') })
-akmods_target := env('AKMODS_TARGET', if kernel_flavor =~ 'centos' { 'zfs' } else { shell('yq ".defaults.akmods_target" images.yaml') })
+akmods_target := env('AKMODS_TARGET', if kernel_flavor =~ '(centos|longterm)' { 'zfs' } else { shell('yq ".defaults.akmods_target" images.yaml') })
 
 # Check if valid
 
@@ -295,7 +295,7 @@ build: (cache-kernel-version) (fetch-kernel)
     )
     if [[ "{{ akmods_target }}" =~ nvidia ]]; then
         CPP_FLAGS+=(
-            "--cpp-flag=-DKMOD_MODULE_ARG=KMOD_MODULE={{ if akmods_target =~ 'open' { "kernel-open" } else { 'kernel' } }}"
+            "--cpp-flag=-DKMOD_REPO_ARG=KMOD_REPO={{ if akmods_target =~ 'lts' { "nvidia-lts" } else { 'nvidia' } }}"
         )
     fi
     LABELS=(
@@ -340,7 +340,7 @@ test: (cache-kernel-version) (fetch-kernel)
     )
     if [[ "{{ akmods_target }}" =~ nvidia ]]; then
         CPP_FLAGS+=(
-            "--cpp-flag=-DKMOD_MODULE_ARG=KMOD_MODULE={{ if akmods_target =~ 'open' { "kernel-open" } else { 'kernel' } }}"
+            "--cpp-flag=-DKMOD_REPO_ARG=KMOD_REPO={{ if akmods_target =~ 'lts' { "nvidia-lts" } else { 'nvidia' } }}"
         )
     fi
 

@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       akmods_target:
-        description: "The akmods to build: common, zfs, nvidia, nvidia-open"
+        description: "The akmods to build: common, zfs, nvidia-lts, nvidia-open"
         required: true
         type: string
       architecture:
@@ -27,7 +27,7 @@ on:
   workflow_dispatch:
     inputs:
       akmods_target:
-        description: "The akmods to build: common, zfs, nvidia, nvidia-open"
+        description: "The akmods to build: common, zfs, nvidia-lts, nvidia-open"
         required: true
         type: string
       architecture:
