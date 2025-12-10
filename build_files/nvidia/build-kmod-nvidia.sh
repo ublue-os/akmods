@@ -27,7 +27,7 @@ cd /tmp
 ### BUILD nvidia
 
 # query latest available driver in repo
-DRIVER_VERSION=$(dnf info nvidia-driver | grep -E '^Version|^Release' | awk '{print $3}' | xargs | sed 's/\ /-/')
+DRIVER_VERSION=$(dnf info akmod-nvidia | grep -E '^Version|^Release' | awk '{print $3}' | xargs | sed 's/\ /-/')
 
 # only install the version of akmod-nviida which matches available nvidia-driver
 # this works around situations where a new version may be released but not for one arch
