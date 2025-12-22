@@ -14,10 +14,6 @@ ARG CI=1
 ARG KMOD_REPO_ARG
 #endif /* NVIDIA */
 
-#ifdef ZFS
-ARG ZFS_MINOR_VERSION="2.3"
-#endif /* ZFS */
-
 # /*
 # common copy/add
 # */
@@ -64,6 +60,10 @@ ARG CI=1
 #ifdef NVIDIA 
 ARG KMOD_REPO_ARG
 #endif /* NVIDIA */
+
+#ifdef ZFS
+ARG ZFS_MINOR_VERSION="2.3"
+#endif /* ZFS */
 
 #if defined COMMON
 # /*

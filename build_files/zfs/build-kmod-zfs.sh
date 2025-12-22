@@ -11,6 +11,7 @@ cd /tmp
 # Use cURL to fetch the given URL, saving the response to `data.json`
 curl "https://api.github.com/repos/openzfs/zfs/releases" -o data.json
 ZFS_VERSION=$(jq -r --arg ZMV "zfs-${ZFS_MINOR_VERSION}" '[ .[] | select(.prerelease==false and .draft==false) | select(.tag_name | startswith($ZMV))][0].tag_name' data.json|cut -f2- -d-)
+echo "ZFS_MINOR_VERSION==$ZFS_MINOR_VERSION"
 echo "ZFS_VERSION==$ZFS_VERSION"
 
 
