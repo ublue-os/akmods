@@ -84,7 +84,7 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
 /tmp/build-kmod-openrazer.sh
 /tmp/build-kmod-v4l2loopback.sh
 /tmp/build-kmod-wl.sh
-/tmp/build-kmod-xone.sh
+#/tmp/build-kmod-xone.sh
 RUNEOF
 
 #elif defined NVIDIA
