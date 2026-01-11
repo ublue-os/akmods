@@ -187,10 +187,7 @@ get-kernel-version:
             kernel_name=kernel-longterm
             ;;
         "main")
-            base_image_name="base"
-            if [[ {{ version }} > 40 ]]; then
-                base_image_name+="-atomic"
-            fi
+            base_image_name="base-atomic"
             linux=$(skopeo inspect docker://quay.io/fedora-ostree-desktops/$base_image_name:{{ version }} --format '{{{{ index .Labels "ostree.linux" }}')
             ;;
         *)
