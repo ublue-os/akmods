@@ -17,6 +17,10 @@ kernel_flavor := env('AKMODS_KERNEL', shell('yq ".defaults.kernel_flavor" images
 version := env('AKMODS_VERSION', if kernel_flavor =~ 'centos' { '10' } else { shell('yq ".defaults.version" images.yaml') })
 akmods_target := env('AKMODS_TARGET', if kernel_flavor =~ '(centos|longterm)' { 'zfs' } else { shell('yq ".defaults.akmods_target" images.yaml') })
 
+# Kernel Pin (optional) - Set to a kernel version to cap coreos-stable at that version
+# Example: COREOS_STABLE_KERNEL_PIN="6.17.12"
+coreos_stable_kernel_pin := env('COREOS_STABLE_KERNEL_PIN', '')
+
 # Check if valid
 
 check_valid := if shell('yq ".images.$1[\"$2\"].$3" images.yaml', version, kernel_flavor, akmods_target) != 'null' { 'true' } else { error('Invalid Image Combination') }
@@ -69,12 +73,28 @@ get-kernel-version:
         # as of Fedora 43, CoreOS image does not have the ostree.linux label; so query rpm within image
         coreos_linux=$($rpm -q kernel | sed "s/^kernel-//" | tr -d '\r\n')
 
-        # Kernel Pin Location
+        # Kernel Pin Location (Maximum Version Cap)
         # this gives us a consistent place to handle pinning for coreos stable dependent usages
-        # including: ucore stable, bluefin/aurora stable, bluefin lts (using centos-kmodsig version matching)
-        #if [[ "{{ kernel_flavor }}" =~ coreos-stable ]]; then
-        #    coreos_linux="6.14.11-300.fc42.$(uname -m)"
-        #fi
+        # including: ucore stable, aurora stable and bluefin stable
+        # This pin acts as a ceiling - kernels newer than this version will be held back to the pinned version
+        # Kernels at or below this version will pass through unchanged
+        # Set COREOS_STABLE_KERNEL_PIN env var to enable (e.g., "6.17.12")
+        if [[ "{{ kernel_flavor }}" =~ coreos-stable ]] && [[ -n "{{ coreos_stable_kernel_pin }}" ]]; then
+            local pin_version="{{ coreos_stable_kernel_pin }}"
+            # Extract major.minor.patch from detected kernel (e.g., "6.17.11" from "6.17.11-300.fc43.x86_64")
+            local detected_version=$(echo "$coreos_linux" | grep -oP '^\d+\.\d+\.\d+')
+
+            # Compare versions: only apply pin if detected kernel is newer than pinned
+            if [[ "$(printf '%s\n' "$pin_version" "$detected_version" | sort -V | tail -n1)" == "$detected_version" ]] && \
+               [[ "$detected_version" != "$pin_version" ]]; then
+                echo "Detected coreos-stable kernel $coreos_linux (${detected_version}) is newer than pin ${pin_version}, applying pin" >&2
+                # Reconstruct full kernel version with pinned major.minor.patch
+                local suffix=$(echo "$coreos_linux" | grep -oP '^\d+\.\d+\.\d+\K.*')
+                coreos_linux="${pin_version}${suffix}"
+            else
+                echo "Detected coreos-stable kernel $coreos_linux is at or below pin $pin_kernel, no pin applied" >&2
+            fi
+        fi
 
         # This always provides kernel version from the upstream image as the resulting $coreos_linux variable
         # It should be verified downloadable by verify_kernel_fedora() and verify_kernel_centos_kmodsig()
