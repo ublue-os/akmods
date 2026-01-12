@@ -17,9 +17,11 @@ kernel_flavor := env('AKMODS_KERNEL', shell('yq ".defaults.kernel_flavor" images
 version := env('AKMODS_VERSION', if kernel_flavor =~ 'centos' { '10' } else { shell('yq ".defaults.version" images.yaml') })
 akmods_target := env('AKMODS_TARGET', if kernel_flavor =~ '(centos|longterm)' { 'zfs' } else { shell('yq ".defaults.akmods_target" images.yaml') })
 
-# Kernel Pin (optional) - Set to a kernel version to cap coreos-stable at that version
-# Example: COREOS_STABLE_KERNEL_PIN="6.17.12"
-coreos_stable_kernel_pin := env('COREOS_STABLE_KERNEL_PIN', '')
+# Kernel Pin for coreos-stable (Maximum Version Cap)
+# Set to a specific kernel version (e.g., '6.17.12') to cap coreos-stable builds
+# Set to empty string '' for no pin (use latest kernel from upstream fedora-coreos:stable)
+# This gives maintainers a clear, version-controlled view of the current pin state
+coreos_stable_kernel_pin := '6.17.12'
 
 # Check if valid
 
@@ -74,11 +76,11 @@ get-kernel-version:
         coreos_linux=$($rpm -q kernel | sed "s/^kernel-//" | tr -d '\r\n')
 
         # Kernel Pin Location (Maximum Version Cap)
-        # this gives us a consistent place to handle pinning for coreos stable dependent usages
+        # This gives us a consistent place to handle pinning for coreos stable dependent usages
         # including: ucore stable, aurora stable and bluefin stable
         # This pin acts as a ceiling - kernels newer than this version will be held back to the pinned version
         # Kernels at or below this version will pass through unchanged
-        # Set COREOS_STABLE_KERNEL_PIN env var to enable (e.g., "6.17.12")
+        # Edit coreos_stable_kernel_pin at the top of this Justfile to enable/disable
         if [[ "{{ kernel_flavor }}" =~ coreos-stable ]] && [[ -n "{{ coreos_stable_kernel_pin }}" ]]; then
             local pin_version="{{ coreos_stable_kernel_pin }}"
             # Extract major.minor.patch from detected kernel (e.g., "6.17.11" from "6.17.11-300.fc43.x86_64")
