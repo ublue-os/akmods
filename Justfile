@@ -75,7 +75,6 @@ get-kernel-version:
         # as of Fedora 43, CoreOS image does not have the ostree.linux label; so query rpm within image
         coreos_linux=$($rpm -q kernel | sed "s/^kernel-//" | tr -d '\r\n')
 
-        # Kernel Pin Location (Maximum Version Cap)
         # This gives us a consistent place to handle pinning for coreos stable dependent usages
         # including: ucore stable, aurora stable and bluefin stable
         # This pin acts as a ceiling - kernels newer than this version will be held back to the pinned version
@@ -94,7 +93,7 @@ get-kernel-version:
                 local suffix=$(echo "$coreos_linux" | grep -oP '^\d+\.\d+\.\d+\K.*')
                 coreos_linux="${pin_version}${suffix}"
             else
-                echo "Detected coreos-stable kernel $coreos_linux is at or below pin $pin_kernel, no pin applied" >&2
+                echo "Detected coreos-stable kernel $coreos_linux is at or below pin $pin_version, no pin applied" >&2
             fi
         fi
 
