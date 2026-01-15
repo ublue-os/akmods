@@ -21,7 +21,7 @@ akmods_target := env('AKMODS_TARGET', if kernel_flavor =~ '(centos|longterm)' { 
 # Set to a specific kernel version (e.g., '6.17.12') to cap coreos-stable builds
 # Set to empty string '' for no pin (use latest kernel from upstream fedora-coreos:stable)
 # This gives maintainers a clear, version-controlled view of the current pin state
-coreos_stable_kernel_pin := '6.17.12'
+coreos_stable_kernel_pin := ''
 
 # Check if valid
 
