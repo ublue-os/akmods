@@ -13,7 +13,7 @@ on:
     paths-ignore:
       - '**.md'
   schedule:
-    - cron: '01 0 * * *'  # 0001 UTC everyday
+    - cron: '03 0 * * *'  # 0003 UTC everyday
   workflow_dispatch:
 jobs:
   cache_kernel_main_42:
@@ -25,7 +25,7 @@ jobs:
       contents: read
       packages: write
     with:
-      architecture: '["x86_64"]'
+      architecture: '["aarch64","x86_64"]'
       kernel_flavor: main
       version: 42
   build-main_42_common:
@@ -39,7 +39,7 @@ jobs:
     needs: cache_kernel_main_42
     with:
       akmods_target: common
-      architecture: '["x86_64"]'
+      architecture: '["aarch64","x86_64"]'
       kernel_cache_key: ${{ needs.cache_kernel_main_42.outputs.KCKEY }}
       kernel_flavor: main
       version: 42
@@ -54,7 +54,7 @@ jobs:
     needs: cache_kernel_main_42
     with:
       akmods_target: nvidia-lts
-      architecture: '["x86_64"]'
+      architecture: '["aarch64","x86_64"]'
       kernel_cache_key: ${{ needs.cache_kernel_main_42.outputs.KCKEY }}
       kernel_flavor: main
       version: 42
@@ -69,7 +69,7 @@ jobs:
     needs: cache_kernel_main_42
     with:
       akmods_target: nvidia-open
-      architecture: '["x86_64"]'
+      architecture: '["aarch64","x86_64"]'
       kernel_cache_key: ${{ needs.cache_kernel_main_42.outputs.KCKEY }}
       kernel_flavor: main
       version: 42
@@ -97,7 +97,7 @@ jobs:
       contents: read
       packages: write
     with:
-      architecture: '["x86_64"]'
+      architecture: '["aarch64","x86_64"]'
       kernel_flavor: main
       version: 43
   build-main_43_common:
@@ -111,7 +111,7 @@ jobs:
     needs: cache_kernel_main_43
     with:
       akmods_target: common
-      architecture: '["x86_64"]'
+      architecture: '["aarch64","x86_64"]'
       kernel_cache_key: ${{ needs.cache_kernel_main_43.outputs.KCKEY }}
       kernel_flavor: main
       version: 43
@@ -126,7 +126,7 @@ jobs:
     needs: cache_kernel_main_43
     with:
       akmods_target: nvidia-lts
-      architecture: '["x86_64"]'
+      architecture: '["aarch64","x86_64"]'
       kernel_cache_key: ${{ needs.cache_kernel_main_43.outputs.KCKEY }}
       kernel_flavor: main
       version: 43
@@ -141,7 +141,7 @@ jobs:
     needs: cache_kernel_main_43
     with:
       akmods_target: nvidia-open
-      architecture: '["x86_64"]'
+      architecture: '["aarch64","x86_64"]'
       kernel_cache_key: ${{ needs.cache_kernel_main_43.outputs.KCKEY }}
       kernel_flavor: main
       version: 43

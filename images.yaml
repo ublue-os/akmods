@@ -111,7 +111,7 @@ images:
   42:
     main:
       !!merge <<:
-        - *desktop-build-group-only-x86
+        - *desktop-build-group
     coreos-stable:
       !!merge <<:
         - *desktop-build-group
@@ -119,7 +119,7 @@ images:
   43:
     main:
       !!merge <<:
-        - *desktop-build-group-only-x86
+        - *desktop-build-group
     coreos-stable:
       !!merge <<:
         - *desktop-build-group
