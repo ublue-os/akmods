@@ -16,6 +16,10 @@ builder := if kernel_flavor =~ 'centos' { 'quay.io/centos/centos:' + version } e
 kernel_flavor := env('AKMODS_KERNEL', shell('yq ".defaults.kernel_flavor" images.yaml'))
 version := env('AKMODS_VERSION', if kernel_flavor =~ 'centos' { '10' } else { shell('yq ".defaults.version" images.yaml') })
 akmods_target := env('AKMODS_TARGET', if kernel_flavor =~ '(centos|longterm)' { 'zfs' } else { shell('yq ".defaults.akmods_target" images.yaml') })
+zfs_minor_version := env(
+    'ZFS_MINOR_VERSION',
+    if kernel_flavor =~ 'coreos-stable' { '2.3' } else if kernel_flavor =~ 'coreos-testing' { '2.4' } else { '2.3' }
+)
 
 # Kernel Pin for coreos-stable (Maximum Version Cap)
 # Set to a specific kernel version (e.g., '6.17.12') to cap coreos-stable builds
@@ -316,6 +320,11 @@ build: (cache-kernel-version) (fetch-kernel)
             "--cpp-flag=-DKMOD_REPO_ARG=KMOD_REPO={{ if akmods_target =~ 'lts' { "nvidia-lts" } else { 'nvidia' } }}"
         )
     fi
+    if [[ "{{ akmods_target }}" == "zfs" ]]; then
+        CPP_FLAGS+=(
+            "--cpp-flag=-DZFS_MINOR_VERSION_ARG=ZFS_MINOR_VERSION={{ zfs_minor_version }}"
+        )
+    fi
     LABELS=(
         "--label" "io.artifacthub.package.deprecated=false"
         "--label" "io.artifacthub.package.keywords=bootc,fedora,bluefin,centos,cayo,aurora,ublue,universal-blue"
@@ -359,6 +368,11 @@ test: (cache-kernel-version) (fetch-kernel)
     if [[ "{{ akmods_target }}" =~ nvidia ]]; then
         CPP_FLAGS+=(
             "--cpp-flag=-DKMOD_REPO_ARG=KMOD_REPO={{ if akmods_target =~ 'lts' { "nvidia-lts" } else { 'nvidia' } }}"
+        )
+    fi
+    if [[ "{{ akmods_target }}" == "zfs" ]]; then
+        CPP_FLAGS+=(
+            "--cpp-flag=-DZFS_MINOR_VERSION_ARG=ZFS_MINOR_VERSION={{ zfs_minor_version }}"
         )
     fi
 

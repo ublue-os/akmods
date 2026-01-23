@@ -62,7 +62,7 @@ ARG KMOD_REPO_ARG
 #endif /* NVIDIA */
 
 #ifdef ZFS
-ARG ZFS_MINOR_VERSION="2.3"
+ARG ZFS_MINOR_VERSION_ARG
 #endif /* ZFS */
 
 #if defined COMMON
