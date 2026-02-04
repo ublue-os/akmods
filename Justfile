@@ -18,7 +18,7 @@ version := env('AKMODS_VERSION', if kernel_flavor =~ 'centos' { '10' } else { sh
 akmods_target := env('AKMODS_TARGET', if kernel_flavor =~ '(centos|longterm)' { 'zfs' } else { shell('yq ".defaults.akmods_target" images.yaml') })
 zfs_minor_version := env(
     'ZFS_MINOR_VERSION',
-    if kernel_flavor =~ 'coreos-stable' { '2.3' } else if kernel_flavor =~ 'coreos-testing' { '2.4' } else { '2.3' }
+    if kernel_flavor =~ 'coreos-stable' { '2.4' } else if kernel_flavor =~ 'coreos-testing' { '2.4' } else { '2.3' }
 )
 
 # Kernel Pin for coreos-stable (Maximum Version Cap)
