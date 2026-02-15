@@ -15,4 +15,8 @@ akmods --force --kernels "${KERNEL}" --kmod xone
 modinfo /usr/lib/modules/"${KERNEL}"/extra/xone/xone_{dongle,gip,gip_gamepad,gip_headset,gip_chatpad,gip_madcatz_strat,gip_madcatz_glam,gip_pdp_jaguar}.ko.xz > /dev/null \
 || (find /var/cache/akmods/xone/ -name \*.log -print -exec cat {} \; && exit 1)
 
+mkdir -p /var/cache/rpms/common
+dnf download --destdir /var/cache/rpms/common \
+    xone-kmod-common
+
 rm -f /etc/yum.repos.d/_copr_ublue-os-akmods.repo

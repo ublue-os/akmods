@@ -14,3 +14,7 @@ dnf install -y \
 akmods --force --kernels "${KERNEL}" --kmod wl
 modinfo /usr/lib/modules/"${KERNEL}"/extra/wl/wl.ko.xz > /dev/null \
 || (find /var/cache/akmods/wl/ -name \*.log -print -exec cat {} \; && exit 1)
+
+mkdir -p /var/cache/rpms/common
+dnf download --destdir /var/cache/rpms/common \
+    broadcom-wl

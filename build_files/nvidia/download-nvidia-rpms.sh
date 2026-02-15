@@ -22,6 +22,7 @@ fi
 if [[ ! "${KMOD_REPO}" =~ "lts" ]]; then
     NVIDIA_EXTRA_PKGS+=(
         "xorg-x11-nvidia"
+        "nvidia-xconfig"
     )
 fi
 
@@ -39,7 +40,6 @@ NVIDIA_RPMS+=(
     "nvidia-modprobe"
     "nvidia-persistenced"
     "nvidia-settings"
-    "nvidia-xconfig"
     "${NVIDIA_EXTRA_PKGS[@]}"
 )
 
