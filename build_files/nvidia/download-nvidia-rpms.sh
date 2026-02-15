@@ -17,14 +17,14 @@ else
                 "nvidia-driver-libs.i686"
             )
     fi
+    if [[ ! "${KMOD_REPO}" =~ "lts" ]]; then
+        NVIDIA_EXTRA_PKGS+=(
+            "xorg-x11-nvidia"
+            "nvidia-xconfig"
+        )
+    fi
 fi
 
-if [[ ! "${KMOD_REPO}" =~ "lts" ]]; then
-    NVIDIA_EXTRA_PKGS+=(
-        "xorg-x11-nvidia"
-        "nvidia-xconfig"
-    )
-fi
 
 NVIDIA_RPMS+=(
     "libnvidia-cfg"
