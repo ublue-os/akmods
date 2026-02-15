@@ -104,6 +104,11 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     bash <<'RUNEOF'
 /tmp/build-kmod-nvidia.sh "$KMOD_REPO"
 RUNEOF
+RUN --mount=type=cache,dst=/var/cache/dnf \
+    --mount=type=cache,dst=/var/cache/libdnf5 \
+    bash <<'RUNEOF'
+/tmp/download-nvidia-rpms.sh "$KMOD_REPO"
+RUNEOF
 
 #elif defined ZFS
 # /*
