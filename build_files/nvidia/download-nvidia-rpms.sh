@@ -45,3 +45,5 @@ NVIDIA_RPMS+=(
 
 mkdir -p /var/cache/rpms/nvidia
 dnf download --destdir /var/cache/rpms/nvidia "${NVIDIA_RPMS[@]}"
+
+rm -f /var/cache/rpms/nvidia/*.src.rpm

@@ -19,4 +19,6 @@ mkdir -p /var/cache/rpms/common
 dnf download --destdir /var/cache/rpms/common \
     framework-laptop-kmod-common
 
+rm -f /var/cache/rpms/common/*.src.rpm
+
 rm -f /etc/yum.repos.d/_copr_ublue-os-akmods.repo

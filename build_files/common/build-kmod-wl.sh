@@ -18,3 +18,5 @@ modinfo /usr/lib/modules/"${KERNEL}"/extra/wl/wl.ko.xz > /dev/null \
 mkdir -p /var/cache/rpms/common
 dnf download --destdir /var/cache/rpms/common \
     broadcom-wl
+
+rm -f /var/cache/rpms/common/*.src.rpm

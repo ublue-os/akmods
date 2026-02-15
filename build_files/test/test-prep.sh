@@ -143,19 +143,7 @@ if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm 2> /dev/null) ]]; then
     #shellcheck disable=SC1091
     source /tmp/akmods-rpms/kmods/nvidia-vars
     KMODS_TO_INSTALL+=(
-        /tmp/akmods-rpms/nvidia/libnvidia-cfg-*.rpm
-        /tmp/akmods-rpms/nvidia/libnvidia-fbc-*.rpm
-        /tmp/akmods-rpms/nvidia/libnvidia-gpucomp-*.rpm
-        /tmp/akmods-rpms/nvidia/libnvidia-ml-*.rpm
-        /tmp/akmods-rpms/nvidia/nvidia-driver-*.rpm
-        /tmp/akmods-rpms/nvidia/nvidia-driver-cuda-*.rpm
-        /tmp/akmods-rpms/nvidia/nvidia-driver-cuda-libs-*.rpm
-        /tmp/akmods-rpms/nvidia/nvidia-driver-libs-*.rpm
-        /tmp/akmods-rpms/nvidia/nvidia-kmod-common-*.rpm
-        /tmp/akmods-rpms/nvidia/nvidia-libXNVCtrl-*.rpm
-        /tmp/akmods-rpms/nvidia/nvidia-modprobe-*.rpm
-        /tmp/akmods-rpms/nvidia/nvidia-persistenced-*.rpm
-        /tmp/akmods-rpms/nvidia/nvidia-settings-*.rpm
+        /tmp/akmods-rpms/nvidia/*.rpm
         "${NVIDIA_EXTRA_PKGS[@]}"
         /tmp/akmods-rpms/kmods/kmod-nvidia-"${KERNEL_VERSION}"-"${NVIDIA_AKMOD_VERSION}"."${DIST_ARCH}".rpm
     )
@@ -169,11 +157,7 @@ elif [[ -f $(find /tmp/akmods-rpms/kmods/zfs/kmod-*.rpm 2> /dev/null) ]]; then
 else
     KMODS_TO_INSTALL+=(
         /tmp/akmods-rpms/kmods/*.rpm
-        /tmp/akmods-rpms/common/broadcom-wl*.rpm
-        /tmp/akmods-rpms/common/framework-laptop-kmod-common-*.noarch.rpm
-        /tmp/akmods-rpms/common/openrazer-kmod-common-*."$(rpm -E '%{_arch}')".rpm
-        /tmp/akmods-rpms/common/v4l2loopback-*.rpm
-        /tmp/akmods-rpms/common/xone-kmod-common-*.noarch.rpm
+        /tmp/akmods-rpms/common/*.rpm
     )
 fi
 
