@@ -30,7 +30,7 @@ else
         NVIDIA_EXTRA_PKGS+=(libva-nvidia-driver)
     fi
 
-    if [[ ! "${KMOD_REPO}" =~ "lts" ]]; then
+    if [[ ! "${KMOD_REPO:-nvidia}" =~ "lts" ]]; then
         NVIDIA_EXTRA_PKGS+=(
             /tmp/akmods-rpms/nvidia/xorg-x11-nvidia-*.rpm
             /tmp/akmods-rpms/nvidia/nvidia-xconfig-*.rpm
