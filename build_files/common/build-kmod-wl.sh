@@ -7,6 +7,11 @@ ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
 
+# Skip for aarch64
+if [[ "${ARCH}" =~ aarch64 ]]; then
+    exit 0
+fi
+
 
 ### BUILD wl (succeed or fail-fast with debug output)
 dnf install -y \
