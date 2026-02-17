@@ -104,6 +104,11 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     bash <<'RUNEOF'
 /tmp/build-kmod-nvidia.sh "$KMOD_REPO"
 RUNEOF
+RUN --mount=type=cache,dst=/var/cache/dnf \
+    --mount=type=cache,dst=/var/cache/libdnf5 \
+    bash <<'RUNEOF'
+/tmp/download-nvidia-rpms.sh "$KMOD_REPO"
+RUNEOF
 
 #elif defined ZFS
 # /*
@@ -155,6 +160,10 @@ ARG KERNEL_FLAVOR_ARG
 ARG KERNEL_NAME_ARG
 ARG RPMFUSION_MIRROR_ARG
 ARG VERSION_ARG
+
+#ifdef NVIDIA 
+ARG KMOD_REPO_ARG
+#endif /* NVIDIA */
 
 #ifdef CI_SETX
 ENV CI=1

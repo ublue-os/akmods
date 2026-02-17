@@ -15,4 +15,10 @@ akmods --force --kernels "${KERNEL}" --kmod framework-laptop
 modinfo /usr/lib/modules/"${KERNEL}"/extra/framework-laptop/framework_laptop.ko.xz > /dev/null \
 || (find /var/cache/akmods/framework-laptop/ -name \*.log -print -exec cat {} \; && exit 1)
 
+mkdir -p /var/cache/rpms/common
+dnf download --destdir /var/cache/rpms/common \
+    framework-laptop-kmod-common
+
+rm -f /var/cache/rpms/common/*.src.rpm
+
 rm -f /etc/yum.repos.d/_copr_ublue-os-akmods.repo

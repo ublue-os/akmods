@@ -12,7 +12,7 @@ if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
     echo "Building for CentOS"
     RELEASE="$(rpm -E '%centos')"
     NVIDIA_REPO_NAME="epel-nvidia.repo"
-    NVIDIA_EXTRA_PKGS=""
+    NVIDIA_EXTRA_PKGS+=()
 
     mkdir -p /var/roothome
     RPM_PREP+=("https://dl.fedoraproject.org/pub/epel/epel-release-latest-${RELEASE}.noarch.rpm")
@@ -22,9 +22,19 @@ else
     RELEASE="$(rpm -E '%fedora')"
     NVIDIA_REPO_NAME="fedora-nvidia.repo"
     if [ "$(rpm -E %{_arch})" = "x86_64" ]; then
-        NVIDIA_EXTRA_PKGS="libva-nvidia-driver libnvidia-ml.i686 mesa-vulkan-drivers.i686 nvidia-driver-cuda-libs.i686 nvidia-driver-libs.i686"
+        NVIDIA_EXTRA_PKGS+=(
+            libva-nvidia-driver
+            mesa-vulkan-drivers.i686
+        )
     else
-        NVIDIA_EXTRA_PKGS="libva-nvidia-driver"
+        NVIDIA_EXTRA_PKGS+=(libva-nvidia-driver)
+    fi
+
+    if [[ ! "${KMOD_REPO:-nvidia}" =~ "lts" ]]; then
+        NVIDIA_EXTRA_PKGS+=(
+            /tmp/akmods-rpms/nvidia/xorg-x11-nvidia-*.rpm
+            /tmp/akmods-rpms/nvidia/nvidia-xconfig-*.rpm
+        )
     fi
 
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/fedora-cisco-openh264.repo
@@ -133,14 +143,8 @@ if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm 2> /dev/null) ]]; then
     #shellcheck disable=SC1091
     source /tmp/akmods-rpms/kmods/nvidia-vars
     KMODS_TO_INSTALL+=(
-        libnvidia-fbc
-        libva-nvidia-driver
-        nvidia-driver
-        nvidia-driver-cuda
-        nvidia-modprobe
-        nvidia-persistenced
-        nvidia-settings
-        ${NVIDIA_EXTRA_PKGS}
+        /tmp/akmods-rpms/nvidia/*.rpm
+        "${NVIDIA_EXTRA_PKGS[@]}"
         /tmp/akmods-rpms/kmods/kmod-nvidia-"${KERNEL_VERSION}"-"${NVIDIA_AKMOD_VERSION}"."${DIST_ARCH}".rpm
     )
         # Codacy complains about the lack of quotes on ${NVIDIA_EXTRA_PKGS}, but we don't want quotes here
@@ -151,7 +155,10 @@ elif [[ -f $(find /tmp/akmods-rpms/kmods/zfs/kmod-*.rpm 2> /dev/null) ]]; then
         /tmp/akmods-rpms/kmods/zfs/*.rpm
     )
 else
-    KMODS_TO_INSTALL+=(/tmp/akmods-rpms/kmods/*.rpm)
+    KMODS_TO_INSTALL+=(
+        /tmp/akmods-rpms/kmods/*.rpm
+        /tmp/akmods-rpms/common/*.rpm
+    )
 fi
 
 dnf install -y --setopt=install_weak_deps=False "${KMODS_TO_INSTALL[@]}"

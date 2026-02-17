@@ -21,4 +21,10 @@ modinfo /usr/lib/modules/"${KERNEL}"/extra/openrazer/razerkraken.ko.xz >/dev/nul
 modinfo /usr/lib/modules/"${KERNEL}"/extra/openrazer/razeraccessory.ko.xz >/dev/null ||
     (find /var/cache/akmods/openrazer/ -name \*.log -print -exec cat {} \; && exit 1)
 
+mkdir -p /var/cache/rpms/common
+dnf download --destdir /var/cache/rpms/common \
+    openrazer-kmod-common
+
+rm -f /var/cache/rpms/common/*.src.rpm
+
 rm -f /etc/yum.repos.d/_copr_ublue-os-akmods.repo

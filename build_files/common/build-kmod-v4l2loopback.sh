@@ -13,3 +13,9 @@ dnf install -y \
 akmods --force --kernels "${KERNEL}" --kmod v4l2loopback
 modinfo /usr/lib/modules/"${KERNEL}"/extra/v4l2loopback/v4l2loopback.ko.xz > /dev/null \
 || (find /var/cache/akmods/v4l2loopback/ -name \*.log -print -exec cat {} \; && exit 1)
+
+mkdir -p /var/cache/rpms/common
+dnf download --destdir /var/cache/rpms/common \
+    v4l2loopback
+
+rm -f /var/cache/rpms/common/*.src.rpm
