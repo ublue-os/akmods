@@ -452,17 +452,22 @@ manifest:
     done
 
     # Add to Manifest
-    if skopeo inspect docker://{{ manifest_image }}-x86_64 &>/dev/null; then
+    TAGS="$(skopeo list-tags docker://{{ registry / _org / akmods_name }} | jq -r '.Tags | map(select(contains("{{ kernel_flavor }}-{{ version }}")))')"
+    if echo "$TAGS" | jq -re '.[] | select(test("{{ manifest_tag }}-x86_64"))' >/dev/null; then
+        echo "Adding {{ manifest_image }}-x86_64 to {{ manifest_image }} manifest"
         {{ podman }} manifest add {{ manifest_image }} docker://{{ manifest_image }}-x86_64
     fi
-    if skopeo inspect docker://{{ manifest_image }}-aarch64 &>/dev/null; then
+    if echo "$TAGS" | jq -re '.[] | select(test("{{ manifest_tag }}-aarch64"))' >/dev/null; then
+        echo "Adding {{ manifest_image }}-aarch64 to {{ manifest_image }} manifest"
         {{ podman }} manifest add {{ manifest_image }} docker://{{ manifest_image }}-aarch64
     fi
-    if skopeo inspect docker://{{ manifest_image_kernel }}-x86_64 &>/dev/null; then
-        {{ podman }} manifest add {{ manifest_image_kernel }} docker://{{ manifest_image_kernel }}-x86_64
+    if echo "$TAGS" | jq -re '.[] | select(test("{{ manifest_tag_kernel }}.x86_64"))' >/dev/null; then
+        echo "Adding {{ manifest_image_kernel }}.x86_64 to {{ manifest_image_kernel }} manifest"
+        {{ podman }} manifest add {{ manifest_image_kernel }} docker://{{ manifest_image_kernel }}.x86_64
     fi
-    if skopeo inspect docker://{{ manifest_image_kernel }}-aarch64 &>/dev/null; then
-        {{ podman }} manifest add {{ manifest_image_kernel }} docker://{{ manifest_image_kernel }}-aarch64
+    if echo "$TAGS" | jq -re '.[] | select(test("{{ manifest_tag_kernel }}.aarch64"))' >/dev/null; then
+        echo "Adding {{ manifest_image_kernel }}.aarch64 to {{ manifest_image_kernel }} manifest"
+        {{ podman }} manifest add {{ manifest_image_kernel }} docker://{{ manifest_image_kernel }}.aarch64
     fi
 
     # Push Manifest
