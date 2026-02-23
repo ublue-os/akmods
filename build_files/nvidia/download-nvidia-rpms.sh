@@ -2,13 +2,16 @@
 
 set "${CI:+-x}" -euo pipefail
 
+ARCH="$(rpm -E '%_arch')"
+KMOD_REPO="${1:-nvidia}"
+
 if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
     echo "Building for CentOS"
     NVIDIA_EXTRA_PKGS=()
 else
     echo "Building for Fedora"
     NVIDIA_EXTRA_PKGS=()
-    if [ "$(rpm -E '%_arch')" = "x86_64" ]; then
+    if [ "${ARCH}" = "x86_64" ]; then
         NVIDIA_EXTRA_PKGS+=(
                 "libnvidia-fbc.i686"
                 "libnvidia-gpucomp.i686"

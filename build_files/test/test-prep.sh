@@ -1,5 +1,4 @@
 #!/usr/bin/bash
-#shellcheck disable=SC2206
 
 set "${CI:+-x}" -euo pipefail
 
@@ -21,7 +20,7 @@ else
     echo "Building for Fedora"
     RELEASE="$(rpm -E '%fedora')"
     NVIDIA_REPO_NAME="fedora-nvidia.repo"
-    if [ "$(rpm -E %{_arch})" = "x86_64" ]; then
+    if [ "$(rpm -E '%{_arch}')" = "x86_64" ]; then
         NVIDIA_EXTRA_PKGS+=(
             libva-nvidia-driver
             mesa-vulkan-drivers.i686
@@ -108,9 +107,6 @@ if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm) ]]; then
         "https://negativo17.org/repos/${NVIDIA_REPO_NAME}"
     curl -Lo /etc/yum.repos.d/nvidia-container.pp \
         "https://raw.githubusercontent.com/NVIDIA/dgx-selinux/master/bin/RHEL9/nvidia-container.pp"
-    curl -Lo /tmp/nvidia-install.sh \
-        "https://raw.githubusercontent.com/ublue-os/nvidia/main/build_files/nvidia-install.sh"
-    chmod +x /tmp/nvidia-install.sh
 fi
 
 dnf install -y \
@@ -118,7 +114,7 @@ dnf install -y \
     "${RPM_PREP[@]}"
 
 if [[ ! -s "/tmp/certs/private_key.priv" ]]; then
-    echo "WARNING: Using test signing key. Run './generate-akmods-key' for production builds."
+    echo "WARNING: Using test signing key."
     cp /tmp/certs/public_key.der{.test,}
 fi
 
@@ -147,8 +143,6 @@ if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm 2> /dev/null) ]]; then
         "${NVIDIA_EXTRA_PKGS[@]}"
         /tmp/akmods-rpms/kmods/kmod-nvidia-"${KERNEL_VERSION}"-"${NVIDIA_AKMOD_VERSION}"."${DIST_ARCH}".rpm
     )
-        # Codacy complains about the lack of quotes on ${NVIDIA_EXTRA_PKGS}, but we don't want quotes here
-        # we want word splitting behavior, thus '#shellcheck disable=SC2206' added to the top of this file
 elif [[ -f $(find /tmp/akmods-rpms/kmods/zfs/kmod-*.rpm 2> /dev/null) ]]; then
     KMODS_TO_INSTALL+=(
         pv
