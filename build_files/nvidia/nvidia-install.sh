@@ -3,6 +3,7 @@
 set -ouex pipefail
 
 : "${AKMODNV_PATH:=/tmp/akmods-rpms}"
+: "${MULTILIB:=1}"
 source "${AKMODNV_PATH}"/kmods/nvidia-vars
 
 # this is only to aid in human understanding of any issues in CI
@@ -24,9 +25,9 @@ dnf5 config-manager setopt fedora-cisco-openh264.enabled=0
 ## nvidia install steps
 dnf5 install -y "${AKMODNV_PATH}"/ublue-os/ublue-os-nvidia-addons-*.rpm
 
-# Install MULTILIB packages from negativo17-multimedia prior to disabling repo
+# Install MULTILIB_PKGS packages from negativo17-multimedia prior to disabling repo
 
-MULTILIB=(
+MULTILIB_PKGS=(
     mesa-dri-drivers.i686
     mesa-filesystem.i686
     mesa-libEGL.i686
@@ -36,8 +37,8 @@ MULTILIB=(
     mesa-vulkan-drivers.i686
 )
 
-if [[ "$(rpm -E '%{_arch}')" == "x86_64" ]]; then
-    dnf5 install -y "${MULTILIB[@]}"
+if [[ "$(rpm -E '%{_arch}')" == "x86_64" && "${MULTILIB}" == "1" ]]; then
+    dnf5 install -y "${MULTILIB_PKGS[@]}"
 fi
 
 # enable repos provided by ublue-os-nvidia-addons (not enabling fedora-nvidia-lts)
@@ -73,11 +74,17 @@ else
 fi
 
 NVIDIA_RPMS=(
-    "${AKMODNV_PATH}"/nvidia/*.rpm
+    "${AKMODNV_PATH}"/nvidia/*."$(rpm -E '%{_arch}')".rpm
     nvidia-container-toolkit
     "${VARIANT_PKGS[@]}"
     "${AKMODNV_PATH}"/kmods/kmod-nvidia-"${KERNEL_VERSION}"-"${NVIDIA_AKMOD_VERSION}"."${DIST_ARCH}".rpm
 )
+
+if [[ "$(rpm -E '%{_arch}')" == "x86_64" && "${MULTILIB}" == "1" ]]; then
+    NVIDIA_RPMS+=(
+        "${AKMODNV_PATH}"/nvidia/*.i686.rpm
+    )
+fi
 
 dnf5 install -y "${NVIDIA_RPMS[@]}"
 
