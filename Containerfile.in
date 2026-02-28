@@ -108,6 +108,7 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
 /tmp/download-nvidia-rpms.sh "$KMOD_REPO"
+install -m755 -t /var/cache/rpms/ublue-os /tmp/nvidia-install.sh
 RUNEOF
 
 #elif defined ZFS
