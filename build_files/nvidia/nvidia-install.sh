@@ -61,7 +61,6 @@ fi
 
 if [[ "${IMAGE_NAME}" == "kinoite" ]]; then
     VARIANT_PKGS=(
-        supergfxctl-plasmoid
         supergfxctl
     )
 elif [[ "${IMAGE_NAME}" == "silverblue" ]]; then
