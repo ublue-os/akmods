@@ -80,7 +80,7 @@ jobs:
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5
         with:
           path: ${{ steps.kernel-version.outputs.KCPATH }}
-          key: ${{ inputs.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_major_minor_patch }}-${{ matrix.architecture }} # job outputs KCKEY
+          key: ${{ matrix.architecture }}-${{ inputs.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_major_minor_patch }} # job outputs KCKEY
 
       - name: Retrieve Signing Key
         if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && steps.cache-kernel.outputs.cache-hit != 'true'

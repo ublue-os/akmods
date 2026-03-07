@@ -102,11 +102,11 @@ jobs:
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         with:
           path: ${{ steps.gh-workspace.outputs.GITHUB_WORKSPACE }}/build/${{ env.AKMODS_KERNEL }}-${{ env.AKMODS_VERSION }}/KCWD/rpms
+          fail-on-cache-miss: true
           key: ${{ env.KCKEY }}-${{ matrix.architecture }}
-
-      - name: Fail Absent Kernel Cache
-        if: steps.cache-kernel.outputs.cache-hit != 'true'
-        run: "echo 'Kernel Cache not found for key: ${{ env.KCKEY }}'; exit 1"
+          restore-keys: |
+            ${{ matrix.architecture }}-${{ env.KCKEY }}
+            ${{ matrix.architecture }}-${{ env.AKMODS_KERNEL }}
 
       - name: Retrieve Signing Key
         if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
