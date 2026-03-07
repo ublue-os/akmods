@@ -1,5 +1,4 @@
 #!/usr/bin/bash
-#shellcheck disable=SC2206
 
 set "${CI:+-x}" -euo pipefail
 
@@ -8,36 +7,17 @@ KERNEL_VERSION=$(find "$KERNEL_NAME"-*.rpm | grep "$(uname -m)" | grep -P "$KERN
 popd
 
 ### PREPARE REPOS
+RPM_PREP=(openssl)
 if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
     echo "Building for CentOS"
     RELEASE="$(rpm -E '%centos')"
-    NVIDIA_REPO_NAME="epel-nvidia.repo"
-    NVIDIA_EXTRA_PKGS+=()
-
     mkdir -p /var/roothome
-    RPM_PREP+=("https://dl.fedoraproject.org/pub/epel/epel-release-latest-${RELEASE}.noarch.rpm")
     dnf config-manager --set-enabled crb
 else
     echo "Building for Fedora"
     RELEASE="$(rpm -E '%fedora')"
-    NVIDIA_REPO_NAME="fedora-nvidia.repo"
-    if [ "$(rpm -E %{_arch})" = "x86_64" ]; then
-        NVIDIA_EXTRA_PKGS+=(
-            libva-nvidia-driver
-            mesa-vulkan-drivers.i686
-        )
-    else
-        NVIDIA_EXTRA_PKGS+=(libva-nvidia-driver)
-    fi
-
-    if [[ ! "${KMOD_REPO:-nvidia}" =~ "lts" ]]; then
-        NVIDIA_EXTRA_PKGS+=(
-            /tmp/akmods-rpms/nvidia/xorg-x11-nvidia-*.rpm
-            /tmp/akmods-rpms/nvidia/nvidia-xconfig-*.rpm
-        )
-    fi
-
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/fedora-cisco-openh264.repo
+    dnf config-manager addrepo --from-repofile=https://negativo17.org/repos/fedora-multimedia.repo
 fi
 
 # enable RPMs with alternatives to create them in this image build
@@ -51,42 +31,7 @@ fi
 echo "Installing ${KERNEL_FLAVOR} kernel-cache RPMs..."
 # fedora image has no kernel so this needs nothing fancy, just install
 #shellcheck disable=SC2046 # We want word splitting
-dnf install -y "${RPM_PREP[@]}" $(find /tmp/kernel_cache/*.rpm -type f | grep "$(uname -m)" | grep -v uki)
-
-if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
-    echo "Building for CentOS does not require more repos"
-else
-    echo "Building for Fedora requires more repo setup"
-    # enable more repos
-    RPMFUSION_MIRROR_RPMS="https://mirrors.rpmfusion.org"
-    if [ -n "${RPMFUSION_MIRROR}" ]; then
-        RPMFUSION_MIRROR_RPMS=${RPMFUSION_MIRROR}
-    fi
-    RPM_PREP+=(
-        "${RPMFUSION_MIRROR_RPMS}"/free/fedora/rpmfusion-free-release-"${RELEASE}".noarch.rpm
-        "${RPMFUSION_MIRROR_RPMS}"/nonfree/fedora/rpmfusion-nonfree-release-"${RELEASE}".noarch.rpm
-        fedora-repos-archive
-    )
-
-    # after F44 launches, bump to 45
-    if [[ "${RELEASE}" -ge 44 ]]; then
-        COPR_RELEASE="rawhide"
-    else
-        COPR_RELEASE="${RELEASE}"
-    fi
-
-    curl -Lo /etc/yum.repos.d/_copr_ublue-os_staging.repo \
-        "https://copr.fedorainfracloud.org/coprs/ublue-os/staging/repo/fedora-${COPR_RELEASE}/ublue-os-staging-fedora-${COPR_RELEASE}.repo"
-
-    curl -Lo /etc/yum.repos.d/_copr_kylegospo_oversteer.repo \
-        "https://copr.fedorainfracloud.org/coprs/kylegospo/oversteer/repo/fedora-${COPR_RELEASE}/kylegospo-oversteer-fedora-${COPR_RELEASE}.repo"
-
-    curl -Lo /etc/yum.repos.d/_copr_ublue-os-akmods.repo \
-        "https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${COPR_RELEASE}/ublue-os-akmods-fedora-${COPR_RELEASE}.repo"
-
-    curl -Lo /etc/yum.repos.d/negativo17-fedora-multimedia.repo \
-        "https://negativo17.org/repos/fedora-multimedia.repo"
-fi
+dnf install -y --setopt=install_weak_deps=False "${RPM_PREP[@]}" $(find /tmp/kernel_cache/*.rpm -type f | grep "$(uname -m)" | grep -v uki)
 
 # after F44 launches, bump to 45
 if [[ "${RELEASE}" -ge 44 && -f /etc/fedora-release ]]; then
@@ -96,29 +41,13 @@ if [[ "${RELEASE}" -ge 44 && -f /etc/fedora-release ]]; then
     sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/rpmfusion-*-updates-testing.repo
 fi
 
-if [[ -n "${RPMFUSION_MIRROR}" && -f /etc/fedora-release ]]; then
-    # force use of single rpmfusion mirror
-    echo "Using single rpmfusion mirror: ${RPMFUSION_MIRROR}"
-    sed -i.bak "s%^metalink=%#metalink=%" /etc/yum.repos.d/rpmfusion-*.repo
-    sed -i "s%^#baseurl=http://download1.rpmfusion.org%baseurl=${RPMFUSION_MIRROR}%" /etc/yum.repos.d/rpmfusion-*.repo
-fi
-
 if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm) ]]; then
-    curl -Lo /etc/yum.repos.d/negativo17-${NVIDIA_REPO_NAME} \
-        "https://negativo17.org/repos/${NVIDIA_REPO_NAME}"
     curl -Lo /etc/yum.repos.d/nvidia-container.pp \
         "https://raw.githubusercontent.com/NVIDIA/dgx-selinux/master/bin/RHEL9/nvidia-container.pp"
-    curl -Lo /tmp/nvidia-install.sh \
-        "https://raw.githubusercontent.com/ublue-os/nvidia/main/build_files/nvidia-install.sh"
-    chmod +x /tmp/nvidia-install.sh
 fi
 
-dnf install -y \
-    openssl \
-    "${RPM_PREP[@]}"
-
 if [[ ! -s "/tmp/certs/private_key.priv" ]]; then
-    echo "WARNING: Using test signing key. Run './generate-akmods-key' for production builds."
+    echo "WARNING: Using test signing key."
     cp /tmp/certs/public_key.der{.test,}
 fi
 
@@ -139,19 +68,14 @@ fi
 rm -f /tmp/certs/private_key_2.priv
 
 if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm 2> /dev/null) ]]; then
-    sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/negativo17-${NVIDIA_REPO_NAME}
     #shellcheck disable=SC1091
     source /tmp/akmods-rpms/kmods/nvidia-vars
     KMODS_TO_INSTALL+=(
         /tmp/akmods-rpms/nvidia/*.rpm
-        "${NVIDIA_EXTRA_PKGS[@]}"
         /tmp/akmods-rpms/kmods/kmod-nvidia-"${KERNEL_VERSION}"-"${NVIDIA_AKMOD_VERSION}"."${DIST_ARCH}".rpm
     )
-        # Codacy complains about the lack of quotes on ${NVIDIA_EXTRA_PKGS}, but we don't want quotes here
-        # we want word splitting behavior, thus '#shellcheck disable=SC2206' added to the top of this file
 elif [[ -f $(find /tmp/akmods-rpms/kmods/zfs/kmod-*.rpm 2> /dev/null) ]]; then
     KMODS_TO_INSTALL+=(
-        pv
         /tmp/akmods-rpms/kmods/zfs/*.rpm
     )
 else
@@ -161,6 +85,6 @@ else
     )
 fi
 
-dnf install -y --setopt=install_weak_deps=False "${KMODS_TO_INSTALL[@]}"
+dnf install -y --setopt=install_weak_deps=False --allowerasing "${KMODS_TO_INSTALL[@]}"
 
 printf "KERNEL_NAME=%s" "$KERNEL_NAME" >> /tmp/info.sh
