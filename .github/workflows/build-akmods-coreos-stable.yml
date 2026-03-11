@@ -13,7 +13,7 @@ on:
     paths-ignore:
       - '**.md'
   schedule:
-    - cron: '02 0 * * *'  # 0002 UTC everyday
+    - cron: '19 0 * * *'  # 0019 UTC everyday
   workflow_dispatch:
 jobs:
   cache_kernel_coreos-stable_43:
