@@ -116,6 +116,22 @@ images:
       !!merge <<:
         - *desktop-build-group
         - *server-build-group
+  44:
+    main:
+      !!merge <<:
+        - *desktop-build-group-only-x86
+    coreos-stable:
+      !!merge <<:
+        - *desktop-build-group
+        - *server-build-group
+    coreos-testing:
+      !!merge <<:
+        - *desktop-build-group
+        - *server-build-group
+    "longterm-6.12":
+      !!merge <<:
+        - *server-build-group
+        - *desktop-build-group-only-x86
   43:
     main:
       !!merge <<:
