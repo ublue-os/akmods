@@ -42,8 +42,8 @@ echo "Installing ${KERNEL_FLAVOR} kernel-cache RPMs..."
 #shellcheck disable=SC2046 #we want word splitting
 dnf install -y --allowerasing --setopt=install_weak_deps=False "${PREP_RPMS[@]}" $(find /tmp/kernel_cache/*.rpm -type f | grep "$(uname -m)" | grep -v uki | xargs)
 
-# after F44 launches, bump to 45
-if [[ "${VERSION}" -ge 44 && -f /etc/fedora-release ]]; then
+# after F45 launches, bump to 46
+if [[ "${VERSION}" -ge 45 && -f /etc/fedora-release ]]; then
     # pre-release rpmfusion is in a different location
     sed -i "s%free/fedora/releases%free/fedora/development%" /etc/yum.repos.d/rpmfusion-*.repo
     # pre-release rpmfusion needs to enable testing
