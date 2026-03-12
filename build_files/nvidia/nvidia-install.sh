@@ -76,6 +76,8 @@ NVIDIA_RPMS=(
     "${AKMODNV_PATH}"/nvidia/*."$(rpm -E '%{_arch}')".rpm
     "${AKMODNV_PATH}"/nvidia/*.noarch.rpm
     nvidia-container-toolkit
+    egl-wayland
+    libva-nvidia-driver
     "${VARIANT_PKGS[@]}"
     "${AKMODNV_PATH}"/kmods/kmod-nvidia-"${KERNEL_VERSION}"-"${NVIDIA_AKMOD_VERSION}"."${DIST_ARCH}".rpm
 )
