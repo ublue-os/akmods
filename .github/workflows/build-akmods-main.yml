@@ -16,6 +16,78 @@ on:
     - cron: '01 0 * * *'  # 0001 UTC everyday
   workflow_dispatch:
 jobs:
+  cache_kernel_main_44:
+    name: Cache main (44)
+    uses: ./.github/workflows/reusable-cache-kernel.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    with:
+      architecture: '["x86_64"]'
+      kernel_flavor: main
+      version: 44
+  build-main_44_common:
+    name: Build common main (44)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_main_44
+    with:
+      akmods_target: common
+      architecture: '["x86_64"]'
+      kernel_cache_key: ${{ needs.cache_kernel_main_44.outputs.KCKEY }}
+      kernel_flavor: main
+      version: 44
+  build-main_44_nvidia-lts:
+    name: Build nvidia-lts main (44)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_main_44
+    with:
+      akmods_target: nvidia-lts
+      architecture: '["x86_64"]'
+      kernel_cache_key: ${{ needs.cache_kernel_main_44.outputs.KCKEY }}
+      kernel_flavor: main
+      version: 44
+  build-main_44_nvidia-open:
+    name: Build nvidia-open main (44)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_main_44
+    with:
+      akmods_target: nvidia-open
+      architecture: '["x86_64"]'
+      kernel_cache_key: ${{ needs.cache_kernel_main_44.outputs.KCKEY }}
+      kernel_flavor: main
+      version: 44
+  check-main_44:
+    name: Check main (44)
+    permissions:
+      actions: read
+      contents: read
+    needs: [build-main_44_common,build-main_44_nvidia-lts,build-main_44_nvidia-open]
+    runs-on: ubuntu-24.04
+    if: always()
+    steps:
+      - name: Check for Build Failures
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped')
+        run: exit 1
+
+      - name: Exit if Success
+        run: exit 0
   cache_kernel_main_42:
     name: Cache main (42)
     uses: ./.github/workflows/reusable-cache-kernel.yml
