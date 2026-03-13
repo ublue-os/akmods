@@ -105,8 +105,8 @@ jobs:
           fail-on-cache-miss: true
           key: ${{ env.KCKEY }}-${{ matrix.architecture }}
           restore-keys: |
-            ${{ env.KCKEY }}-
-            ${{ env.AKMODS_KERNEL }}-
+            ${{ matrix.architecture }}-${{ env.KCKEY }}
+            ${{ matrix.architecture }}-${{ env.AKMODS_KERNEL }}
 
       - name: Retrieve Signing Key
         if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
