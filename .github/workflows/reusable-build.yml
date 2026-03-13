@@ -91,7 +91,7 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Mark Directory as Safe
-        run: git config --system --ad safe.directory "$GITHUB_WORKSPACE"
+        run: git config --system --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Export GITHUB_WORKSPACE
         id: gh-workspace
@@ -105,8 +105,8 @@ jobs:
           fail-on-cache-miss: true
           key: ${{ env.KCKEY }}-${{ matrix.architecture }}
           restore-keys: |
-            ${{ matrix.architecture }}-${{ env.KCKEY }}
-            ${{ matrix.architecture }}-${{ env.AKMODS_KERNEL }}
+            ${{ env.KCKEY }}-
+            ${{ env.AKMODS_KERNEL }}-
 
       - name: Retrieve Signing Key
         if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
@@ -155,7 +155,7 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Mark Directory as Safe
-        run: git config --system --ad safe.directory "$GITHUB_WORKSPACE"
+        run: git config --system --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Export GITHUB_WORKSPACE
         id: gh-workspace
