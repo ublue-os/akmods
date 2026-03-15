@@ -69,7 +69,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v5
       
       - name: Mark Directory as Safe
-        run: git config --system --ad safe.directory "$GITHUB_WORKSPACE"
+        run: git config --system --add safe.directory "$GITHUB_WORKSPACE"
       
       - name: Get Kernel Version
         id: kernel-version
