@@ -1,0 +1,90 @@
+---
+#
+# WARNING THIS IS A GENERATED WORKFLOW. DO NOT EDIT BY HAND!
+#
+# Generate the workflow by running `just generate-workflows` at git root
+# Modify the inputs in workflow-templates
+name: Build OGC akmods
+on:
+  merge_group:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+  schedule:
+    - cron: '18 0 * * *'  # 0018 UTC everyday
+  workflow_dispatch:
+jobs:
+  cache_kernel_ogc_43:
+    name: Cache ogc (43)
+    uses: ./.github/workflows/reusable-cache-kernel.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    with:
+      architecture: '["x86_64"]'
+      kernel_flavor: ogc
+      version: 43
+  build-ogc_43_common:
+    name: Build common ogc (43)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_ogc_43
+    with:
+      akmods_target: common
+      architecture: '["x86_64"]'
+      kernel_cache_key: ${{ needs.cache_kernel_ogc_43.outputs.KCKEY }}
+      kernel_flavor: ogc
+      version: 43
+  build-ogc_43_nvidia-lts:
+    name: Build nvidia-lts ogc (43)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_ogc_43
+    with:
+      akmods_target: nvidia-lts
+      architecture: '["x86_64"]'
+      kernel_cache_key: ${{ needs.cache_kernel_ogc_43.outputs.KCKEY }}
+      kernel_flavor: ogc
+      version: 43
+  build-ogc_43_nvidia-open:
+    name: Build nvidia-open ogc (43)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_ogc_43
+    with:
+      akmods_target: nvidia-open
+      architecture: '["x86_64"]'
+      kernel_cache_key: ${{ needs.cache_kernel_ogc_43.outputs.KCKEY }}
+      kernel_flavor: ogc
+      version: 43
+  check-ogc_43:
+    name: Check ogc (43)
+    permissions:
+      actions: read
+      contents: read
+    needs: [build-ogc_43_common,build-ogc_43_nvidia-lts,build-ogc_43_nvidia-open]
+    runs-on: ubuntu-24.04
+    if: always()
+    steps:
+      - name: Check for Build Failures
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped')
+        run: exit 1
+
+      - name: Exit if Success
+        run: exit 0
