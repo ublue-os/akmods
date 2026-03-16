@@ -120,6 +120,9 @@ images:
     main:
       !!merge <<:
         - *desktop-build-group-only-x86
+    ogc:
+      !!merge <<:
+        - *desktop-build-group-only-x86
     coreos-stable:
       !!merge <<:
         - *desktop-build-group

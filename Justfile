@@ -9,6 +9,7 @@ KCWD := shell('mkdir -p $1 && echo $1', version_cache / 'KCWD')
 KCPATH := shell('mkdir -p $1 && echo $1', env('KCPATH', KCWD / 'rpms'))
 version_json := KCPATH / 'cache.json'
 builder := if kernel_flavor =~ 'centos' { 'quay.io/centos/centos:' + version } else { 'quay.io/fedora/fedora:' + version }
+ogc_image := "ghcr.io/opengamingcollective/kernel-packages-nobara:latest"
 
 
 # Inputs
@@ -211,6 +212,14 @@ get-kernel-version:
             linux=$($dnf repoquery --whatprovides kernel-longterm | sort -V | tail -n1 | sed 's/.*://')
             kernel_name=kernel-longterm
             ;;
+        "ogc")
+            ogc_manifest=$(skopeo inspect --raw "docker://{{ ogc_image }}")
+            linux=$(echo "$ogc_manifest" | jq -r '
+                .layers[].annotations["org.opencontainers.image.title"]
+                | select(startswith("kernel-core-"))
+                | ltrimstr("kernel-core-") | rtrimstr(".rpm")
+            ')
+            ;;
         "main")
             base_image_name="base-atomic"
             linux=$(skopeo inspect docker://quay.io/fedora-ostree-desktops/$base_image_name:{{ version }} --format '{{{{ index .Labels "ostree.linux" }}')
@@ -275,28 +284,58 @@ fetch-kernel: (cache-kernel-version)
     {{ if path_exists( KCPATH / shell("jq -r '.kernel_name + \"-\" + .kernel_release + \".rpm\"' < $1", version_json)) == 'true' { 'exit 0' } else { '' } }}
     set "${CI:+-x}" -euo pipefail
 
-    # Pull Build Image
-    {{ podman }} pull --retry 3 "{{ builder }}" >&2
+    if [[ "{{ kernel_flavor }}" == "ogc" ]]; then
+        ogc_image="{{ ogc_image }}"
 
-    # Prep Environment
-    cp -a fetch-kernel.sh certs {{ KCWD }} >&2
+        # Parse manifest for filenames
+        manifest=$(skopeo inspect --raw "docker://${ogc_image}")
+        needed_prefixes="^kernel-[0-9]+\.[0-9]|^kernel-core-|^kernel-devel-|^kernel-devel-matched-|^kernel-modules-[0-9]"
 
-    # Fetch Kernels
-    builder=$(podman run \
-        --security-opt label=disable \
-        {{ if env('CI', '') != '' { '--env CI=1' } else { '' } }} \
-        --env DUAL_SIGN=true \
-        --env KERNEL_BUILD_TAG="{{ shell('jq -r .kernel_build_tag < $1', version_json) }}" \
-        --env KERNEL_FLAVOR="{{ kernel_flavor }}" \
-        --env KERNEL_NAME="{{ shell('jq -r .kernel_name < $1', version_json) }}" \
-        --env KERNEL_VERSION="{{ shell('jq -r .kernel_release < $1' , version_json) }}" \
-        --volume "{{ KCWD }}":/tmp/kernel-cache \
-        --entrypoint /bin/bash \
-        -dt "{{ builder }}")
-    trap '{{ podman }} rm -f -t 0 $builder &>/dev/null' EXIT SIGINT
-    podman exec $builder bash /tmp/kernel-cache/fetch-kernel.sh >&2
-    echo "{{ datetime_utc('%Y%m%d') }}" > "{{ KCPATH / 'kernel-cache-date' }}"
-    find "{{ KCPATH }}"
+        # Pull OGC rpms from the container
+        tmpdir=$(mktemp -d)
+        trap 'rm -rf "$tmpdir"' EXIT
+        while read -r layer; do
+            title=$(echo "$layer" | jq -r '.annotations["org.opencontainers.image.title"]')
+            digest=$(echo "$layer" | jq -r '.digest')
+            if echo "$title" | grep -qP "$needed_prefixes"; then
+                echo "Fetching ${title}..." >&2
+                oras blob fetch "${ogc_image}@${digest}" --output "${tmpdir}/${title}"
+                # Layer may be a tar wrapping the RPM, or the RPM itself
+                if file "${tmpdir}/${title}" | grep -q "POSIX tar"; then
+                    tar xf "${tmpdir}/${title}" -C "{{ KCPATH }}/"
+                else
+                    mv "${tmpdir}/${title}" "{{ KCPATH }}/${title}"
+                fi
+                rm -f "${tmpdir}/${title}"
+            fi
+        done < <(echo "$manifest" | jq -c '.layers[]')
+
+        echo "{{ datetime_utc('%Y%m%d') }}" > "{{ KCPATH / 'kernel-cache-date' }}"
+        find "{{ KCPATH }}"
+    else
+        # Pull Build Image
+        {{ podman }} pull --retry 3 "{{ builder }}" >&2
+
+        # Prep Environment
+        cp -a fetch-kernel.sh certs {{ KCWD }} >&2
+
+        # Fetch Kernels
+        builder=$(podman run \
+            --security-opt label=disable \
+            {{ if env('CI', '') != '' { '--env CI=1' } else { '' } }} \
+            --env DUAL_SIGN=true \
+            --env KERNEL_BUILD_TAG="{{ shell('jq -r .kernel_build_tag < $1', version_json) }}" \
+            --env KERNEL_FLAVOR="{{ kernel_flavor }}" \
+            --env KERNEL_NAME="{{ shell('jq -r .kernel_name < $1', version_json) }}" \
+            --env KERNEL_VERSION="{{ shell('jq -r .kernel_release < $1' , version_json) }}" \
+            --volume "{{ KCWD }}":/tmp/kernel-cache \
+            --entrypoint /bin/bash \
+            -dt "{{ builder }}")
+        trap '{{ podman }} rm -f -t 0 $builder &>/dev/null' EXIT SIGINT
+        podman exec $builder bash /tmp/kernel-cache/fetch-kernel.sh >&2
+        echo "{{ datetime_utc('%Y%m%d') }}" > "{{ KCPATH / 'kernel-cache-date' }}"
+        find "{{ KCPATH }}"
+    fi
 
 # Build Akmod Image
 [group('Build')]
