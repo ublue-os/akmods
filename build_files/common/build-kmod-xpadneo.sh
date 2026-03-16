@@ -11,9 +11,9 @@ cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.rep
 
 ### BUILD xpadneo
 dnf install -y \
-    akmod-xpadneo-*.fc${RELEASE}.${ARCH}
+    akmod-xpadneo-*.fc"${RELEASE}.${ARCH}"
 akmods --force --kernels "${KERNEL}" --kmod xpadneo
-modinfo /usr/lib/modules/${KERNEL}/extra/xpadneo/hid-xpadneo.ko.xz > /dev/null \
+modinfo /usr/lib/modules/"${KERNEL}"/extra/xpadneo/hid-xpadneo.ko.xz > /dev/null \
 || (find /var/cache/akmods/xpadneo/ -name \*.log -print -exec cat {} \; && exit 1)
 
 mkdir -p /var/cache/rpms/common
