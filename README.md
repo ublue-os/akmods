@@ -51,6 +51,7 @@ The `nvidia` and `nvidia-open` images contains
 | common | [v4l2loopback](https://github.com/umlaeute/v4l2loopback) | allows creating "virtual video devices" | [RPMFusion - free](https://rpmfusion.org/) |
 | common | [wl](https://github.com/rpmfusion/broadcom-wl/) | support for some legacy broadcom wifi devices | [RPMFusion - nonfree](https://rpmfusion.org/) |
 | common | [xone](https://github.com/BoukeHaarsma23/xonedo/) | xbox one controller USB wired/RF driver modified to work along-side xpad | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/xone-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/xone-kmod) |
+| common | [xpadneo](https://github.com/atar-axis/xpadneo) | xbox one controller bluetooth driver | [negativo17 - fedora-multimedia](https://negativo17.org/) |
 | nvidia-open | [nvidia](https://negativo17.org/nvidia-driver/) | nvidia-open GPU drivers | [negativo17 - fedora-nvidia](https://negativo17.org/) |
 | zfs | [zfs](https://github.com/openzfs/zfs) | OpenZFS advanced file system and volume manager | [zfs](https://github.com/openzfs/zfs) |
 
