@@ -35,11 +35,20 @@ akmods-zfs: &akmods-zfs
   name: akmods-zfs
   description: "A caching layer for the pre-built zfs akmod RPMs"
 
+akmods-extra: &akmods-extra
+  name: akmods-extra
+  description: "A caching layer for pre-built extra akmod RPMs"
+
 desktop-build-group-only-x86: &desktop-build-group-only-x86
   common:
     !!merge <<:
       - *akmods-base
       - *akmods-common
+      - *arch-only-x86
+  extra:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-extra
       - *arch-only-x86
   nvidia-lts:
     !!merge <<:

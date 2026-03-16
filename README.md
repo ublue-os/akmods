@@ -10,7 +10,8 @@ The [`akmods` images](https://github.com/orgs/ublue-os/packages?repo_name=akmods
 
 The akmods packages are divided up for building in a few different "groups":
 
-- `common` - any kmod installed by default in Bluefin/Aurora (or were originally in main images pre-Fedora 39)
+- `common` - any kmod installed by default in Aurora/Bazzite/Bluefin (or were originally in main images pre-Fedora 39)
+- `extra` - less common kmods used by only one Universal Blue project.
 - `nvidia` - only the nvidia proprietary kmod and addons
 - `nvidia-open` - only the nvidia-open kmod and addons
 - `zfs` - only the zfs kmod and utilities built for select kernels

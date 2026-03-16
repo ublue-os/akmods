@@ -43,6 +43,21 @@ jobs:
       kernel_cache_key: ${{ needs.cache_kernel_main_44.outputs.KCKEY }}
       kernel_flavor: main
       version: 44
+  build-main_44_extra:
+    name: Build extra main (44)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_main_44
+    with:
+      akmods_target: extra
+      architecture: '["x86_64"]'
+      kernel_cache_key: ${{ needs.cache_kernel_main_44.outputs.KCKEY }}
+      kernel_flavor: main
+      version: 44
   build-main_44_nvidia-lts:
     name: Build nvidia-lts main (44)
     uses: ./.github/workflows/reusable-build.yml
@@ -78,7 +93,7 @@ jobs:
     permissions:
       actions: read
       contents: read
-    needs: [build-main_44_common,build-main_44_nvidia-lts,build-main_44_nvidia-open]
+    needs: [build-main_44_common,build-main_44_extra,build-main_44_nvidia-lts,build-main_44_nvidia-open]
     runs-on: ubuntu-24.04
     if: always()
     steps:
@@ -111,6 +126,21 @@ jobs:
     needs: cache_kernel_main_42
     with:
       akmods_target: common
+      architecture: '["x86_64"]'
+      kernel_cache_key: ${{ needs.cache_kernel_main_42.outputs.KCKEY }}
+      kernel_flavor: main
+      version: 42
+  build-main_42_extra:
+    name: Build extra main (42)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_main_42
+    with:
+      akmods_target: extra
       architecture: '["x86_64"]'
       kernel_cache_key: ${{ needs.cache_kernel_main_42.outputs.KCKEY }}
       kernel_flavor: main
@@ -150,7 +180,7 @@ jobs:
     permissions:
       actions: read
       contents: read
-    needs: [build-main_42_common,build-main_42_nvidia-lts,build-main_42_nvidia-open]
+    needs: [build-main_42_common,build-main_42_extra,build-main_42_nvidia-lts,build-main_42_nvidia-open]
     runs-on: ubuntu-24.04
     if: always()
     steps:
@@ -183,6 +213,21 @@ jobs:
     needs: cache_kernel_main_43
     with:
       akmods_target: common
+      architecture: '["x86_64"]'
+      kernel_cache_key: ${{ needs.cache_kernel_main_43.outputs.KCKEY }}
+      kernel_flavor: main
+      version: 43
+  build-main_43_extra:
+    name: Build extra main (43)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_main_43
+    with:
+      akmods_target: extra
       architecture: '["x86_64"]'
       kernel_cache_key: ${{ needs.cache_kernel_main_43.outputs.KCKEY }}
       kernel_flavor: main
@@ -222,7 +267,7 @@ jobs:
     permissions:
       actions: read
       contents: read
-    needs: [build-main_43_common,build-main_43_nvidia-lts,build-main_43_nvidia-open]
+    needs: [build-main_43_common,build-main_43_extra,build-main_43_nvidia-lts,build-main_43_nvidia-open]
     runs-on: ubuntu-24.04
     if: always()
     steps:

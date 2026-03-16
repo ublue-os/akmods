@@ -88,6 +88,23 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
 /tmp/build-kmod-xone.sh
 RUNEOF
 
+#elif defined EXTRA
+# /*
+# extra akmods
+# */
+COPY build_files/extra /tmp/
+RUN --mount=type=cache,dst=/var/cache/dnf \
+    --mount=type=cache,dst=/var/cache/libdnf5 \
+    bash <<'RUNEOF'
+set "${CI+-x}" -euo pipefail
+/tmp/build-kmod-gcadapter_oc.sh
+/tmp/build-kmod-zenergy.sh
+/tmp/build-kmod-ryzen-smu.sh
+/tmp/build-kmod-evdi.sh
+/tmp/build-kmod-system76.sh
+/tmp/build-kmod-system76-io.sh
+RUNEOF
+
 #elif defined NVIDIA
 # /*
 # nvidia kmods
