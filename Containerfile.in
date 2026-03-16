@@ -87,6 +87,13 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
 /tmp/build-kmod-xone.sh
 RUNEOF
 
+#elif defined EXTRA
+# /*
+# extra akmods
+# */
+
+COPY build_files/extra /tmp/
+
 #elif defined NVIDIA
 # /*
 # nvidia kmods

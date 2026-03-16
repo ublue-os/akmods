@@ -23,6 +23,10 @@ akmods-common: &akmods-common
   name: akmods
   description: "A caching layer for pre-built akmod RPMs"
 
+akmods-extra: &akmods-extra
+  name: akmods-extra
+  description: "A caching layer for extra pre-built akmod RPMs"
+
 akmods-nvidia-lts: &akmods-nvidia-lts
   name: akmods-nvidia-lts
   description: "A caching layer for the pre-built nvidia-lts akmod RPMs"
@@ -41,6 +45,11 @@ desktop-build-group-only-x86: &desktop-build-group-only-x86
       - *akmods-base
       - *akmods-common
       - *arch-only-x86
+  extra:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-extra
+      - *arch-only-x86
   nvidia-lts:
     !!merge <<:
       - *akmods-base
@@ -57,6 +66,11 @@ desktop-build-group: &desktop-build-group
     !!merge <<:
       - *akmods-base
       - *akmods-common
+      - *arch-arm-x86
+  extra:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-extra
       - *arch-arm-x86
   nvidia-lts:
     !!merge <<:
