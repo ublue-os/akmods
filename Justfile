@@ -9,7 +9,7 @@ KCWD := shell('mkdir -p $1 && echo $1', version_cache / 'KCWD')
 KCPATH := shell('mkdir -p $1 && echo $1', env('KCPATH', KCWD / 'rpms'))
 version_json := KCPATH / 'cache.json'
 builder := if kernel_flavor =~ 'centos' { 'quay.io/centos/centos:' + version } else { 'quay.io/fedora/fedora:' + version }
-ogc_image := "ghcr.io/opengamingcollective/kernel-packages-nobara:latest"
+ogc_image := "ghcr.io/opengamingcollective/kernel-packages-fedora:latest"
 
 
 # Inputs
