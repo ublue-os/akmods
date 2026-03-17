@@ -33,6 +33,8 @@ case "$kernel_flavor" in
     "longterm"*)
         dnf -y copr enable kwizart/kernel-"${kernel_flavor}"
         ;;
+    "ogc")
+        ;;
     *)
         echo "unexpected kernel_flavor ${kernel_flavor} for query" >&2
         exit 1
@@ -72,6 +74,32 @@ elif [[ "${kernel_flavor}" =~ "longterm" ]]; then
         kernel-longterm-modules-extra-"${kernel_version}" \
         kernel-longterm-devel-"${kernel_version}" \
         kernel-longterm-devel-matched-"${kernel_version}"
+elif [[ "${kernel_flavor}" == "ogc" ]]; then
+    ogc_image="${OGC_IMAGE:?OGC_IMAGE env var must be set}"
+    dnf install -y --setopt=install_weak_deps=False jq skopeo golang-oras
+
+    # Parse manifest for kernel RPM filenames
+    manifest=$(skopeo inspect --raw "docker://${ogc_image}")
+    needed_prefixes="^kernel-[0-9]+\.[0-9]|^kernel-core-|^kernel-devel-|^kernel-devel-matched-|^kernel-modules-[0-9]"
+
+    # Fetch RPM blobs from OCI artifact
+    tmpdir=$(mktemp -d)
+    while read -r layer; do
+        title=$(echo "$layer" | jq -r '.annotations["org.opencontainers.image.title"]')
+        digest=$(echo "$layer" | jq -r '.digest')
+        if echo "$title" | grep -qE "$needed_prefixes"; then
+            echo "Fetching ${title}..."
+            oras blob fetch "${ogc_image}@${digest}" --output "${tmpdir}/${title}"
+            # Layer may be a tar wrapping the RPM, or the RPM itself
+            if file "${tmpdir}/${title}" | grep -q "POSIX tar"; then
+                tar xf "${tmpdir}/${title}" -C /
+            else
+                mv "${tmpdir}/${title}" "/${title}"
+            fi
+            rm -f "${tmpdir}/${title}"
+        fi
+    done < <(echo "$manifest" | jq -c '.layers[]')
+    rm -rf "$tmpdir"
 else
     KERNEL_MAJOR_MINOR_PATCH=$(echo "$kernel_version" | cut -d '-' -f 1)
     KERNEL_RELEASE="$(echo "$kernel_version" | cut -d - -f 2 | rev | cut -d . -f 2- | rev)"
@@ -107,7 +135,7 @@ install -Dm644 "${KCWD}"/certs/public_key.crt "$PUBLIC_KEY_PATH"
 install -Dm644 "${KCWD}"/certs/private_key.priv "$PRIVATE_KEY_PATH"
 
 ls -la /
-if [[ "${kernel_flavor}" == "centos-kmodsig" ]]; then
+if [[ "${kernel_flavor}" == "centos-kmodsig" ]] || [[ "${kernel_flavor}" == "ogc" ]]; then
   dnf install -y \
       /"${kernel_name}-$kernel_version.rpm" \
       /"${kernel_name}-core-$kernel_version.rpm" \
