@@ -78,6 +78,11 @@ elif [[ -f $(find /tmp/akmods-rpms/kmods/zfs/kmod-*.rpm 2> /dev/null) ]]; then
     KMODS_TO_INSTALL+=(
         /tmp/akmods-rpms/kmods/zfs/*.rpm
     )
+elif [[ -d /tmp/akmods-rpms/extra ]]; then
+    KMODS_TO_INSTALL+=(
+        /tmp/akmods-rpms/kmods/*.rpm
+        /tmp/akmods-rpms/extra/*.rpm
+    )
 else
     KMODS_TO_INSTALL+=(
         /tmp/akmods-rpms/kmods/*.rpm

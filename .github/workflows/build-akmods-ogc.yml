@@ -43,6 +43,21 @@ jobs:
       kernel_cache_key: ${{ needs.cache_kernel_ogc_43.outputs.KCKEY }}
       kernel_flavor: ogc
       version: 43
+  build-ogc_43_extra:
+    name: Build extra ogc (43)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    needs: cache_kernel_ogc_43
+    with:
+      akmods_target: extra
+      architecture: '["x86_64"]'
+      kernel_cache_key: ${{ needs.cache_kernel_ogc_43.outputs.KCKEY }}
+      kernel_flavor: ogc
+      version: 43
   build-ogc_43_nvidia-lts:
     name: Build nvidia-lts ogc (43)
     uses: ./.github/workflows/reusable-build.yml
@@ -78,7 +93,7 @@ jobs:
     permissions:
       actions: read
       contents: read
-    needs: [build-ogc_43_common,build-ogc_43_nvidia-lts,build-ogc_43_nvidia-open]
+    needs: [build-ogc_43_common,build-ogc_43_extra,build-ogc_43_nvidia-lts,build-ogc_43_nvidia-open]
     runs-on: ubuntu-24.04
     if: always()
     steps:
