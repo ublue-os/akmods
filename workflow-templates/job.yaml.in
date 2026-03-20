@@ -4,7 +4,9 @@
     secrets: inherit
     permissions:
       actions: read
+      attestations: write
       contents: read
+      id-token: write
       packages: write
     needs: cache_kernel_%%KERNEL_FLAVOR_CLEAN%%_%%VERSION%%
     with:

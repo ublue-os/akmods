@@ -144,7 +144,9 @@ jobs:
       options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
     permissions:
       actions: read
+      attestations: write
       contents: read
+      id-token: write
       packages: write
     steps:
       - name: Exit on failure
@@ -179,3 +181,36 @@ jobs:
           COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
           REGISTRY_ACTOR: ${{ github.actor }}
           REGISTRY_TOKEN: ${{ github.token }}
+
+      - name: Get Manifest Digests
+        id: digest
+        if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
+        run: |
+          IMAGE_NAME="${{ inputs.akmods_target != 'common' && format('akmods-{0}', inputs.akmods_target) || 'akmods' }}"
+          MANIFEST_TAG="${{ inputs.kernel_flavor }}-${{ inputs.version }}"
+          KERNEL_RELEASE="$(jq -r '.kernel_release' < "$GITHUB_WORKSPACE/build/${{ env.AKMODS_KERNEL }}-${{ env.AKMODS_VERSION }}/KCWD/rpms/cache.json" | sed 's/\.x86_64\|\.aarch64//g')"
+          MANIFEST_TAG_KERNEL="${MANIFEST_TAG}-${KERNEL_RELEASE}"
+
+          DIGEST="$(skopeo inspect --format '{{.Digest}}' "docker://ghcr.io/${{ github.repository_owner }}/${IMAGE_NAME}:${MANIFEST_TAG}")"
+          echo "manifest=${DIGEST}" >> "$GITHUB_OUTPUT"
+
+          DIGEST_KERNEL="$(skopeo inspect --format '{{.Digest}}' "docker://ghcr.io/${{ github.repository_owner }}/${IMAGE_NAME}:${MANIFEST_TAG_KERNEL}")"
+          echo "manifest_kernel=${DIGEST_KERNEL}" >> "$GITHUB_OUTPUT"
+
+          echo "image_name=${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Attest Manifest Image
+        if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
+        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4
+        with:
+          subject-name: ghcr.io/${{ github.repository_owner }}/${{ steps.digest.outputs.image_name }}
+          subject-digest: ${{ steps.digest.outputs.manifest }}
+          push-to-registry: true
+
+      - name: Attest Manifest Kernel Image
+        if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
+        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4
+        with:
+          subject-name: ghcr.io/${{ github.repository_owner }}/${{ steps.digest.outputs.image_name }}
+          subject-digest: ${{ steps.digest.outputs.manifest_kernel }}
+          push-to-registry: true

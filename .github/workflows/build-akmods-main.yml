@@ -34,7 +34,9 @@ jobs:
     secrets: inherit
     permissions:
       actions: read
+      attestations: write
       contents: read
+      id-token: write
       packages: write
     needs: cache_kernel_main_44
     with:
@@ -49,7 +51,9 @@ jobs:
     secrets: inherit
     permissions:
       actions: read
+      attestations: write
       contents: read
+      id-token: write
       packages: write
     needs: cache_kernel_main_44
     with:
@@ -64,7 +68,9 @@ jobs:
     secrets: inherit
     permissions:
       actions: read
+      attestations: write
       contents: read
+      id-token: write
       packages: write
     needs: cache_kernel_main_44
     with:
@@ -106,7 +112,9 @@ jobs:
     secrets: inherit
     permissions:
       actions: read
+      attestations: write
       contents: read
+      id-token: write
       packages: write
     needs: cache_kernel_main_42
     with:
@@ -121,7 +129,9 @@ jobs:
     secrets: inherit
     permissions:
       actions: read
+      attestations: write
       contents: read
+      id-token: write
       packages: write
     needs: cache_kernel_main_42
     with:
@@ -136,7 +146,9 @@ jobs:
     secrets: inherit
     permissions:
       actions: read
+      attestations: write
       contents: read
+      id-token: write
       packages: write
     needs: cache_kernel_main_42
     with:
@@ -178,7 +190,9 @@ jobs:
     secrets: inherit
     permissions:
       actions: read
+      attestations: write
       contents: read
+      id-token: write
       packages: write
     needs: cache_kernel_main_43
     with:
@@ -193,7 +207,9 @@ jobs:
     secrets: inherit
     permissions:
       actions: read
+      attestations: write
       contents: read
+      id-token: write
       packages: write
     needs: cache_kernel_main_43
     with:
@@ -208,7 +224,9 @@ jobs:
     secrets: inherit
     permissions:
       actions: read
+      attestations: write
       contents: read
+      id-token: write
       packages: write
     needs: cache_kernel_main_43
     with:
