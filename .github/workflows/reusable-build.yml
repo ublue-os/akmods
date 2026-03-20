@@ -199,6 +199,14 @@ jobs:
 
           echo "image_name=${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
 
+      - name: Login to GHCR for Attestation
+        if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
       - name: Attest Manifest Image
         if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
         uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4
