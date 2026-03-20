@@ -34,7 +34,9 @@ jobs:
     secrets: inherit
     permissions:
       actions: read
+      attestations: write
       contents: read
+      id-token: write
       packages: write
     needs: cache_kernel_longterm-6-12_43
     with:
@@ -49,7 +51,9 @@ jobs:
     secrets: inherit
     permissions:
       actions: read
+      attestations: write
       contents: read
+      id-token: write
       packages: write
     needs: cache_kernel_longterm-6-12_43
     with:
@@ -64,7 +68,9 @@ jobs:
     secrets: inherit
     permissions:
       actions: read
+      attestations: write
       contents: read
+      id-token: write
       packages: write
     needs: cache_kernel_longterm-6-12_43
     with:
