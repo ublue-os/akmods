@@ -237,6 +237,9 @@ get-kernel-version:
     minor=$(echo "$linux" | cut -d '.' -f 2)
     patch=$(echo "$linux" | cut -d '.' -f 3)
     kernel_major_minor_patch="${major}.${minor}.${patch}"
+    if [[ "{{ kernel_flavor }}" == "ogc" ]]; then
+        kernel_major_minor_patch=$(echo "$linux" | sed 's/\.fc.*$//')
+    fi
     linux="$(echo $linux | tr -d '[:cntrl:]')"
 
     # Debug Output
