@@ -7,7 +7,7 @@ set "${CI:+-x}" -euo pipefail
 mkdir -p /var/lib/alternatives
 
 pushd /tmp/kernel_cache
-KERNEL_VERSION=$(find "$KERNEL_NAME"-*.rpm | grep "$(uname -m)" | grep -P "$KERNEL_NAME-\d+\.\d+\.\d+-\w+.*$(rpm -E '%{dist}')" | sed -E "s/$KERNEL_NAME-//;s/\.rpm//")
+KERNEL_VERSION=$(find "$KERNEL_NAME"-*.rpm | grep "$(uname -m)" | grep -P "$KERNEL_NAME-\d+\.\d+\.\d+-\w+.*($(rpm -E '%{dist}'))?" | sed -E "s/$KERNEL_NAME-//;s/\.rpm//")
 popd
 
 if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
