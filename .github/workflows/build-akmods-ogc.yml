@@ -100,6 +100,106 @@ jobs:
       kernel_cache_key: ${{ needs.cache_kernel_ogc_43.outputs.KCKEY }}
       kernel_flavor: ogc
       version: 43
+  cache_kernel_ogc_44:
+    name: Cache ogc (44)
+    uses: ./.github/workflows/reusable-cache-kernel.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    with:
+      architecture: '["x86_64"]'
+      kernel_flavor: ogc
+      version: 44
+  build-ogc_44_common:
+    name: Build common ogc (44)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      attestations: write
+      artifact-metadata: write
+      contents: read
+      id-token: write
+      packages: write
+    needs: cache_kernel_ogc_44
+    with:
+      akmods_target: common
+      architecture: '["x86_64"]'
+      kernel_cache_key: ${{ needs.cache_kernel_ogc_44.outputs.KCKEY }}
+      kernel_flavor: ogc
+      version: 44
+  build-ogc_44_extra:
+    name: Build extra ogc (44)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      attestations: write
+      artifact-metadata: write
+      contents: read
+      id-token: write
+      packages: write
+    needs: cache_kernel_ogc_44
+    with:
+      akmods_target: extra
+      architecture: '["x86_64"]'
+      kernel_cache_key: ${{ needs.cache_kernel_ogc_44.outputs.KCKEY }}
+      kernel_flavor: ogc
+      version: 44
+  build-ogc_44_nvidia-lts:
+    name: Build nvidia-lts ogc (44)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      attestations: write
+      artifact-metadata: write
+      contents: read
+      id-token: write
+      packages: write
+    needs: cache_kernel_ogc_44
+    with:
+      akmods_target: nvidia-lts
+      architecture: '["x86_64"]'
+      kernel_cache_key: ${{ needs.cache_kernel_ogc_44.outputs.KCKEY }}
+      kernel_flavor: ogc
+      version: 44
+  build-ogc_44_nvidia-open:
+    name: Build nvidia-open ogc (44)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      attestations: write
+      artifact-metadata: write
+      contents: read
+      id-token: write
+      packages: write
+    needs: cache_kernel_ogc_44
+    with:
+      akmods_target: nvidia-open
+      architecture: '["x86_64"]'
+      kernel_cache_key: ${{ needs.cache_kernel_ogc_44.outputs.KCKEY }}
+      kernel_flavor: ogc
+      version: 44
+  check-ogc_44:
+    name: Check ogc (44)
+    permissions:
+      actions: read
+      contents: read
+    needs: [build-ogc_44_common,build-ogc_44_extra,build-ogc_44_nvidia-lts,build-ogc_44_nvidia-open]
+    runs-on: ubuntu-24.04
+    if: always()
+    steps:
+      - name: Check for Build Failures
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped')
+        run: exit 1
+
+      - name: Exit if Success
+        run: exit 0
+
   check-ogc_43:
     name: Check ogc (43)
     permissions:

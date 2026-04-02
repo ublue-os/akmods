@@ -164,3 +164,6 @@ images:
     main:
       !!merge <<:
         - *desktop-build-group-only-x86
+    ogc:
+      !!merge <<:
+        - *ogc-desktop-build-group-only-x86
