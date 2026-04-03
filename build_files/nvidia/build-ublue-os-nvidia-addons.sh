@@ -21,6 +21,7 @@ sed -i 's/^\[fedora-nvidia-580/[fedora-nvidia-lts/' \
 curl -L https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo \
     -o /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/nvidia-container-toolkit.repo
 sed -i "s@gpgcheck=0@gpgcheck=1@" /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/nvidia-container-toolkit.repo
+sed -i "/^sslcacert=/d" /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/nvidia-container-toolkit.repo
 
 curl -L https://raw.githubusercontent.com/NVIDIA/dgx-selinux/master/bin/RHEL9/nvidia-container.pp \
     -o /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/nvidia-container.pp
