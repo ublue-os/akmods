@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/bash
 
 set "${CI:+-x}" -euo pipefail
 
@@ -11,17 +11,17 @@ curl -LsSf -o /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}" \
     "https://raw.githubusercontent.com/terrapkg/packages/f${RELEASE}/anda/terra/gpg-keys/RPM-GPG-KEY-terra${RELEASE}"
 rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}"
 
-### BUILD xpadneo
+### BUILD sc0710 (succeed or fail-fast with debug output)
 dnf install -y \
-    akmod-xpadneo-*.fc"${RELEASE}.${ARCH}"
-akmods --force --kernels "${KERNEL}" --kmod xpadneo
-modinfo /usr/lib/modules/"${KERNEL}"/extra/xpadneo/hid-xpadneo.ko.xz > /dev/null \
-|| (find /var/cache/akmods/xpadneo/ -name \*.log -print -exec cat {} \; && exit 1)
+    akmod-sc0710-*.fc"${RELEASE}"."${ARCH}"
+akmods --force --kernels "${KERNEL}" --kmod sc0710
+modinfo /usr/lib/modules/"${KERNEL}"/extra/sc0710/sc0710.ko.xz > /dev/null \
+|| (find /var/cache/akmods/sc0710/ -name \*.log -print -exec cat {} \; && exit 1)
 
-mkdir -p /var/cache/rpms/common
-dnf download --destdir /var/cache/rpms/common \
-    xpadneo-kmod-common
+mkdir -p /var/cache/rpms/extra
+dnf download --destdir /var/cache/rpms/extra \
+    sc0710
 
-rm -f /var/cache/rpms/common/*.src.rpm
+rm -f /var/cache/rpms/extra/*.src.rpm
 
 rm -f /etc/yum.repos.d/terra.repo

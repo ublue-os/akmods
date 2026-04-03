@@ -2,7 +2,6 @@
 
 set "${CI:+-x}" -euo pipefail
 
-
 ### BUILD UBLUE AKMODS-ADDONS RPM
 # ensure a higher priority is set for our ublue akmods COPR to pull deps from it over other sources (99 is default)
 echo "priority=85" >> /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo
