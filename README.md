@@ -52,7 +52,7 @@ The `nvidia` and `nvidia-open` images contains
 | common | [v4l2loopback](https://github.com/umlaeute/v4l2loopback) | allows creating "virtual video devices" | [RPMFusion - free](https://rpmfusion.org/) |
 | common | [wl](https://github.com/rpmfusion/broadcom-wl/) | support for some legacy broadcom wifi devices | [RPMFusion - nonfree](https://rpmfusion.org/) |
 | common | [xone](https://github.com/dlundqvist/xone) | xbox one controller USB wired/RF driver modified to work along-side xpad (built from [xonedo](https://github.com/OpenGamingCollective/xonedo) fork) | [Terra](https://github.com/terrapkg/packages) |
-| common | [xpadneo](https://github.com/atar-axis/xpadneo) | xbox one controller bluetooth driver | [Terra](https://github.com/terrapkg/packages) |
+| common | [xpadneo](https://github.com/atar-axis/xpadneo) | xbox one controller bluetooth driver | [negativo17 - fedora-multimedia](https://negativo17.org/) |
 | extra | [evdi](https://github.com/DisplayLink/evdi) | DisplayLink USB graphics adapter support | [negativo17 - fedora-multimedia](https://negativo17.org/) |
 | extra | [gcadapter_oc](https://github.com/hannesmann/gcadapter-oc-kmod) | Gamecube controller adapter overclocking | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/gcadapter_oc-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/gcadapter_oc-kmod) |
 | extra | [hid-fanatecff](https://github.com/gotzl/hid-fanatecff) | Fanatec wheel base force feedback | [Terra](https://github.com/terrapkg/packages) |
