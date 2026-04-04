@@ -11,16 +11,18 @@ curl -LsSf -o /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}" \
     "https://raw.githubusercontent.com/terrapkg/packages/f${RELEASE}/anda/terra/gpg-keys/RPM-GPG-KEY-terra${RELEASE}"
 rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}"
 
-### BUILD zenergy (succeed or fail-fast with debug output)
+### BUILD hid-tmff2 (succeed or fail-fast with debug output)
 dnf install -y \
-    akmod-zenergy-*.fc"${RELEASE}"."${ARCH}"
-akmods --force --kernels "${KERNEL}" --kmod zenergy
-modinfo /usr/lib/modules/"${KERNEL}"/extra/zenergy/zenergy.ko.xz > /dev/null \
-|| (find /var/cache/akmods/zenergy/ -name \*.log -print -exec cat {} \; && exit 1)
+    akmod-hid-tmff2-*.fc"${RELEASE}"."${ARCH}"
+akmods --force --kernels "${KERNEL}" --kmod hid-tmff2
+modinfo /usr/lib/modules/"${KERNEL}"/extra/hid-tmff2/hid-tmff-new.ko.xz > /dev/null \
+|| (find /var/cache/akmods/hid-tmff2/ -name \*.log -print -exec cat {} \; && exit 1)
+modinfo /usr/lib/modules/"${KERNEL}"/extra/hid-tmff2/hid-tminit-new.ko.xz > /dev/null \
+|| (find /var/cache/akmods/hid-tmff2/ -name \*.log -print -exec cat {} \; && exit 1)
 
 mkdir -p /var/cache/rpms/extra
 dnf download --destdir /var/cache/rpms/extra \
-    zenergy
+    hid-tmff2
 
 rm -f /var/cache/rpms/extra/*.src.rpm
 

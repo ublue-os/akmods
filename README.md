@@ -51,8 +51,19 @@ The `nvidia` and `nvidia-open` images contains
 | common | [openrazer](https://openrazer.github.io/) | kernel module adding additional features to Razer hardware | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/openrazer-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/openrazer-kmod) |
 | common | [v4l2loopback](https://github.com/umlaeute/v4l2loopback) | allows creating "virtual video devices" | [RPMFusion - free](https://rpmfusion.org/) |
 | common | [wl](https://github.com/rpmfusion/broadcom-wl/) | support for some legacy broadcom wifi devices | [RPMFusion - nonfree](https://rpmfusion.org/) |
-| common | [xone](https://github.com/BoukeHaarsma23/xonedo/) | xbox one controller USB wired/RF driver modified to work along-side xpad | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/xone-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/xone-kmod) |
-| common | [xpadneo](https://github.com/atar-axis/xpadneo) | xbox one controller bluetooth driver | [negativo17 - fedora-multimedia](https://negativo17.org/) |
+| common | [xone](https://github.com/dlundqvist/xone) | xbox one controller USB wired/RF driver modified to work along-side xpad (built from [xonedo](https://github.com/OpenGamingCollective/xonedo) fork) | [Terra](https://github.com/terrapkg/packages) |
+| common | [xpadneo](https://github.com/atar-axis/xpadneo) | xbox one controller bluetooth driver | [Terra](https://github.com/terrapkg/packages) |
+| extra | [evdi](https://github.com/DisplayLink/evdi) | DisplayLink USB graphics adapter support | [negativo17 - fedora-multimedia](https://negativo17.org/) |
+| extra | [gcadapter_oc](https://github.com/hannesmann/gcadapter-oc-kmod) | Gamecube controller adapter overclocking | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/gcadapter_oc-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/gcadapter_oc-kmod) |
+| extra | [hid-fanatecff](https://github.com/gotzl/hid-fanatecff) | Fanatec wheel base force feedback | [Terra](https://github.com/terrapkg/packages) |
+| extra | [hid-tmff2](https://github.com/Kimplul/hid-tmff2) | Thrustmaster T300RS, T248, TX, T128, T598, T-GT II, TS-XW force feedback | [Terra](https://github.com/terrapkg/packages) |
+| extra | [new-lg4ff](https://github.com/berarma/new-lg4ff) | Logitech force feedback wheels | [Terra](https://github.com/terrapkg/packages) |
+| extra | [t150-driver](https://github.com/scarburato/t150_driver) | Thrustmaster T150 steering wheel | [Terra](https://github.com/terrapkg/packages) |
+| extra | [sc0710](https://github.com/Nakildias/sc0710) | Elgato 4K60 Pro MK.2 / 4K Pro capture card driver | [Terra](https://github.com/terrapkg/packages) |
+| extra | [ryzen-smu](https://github.com/leogx9r/ryzen_smu) | AMD Ryzen SMU (System Management Unit) driver | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/ryzen-smu-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/ryzen-smu-kmod) |
+| extra | [system76](https://github.com/pop-os/system76-driver) | System76 laptop hardware support | [![badge](https://copr.fedorainfracloud.org/coprs/ssweeny/system76-hwe/package/system76-driver-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ssweeny/system76-hwe/package/system76-driver-kmod) |
+| extra | [system76-io](https://github.com/pop-os/system76-io-dkms) | System76 Thelio I/O board driver | [![badge](https://copr.fedorainfracloud.org/coprs/ssweeny/system76-io/package/system76-io-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ssweeny/system76-io/package/system76-io-kmod) |
+| extra | [zenergy](https://github.com/BoukeHaarsma23/zenern) | AMD Zen energy monitoring driver | [Terra](https://github.com/terrapkg/packages) |
 | nvidia-open | [nvidia](https://negativo17.org/nvidia-driver/) | nvidia-open GPU drivers | [negativo17 - fedora-nvidia](https://negativo17.org/) |
 | zfs | [zfs](https://github.com/openzfs/zfs) | OpenZFS advanced file system and volume manager | [zfs](https://github.com/openzfs/zfs) |
 

@@ -12,6 +12,7 @@ Supplements:    mokutil policycoreutils
 Source0:        public_key.der
 Source1:        _copr_ublue-os-akmods.repo
 Source2:        negativo17-fedora-multimedia.repo
+Source3:        terra.repo
 
 %description
 Adds the signing key for importing with mokutil to enable secure boot for kernel modules and repo files required to install akmod dependencies.
@@ -25,20 +26,25 @@ Adds the signing key for importing with mokutil to enable secure boot for kernel
 install -Dm0644 %{SOURCE0} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/pki/akmods/certs/akmods-ublue.der
 install -Dm0644 %{SOURCE1} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/_copr_ublue-os-akmods.repo
 install -Dm0644 %{SOURCE2} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-multimedia.repo
+install -Dm0644 %{SOURCE3} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/terra.repo
 
 sed -i 's@enabled=1@enabled=0@g' %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-multimedia.repo
+sed -i 's@enabled=1@enabled=0@g' %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/terra.repo
 
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/pki/akmods/certs/akmods-ublue.der            %{buildroot}%{_sysconfdir}/pki/akmods/certs/akmods-ublue.der
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/_copr_ublue-os-akmods.repo    %{buildroot}%{_sysconfdir}/yum.repos.d/_copr_ublue-os-akmods.repo
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-multimedia.repo     %{buildroot}%{_sysconfdir}/yum.repos.d/negativo17-fedora-multimedia.repo
+install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/terra.repo     %{buildroot}%{_sysconfdir}/yum.repos.d/terra.repo
 
 %files
 %attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/pki/akmods/certs/akmods-ublue.der
 %attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/_copr_ublue-os-akmods.repo
 %attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-multimedia.repo
+%attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/terra.repo
 %attr(0644,root,root) %{_sysconfdir}/pki/akmods/certs/akmods-ublue.der
 %attr(0644,root,root) %{_sysconfdir}/yum.repos.d/_copr_ublue-os-akmods.repo
 %attr(0644,root,root) %{_sysconfdir}/yum.repos.d/negativo17-fedora-multimedia.repo
+%attr(0644,root,root) %{_sysconfdir}/yum.repos.d/terra.repo
 
 %changelog
 * Mon Apr 23 2024 Kyle Gospodnetich <me@kylegospodneti.ch> - 0.6

@@ -31,6 +31,8 @@ ADD https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${VERSIO
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo
 ADD https://negativo17.org/repos/fedora-multimedia.repo \
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo
+ADD https://raw.githubusercontent.com/terrapkg/packages/f${VERSION}/anda/terra/release/terra.repo \
+    /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/terra.repo
 #endif
 
 # /*
@@ -103,6 +105,11 @@ set "${CI+-x}" -euo pipefail
 /tmp/build-kmod-evdi.sh
 /tmp/build-kmod-system76.sh
 /tmp/build-kmod-system76-io.sh
+/tmp/build-kmod-hid-tmff2.sh
+/tmp/build-kmod-new-lg4ff.sh
+/tmp/build-kmod-t150-driver.sh
+/tmp/build-kmod-hid-fanatecff.sh
+/tmp/build-kmod-sc0710.sh
 RUNEOF
 
 #elif defined NVIDIA
