@@ -9,7 +9,7 @@ RELEASE="$(rpm -E '%fedora')"
 cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/terra.repo /etc/yum.repos.d/
 curl -LsSf -o /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}" \
     "https://raw.githubusercontent.com/terrapkg/packages/f${RELEASE}/anda/terra/gpg-keys/RPM-GPG-KEY-terra${RELEASE}"
-rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}"
+rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}"
 
 ### BUILD hid-tmff2 (succeed or fail-fast with debug output)
 dnf install -y \
