@@ -22,7 +22,8 @@ modinfo /usr/lib/modules/"${KERNEL}"/extra/hid-tmff2/hid-tminit-new.ko.xz > /dev
 
 mkdir -p /var/cache/rpms/extra
 dnf download --destdir /var/cache/rpms/extra \
-    hid-tmff2
+    hid-tmff2 \
+    hid-tmff2-akmod-modules
 
 rm -f /var/cache/rpms/extra/*.src.rpm
 

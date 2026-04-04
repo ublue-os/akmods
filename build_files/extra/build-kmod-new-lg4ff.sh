@@ -20,7 +20,8 @@ modinfo /usr/lib/modules/"${KERNEL}"/extra/new-lg4ff/hid-logitech-new.ko.xz > /d
 
 mkdir -p /var/cache/rpms/extra
 dnf download --destdir /var/cache/rpms/extra \
-    new-lg4ff
+    new-lg4ff \
+    new-lg4ff-akmod-modules
 
 rm -f /var/cache/rpms/extra/*.src.rpm
 

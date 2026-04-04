@@ -20,7 +20,8 @@ modinfo /usr/lib/modules/"${KERNEL}"/extra/hid-fanatecff/hid-fanatec.ko.xz > /de
 
 mkdir -p /var/cache/rpms/extra
 dnf download --destdir /var/cache/rpms/extra \
-    hid-fanatecff
+    hid-fanatecff \
+    hid-fanatecff-akmod-modules
 
 rm -f /var/cache/rpms/extra/*.src.rpm
 
