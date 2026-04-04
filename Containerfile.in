@@ -101,8 +101,6 @@ set "${CI+-x}" -euo pipefail
 /tmp/build-kmod-zenergy.sh
 /tmp/build-kmod-ryzen-smu.sh
 /tmp/build-kmod-evdi.sh
-/tmp/build-kmod-system76.sh
-/tmp/build-kmod-system76-io.sh
 RUNEOF
 
 #elif defined NVIDIA
