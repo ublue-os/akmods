@@ -89,7 +89,7 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
 /tmp/build-kmod-v4l2loopback.sh
 /tmp/build-kmod-wl.sh
 /tmp/build-kmod-xpadneo.sh
-/tmp/build-kmod-xonedo.sh
+/tmp/build-kmod-xone.sh
 RUNEOF
 
 #elif defined EXTRA
