@@ -1,5 +1,5 @@
 Name:           ublue-os-akmods-addons
-Version:        0.6
+Version:        0.7
 Release:        1%{?dist}
 Summary:        Signing key and repos for ublue os akmods
 
@@ -52,6 +52,9 @@ install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/pki/rpm-gpg/RPM-
 %attr(0644,root,root) %{_sysconfdir}/pki/rpm-gpg/RPM-GPG-KEY-terra%{fedora}
 
 %changelog
+* Sat Apr 04 2026 Kyle Gospodnetich <me@kylegospodneti.ch> - 0.7
+- Add Terra Repo & GPG Key
+
 * Mon Apr 23 2024 Kyle Gospodnetich <me@kylegospodneti.ch> - 0.6
 - Remove unneeded repositories
 
