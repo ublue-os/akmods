@@ -33,6 +33,8 @@ ADD https://negativo17.org/repos/fedora-multimedia.repo \
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo
 ADD https://raw.githubusercontent.com/terrapkg/packages/f${VERSION}/anda/terra/release/terra.repo \
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/terra.repo
+ADD https://raw.githubusercontent.com/terrapkg/packages/f${VERSION}/anda/terra/gpg-keys/RPM-GPG-KEY-terra${VERSION} \
+    /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/RPM-GPG-KEY-terra${VERSION}
 #endif
 
 # /*
