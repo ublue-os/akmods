@@ -12,8 +12,6 @@ Supplements:    mokutil policycoreutils
 Source0:        public_key.der
 Source1:        _copr_ublue-os-akmods.repo
 Source2:        negativo17-fedora-multimedia.repo
-Source3:        terra.repo
-Source4:        RPM-GPG-KEY-terra%{fedora}
 
 %description
 Adds the signing key for importing with mokutil to enable secure boot for kernel modules and repo files required to install akmod dependencies.
@@ -36,8 +34,6 @@ sed -i 's@enabled=1@enabled=0@g' %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/pki/akmods/certs/akmods-ublue.der            %{buildroot}%{_sysconfdir}/pki/akmods/certs/akmods-ublue.der
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/_copr_ublue-os-akmods.repo    %{buildroot}%{_sysconfdir}/yum.repos.d/_copr_ublue-os-akmods.repo
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-multimedia.repo     %{buildroot}%{_sysconfdir}/yum.repos.d/negativo17-fedora-multimedia.repo
-install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/terra.repo     %{buildroot}%{_sysconfdir}/yum.repos.d/terra.repo
-install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/pki/rpm-gpg/RPM-GPG-KEY-terra%{fedora}     %{buildroot}%{_sysconfdir}/pki/rpm-gpg/RPM-GPG-KEY-terra%{fedora}
 
 %files
 %attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/pki/akmods/certs/akmods-ublue.der
@@ -48,13 +44,8 @@ install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/pki/rpm-gpg/RPM-
 %attr(0644,root,root) %{_sysconfdir}/pki/akmods/certs/akmods-ublue.der
 %attr(0644,root,root) %{_sysconfdir}/yum.repos.d/_copr_ublue-os-akmods.repo
 %attr(0644,root,root) %{_sysconfdir}/yum.repos.d/negativo17-fedora-multimedia.repo
-%attr(0644,root,root) %{_sysconfdir}/yum.repos.d/terra.repo
-%attr(0644,root,root) %{_sysconfdir}/pki/rpm-gpg/RPM-GPG-KEY-terra%{fedora}
 
 %changelog
-* Sat Apr 04 2026 Kyle Gospodnetich <me@kylegospodneti.ch> - 0.7
-- Add Terra Repo & GPG Key
-
 * Mon Apr 23 2024 Kyle Gospodnetich <me@kylegospodneti.ch> - 0.6
 - Remove unneeded repositories
 
