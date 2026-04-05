@@ -20,7 +20,8 @@ modinfo /usr/lib/modules/"${KERNEL}"/extra/zenergy/zenergy.ko.xz > /dev/null \
 
 mkdir -p /var/cache/rpms/extra
 dnf download --destdir /var/cache/rpms/extra \
-    zenergy
+    zenergy \
+    zenergy-akmod-modules
 
 rm -f /var/cache/rpms/extra/*.src.rpm
 
