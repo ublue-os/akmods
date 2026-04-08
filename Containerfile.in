@@ -107,6 +107,7 @@ set "${CI+-x}" -euo pipefail
 /tmp/build-kmod-evdi.sh
 /tmp/build-kmod-system76.sh
 /tmp/build-kmod-system76-io.sh
+/tmp/build-kmod-hid-tmff2.sh
 /tmp/build-kmod-new-lg4ff.sh
 /tmp/build-kmod-t150-driver.sh
 /tmp/build-kmod-hid-fanatecff.sh
