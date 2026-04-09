@@ -44,7 +44,7 @@ COPY build_files/prep /tmp/
 RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
-set "${CI+-x}" -euo pipefail
+set ${CI+-x} -euo pipefail
 ls -sh /tmp/kernel_cache
 /tmp/build-prep.sh
 RUNEOF
@@ -77,7 +77,7 @@ COPY build_files/common /tmp/
 RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
-set "${CI+-x}" -euo pipefail
+set ${CI+-x} -euo pipefail
 /tmp/build-ublue-os-akmods-addons.sh
 cp /tmp/ublue-os-akmods-addons/rpmbuild/RPMS/noarch/ublue-os-akmods-addons*.rpm /var/cache/rpms/ublue-os/
 RUNEOF
@@ -100,7 +100,7 @@ COPY build_files/extra /tmp/
 RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
-set "${CI+-x}" -euo pipefail
+set ${CI+-x} -euo pipefail
 /tmp/build-kmod-gcadapter_oc.sh
 /tmp/build-kmod-zenergy.sh
 /tmp/build-kmod-ryzen-smu.sh
@@ -147,7 +147,7 @@ COPY build_files/zfs /tmp/
 RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
-set "${CI+-x}" -euo pipefail
+set ${CI+-x} -euo pipefail
 if [[ "${KERNEL_FLAVOR}" =~ (coreos|longterm) ]]; then
     /tmp/build-ublue-os-ucore-addons.sh
     cp /tmp/ublue-os-ucore-addons/rpmbuild/RPMS/noarch/ublue-os-ucore-addons*.rpm /var/cache/rpms/ucore/
@@ -156,7 +156,7 @@ RUNEOF
 RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
-set "${CI+-x}" -euo pipefail
+set ${CI+-x} -euo pipefail
 /tmp/build-kmod-zfs.sh
 RUNEOF
 #endif
@@ -168,7 +168,7 @@ COPY build_files/post /tmp/
 RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
-set "${CI+-x}" -euo pipefail
+set ${CI+-x} -euo pipefail
 #ifdef ZFS
 /tmp/dual-sign-zfs.sh
 #else
@@ -207,7 +207,7 @@ COPY certs /tmp/certs
 RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
-set "${CI+-x}" -euo pipefail
+set ${CI+-x} -euo pipefail
 /tmp/test-prep.sh
 RUNEOF
 

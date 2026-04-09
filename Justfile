@@ -59,7 +59,7 @@ clean:
 [private]
 get-kernel-version:
     #!/usr/bin/env bash
-    set "${CI:+-x}" -euo pipefail
+    set ${CI:+-x} -euo pipefail
     if [[ {{ kernel_flavor }} =~ centos|longterm ]]; then
         {{ podman }} pull --retry 3 "{{ builder }}" >&2
         builder=$({{ podman }} run --entrypoint /bin/bash -dt "{{ builder }}")
@@ -285,7 +285,7 @@ fetch-kernel: (cache-kernel-version)
     #!/usr/bin/env bash
     {{ if path_exists(version_json) != 'true' { error('Need to run just cache-kernel-version first for dry-run') } else { '' } }}
     {{ if path_exists( KCPATH / shell("jq -r '.kernel_name + \"-\" + .kernel_release + \".rpm\"' < $1", version_json)) == 'true' { 'exit 0' } else { '' } }}
-    set "${CI:+-x}" -euo pipefail
+    set ${CI:+-x} -euo pipefail
 
     # Pull Build Image
     {{ podman }} pull --retry 3 "{{ builder }}" >&2
@@ -315,7 +315,7 @@ fetch-kernel: (cache-kernel-version)
 [group('Build')]
 build: (cache-kernel-version) (fetch-kernel)
     #!/usr/bin/env bash
-    set "${CI:+-x}" -euo pipefail
+    set ${CI:+-x} -euo pipefail
     {{ if path_exists(version_json) != 'true' { error('Need to run just cache-kernel-version first for dry-run') } else { '' } }}
     {{ if path_exists( KCPATH / shell("jq -r '.kernel_name + \"-\" + .kernel_release + \".rpm\"' < $1", version_json)) != 'true' { error('No Cached RPMs') } else { '' } }}
     CPP_FLAGS=(
@@ -365,7 +365,7 @@ build: (cache-kernel-version) (fetch-kernel)
 [group('Build')]
 test: (cache-kernel-version) (fetch-kernel)
     #!/usr/bin/env bash
-    set "${CI:+-x}" -euo pipefail
+    set ${CI:+-x} -euo pipefail
     {{ if path_exists(version_json) != 'true' { error('Need to run just cache-kernel-version first for dry-run') } else { '' } }}
     {{ if path_exists( KCPATH / shell("jq -r '.kernel_name + \"-\" + .kernel_release + \".rpm\"' < $1", version_json)) != 'true' { error('No Cached RPMs') } else { '' } }}
     CPP_FLAGS=(
