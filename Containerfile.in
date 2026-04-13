@@ -101,18 +101,18 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
 set "${CI+-x}" -euo pipefail
-/tmp/build-kmod-gcadapter_oc.sh
-/tmp/build-kmod-zenergy.sh
-/tmp/build-kmod-ryzen-smu.sh
-/tmp/build-kmod-evdi.sh
-/tmp/build-kmod-system76.sh
-/tmp/build-kmod-system76-io.sh
-/tmp/build-kmod-hid-tmff2.sh
-/tmp/build-kmod-new-lg4ff.sh
-/tmp/build-kmod-t150-driver.sh
-/tmp/build-kmod-hid-fanatecff.sh
-/tmp/build-kmod-sc0710.sh
-/tmp/build-kmod-kvmfr.sh
+/tmp/build-kmod-gcadapter_oc.sh || echo "SKIPPED: gcadapter_oc"
+/tmp/build-kmod-zenergy.sh || echo "SKIPPED: zenergy"
+/tmp/build-kmod-ryzen-smu.sh || echo "SKIPPED: ryzen-smu"
+/tmp/build-kmod-evdi.sh || echo "SKIPPED: evdi"
+/tmp/build-kmod-system76.sh || echo "SKIPPED: system76"
+/tmp/build-kmod-system76-io.sh || echo "SKIPPED: system76-io"
+/tmp/build-kmod-hid-tmff2.sh || echo "SKIPPED: hid-tmff2"
+/tmp/build-kmod-new-lg4ff.sh || echo "SKIPPED: new-lg4ff"
+/tmp/build-kmod-t150-driver.sh || echo "SKIPPED: t150-driver"
+/tmp/build-kmod-hid-fanatecff.sh || echo "SKIPPED: hid-fanatecff"
+/tmp/build-kmod-sc0710.sh || echo "SKIPPED: sc0710"
+/tmp/build-kmod-kvmfr.sh || echo "SKIPPED: kvmfr"
 RUNEOF
 
 #elif defined NVIDIA
