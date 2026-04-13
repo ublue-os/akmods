@@ -107,6 +107,7 @@ set "${CI+-x}" -euo pipefail
 /tmp/build-kmod-evdi.sh || echo "SKIPPED: evdi"
 /tmp/build-kmod-system76.sh || echo "SKIPPED: system76"
 /tmp/build-kmod-system76-io.sh || echo "SKIPPED: system76-io"
+/tmp/build-kmod-hid-tmff2.sh || echo "SKIPPED: hid-tmff2"
 /tmp/build-kmod-new-lg4ff.sh || echo "SKIPPED: new-lg4ff"
 /tmp/build-kmod-t150-driver.sh || echo "SKIPPED: t150-driver"
 /tmp/build-kmod-hid-fanatecff.sh || echo "SKIPPED: hid-fanatecff"
