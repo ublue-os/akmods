@@ -167,3 +167,7 @@ images:
     ogc:
       !!merge <<:
         - *ogc-desktop-build-group-only-x86
+    coreos-testing:
+      !!merge <<:
+        - *desktop-build-group
+        - *server-build-group
