@@ -102,6 +102,7 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     bash <<'RUNEOF'
 set "${CI+-x}" -euo pipefail
 /tmp/build-kmod-gcadapter_oc.sh || echo "SKIPPED: gcadapter_oc"
+/tmp/build-kmod-nct6687d.sh || echo "SKIPPED: nct6687d"
 /tmp/build-kmod-zenergy.sh || echo "SKIPPED: zenergy"
 /tmp/build-kmod-ryzen-smu.sh || echo "SKIPPED: ryzen-smu"
 /tmp/build-kmod-evdi.sh || echo "SKIPPED: evdi"

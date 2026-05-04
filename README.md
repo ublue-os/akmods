@@ -58,6 +58,7 @@ The `nvidia` and `nvidia-open` images contains
 | extra | [hid-fanatecff](https://github.com/gotzl/hid-fanatecff) | Fanatec wheel base force feedback | [Terra](https://github.com/terrapkg/packages) |
 | extra | [hid-tmff2](https://github.com/Kimplul/hid-tmff2) | Thrustmaster T300RS, T248, TX, T128, T598, T-GT II, TS-XW force feedback | [Terra](https://github.com/terrapkg/packages) |
 | extra | [kvmfr](https://github.com/gnif/looking-glass) | KVM framebuffer relay kernel module for use with Looking Glass | [![badge](https://copr.fedorainfracloud.org/coprs/hikariknight/looking-glass-kvmfr/package/kvmfr-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/hikariknight/looking-glass-kvmfr/package/kvmfr-kmod) |
+| extra | [nct6687d](https://github.com/Fred78290/nct6687d) | Linux kernel module for Nuvoton NCT6687-R found on AMD B550 chipset motherboards | [Terra](https://github.com/terrapkg/packages) |
 | extra | [new-lg4ff](https://github.com/berarma/new-lg4ff) | Logitech force feedback wheels | [Terra](https://github.com/terrapkg/packages) |
 | extra | [ryzen-smu](https://github.com/leogx9r/ryzen_smu) | AMD Ryzen SMU (System Management Unit) driver | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/ryzen-smu-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/ryzen-smu-kmod) |
 | extra | [sc0710](https://github.com/Nakildias/sc0710) | Elgato 4K60 Pro MK.2 / 4K Pro capture card driver | [Terra](https://github.com/terrapkg/packages) |
