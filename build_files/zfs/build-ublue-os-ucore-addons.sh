@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-set "${CI:+-x}" -euo pipefail
+set ${CI:+-x} -euo pipefail
 
 ### BUILD UCORE-ADDONS RPM
 install -D /etc/pki/akmods/certs/public_key.der /tmp/ublue-os-ucore-addons/rpmbuild/SOURCES/public_key.der

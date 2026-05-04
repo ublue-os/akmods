@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-set "${CI:+-x}" -euo pipefail
+set ${CI:+-x} -euo pipefail
 
 ARCH="$(rpm -E '%_arch')"
 KMOD_REPO="${1:-nvidia}"

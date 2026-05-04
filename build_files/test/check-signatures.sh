@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-set "${CI:+-x}" -euo pipefail
+set ${CI:+-x} -euo pipefail
 
 #shellcheck disable=SC1091
 source /tmp/info.sh
