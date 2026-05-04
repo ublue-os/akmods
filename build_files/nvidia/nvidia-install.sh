@@ -64,7 +64,6 @@ if [[ "${IMAGE_NAME}" == "kinoite" ]]; then
     )
 elif [[ "${IMAGE_NAME}" == "silverblue" ]]; then
     VARIANT_PKGS=(
-        gnome-shell-extension-supergfxctl-gex
         supergfxctl
     )
 else
