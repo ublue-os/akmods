@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-set "${CI:+-x}" -euo pipefail
+set ${CI:+-x} -euo pipefail
 
 # ensures we pass a known dir for volume mount of output rpm files
 KCWD=/tmp/kernel-cache

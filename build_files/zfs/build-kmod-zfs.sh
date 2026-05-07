@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-set "${CI:+-x}" -euo pipefail
+set ${CI:+-x} -euo pipefail
 
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 # allow pinning to a specific release series (eg, 2.0.x or 2.1.x)
