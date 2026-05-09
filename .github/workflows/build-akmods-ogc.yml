@@ -199,7 +199,7 @@ jobs:
 
       - name: Exit if Success
         run: exit 0
-    check-ogc_43:
+  check-ogc_43:
     name: Check ogc (43)
     permissions:
       actions: read
