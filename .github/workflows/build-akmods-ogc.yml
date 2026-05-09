@@ -100,21 +100,6 @@ jobs:
       kernel_cache_key: ${{ needs.cache_kernel_ogc_43.outputs.KCKEY }}
       kernel_flavor: ogc
       version: 43
-  check-ogc_43:
-    name: Check ogc (43)
-    permissions:
-      actions: read
-      contents: read
-    needs: [build-ogc_43_common,build-ogc_43_extra,build-ogc_43_nvidia-lts,build-ogc_43_nvidia-open]
-    runs-on: ubuntu-24.04
-    if: always()
-    steps:
-      - name: Check for Build Failures
-        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped')
-        run: exit 1
-
-      - name: Exit if Success
-        run: exit 0
   cache_kernel_ogc_44:
     name: Cache ogc (44)
     uses: ./.github/workflows/reusable-cache-kernel.yml
@@ -205,6 +190,21 @@ jobs:
       actions: read
       contents: read
     needs: [build-ogc_44_common,build-ogc_44_extra,build-ogc_44_nvidia-lts,build-ogc_44_nvidia-open]
+    runs-on: ubuntu-24.04
+    if: always()
+    steps:
+      - name: Check for Build Failures
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped')
+        run: exit 1
+
+      - name: Exit if Success
+        run: exit 0
+    check-ogc_43:
+    name: Check ogc (43)
+    permissions:
+      actions: read
+      contents: read
+    needs: [build-ogc_43_common,build-ogc_43_extra,build-ogc_43_nvidia-lts,build-ogc_43_nvidia-open]
     runs-on: ubuntu-24.04
     if: always()
     steps:
