@@ -28,8 +28,7 @@ find /var/cache/akmods/nct6687d/ -type f -name "kmod-nct6687d-${KERNEL}-*.rpm" |
 
 mkdir -p /var/cache/rpms/extra
 dnf download --destdir /var/cache/rpms/extra \
-    nct6687d \
-    nct6687d-akmod-modules
+    nct6687d
 
 rm -f /var/cache/rpms/extra/*.src.rpm
 rm -f /etc/yum.repos.d/terra.repo
