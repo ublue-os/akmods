@@ -53,8 +53,22 @@ fi
 tar -z -x --no-same-owner --no-same-permissions -f "zfs-${ZFS_VERSION}.tar.gz"
 
 cd "/tmp/zfs-${ZFS_VERSION}"
+# normalize timestamps so autotools doesn't complain about clock skew
+find . -exec touch -h -r "/tmp/zfs-${ZFS_VERSION}.tar.gz" {} + 2>/dev/null || true
 # ensure rpm spec depends on correct kernel-devel package, else build fails on kernel-longterm kernels
 sed -i "s|kernel-devel|${KERNEL_NAME}-devel|" rpm/*/*spec.in
+
+# GCC 16+ rejects earlyclobber on hard-bound registers (see GCC PR 87600)
+LOCALLY_PATCHED=false
+if [ "$(uname -m)" = "aarch64" ]; then
+    if grep -q '"+&w"' module/zfs/vdev_raidz_math_aarch64_neon_common.h; then
+        echo "PATCH raidz aarch64 neon to drop earlyclobber"
+        sed -i 's/"+&w"/"+w"/g' module/zfs/vdev_raidz_math_aarch64_neon_common.h
+        LOCALLY_PATCHED=true
+    else
+        echo "SKIP patch to raidz aarch64 neon, already applied upstream"
+    fi
+fi
 if ! ./configure \
         -with-linux="/usr/src/kernels/${KERNEL}/" \
         -with-linux-obj="/usr/src/kernels/${KERNEL}/" \
@@ -62,6 +76,19 @@ if ! ./configure \
     cat config.log && exit 1
 fi
 
+# validate RAIDZ math implementations when we've locally patched on aarch64
+if [ "${LOCALLY_PATCHED}" = "true" ]; then
+    echo "Installing ZFS packages for raidz_test validation..."
+    rpm -ivh --nodeps ./lib*.$(uname -m).rpm ./zfs-2.[0-9]*.$(uname -m).rpm ./zfs-test-*.$(uname -m).rpm 2>&1 | grep -v debuginfo || true
+    ldconfig
+    if command -v raidz_test &>/dev/null; then
+        echo "Running raidz_test to validate RAIDZ math implementations..."
+        raidz_test -S -t 60
+        echo "raidz_test PASSED"
+    else
+        echo "WARNING: raidz_test not found, skipping RAIDZ math validation"
+    fi
+fi
 
 # create a directory for later copying of resulting zfs specific artifacts
 mkdir -p /var/cache/rpms/kmods/zfs/{debug,devel,other,src}
