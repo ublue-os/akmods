@@ -61,9 +61,9 @@ sed -i "s|kernel-devel|${KERNEL_NAME}-devel|" rpm/*/*spec.in
 # GCC 16+ rejects earlyclobber on hard-bound registers (see GCC PR 87600)
 LOCALLY_PATCHED=false
 if [ "$(uname -m)" = "aarch64" ]; then
-    if grep -q '"+&w"' module/zfs/vdev_raidz_math_aarch64_neon_common.h; then
+    if grep -q '^#define[[:space:]]*UVR.*"+&w"' module/zfs/vdev_raidz_math_aarch64_neon_common.h; then
         echo "PATCH raidz aarch64 neon to drop earlyclobber"
-        sed -i 's/"+&w"/"+w"/g' module/zfs/vdev_raidz_math_aarch64_neon_common.h
+        sed -i '/^#define[[:space:]]*UVR/s/"+&w"/"+w"/g' module/zfs/vdev_raidz_math_aarch64_neon_common.h
         LOCALLY_PATCHED=true
     else
         echo "SKIP patch to raidz aarch64 neon, already applied upstream"
@@ -79,15 +79,19 @@ fi
 # validate RAIDZ math implementations when we've locally patched on aarch64
 if [ "${LOCALLY_PATCHED}" = "true" ]; then
     echo "Installing ZFS packages for raidz_test validation..."
-    rpm -ivh --nodeps ./lib*.$(uname -m).rpm ./zfs-2.[0-9]*.$(uname -m).rpm ./zfs-test-*.$(uname -m).rpm 2>&1 | grep -v debuginfo || true
+    rpm -ivh --nodeps \
+        ./lib*."$(uname -m)".rpm \
+        ./zfs-2.[0-9]*."$(uname -m)".rpm \
+        ./zfs-test-*."$(uname -m)".rpm \
+        2> >(grep -v debuginfo >&2)
     ldconfig
-    if command -v raidz_test &>/dev/null; then
-        echo "Running raidz_test to validate RAIDZ math implementations..."
-        raidz_test -S -t 60
-        echo "raidz_test PASSED"
-    else
-        echo "WARNING: raidz_test not found, skipping RAIDZ math validation"
+    if ! command -v raidz_test &>/dev/null; then
+        echo "ERROR: raidz_test not found after installing zfs-test package"
+        exit 1
     fi
+    echo "Running raidz_test to validate RAIDZ math implementations..."
+    raidz_test -S -t 60
+    echo "raidz_test PASSED"
 fi
 
 # create a directory for later copying of resulting zfs specific artifacts
