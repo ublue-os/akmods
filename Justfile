@@ -3,6 +3,7 @@ set dotenv-load := true
 
 podman := which('podman') || require('podman-remote')
 just := just_executable()
+yq := 'yq --yaml-fix-merge-anchor-to-spec'
 BUILDDIR := shell('mkdir -p $1 && echo $1', env('AKMODS_BUILDDIR', absolute_path('build')))
 version_cache := shell('mkdir -p $1 && echo $1', BUILDDIR / kernel_flavor + '-' + version)
 KCWD := shell('mkdir -p $1 && echo $1', version_cache / 'KCWD')
@@ -14,9 +15,9 @@ ogc_image := "ghcr.io/opengamingcollective/kernel-packages-fedora:latest-fc" + v
 
 # Inputs
 
-kernel_flavor := env('AKMODS_KERNEL', shell('yq ".defaults.kernel_flavor" images.yaml'))
-version := env('AKMODS_VERSION', if kernel_flavor =~ 'centos' { '10' } else { shell('yq ".defaults.version" images.yaml') })
-akmods_target := env('AKMODS_TARGET', if kernel_flavor =~ '(centos|longterm)' { 'zfs' } else { shell('yq ".defaults.akmods_target" images.yaml') })
+kernel_flavor := env('AKMODS_KERNEL', shell(yq + ' ".defaults.kernel_flavor" images.yaml'))
+version := env('AKMODS_VERSION', if kernel_flavor =~ 'centos' { '10' } else { shell(yq + ' ".defaults.version" images.yaml') })
+akmods_target := env('AKMODS_TARGET', if kernel_flavor =~ '(centos|longterm)' { 'zfs' } else { shell(yq + ' ".defaults.akmods_target" images.yaml') })
 zfs_minor_version := env(
     'ZFS_MINOR_VERSION',
     if kernel_flavor =~ 'coreos-stable' { '2.3' } else if kernel_flavor =~ 'coreos-testing' { '2.4' } else { '2.3' }
@@ -30,12 +31,12 @@ coreos_stable_kernel_pin := ''
 
 # Check if valid
 
-check_valid := if shell('yq ".images.$1[\"$2\"].$3" images.yaml', version, kernel_flavor, akmods_target) != 'null' { 'true' } else { error('Invalid Image Combination') }
-_description := shell('yq ".images.$1[\"$2\"].$3.description" images.yaml', version, kernel_flavor, akmods_target)
-_org := shell('yq ".images.$1[\"$2\"].$3.org" images.yaml', version, kernel_flavor, akmods_target)
-_repo := shell('yq ".images.$1[\"$2\"].$3.repo" images.yaml', version, kernel_flavor, akmods_target)
-registry := env('AKMODS_REGISTRY', shell('yq ".images.$1[\"$2\"].$3.registry" images.yaml', version, kernel_flavor, akmods_target))
-transport := env('AKMODS_TRANSPORT', shell('yq ".images.$1[\"$2\"].$3.transport" images.yaml', version, kernel_flavor, akmods_target))
+check_valid := if shell(yq + ' ".images.$1[\"$2\"].$3" images.yaml', version, kernel_flavor, akmods_target) != 'null' { 'true' } else { error('Invalid Image Combination') }
+_description := shell(yq + ' ".images.$1[\"$2\"].$3.description" images.yaml', version, kernel_flavor, akmods_target)
+_org := shell(yq + ' ".images.$1[\"$2\"].$3.org" images.yaml', version, kernel_flavor, akmods_target)
+_repo := shell(yq + ' ".images.$1[\"$2\"].$3.repo" images.yaml', version, kernel_flavor, akmods_target)
+registry := env('AKMODS_REGISTRY', shell(yq + ' ".images.$1[\"$2\"].$3.registry" images.yaml', version, kernel_flavor, akmods_target))
+transport := env('AKMODS_TRANSPORT', shell(yq + ' ".images.$1[\"$2\"].$3.transport" images.yaml', version, kernel_flavor, akmods_target))
 akmods_name := 'akmods' + if akmods_target != 'common' { '-' +akmods_target } else { '' }
 
 # Functions
@@ -518,16 +519,16 @@ generate-workflows:
 
         declare -A images=()
         declare -A workflows=()
-        versions=($(yq '.images | keys | .[]' images.yaml | sort | uniq))
-        flavors=($(yq '.images.* | keys | .[]' images.yaml | sort | uniq))
-        targets=($(yq 'explode(.).images.*.* | keys | .[]' images.yaml | sort | uniq))
+        versions=($({{ yq }} '.images | keys | .[]' images.yaml | sort | uniq))
+        flavors=($({{ yq }} '.images.* | keys | .[]' images.yaml | sort | uniq))
+        targets=($({{ yq }} 'explode(.).images.*.* | keys | .[]' images.yaml | sort | uniq))
 
         for i in "${versions[@]}"; do
             for j in "${flavors[@]}"; do
                 for k in "${targets[@]}"; do
                     #shellcheck disable=SC1087
-                    if [[ "$(yq ".images.$i[\"$j\"].$k" images.yaml)" != "null" ]]; then
-                        arch=$(yq -o json "explode(.).images.$i[\"$j\"].$k.architecture" images.yaml | jq -c)
+                    if [[ "$({{ yq }} ".images.$i[\"$j\"].$k" images.yaml)" != "null" ]]; then
+                        arch=$({{ yq }} -o json "explode(.).images.$i[\"$j\"].$k.architecture" images.yaml | jq -c)
                         images+=(["$i-$j-$k"]="$i,$j,$k,$arch")
                         workflows+=(["$i-$j"]="$i,$j,$arch")
                     fi
