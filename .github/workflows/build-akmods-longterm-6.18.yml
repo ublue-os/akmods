@@ -4,7 +4,7 @@
 #
 # Generate the workflow by running `just generate-workflows` at git root
 # Modify the inputs in workflow-templates
-name: Build LONGTERM-6.12 akmods
+name: Build LONGTERM-6.18 akmods
 on:
   merge_group:
   pull_request:
@@ -16,8 +16,8 @@ on:
     - cron: '23 0 * * *'  # 0023 UTC everyday
   workflow_dispatch:
 jobs:
-  cache_kernel_longterm-6-12_43:
-    name: Cache longterm-6.12 (43)
+  cache_kernel_longterm-6-18_44:
+    name: Cache longterm-6.18 (44)
     uses: ./.github/workflows/reusable-cache-kernel.yml
     secrets: inherit
     permissions:
@@ -26,10 +26,10 @@ jobs:
       packages: write
     with:
       architecture: '["aarch64","x86_64"]'
-      kernel_flavor: longterm-6.12
-      version: 43
-  build-longterm-6-12_43_nvidia-lts:
-    name: Build nvidia-lts longterm-6.12 (43)
+      kernel_flavor: longterm-6.18
+      version: 44
+  build-longterm-6-18_44_nvidia-lts:
+    name: Build nvidia-lts longterm-6.18 (44)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     permissions:
@@ -39,15 +39,15 @@ jobs:
       contents: read
       id-token: write
       packages: write
-    needs: cache_kernel_longterm-6-12_43
+    needs: cache_kernel_longterm-6-18_44
     with:
       akmods_target: nvidia-lts
       architecture: '["aarch64","x86_64"]'
-      kernel_cache_key: ${{ needs.cache_kernel_longterm-6-12_43.outputs.KCKEY }}
-      kernel_flavor: longterm-6.12
-      version: 43
-  build-longterm-6-12_43_nvidia-open:
-    name: Build nvidia-open longterm-6.12 (43)
+      kernel_cache_key: ${{ needs.cache_kernel_longterm-6-18_44.outputs.KCKEY }}
+      kernel_flavor: longterm-6.18
+      version: 44
+  build-longterm-6-18_44_nvidia-open:
+    name: Build nvidia-open longterm-6.18 (44)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     permissions:
@@ -57,15 +57,15 @@ jobs:
       contents: read
       id-token: write
       packages: write
-    needs: cache_kernel_longterm-6-12_43
+    needs: cache_kernel_longterm-6-18_44
     with:
       akmods_target: nvidia-open
       architecture: '["aarch64","x86_64"]'
-      kernel_cache_key: ${{ needs.cache_kernel_longterm-6-12_43.outputs.KCKEY }}
-      kernel_flavor: longterm-6.12
-      version: 43
-  build-longterm-6-12_43_zfs:
-    name: Build zfs longterm-6.12 (43)
+      kernel_cache_key: ${{ needs.cache_kernel_longterm-6-18_44.outputs.KCKEY }}
+      kernel_flavor: longterm-6.18
+      version: 44
+  build-longterm-6-18_44_zfs:
+    name: Build zfs longterm-6.18 (44)
     uses: ./.github/workflows/reusable-build.yml
     secrets: inherit
     permissions:
@@ -75,19 +75,19 @@ jobs:
       contents: read
       id-token: write
       packages: write
-    needs: cache_kernel_longterm-6-12_43
+    needs: cache_kernel_longterm-6-18_44
     with:
       akmods_target: zfs
       architecture: '["aarch64","x86_64"]'
-      kernel_cache_key: ${{ needs.cache_kernel_longterm-6-12_43.outputs.KCKEY }}
-      kernel_flavor: longterm-6.12
-      version: 43
-  check-longterm-6-12_43:
-    name: Check longterm-6.12 (43)
+      kernel_cache_key: ${{ needs.cache_kernel_longterm-6-18_44.outputs.KCKEY }}
+      kernel_flavor: longterm-6.18
+      version: 44
+  check-longterm-6-18_44:
+    name: Check longterm-6.18 (44)
     permissions:
       actions: read
       contents: read
-    needs: [build-longterm-6-12_43_nvidia-lts,build-longterm-6-12_43_nvidia-open,build-longterm-6-12_43_zfs]
+    needs: [build-longterm-6-18_44_nvidia-lts,build-longterm-6-18_44_nvidia-open,build-longterm-6-18_44_zfs]
     runs-on: ubuntu-24.04
     if: always()
     steps:

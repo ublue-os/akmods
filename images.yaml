@@ -145,13 +145,6 @@ images:
       !!merge <<:
         - *desktop-build-group
         - *server-build-group
-    coreos-testing:
-      !!merge <<:
-        - *desktop-build-group
-        - *server-build-group
-    "longterm-6.12":
-      !!merge <<:
-        - *server-build-group
   44:
     main:
       !!merge <<:
@@ -166,4 +159,7 @@ images:
     coreos-testing:
       !!merge <<:
         - *desktop-build-group
+        - *server-build-group
+    "longterm-6.18":
+      !!merge <<:
         - *server-build-group

@@ -1,6 +1,6 @@
 # ublue-os akmods
 
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/ublue-os/akmods/badge)](https://scorecard.dev/viewer/?uri=github.com/ublue-os/akmods)[![Build CENTOS akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-centos.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-centos.yml)[![Build COREOS-STABLE akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-stable.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-stable.yml)[![Build COREOS-TESTING akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-testing.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-testing.yml)[![Build LONGTERM-6.12 akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-longterm-6.12.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-longterm-6.12.yml)[![Build OGC akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-ogc.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-ogc.yml)[![Build MAIN akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-main.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-main.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/ublue-os/akmods/badge)](https://scorecard.dev/viewer/?uri=github.com/ublue-os/akmods)[![Build CENTOS akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-centos.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-centos.yml)[![Build COREOS-STABLE akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-stable.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-stable.yml)[![Build COREOS-TESTING akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-testing.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-testing.yml)[![Build LONGTERM-6.18 akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-longterm-6.18.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-longterm-6.18.yml)[![Build OGC akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-ogc.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-ogc.yml)[![Build MAIN akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-main.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-main.yml)
 
 OCI images providing a set of cached kernel RPMs and extra kernel modules to Universal Blue images. Used for better hardware support and consistent build process.
 
@@ -24,7 +24,7 @@ Builds also run for different kernels:
 - `coreos-stable` - Current Fedora CoreOS stable kernel version
 - `coreos-testing` - Current Fedora CoreOS testing kernel version
 - `Centos` - Mainline Centos Kernel
-- `Longterm-6.12` - Fedora Kernel on Kernel 6.12 LTS
+- `Longterm-6.18` - Fedora Kernel on Kernel 6.18 LTS
 
 See `images.yaml` for which akmods packages are built for each Kernel
 
