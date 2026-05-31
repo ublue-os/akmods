@@ -108,10 +108,10 @@ systemctl enable ublue-nvctk-cdi.service
 systemctl enable ublue-nvidia-selinux.service
 semodule --verbose --install /usr/share/selinux/packages/nvidia-container.pp
 
-# nvidia-driver-selinux is explicitly listed above so it is pulled into the main
-# transaction (the weak conditional on nvidia-kmod-common only + no 32-bit deps
-# + March 2026 weakening made it unreliable). The 610 driver-common split
-# exacerbated 32-bit labeling issues on newer kernels.
+# nvidia-driver-selinux is pulled at runtime (when the nvidia repo is enabled)
+# because it has only a weak/conditional dependency upstream. Explicitly listing
+# it ensures the policy is installed even after the March 2026 weakening of the
+# dep and the 610 driver-common packaging changes that affected 32-bit labeling.
 # See: https://github.com/negativo17/nvidia-driver/issues/200
 
 # Load main driver SELinux policy + relabel nvidia files so 32-bit libs get correct contexts.

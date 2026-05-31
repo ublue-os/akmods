@@ -64,7 +64,6 @@ NVIDIA_RPMS+=(
     "nvidia-driver-cuda-libs"
     "nvidia-driver-libs"
     "nvidia-kmod-common"
-    "nvidia-driver-selinux"
     "nvidia-libXNVCtrl"
     "nvidia-modprobe"
     "nvidia-persistenced"
