@@ -18,6 +18,8 @@ Source6:        60-nvidia-extra-devices-pm.rules
 Source7:        negativo17-epel-nvidia.repo
 Source8:        negativo17-epel-nvidia-lts.repo
 Source9:        negativo17-fedora-nvidia-lts.repo
+Source10:       ublue-nvidia-selinux.service
+Source11:       70-ublue-nvidia-selinux.preset
 
 %description
 Adds various runtime files for nvidia support.
@@ -48,10 +50,14 @@ install -Dm0644 %{SOURCE0} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.r
 install -Dm0644 %{SOURCE1} %{buildroot}%{_datadir}/ublue-os/%{_datadir}/selinux/packages/nvidia-container.pp
 install -Dm0644 %{SOURCE2} %{buildroot}%{_datadir}/ublue-os/%{_unitdir}/ublue-nvctk-cdi.service
 install -Dm0644 %{SOURCE3} %{buildroot}%{_presetdir}/70-ublue-nvctk-cdi.preset
+install -Dm0644 %{SOURCE10} %{buildroot}%{_datadir}/ublue-os/%{_unitdir}/ublue-nvidia-selinux.service
+install -Dm0644 %{SOURCE11} %{buildroot}%{_presetdir}/70-ublue-nvidia-selinux.preset
 sed -i 's@enabled=1@enabled=0@g' %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo     %{buildroot}%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_datadir}/selinux/packages/nvidia-container.pp             %{buildroot}%{_datadir}/selinux/packages/nvidia-container.pp
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_unitdir}/ublue-nvctk-cdi.service                          %{buildroot}%{_unitdir}/ublue-nvctk-cdi.service
+install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_unitdir}/ublue-nvidia-selinux.service                     %{buildroot}%{_unitdir}/ublue-nvidia-selinux.service
+install -Dm0644 %{buildroot}%{_presetdir}/70-ublue-nvidia-selinux.preset                                       %{buildroot}%{_presetdir}/70-ublue-nvidia-selinux.preset
 
 %files
 %if 0%{?rhel}
@@ -73,6 +79,9 @@ install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_unitdir}/ublue-nvctk-cdi.ser
 %attr(0644,root,root) %{_datadir}/selinux/packages/nvidia-container.pp
 %attr(0644,root,root) %{_unitdir}/ublue-nvctk-cdi.service
 %attr(0644,root,root) %{_presetdir}/70-ublue-nvctk-cdi.preset
+%attr(0644,root,root) %{_datadir}/ublue-os/%{_unitdir}/ublue-nvidia-selinux.service
+%attr(0644,root,root) %{_unitdir}/ublue-nvidia-selinux.service
+%attr(0644,root,root) %{_presetdir}/70-ublue-nvidia-selinux.preset
 
 %changelog
 * Mon Dec 8 2025 Benjamin Sherman <benjamin@holyarmy.org> - 0.14

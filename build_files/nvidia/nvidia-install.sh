@@ -76,6 +76,7 @@ NVIDIA_RPMS=(
     nvidia-container-toolkit
     egl-wayland
     libva-nvidia-driver
+    nvidia-driver-selinux
     "${VARIANT_PKGS[@]}"
     "${AKMODNV_PATH}"/kmods/kmod-nvidia-"${KERNEL_VERSION}"-"${NVIDIA_AKMOD_VERSION}"."${DIST_ARCH}".rpm
 )
@@ -104,7 +105,25 @@ dnf5 config-manager setopt fedora-nvidia*.enabled=0 nvidia-container-toolkit.ena
 dnf5 -y copr disable ublue-os/staging
 
 systemctl enable ublue-nvctk-cdi.service
+systemctl enable ublue-nvidia-selinux.service
 semodule --verbose --install /usr/share/selinux/packages/nvidia-container.pp
+
+# nvidia-driver-selinux is explicitly listed above so it is pulled into the main
+# transaction (the weak conditional on nvidia-kmod-common only + no 32-bit deps
+# + March 2026 weakening made it unreliable). The 610 driver-common split
+# exacerbated 32-bit labeling issues on newer kernels.
+# See: https://github.com/negativo17/nvidia-driver/issues/200
+
+# Load main driver SELinux policy + relabel nvidia files so 32-bit libs get correct contexts.
+if [[ -f /usr/share/selinux/packages/targeted/nvidia-driver.pp.bz2 ]]; then
+    semodule -i /usr/share/selinux/packages/targeted/nvidia-driver.pp.bz2 || true
+fi
+restorecon -RFv \
+    /usr/lib*/libnvidia* \
+    /usr/lib*/nvidia* \
+    /etc/modprobe.d/nvidia.conf \
+    /usr/lib/dracut/dracut.conf.d/99-nvidia.conf \
+    2>/dev/null || true
 
 # we must force driver load to fix black screen on boot for nvidia desktops
 sed -i 's@omit_drivers@force_drivers@g' /usr/lib/dracut/dracut.conf.d/99-nvidia.conf

@@ -1,0 +1,47 @@
+[Unit]
+Description=Load NVIDIA proprietary driver SELinux policy
+Documentation=https://github.com/ublue-os/akmods
+After=local-fs.target selinux-autorelabel-mark.service
+Before=graphical.target multi-user.target
+ConditionPathExists=/usr/share/selinux/packages/targeted/nvidia-driver.pp.bz2
+# Only run if SELinux is enabled
+ConditionSecurity=selinux
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+# NOTE on "run only once" behavior:
+#
+# With RemainAfterExit=yes, this oneshot will execute on the first boot after the
+# unit is enabled (or after a rebase that changes the unit or its dependencies),
+# then transition to "active (exited)" and will not re-run on subsequent boots
+# in the same deployment.
+#
+# We deliberately do NOT add extra "run exactly once ever" logic (e.g. a stamp
+# file in /var that prevents future executions). Reasons:
+#
+# 1. The work (semodule -i + restorecon on /etc paths) is cheap and idempotent.
+# 2. After a user rebases to a new image (the main reason this service exists),
+#    we *want* it to re-execute so the updated nvidia-driver.pp policy is loaded
+#    and any new overlay files get correct labels.
+# 3. On bootc/ostree systems, a rebase + reboot is the signal that "something
+#    important may have changed in the base image". Relying only on
+#    RemainAfterExit=yes + the natural reboot boundary is sufficient and robust.
+#
+# If you ever need to force it to re-run on the current boot:
+#   systemctl restart ublue-nvidia-selinux.service
+
+ExecStart=/bin/sh -c '\
+    if command -v semodule >/dev/null; then \
+        semodule -i /usr/share/selinux/packages/targeted/nvidia-driver.pp.bz2 2>/dev/null || true; \
+    fi; \
+    if command -v restorecon >/dev/null; then \
+        restorecon -RFv \
+            /etc/modprobe.d/nvidia.conf \
+            /usr/lib/dracut/dracut.conf.d/99-nvidia.conf \
+            2>/dev/null || true; \
+    fi'
+
+[Install]
+WantedBy=multi-user.target
