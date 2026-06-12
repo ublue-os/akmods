@@ -85,10 +85,21 @@ jobs:
       - name: Retrieve Signing Key
         if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && steps.cache-kernel.outputs.cache-hit != 'true'
         shell: bash
+        env:
+          KERNEL_PRIVKEY: ${{ secrets.KERNEL_PRIVKEY }}
+          AKMOD_PRIVKEY: ${{ secrets.AKMOD_PRIVKEY_20230518 }}
         run: |
           mkdir -p certs
-          echo "${{ secrets.KERNEL_PRIVKEY }}" > certs/private_key.priv
-          echo "${{ secrets.AKMOD_PRIVKEY_20230518 }}" > certs/private_key_2.priv
+          # Only write signing keys when the secrets are set. On forks without
+          # them, keep the checked-in empty placeholders so the build falls back
+          # to the test key (a bare `echo` would write a 1-byte newline and break
+          # that fallback, causing sbsign "No supported data to decode").
+          if [[ -n "$KERNEL_PRIVKEY" ]]; then
+              printf '%s\n' "$KERNEL_PRIVKEY" > certs/private_key.priv
+          fi
+          if [[ -n "$AKMOD_PRIVKEY" ]]; then
+              printf '%s\n' "$AKMOD_PRIVKEY" > certs/private_key_2.priv
+          fi
           # DEBUG: get character count of key
           wc -c certs/private_key.priv
           wc -c certs/private_key_2.priv
