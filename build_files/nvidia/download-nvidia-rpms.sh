@@ -30,13 +30,13 @@ else
 fi
 
 NVIDIA_DRIVER_COMMON_PKGS=()
-if dnf repoquery --qf '%{EPOCH}:%{VERSION}-%{RELEASE}\n' nvidia-driver-common | grep -qxF "${DRIVER_EVR}"; then
+if dnf repoquery --qf '%{VERSION}\n' nvidia-driver-common | grep -qxF "${DRIVER_VERSION}"; then
     echo "Using nvidia-driver-common for NVIDIA ${DRIVER_VERSION}"
     NVIDIA_DRIVER_COMMON_PKGS+=(
         "nvidia-driver-common"
     )
     if [[ "${ARCH}" = "x86_64" && ! "${KERNEL_FLAVOR}" =~ "centos" ]] && \
-        dnf repoquery --qf '%{EPOCH}:%{VERSION}-%{RELEASE}\n' nvidia-driver-common.i686 | grep -qxF "${DRIVER_EVR}"; then
+        dnf repoquery --qf '%{VERSION}\n' nvidia-driver-common.i686 | grep -qxF "${DRIVER_VERSION}"; then
         NVIDIA_EXTRA_PKGS+=(
             "nvidia-driver-common.i686"
         )
