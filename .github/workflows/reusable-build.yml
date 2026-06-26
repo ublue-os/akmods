@@ -99,7 +99,7 @@ jobs:
         
       - name: Cache Kernel RPMs
         id: cache-kernel
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: ${{ steps.gh-workspace.outputs.GITHUB_WORKSPACE }}/build/${{ env.AKMODS_KERNEL }}-${{ env.AKMODS_VERSION }}/KCWD/rpms
           fail-on-cache-miss: true
@@ -166,7 +166,7 @@ jobs:
 
       - name: Cache Kernel RPMs
         id: cache-kernel
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: ${{ steps.gh-workspace.outputs.GITHUB_WORKSPACE }}/build/${{ env.AKMODS_KERNEL }}-${{ env.AKMODS_VERSION }}/KCWD/rpms
           key: ${{ env.KCKEY }}-x86_64
