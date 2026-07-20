@@ -20,7 +20,20 @@ version := env('AKMODS_VERSION', if kernel_flavor =~ 'centos' { '10' } else { sh
 akmods_target := env('AKMODS_TARGET', if kernel_flavor =~ '(centos|longterm)' { 'zfs' } else { shell(yq + ' ".defaults.akmods_target" images.yaml') })
 zfs_minor_version := env(
     'ZFS_MINOR_VERSION',
-    if kernel_flavor =~ 'coreos-stable' { '2.3' } else if kernel_flavor =~ 'coreos-testing' { '2.4' } else { '2.3' }
+    shell(yq + ' ".zfs[\"$1\"].minor_version // .zfs.default.minor_version" images.yaml', kernel_flavor)
+)
+zfs_linux_experimental_overridden := shell(
+    yq + ' ".zfs[\"$1\"] | has(\"linux_experimental\")" images.yaml',
+    kernel_flavor
+)
+zfs_linux_experimental := if zfs_linux_experimental_overridden == 'true' {
+    shell(yq + ' ".zfs[\"$1\"].linux_experimental" images.yaml', kernel_flavor)
+} else {
+    shell(yq + ' ".zfs.default.linux_experimental" images.yaml')
+}
+zfs_configure_args := env(
+    'ZFS_CONFIGURE_ARGS',
+    if zfs_linux_experimental == 'true' { '--enable-linux-experimental' } else { '' }
 )
 
 # Kernel Pin for coreos-stable (Maximum Version Cap)
@@ -337,6 +350,7 @@ build: (cache-kernel-version) (fetch-kernel)
     if [[ "{{ akmods_target }}" == "zfs" ]]; then
         CPP_FLAGS+=(
             "--cpp-flag=-DZFS_MINOR_VERSION_ARG=ZFS_MINOR_VERSION={{ zfs_minor_version }}"
+            "--cpp-flag=-DZFS_CONFIGURE_ARGS_ARG=ZFS_CONFIGURE_ARGS=\"{{ zfs_configure_args }}\""
         )
     fi
     LABELS=(
@@ -387,6 +401,7 @@ test: (cache-kernel-version) (fetch-kernel)
     if [[ "{{ akmods_target }}" == "zfs" ]]; then
         CPP_FLAGS+=(
             "--cpp-flag=-DZFS_MINOR_VERSION_ARG=ZFS_MINOR_VERSION={{ zfs_minor_version }}"
+            "--cpp-flag=-DZFS_CONFIGURE_ARGS_ARG=ZFS_CONFIGURE_ARGS=\"{{ zfs_configure_args }}\""
         )
     fi
 

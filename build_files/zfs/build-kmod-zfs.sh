@@ -5,6 +5,16 @@ set ${CI:+-x} -euo pipefail
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 # allow pinning to a specific release series (eg, 2.0.x or 2.1.x)
 ZFS_MINOR_VERSION="${ZFS_MINOR_VERSION:-}"
+# CoreOS testing may opt into the one experimental configure switch we support.
+ZFS_CONFIGURE_ARGS="${ZFS_CONFIGURE_ARGS:-}"
+ZFS_CONFIGURE_ARGS_ARRAY=()
+if [[ -n "${ZFS_CONFIGURE_ARGS}" ]]; then
+    if [[ "${ZFS_CONFIGURE_ARGS}" != "--enable-linux-experimental" ]]; then
+        echo "Unsupported ZFS_CONFIGURE_ARGS: ${ZFS_CONFIGURE_ARGS}" >&2
+        exit 1
+    fi
+    ZFS_CONFIGURE_ARGS_ARRAY=("${ZFS_CONFIGURE_ARGS}")
+fi
 
 cd /tmp
 
@@ -13,6 +23,7 @@ curl "https://api.github.com/repos/openzfs/zfs/releases" -o data.json
 ZFS_VERSION=$(jq -r --arg ZMV "zfs-${ZFS_MINOR_VERSION}" '[ .[] | select(.prerelease==false and .draft==false) | select(.tag_name | startswith($ZMV))][0].tag_name' data.json|cut -f2- -d-)
 echo "ZFS_MINOR_VERSION==$ZFS_MINOR_VERSION"
 echo "ZFS_VERSION==$ZFS_VERSION"
+echo "ZFS_CONFIGURE_ARGS==$ZFS_CONFIGURE_ARGS"
 
 
 ### zfs specific build deps
@@ -58,6 +69,17 @@ find . -exec touch -h -r "/tmp/zfs-${ZFS_VERSION}.tar.gz" {} + 2>/dev/null || tr
 # ensure rpm spec depends on correct kernel-devel package, else build fails on kernel-longterm kernels
 sed -i "s|kernel-devel|${KERNEL_NAME}-devel|" rpm/*/*spec.in
 
+if [[ -n "${ZFS_CONFIGURE_ARGS}" ]]; then
+    for spec in rpm/generic/zfs-kmod.spec.in rpm/redhat/zfs-kmod.spec.in; do
+        if [[ ! -f "${spec}" ]] || ! grep -q '^[[:space:]]*%{?kernel_arch}[[:space:]]*$' "${spec}"; then
+            echo "Unable to add ZFS configure arguments to ${spec}" >&2
+            exit 1
+        fi
+        # rpm-kmod invokes configure separately, so it needs the same opt-in.
+        sed -i 's|^\([[:space:]]*%{?kernel_arch}\)[[:space:]]*$|\1 --enable-linux-experimental|' "${spec}"
+    done
+fi
+
 # GCC 16+ rejects earlyclobber on hard-bound registers (see GCC PR 87600)
 LOCALLY_PATCHED=false
 if [ "$(uname -m)" = "aarch64" ]; then
@@ -72,6 +94,7 @@ fi
 if ! ./configure \
         -with-linux="/usr/src/kernels/${KERNEL}/" \
         -with-linux-obj="/usr/src/kernels/${KERNEL}/" \
+        "${ZFS_CONFIGURE_ARGS_ARRAY[@]}" \
     || ! make -j "$(nproc)" rpm-utils rpm-kmod; then
     cat config.log && exit 1
 fi
