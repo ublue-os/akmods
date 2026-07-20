@@ -4,6 +4,15 @@ defaults:
   version: 44
   akmods_target: common
 
+# ZFS defaults can be overridden per kernel flavor without affecting the build matrix.
+zfs:
+  default:
+    minor_version: "2.4"
+    linux_experimental: false
+  coreos-testing:
+    minor_version: "2.4"
+    linux_experimental: true
+
 arch-arm-x86: &arch-arm-x86
   architecture:
     - aarch64
