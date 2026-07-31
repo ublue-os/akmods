@@ -15,4 +15,10 @@ akmods --force --kernels "${KERNEL}" --kmod vhba
 modinfo /usr/lib/modules/"${KERNEL}"/extra/vhba/vhba.ko.xz > /dev/null \
 || (find /var/cache/akmods/vhba/ -name \*.log -print -exec cat {} \; && exit 1)
 
+mkdir -p /var/cache/rpms/common
+dnf download --destdir /var/cache/rpms/common \
+    vhba-kmod-common
+
+rm -f /var/cache/rpms/common/*.src.rpm
+
 rm -f /etc/yum.repos.d/_copr_rok-cdemu.repo
