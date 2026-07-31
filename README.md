@@ -117,9 +117,38 @@ For NVIDIA images, add something like this to your Containerfile, replacing `TAG
 
 ## Verification
 
-These images are signed with sisgstore's [cosign](https://docs.sigstore.dev/about/overview/). You can verify the signature by downloading the `cosign.pub` key from this repo and running the following command, replacing `KERNEL_FLAVOR` with whichever kernel you are using and `RELEASE` with either `40`, `41` or `42`:
+### Image Signatures
 
-    cosign verify --key cosign.pub ghcr.io/ublue-os/akmods:KERNEL_FLAVOR-RELEASE
+All architecture images and manifest indexes are signed by Podman with the shared Universal Blue static key. Prefer verifying immutable, digest-pinned subjects with Cosign v3.1.2:
+
+```bash
+cosign verify \
+  --key https://raw.githubusercontent.com/ublue-os/main/main/cosign.pub \
+  ghcr.io/ublue-os/akmods@sha256:DIGEST
+```
+
+For historical manifest digests with registry-attached GitHub provenance, use legacy bundle discovery:
+
+```bash
+cosign verify \
+  --new-bundle-format=false \
+  --key https://raw.githubusercontent.com/ublue-os/main/main/cosign.pub \
+  ghcr.io/ublue-os/akmods@sha256:DIGEST
+```
+
+The `ublue-os/main/cosign.pub` key is the Universal Blue image trust root. Mutable tags such as `main-44` or `coreos-stable-43` are convenient for discovery, but a digest is the preferred verification target.
+
+### Build Provenance
+
+GitHub build provenance is a separate trust decision from image signatures: it uses a short-lived GitHub OIDC certificate rather than the Universal Blue static key. Provenance currently covers the release and kernel-version manifest indexes, not architecture-only image digests.
+
+```bash
+gh attestation verify \
+  oci://ghcr.io/ublue-os/akmods@sha256:DIGEST \
+  --repo ublue-os/akmods
+```
+
+Provenance is stored in GitHub's attestations API. It is no longer published as a registry referrer, so registry provenance and GitHub linked-artifact storage records are not available for newly published digests.
 
 ## Local Building/Testing
 
