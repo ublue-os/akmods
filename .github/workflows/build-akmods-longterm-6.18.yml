@@ -35,7 +35,6 @@ jobs:
     permissions:
       actions: read
       attestations: write
-      artifact-metadata: write
       contents: read
       id-token: write
       packages: write
@@ -53,7 +52,6 @@ jobs:
     permissions:
       actions: read
       attestations: write
-      artifact-metadata: write
       contents: read
       id-token: write
       packages: write
@@ -71,7 +69,6 @@ jobs:
     permissions:
       actions: read
       attestations: write
-      artifact-metadata: write
       contents: read
       id-token: write
       packages: write
