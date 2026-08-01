@@ -47,7 +47,7 @@ install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/_cop
 %attr(0644,root,root) %{_sysconfdir}/yum.repos.d/_copr_rok-cdemu.repo
 
 %changelog
-* Mon Aug 31 2026 Marco Rodolfi <marco.rodolfi@tuta.io> - 0.8
+* Mon Jul 31 2026 Marco Rodolfi <marco.rodolfi@tuta.io> - 0.8
 - Revert rok/cdemu copr repo removal for vhba kmod support on unified kernel package
 
 * Mon Apr 23 2024 Kyle Gospodnetich <me@kylegospodneti.ch> - 0.6
