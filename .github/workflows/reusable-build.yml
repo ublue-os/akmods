@@ -257,9 +257,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          cosign_version="$(cosign version)"
-          printf '%s\n' "$cosign_version"
-          [[ "$cosign_version" == *"GitVersion: v3.1.2"* ]]
+          cosign version
+          [[ "$(cosign version --json | jq -r '.gitVersion')" == "v3.1.2" ]]
           command -v gh
           gh --version
 
