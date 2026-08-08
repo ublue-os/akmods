@@ -20,10 +20,8 @@ ARG KMOD_REPO_ARG
 
 COPY certs /tmp/certs
 
-COPY files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/ublue-nvctk-cdi.service
-COPY files/usr/lib/systemd/system/ublue-nvctk-cdi.service /tmp/ublue-os-ucore-nvidia/rpmbuild/SOURCES/ublue-nvctk-cdi.service
-COPY files/usr/lib/systemd/system-preset/70-ublue-nvctk-cdi.preset /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/70-ublue-nvctk-cdi.preset
-COPY files/usr/lib/systemd/system-preset/70-ublue-nvctk-cdi.preset /tmp/ublue-os-ucore-nvidia/rpmbuild/SOURCES/70-ublue-nvctk-cdi.preset
+COPY files/usr/lib/systemd/system-preset/70-nvidia-cdi-refresh.preset /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/70-nvidia-cdi-refresh.preset
+COPY files/usr/lib/systemd/system/nvidia-cdi-refresh.service.d/10-ublue-ordering.conf /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/10-ublue-ordering.conf
 COPY files/etc/udev/rules.d/60-nvidia-extra-devices-pm.rules /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/60-nvidia-extra-devices-pm.rules
 
 #ifndef CENTOS
