@@ -103,7 +103,7 @@ dnf5 config-manager setopt fedora-nvidia*.enabled=0 nvidia-container-toolkit.ena
 # Disable staging
 dnf5 -y copr disable ublue-os/staging
 
-systemctl enable ublue-nvctk-cdi.service
+systemctl enable nvidia-cdi-refresh.service nvidia-cdi-refresh.path nvidia-persistenced.service
 semodule --verbose --install /usr/share/selinux/packages/nvidia-container.pp
 
 # we must force driver load to fix black screen on boot for nvidia desktops

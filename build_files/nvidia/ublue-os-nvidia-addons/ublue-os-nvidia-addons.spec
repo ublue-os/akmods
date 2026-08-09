@@ -1,5 +1,5 @@
 Name:           ublue-os-nvidia-addons
-Version:        0.14
+Version:        0.15
 Release:        1%{?dist}
 Summary:        Additional files for nvidia driver support
 
@@ -11,8 +11,8 @@ Supplements:    mokutil policycoreutils
 
 Source0:        nvidia-container-toolkit.repo
 Source1:        nvidia-container.pp
-Source2:        ublue-nvctk-cdi.service
-Source3:        70-ublue-nvctk-cdi.preset
+Source2:        70-nvidia-cdi-refresh.preset
+Source3:        10-ublue-ordering.conf
 Source5:        negativo17-fedora-nvidia.repo
 Source6:        60-nvidia-extra-devices-pm.rules
 Source7:        negativo17-epel-nvidia.repo
@@ -46,12 +46,11 @@ install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nega
 
 install -Dm0644 %{SOURCE0} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
 install -Dm0644 %{SOURCE1} %{buildroot}%{_datadir}/ublue-os/%{_datadir}/selinux/packages/nvidia-container.pp
-install -Dm0644 %{SOURCE2} %{buildroot}%{_datadir}/ublue-os/%{_unitdir}/ublue-nvctk-cdi.service
-install -Dm0644 %{SOURCE3} %{buildroot}%{_presetdir}/70-ublue-nvctk-cdi.preset
+install -Dm0644 %{SOURCE2} %{buildroot}%{_presetdir}/70-nvidia-cdi-refresh.preset
+install -Dm0644 %{SOURCE3} %{buildroot}%{_unitdir}/nvidia-cdi-refresh.service.d/10-ublue-ordering.conf
 sed -i 's@enabled=1@enabled=0@g' %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo     %{buildroot}%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_datadir}/selinux/packages/nvidia-container.pp             %{buildroot}%{_datadir}/selinux/packages/nvidia-container.pp
-install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_unitdir}/ublue-nvctk-cdi.service                          %{buildroot}%{_unitdir}/ublue-nvctk-cdi.service
 
 %files
 %if 0%{?rhel}
@@ -68,13 +67,19 @@ install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_unitdir}/ublue-nvctk-cdi.ser
 %endif
 %attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
 %attr(0644,root,root) %{_datadir}/ublue-os/%{_datadir}/selinux/packages/nvidia-container.pp
-%attr(0644,root,root) %{_datadir}/ublue-os/%{_unitdir}/ublue-nvctk-cdi.service
 %attr(0644,root,root) %{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
 %attr(0644,root,root) %{_datadir}/selinux/packages/nvidia-container.pp
-%attr(0644,root,root) %{_unitdir}/ublue-nvctk-cdi.service
-%attr(0644,root,root) %{_presetdir}/70-ublue-nvctk-cdi.preset
+%attr(0644,root,root) %{_presetdir}/70-nvidia-cdi-refresh.preset
+%attr(0644,root,root) %{_unitdir}/nvidia-cdi-refresh.service.d/10-ublue-ordering.conf
 
 %changelog
+* Sat Aug 8 2026 Benjamin Sherman <benjamin@holyarmy.org> - 0.15
+- retire ublue-nvctk-cdi.service in favor of upstream nvidia-cdi-refresh.service
+  (shipped by nvidia-container-toolkit-base >= 1.19.1)
+- add drop-in ordering nvidia-cdi-refresh.service before nvidia-persistenced.service and
+  nvidia-powerd.service, fixing an intermittent boot race (ublue-os/ucore#419) where those
+  units' ConditionPathExistsGlob=/dev/nvidia* could be evaluated before device nodes exist
+
 * Mon Dec 8 2025 Benjamin Sherman <benjamin@holyarmy.org> - 0.14
 - add nvidia-driver version 580 LTS repo support
 - remove sway environment file
