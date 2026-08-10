@@ -64,6 +64,21 @@ fi
 tar -z -x --no-same-owner --no-same-permissions -f "zfs-${ZFS_VERSION}.tar.gz"
 
 cd "/tmp/zfs-${ZFS_VERSION}"
+
+# 2.4.3 predates both Linux 7.1 support (openzfs/zfs#18682) and the zfs_fillpage()
+# mmap underflow fix (openzfs/zfs#18715). Neither has been backported to
+# zfs-2.4-release, so carry them here for 2.4.3 only; later releases are expected
+# to ship them and must not be patched.
+if [[ "${ZFS_VERSION}" == "2.4.3" ]]; then
+    echo "zfs-${ZFS_VERSION} requires patches"
+    for patch in /tmp/patches/*.patch; do
+        echo "PATCH ${patch##*/}"
+        git apply "${patch}"
+    done
+else
+    echo "zfs-${ZFS_VERSION}: no patches required"
+fi
+
 # normalize timestamps so autotools doesn't complain about clock skew
 find . -exec touch -h -r "/tmp/zfs-${ZFS_VERSION}.tar.gz" {} + 2>/dev/null || true
 # ensure rpm spec depends on correct kernel-devel package, else build fails on kernel-longterm kernels

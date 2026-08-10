@@ -11,7 +11,7 @@ zfs:
     linux_experimental: false
   coreos-testing:
     minor_version: "2.4"
-    linux_experimental: true
+    linux_experimental: false
 
 arch-arm-x86: &arch-arm-x86
   architecture:
