@@ -36,10 +36,10 @@ zfs_configure_args := env(
     if zfs_linux_experimental == 'true' { '--enable-linux-experimental' } else { '' }
 )
 
-# Kernel Pin for coreos-stable (Maximum Version Cap)
-# Set to a specific kernel version (e.g., '6.17.12') to cap coreos-stable builds
-# Set to empty string '' for no pin (use latest kernel from upstream fedora-coreos:stable)
-# This gives maintainers a clear, version-controlled view of the current pin state
+# Kernel pin for coreos-stable (maximum version cap)
+# Empty '' follows upstream fedora-coreos:stable.
+# Set to major.minor.patch (e.g. '6.17.12') to hold all coreos-stable targets.
+# When to use this: README.md#pinning-the-coreos-stable-kernel
 coreos_stable_kernel_pin := ''
 
 # Check if valid
