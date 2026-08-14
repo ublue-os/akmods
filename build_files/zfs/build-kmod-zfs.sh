@@ -106,12 +106,65 @@ if [ "$(uname -m)" = "aarch64" ]; then
         echo "SKIP patch to raidz aarch64 neon, already applied upstream"
     fi
 fi
+# Hint at the coreos-stable kernel pin when OpenZFS rejects this kernel.
+# See README.md#pinning-the-coreos-stable-kernel
+suggest_coreos_stable_kernel_pin() {
+    local flavor="${KERNEL_FLAVOR:-}"
+    if [[ ! "${flavor}" =~ coreos-stable ]]; then
+        return 0
+    fi
+
+    local looks_unsupported=false
+    local linux_max=""
+    local kernel_mm=""
+
+    if [[ -f META ]]; then
+        linux_max="$(awk -F: '/^Linux-Maximum:/ { gsub(/[[:space:]]/, "", $2); print $2 }' META)"
+    fi
+    kernel_mm="$(echo "${KERNEL}" | grep -oE '^[0-9]+\.[0-9]+')"
+
+    # Linux-Maximum is major.minor; 7.1.4 does not exceed a declared 7.1.
+    if [[ -n "${linux_max}" && -n "${kernel_mm}" ]]; then
+        if [[ "$(printf '%s\n' "${linux_max}" "${kernel_mm}" | sort -V | tail -n1)" == "${kernel_mm}" && \
+              "${kernel_mm}" != "${linux_max}" ]]; then
+            looks_unsupported=true
+        fi
+    fi
+
+    if [[ -f config.log ]] && grep -Eiq \
+        'not a supported kernel|maximum supported kernel|unsupported Linux kernel|Cannot enable unsupported' \
+        config.log; then
+        looks_unsupported=true
+    fi
+
+    if [[ "${looks_unsupported}" != true ]]; then
+        return 0
+    fi
+
+    cat >&2 <<'EOF'
+
+========================================================================
+This coreos-stable ZFS build failed because the kernel looks newer than
+OpenZFS currently declares supported.
+
+Pinning the last successful coreos-stable kernel unblocks the rest of
+the coreos-stable publication pipeline (common, nvidia, and downstream
+stable images) until an OpenZFS release supports this kernel.
+
+Read this before carrying local ZFS kernel-compat backports:
+https://github.com/ublue-os/akmods/blob/main/README.md#pinning-the-coreos-stable-kernel
+========================================================================
+EOF
+}
+
 if ! ./configure \
         -with-linux="/usr/src/kernels/${KERNEL}/" \
         -with-linux-obj="/usr/src/kernels/${KERNEL}/" \
         "${ZFS_CONFIGURE_ARGS_ARRAY[@]}" \
     || ! make -j "$(nproc)" rpm-utils rpm-kmod; then
-    cat config.log && exit 1
+    cat config.log || true
+    suggest_coreos_stable_kernel_pin
+    exit 1
 fi
 
 # validate RAIDZ math implementations when we've locally patched on aarch64

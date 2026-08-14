@@ -89,6 +89,30 @@ We build both the open and closed drivers from NVIDIA. The open driver is the on
 - NVIDIA Pascal: Quadro: P2000, P4000, P5000, P6000, GP100; Tesla: P100, P40, P4
 - NVIDIA Maxwell: Quadro: K2200, M2000, M4000, M5000, M6000, M6000 24GB; - - Tesla: M60, M40, M6, M4
 
+### Pinning the coreos-stable kernel
+
+`coreos_stable_kernel_pin` in the `Justfile` is a temporary ceiling on the kernel used for **every** `coreos-stable` target (`common`, `nvidia-lts`, `nvidia-open`, `zfs`). It exists so publication can continue when Fedora CoreOS stable ships a kernel that OpenZFS cannot yet build.
+
+Empty `''` means follow upstream `fedora-coreos:stable`. A value like `'6.17.12'` is a `major.minor.patch` cap applied in `get-kernel-version` for `coreos-stable` only. Newer detected kernels are rewritten to that pin plus the detected release suffix, then verified in Koji. Kernels at or below the pin pass through.
+
+Use the pin when **all** of these are true:
+
+1. `coreos-stable` ZFS builds are **reliably** failing, not flaking.
+2. The failure is kernel-version incompatibility: OpenZFS `META` `Linux-Maximum` is below the current CoreOS stable kernel, or `configure` rejects the kernel as unsupported.
+3. Waiting for an OpenZFS release would keep the entire `coreos-stable` check job red, blocking publication of the other targets (and kernel CVE / nvidia updates) to downstream stable images such as `ucore:stable`.
+
+Do **not** use the pin for transient CI or network flakes, failures that are not “kernel newer than OpenZFS supports,” `coreos-testing` (set `zfs.linux_experimental` in `images.yaml` if you intentionally want to track newer kernels), or as a long-term fork of the CoreOS stable kernel. Prefer the pin over inventing local OpenZFS kernel-compat backports when the only goal is to restore publication. Carry an already-upstreamed ZFS fix only when the team has explicitly decided to do that.
+
+To apply the pin:
+
+1. Read the last successful `major.minor.patch` from a published image (`ostree.linux` on `ghcr.io/ublue-os/akmods-zfs:coreos-stable-<ver>`) or from a prior `build/*/KCWD/rpms/cache.json`.
+2. Set `coreos_stable_kernel_pin := 'X.Y.Z'` in the `Justfile`, then commit and merge.
+3. Clear it back to `''` as soon as ZFS builds on the current CoreOS stable kernel.
+
+Downstream stable images keep the older kernel until the pin is cleared. That is intentional: operations continue, but new kernel CVEs in the unpinned CoreOS kernel wait.
+
+A `coreos-stable` ZFS job that fails for this unsupported-kernel reason prints a pointer to this section.
+
 ## Usage
 
 To install one of these kmods, you'll need to install any of their specific dependencies (checkout the `build-prep.sh` and the specific `build-FOO.sh` script for details), and ensure you are on a compatible kernel.
