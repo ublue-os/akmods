@@ -76,15 +76,27 @@ ogc-desktop-build-group-only-x86: &ogc-desktop-build-group-only-x86
       - *akmods-base
       - *akmods-extra
       - *arch-only-x86
-  nvidia-lts:
-    !!merge <<:
-      - *akmods-base
-      - *akmods-nvidia-lts
-      - *arch-only-x86
   nvidia-open:
     !!merge <<:
       - *akmods-base
       - *akmods-nvidia-open
+      - *arch-only-x86
+
+ogc-lts-desktop-build-group-only-x86: &ogc-lts-desktop-build-group-only-x86
+  common:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-common
+      - *arch-only-x86
+  extra:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-extra
+      - *arch-only-x86
+  nvidia-lts:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-nvidia-lts
       - *arch-only-x86
 
 desktop-build-group: &desktop-build-group
@@ -150,6 +162,9 @@ images:
     ogc:
       !!merge <<:
         - *ogc-desktop-build-group-only-x86
+    ogc-lts:
+      !!merge <<:
+        - *ogc-lts-desktop-build-group-only-x86
     coreos-stable:
       !!merge <<:
         - *desktop-build-group
@@ -161,6 +176,9 @@ images:
     ogc:
       !!merge <<:
         - *ogc-desktop-build-group-only-x86
+    ogc-lts:
+      !!merge <<:
+        - *ogc-lts-desktop-build-group-only-x86
     coreos-stable:
       !!merge <<:
         - *desktop-build-group
