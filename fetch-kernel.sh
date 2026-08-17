@@ -33,7 +33,7 @@ case "$kernel_flavor" in
     "longterm"*)
         dnf -y copr enable kwizart/kernel-"${kernel_flavor}"
         ;;
-    "ogc")
+    "ogc"|"ogc-lts")
         ;;
     *)
         echo "unexpected kernel_flavor ${kernel_flavor} for query" >&2
@@ -74,7 +74,7 @@ elif [[ "${kernel_flavor}" =~ "longterm" ]]; then
         kernel-longterm-modules-extra-"${kernel_version}" \
         kernel-longterm-devel-"${kernel_version}" \
         kernel-longterm-devel-matched-"${kernel_version}"
-elif [[ "${kernel_flavor}" == "ogc" ]]; then
+elif [[ "${kernel_flavor}" =~ ^ogc ]]; then
     ogc_image="${OGC_IMAGE:?OGC_IMAGE env var must be set}"
     dnf install -y --setopt=install_weak_deps=False jq skopeo golang-oras
 
@@ -135,7 +135,7 @@ install -Dm644 "${KCWD}"/certs/public_key.crt "$PUBLIC_KEY_PATH"
 install -Dm644 "${KCWD}"/certs/private_key.priv "$PRIVATE_KEY_PATH"
 
 ls -la /
-if [[ "${kernel_flavor}" == "centos-kmodsig" ]] || [[ "${kernel_flavor}" == "ogc" ]]; then
+if [[ "${kernel_flavor}" == "centos-kmodsig" ]] || [[ "${kernel_flavor}" =~ ^ogc ]]; then
   dnf install -y \
       /"${kernel_name}-$kernel_version.rpm" \
       /"${kernel_name}-core-$kernel_version.rpm" \
