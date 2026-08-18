@@ -10,7 +10,7 @@ KCWD := shell('mkdir -p $1 && echo $1', version_cache / 'KCWD')
 KCPATH := shell('mkdir -p $1 && echo $1', env('KCPATH', KCWD / 'rpms'))
 version_json := KCPATH / 'cache.json'
 builder := if kernel_flavor =~ 'centos' { 'quay.io/centos/centos:' + version } else { 'quay.io/fedora/fedora:' + version }
-ogc_tag := if kernel_flavor == 'ogc-lts' { 'lts' } else { '7.2-rc7-ogc7.1' }
+ogc_tag := if kernel_flavor == 'ogc-lts' { 'lts' } else { 'latest' }
 ogc_image := "ghcr.io/opengamingcollective/kernel-packages-fedora:" + ogc_tag + "-fc" + version
 
 
