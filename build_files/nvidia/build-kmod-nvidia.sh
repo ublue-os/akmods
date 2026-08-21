@@ -22,6 +22,57 @@ if [[ "${KMOD_REPO}" =~ "lts" ]]; then
 fi
 DEPRECATED_RELEASE="${DIST}.${ARCH}"
 
+# Applies patches for the current kernel flavor.
+# Patches can be optionally placed in build_files/nvidia/patches/{flavor}/
+# and will be applied alphanumerically if present.
+patch_nvidia_kmod_source() {
+    local patch_dir="/tmp/patches/${KERNEL_FLAVOR}"
+    local topdir="/tmp/nvidia-kmod-patched"
+    local patches=() tarball srcdir patched_srpm patch
+
+    [[ -d "${patch_dir}" ]] || return 0
+    mapfile -t patches < <(find "${patch_dir}" -maxdepth 1 -name '*.patch' | sort)
+    (( ${#patches[@]} )) || return 0
+
+    echo "Applying ${#patches[@]} ${KERNEL_FLAVOR} patch(es) to nvidia-kmod source"
+
+    rm -rf "${topdir}"
+    rpm -i --define "_topdir ${topdir}" /usr/src/akmods/nvidia-kmod.latest
+
+    tarball="$(find "${topdir}/SOURCES" -maxdepth 1 -name 'open-gpu-kernel-modules-*.tar.gz' -print -quit)"
+    if [[ -z "${tarball}" ]]; then
+        echo "ERROR: no open-gpu-kernel-modules tarball in ${topdir}/SOURCES" >&2
+        exit 1
+    fi
+
+    srcdir="$(basename "${tarball}" .tar.gz)"
+
+    pushd "${topdir}/SOURCES" > /dev/null
+    tar xzf "${tarball}"
+    if [[ ! -d "${srcdir}" ]]; then
+        echo "ERROR: ${tarball##*/} did not unpack into ${srcdir}/" >&2
+        exit 1
+    fi
+    for patch in "${patches[@]}"; do
+        echo "  ${patch##*/}"
+        patch -p1 -F0 -d "${srcdir}" < "${patch}"
+    done
+    tar czf "${tarball}.new" "${srcdir}"
+    mv "${tarball}.new" "${tarball}"
+    rm -rf "${srcdir}"
+    popd > /dev/null
+
+    rpmbuild -bs --define "_topdir ${topdir}" "${topdir}/SPECS/nvidia-kmod.spec"
+
+    patched_srpm="$(find "${topdir}/SRPMS" -maxdepth 1 -name 'nvidia-kmod-*.src.rpm' -print -quit)"
+    if [[ -z "${patched_srpm}" ]]; then
+        echo "ERROR: rpmbuild produced no patched SRPM in ${topdir}/SRPMS" >&2
+        exit 1
+    fi
+
+    ln -sfn "${patched_srpm}" /usr/src/akmods/nvidia-kmod.latest
+}
+
 cd /tmp
 
 ### BUILD nvidia
@@ -38,6 +89,8 @@ dnf install -y \
 rpm -qa |grep nvidia
 KERNEL_VERSION="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 NVIDIA_AKMOD_VERSION="$(basename "$(rpm -q "akmod-nvidia" --queryformat '%{VERSION}-%{RELEASE}')" ".${DIST}")"
+
+patch_nvidia_kmod_source
 
 akmods --force --kernels "${KERNEL_VERSION}" --kmod "nvidia"
 

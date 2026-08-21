@@ -1,0 +1,47 @@
+From 6c4728b1f422d2cc6cfe4656defde2b8beb4ed1f Mon Sep 17 00:00:00 2001
+From: Matthew Schwartz <matthew.schwartz@linux.dev>
+Date: Tue, 18 Aug 2026 15:56:23 -0700
+Subject: [PATCH] Honor RMDisableNoncontigAlloc in the PMA vidmem path
+
+The RMDisableNoncontigAlloc registry key clears
+bAllowNoncontiguousAllocation, but the flag is only consulted by
+vidmemAllocResources() and heapAlloc() on the legacy heap path.
+_vidmemPmaAllocate() decides contiguity from the client's PHYSICALITY
+attribute alone and silently retries a failed contiguous allocation as
+noncontiguous, so the key has no effect on PMA-managed framebuffer
+heaps, which covers every modern GPU.
+
+Consult the flag in the PMA path as well. When noncontiguous
+allocation is disabled, allocate contiguously regardless of the
+requested physicality and skip the noncontiguous retry, so the
+allocation fails cleanly instead of silently degrading.
+---
+ src/nvidia/src/kernel/mem_mgr/video_mem.c | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/src/nvidia/src/kernel/mem_mgr/video_mem.c b/src/nvidia/src/kernel/mem_mgr/video_mem.c
+index b8098d3df0..1c1e0decc5 100644
+--- a/src/nvidia/src/kernel/mem_mgr/video_mem.c
++++ b/src/nvidia/src/kernel/mem_mgr/video_mem.c
+@@ -161,6 +161,12 @@ _vidmemPmaAllocate
+                                 pAllocData->attr);
+     }
+ 
++    // RMDisableNoncontigAlloc applies to PMA-managed heaps too, not just heapAlloc().
++    if (!pMemoryManager->bAllowNoncontiguousAllocation)
++    {
++        bContig = NV_TRUE;
++    }
++
+     NV_PRINTF(LEVEL_INFO, "PMA input\n");
+     NV_PRINTF(LEVEL_INFO, "          Owner: 0x%x\n", pAllocData->owner);
+     NV_PRINTF(LEVEL_INFO, "        hMemory: 0x%x\n", pAllocRequest->hMemory);
+@@ -324,7 +330,7 @@ _vidmemPmaAllocate
+         portMemFree(pAllocRequest->pPmaAllocInfo[subdevInst]);
+         pAllocRequest->pPmaAllocInfo[subdevInst] = NULL;
+ 
+-        if (bContig)
++        if (bContig && pMemoryManager->bAllowNoncontiguousAllocation)
+         {
+             if (FLD_TEST_DRF(OS32, _ATTR, _PHYSICALITY, _ALLOW_NONCONTIGUOUS, pAllocData->attr) ||
+                 (FLD_TEST_DRF(OS32, _ATTR, _PHYSICALITY, _DEFAULT, pAllocData->attr) &&
