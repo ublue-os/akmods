@@ -26,6 +26,7 @@ Builds also run for different kernels:
 - `Centos` - Mainline Centos Kernel
 - `Longterm-6.18` - Fedora Kernel on Kernel 6.18 LTS
 - `ogc` - [Open Gaming Collective](https://github.com/OpenGamingCollective/kernel-packages-fedora) kernel
+- `ogc-el10` - [Open Gaming Collective](https://github.com/OpenGamingCollective/kernel-packages-fedora) kernel
 - `ogc-lts` - Open Gaming Collective kernel, LTS branch (`:lts` tag)
 
 See `images.yaml` for which akmods packages are built for each Kernel
