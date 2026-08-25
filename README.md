@@ -74,9 +74,13 @@ The `nvidia` and `nvidia-open` images contains
 
 #### EL10 package availability (`ogc-el10`)
 
-Fedora-flavored builds pull each module from the sources listed in the table above. On `ogc-el10` (CentOS Stream 10 userspace) those upstreams do not publish `akmod-*.el10` packages: RPMFusion's EL repositories ship only kABI-tracked `kmod-*` packages, and Terra / negativo17 have no EL10 chroots.
+Fedora-flavored builds pull each module from the sources listed in the table above. On `ogc-el10` (CentOS Stream 10 userspace) most of those upstreams are consumed through their EL variants instead:
 
-Instead, all `common` and `extra` modules on `ogc-el10` are sourced from the `epel-10-x86_64` chroot of our [ublue-os/akmods COPR](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/). Modules without an EL10 build yet are skipped cleanly during image builds and start building automatically as soon as they are packaged there.
+- [Terra](https://github.com/terrapkg/packages) publishes an `el10` branch; its repo is enabled during prep and provides v4l2loopback, wl, xone, xpadneo, hid-fanatecff, hid-tmff2, new-lg4ff, sc0710 and t150-driver.
+- negativo17 provides `epel-multimedia`, staged under the same filename the Fedora build uses; it provides evdi (and is a secondary source for xpadneo/xone).
+- The remaining modules (`framework-laptop`, `openrazer`, `vhba`, `gcadapter_oc`, `ryzen-smu`, `kvmfr`, `system76-driver`, `system76-io`) have no EL10 packaging anywhere yet and are sourced from the `epel-10-x86_64` chroot of our [ublue-os/akmods COPR](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/) as they get packaged there. `nct6687d` and `zenergy` currently ship DKMS-only on Terra's el10 and wait on akmod packaging as well.
+
+Modules without an available EL10 package are skipped cleanly during image builds and start building automatically as soon as they appear in an enabled repository.
 
 ## Notes
 
