@@ -13,7 +13,7 @@ on:
     paths-ignore:
       - '**.md'
   schedule:
-    - cron: '18 0 * * *'  # 0018 UTC everyday
+    - cron: '18 0 * * *'  # 0011 UTC everyday
   workflow_dispatch:
 jobs:
   cache_kernel_ogc-el10_10:
@@ -26,6 +26,40 @@ jobs:
       packages: write
     with:
       architecture: '["x86_64"]'
+      kernel_flavor: ogc-el10
+      version: 10
+  build-ogc-el10_10_common:
+    name: Build common ogc-el10 (10)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      attestations: write
+      contents: read
+      id-token: write
+      packages: write
+    needs: cache_kernel_ogc-el10_10
+    with:
+      akmods_target: common
+      architecture: '["x86_64"]'
+      kernel_cache_key: ${{ needs.cache_kernel_ogc-el10_10.outputs.KCKEY }}
+      kernel_flavor: ogc-el10
+      version: 10
+  build-ogc-el10_10_extra:
+    name: Build extra ogc-el10 (10)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      attestations: write
+      contents: read
+      id-token: write
+      packages: write
+    needs: cache_kernel_ogc-el10_10
+    with:
+      akmods_target: extra
+      architecture: '["x86_64"]'
+      kernel_cache_key: ${{ needs.cache_kernel_ogc-el10_10.outputs.KCKEY }}
       kernel_flavor: ogc-el10
       version: 10
   build-ogc-el10_10_nvidia-open:
@@ -67,7 +101,7 @@ jobs:
     permissions:
       actions: read
       contents: read
-    needs: [build-ogc-el10_10_nvidia-open,build-ogc-el10_10_zfs]
+    needs: [build-ogc-el10_10_common,build-ogc-el10_10_extra,build-ogc-el10_10_nvidia-open,build-ogc-el10_10_zfs]
     runs-on: ubuntu-24.04
     if: always()
     steps:
