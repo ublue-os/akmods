@@ -531,6 +531,19 @@ generate-workflows:
             exit 1
         fi
 
+        # Preserve each flavor's already-assigned cron minute across regenerations so
+        # unrelated images.yaml/template edits don't produce spurious cron diffs. A
+        # flavor only gets a freshly randomized minute if it has no prior generated
+        # file (e.g. it's brand new, or a previous run was interrupted mid-rm).
+        declare -A cron_minutes=()
+        for f in ./.github/workflows/build-akmods-*.yml; do
+            [[ -e "$f" ]] || continue
+            flavor="$(basename "$f" .yml)"
+            flavor="${flavor#build-akmods-}"
+            minute=$(sed -n "s/.*cron: '\([0-9]\{1,2\}\) .*/\1/p" "$f")
+            [[ -n "$minute" ]] && cron_minutes[$flavor]="$minute"
+        done
+
         rm -f "./.github/workflows/build"*".yml"
 
         declare -A images=()
@@ -561,7 +574,8 @@ generate-workflows:
     # Generate the workflow by running `just generate-workflows` at git root
     # Modify the inputs in workflow-templates
     EOF
-            sed "s/AKMODs/${i^^} akmods/;s/05/$(printf '%02d' $(( RANDOM % 30)))/g" ./workflow-templates/workflow.yaml.in
+            minute="${cron_minutes[$i]:-$(printf '%02d' $(( RANDOM % 30 )))}"
+            sed "s/AKMODs/${i^^} akmods/;s/%%CRON_MINUTE%%/$minute/g" ./workflow-templates/workflow.yaml.in
 
             echo "jobs:"
             for j in "${!workflows[@]}"; do

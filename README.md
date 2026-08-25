@@ -243,6 +243,20 @@ All build targets are defined in the `images.yaml` file. This is where the top l
 yq 'explode(.).images' images.yaml
 ```
 
+### Regenerating GitHub Workflows
+
+The `.github/workflows/build-akmods-*.yml` files are generated from `images.yaml` and the templates in `workflow-templates/` (`workflow.yaml.in`, `cache_kernel.yaml.in`, `job.yaml.in`, `check-status.yaml.in`) by running:
+
+```bash
+just generate-workflows
+```
+
+Run this and commit the resulting diff whenever you edit `images.yaml` (adding/removing a kernel, flavor, or target) or anything in `workflow-templates/`. Nothing in CI does this for you.
+
+Never hand-edit files under `.github/workflows/build-akmods-*.yml` directly — they're regenerated from the templates above, and manual edits will be silently discarded the next time someone runs `just generate-workflows`.
+
+Each flavor's daily build is scheduled at a staggered UTC minute assigned once and preserved across regenerations, so an unrelated `images.yaml` edit shouldn't produce cron diffs unless that flavor's generated file was missing beforehand.
+
 ### Adding Kernels and KMODs
 
 Generally speaking, Kernels are only added if they will be used internally to Universal Blue.
