@@ -117,6 +117,14 @@ Downstream stable images keep the older kernel until the pin is cleared. That is
 
 A `coreos-stable` ZFS job that fails for this unsupported-kernel reason prints a pointer to this section.
 
+### Pinning the ogc-el10 kernel
+
+`ogc_el10_kernel_pin` in the `Justfile` holds **every** `ogc-el10` target (`nvidia-open`, `zfs`) on a specific Open Gaming Collective kernel. It exists so publication can continue when the OGC `latest-el10` artifact ships a kernel that OpenZFS cannot yet build.
+
+Empty `''` means follow upstream `ghcr.io/opengamingcollective/kernel-packages-fedora:latest-el10`. A value like `'7.2-ogc6.1-el10'` selects that exact upstream image tag instead. Unlike `coreos_stable_kernel_pin` (a version cap, because CoreOS images only ever contain their current kernel), OGC keeps old kernels as immutable tags — so this is an exact selector and builds remain reproducible while pinned.
+
+Use the pin when OGC ZFS builds are reliably failing due to kernel-version incompatibility (OpenZFS `META` `Linux-Maximum` below the new OGC kernel), not for transient flakes. Clear it back to `''` as soon as OpenZFS supports the current OGC kernel.
+
 ## Usage
 
 To install one of these kmods, you'll need to install any of their specific dependencies (checkout the `build-prep.sh` and the specific `build-FOO.sh` script for details), and ensure you are on a compatible kernel.

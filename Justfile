@@ -10,9 +10,18 @@ KCWD := shell('mkdir -p $1 && echo $1', version_cache / 'KCWD')
 KCPATH := shell('mkdir -p $1 && echo $1', env('KCPATH', KCWD / 'rpms'))
 version_json := KCPATH / 'cache.json'
 builder := if kernel_flavor =~ '(centos|ogc-el10)' { 'quay.io/centos/centos:' + version } else { 'quay.io/fedora/fedora:' + version }
+# Kernel pin for ogc-el10
+# Empty '' follows upstream ghcr.io/opengamingcollective/kernel-packages-fedora:latest-el10.
+# Set to an exact upstream image tag (e.g. '7.2-ogc6.1-el10') to hold all ogc-el10 targets on that kernel.
+# Unlike the coreos-stable pin, OGC keeps old kernels as immutable tags, so this is an exact selector.
+# When to use this: README.md#pinning-the-ogc-el10-kernel
+ogc_el10_kernel_pin := ''
 ogc_tag := if kernel_flavor == 'ogc-lts' { 'lts' } else { 'latest' }
 ogc_suffix := if kernel_flavor == 'ogc-el10' { 'el10' } else { 'fc' + version }
-ogc_image := "ghcr.io/opengamingcollective/kernel-packages-fedora:" + ogc_tag + "-" + ogc_suffix
+ogc_rolling_ref := ogc_tag + '-' + ogc_suffix
+ogc_pinned_ref := if ogc_el10_kernel_pin =~ '^.+' { ogc_el10_kernel_pin } else { ogc_rolling_ref }
+ogc_ref := if kernel_flavor =~ '^ogc-el10$' { ogc_pinned_ref } else { ogc_rolling_ref }
+ogc_image := "ghcr.io/opengamingcollective/kernel-packages-fedora:" + ogc_ref
 
 
 # Inputs
