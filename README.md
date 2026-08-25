@@ -181,6 +181,27 @@ Provenance is stored in GitHub's attestations API. It is no longer published as 
 
 You can build these akmods locally with our test keys using the included `Justfile`. We strongly recommend using the provided devcontainer which contains all dependencies for building this project.
 
+### Using the Devcontainer
+
+The repo's `.devcontainer.json` points at `ghcr.io/ublue-os/devcontainer:latest`, a public prebuilt image with `just`, `podman`, `yq`, `jq`, and everything else the `Justfile` needs, so you don't have to install build dependencies on your host. Pulling it requires no authentication.
+
+**With VS Code:** install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers), open this repo, then run "Dev Containers: Reopen in Container" from the Command Palette. Once it's open, use the integrated terminal exactly as you would locally (e.g. `just build`).
+
+**From the command line (no VS Code):** install the [devcontainer CLI](https://github.com/devcontainers/cli) (`npm install -g @devcontainers/cli`), then start/exec into the container with Podman as the backend. A few aliases make this painless:
+
+```bash
+alias dcup='devcontainer up --docker-path=podman --workspace-folder .'
+alias dcexec='devcontainer exec --docker-path=podman --workspace-folder .'
+alias dcjust='devcontainer exec --docker-path=podman --workspace-folder . just'
+alias dcpodman='devcontainer exec --docker-path=podman --workspace-folder . podman'
+```
+
+```bash
+dcup                 # build and start the devcontainer (run once, or after changing .devcontainer.json)
+dcjust build         # run `just build` inside the devcontainer
+dcpodman images      # run an arbitrary podman command inside the devcontainer
+```
+
 ### How to Use the Justfile
 
 To build an akmods package, run the following:
