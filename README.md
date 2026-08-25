@@ -26,7 +26,7 @@ Builds also run for different kernels:
 - `Centos` - Mainline Centos Kernel
 - `Longterm-6.18` - Fedora Kernel on Kernel 6.18 LTS
 - `ogc` - [Open Gaming Collective](https://github.com/OpenGamingCollective/kernel-packages-fedora) kernel
-- `ogc-el10` - [Open Gaming Collective](https://github.com/OpenGamingCollective/kernel-packages-fedora) kernel
+- `ogc-el10` - [Open Gaming Collective](https://github.com/OpenGamingCollective/kernel-packages-fedora) kernel on CentOS Stream 10
 - `ogc-lts` - Open Gaming Collective kernel, LTS branch (`:lts` tag)
 
 See `images.yaml` for which akmods packages are built for each Kernel
@@ -71,6 +71,12 @@ The `nvidia` and `nvidia-open` images contains
 | extra | [zenergy](https://github.com/BoukeHaarsma23/zenern) | AMD Zen energy monitoring driver | [Terra](https://github.com/terrapkg/packages) |
 | nvidia-open | [nvidia](https://negativo17.org/nvidia-driver/) | nvidia-open GPU drivers | [negativo17 - fedora-nvidia](https://negativo17.org/) |
 | zfs | [zfs](https://github.com/openzfs/zfs) | OpenZFS advanced file system and volume manager | [zfs](https://github.com/openzfs/zfs) |
+
+#### EL10 package availability (`ogc-el10`)
+
+Fedora-flavored builds pull each module from the sources listed in the table above. On `ogc-el10` (CentOS Stream 10 userspace) those upstreams do not publish `akmod-*.el10` packages: RPMFusion's EL repositories ship only kABI-tracked `kmod-*` packages, and Terra / negativo17 have no EL10 chroots.
+
+Instead, all `common` and `extra` modules on `ogc-el10` are sourced from the `epel-10-x86_64` chroot of our [ublue-os/akmods COPR](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/). Modules without an EL10 build yet are skipped cleanly during image builds and start building automatically as soon as they are packaged there.
 
 ## Notes
 
