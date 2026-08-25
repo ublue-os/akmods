@@ -33,6 +33,24 @@ repo_gpgcheck=0
 enabled=1
 enabled_metadata=1
 EOF
+
+    # stage the EL variant of negativo17 multimedia under the same filename the
+    # Fedora build ADDs; scripts and the addons spec consume it unmodified
+    curl -LsSf https://negativo17.org/repos/epel-multimedia.repo \
+        -o /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo
+
+    # enable Terra EL for modules it packages for CentOS Stream (gaming/peripherals)
+    # repo_gpgcheck=0: dnf5 cannot interactively confirm the repomd key in image
+    # builds; package integrity is still enforced via gpgcheck against the
+    # Terra EL key imported below
+    curl -LsSf https://raw.githubusercontent.com/terrapkg/packages/el${RELEASE}/anda/terra/release/terra.repo \
+    | sed 's/^repo_gpgcheck=1/repo_gpgcheck=0/' \
+        > /etc/yum.repos.d/terra.repo
+    curl -LsSf https://raw.githubusercontent.com/terrapkg/packages/el${RELEASE}/anda/terra/gpg-keys/RPM-GPG-KEY-terrael${RELEASE} \
+        -o /etc/pki/rpm-gpg/RPM-GPG-KEY-terrael${RELEASE}
+    rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-terrael${RELEASE}
+    # also stage it where extra kmod scripts copy their repo files from
+    cp /etc/yum.repos.d/terra.repo /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/terra.repo
 else
     echo "Building for Fedora"
     RELEASE="$(rpm -E '%fedora')"

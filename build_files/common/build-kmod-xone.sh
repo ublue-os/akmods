@@ -10,7 +10,7 @@ DIST="$(rpm -E '%{dist}')"
 if [[ "${DIST}" == .el* ]]; then
     # EL: modules come from the distro-matched ublue akmods COPR; skip cleanly until packaged there
     cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo /etc/yum.repos.d/ 2>/dev/null || true
-    if [[ -z "$(dnf -q repoquery --available "akmod-xone-*${DIST}.${ARCH}" || true)" ]]; then
+    if [[ -z "$(dnf -q --assumeyes repoquery --available "akmod-xone-*${DIST}.${ARCH}" 2>/dev/null || true)" ]]; then
         echo "SKIPPED: xone (no package for ${DIST})"
         exit 0
     fi
@@ -19,8 +19,10 @@ fi
 cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo /etc/yum.repos.d/
 
 ### BUILD xone (succeed or fail-fast with debug output)
-dnf install -y \
-    akmod-xone-*"${DIST}."${ARCH}"
+# Terra also ships -nightly variants whose kmod-common conflicts with the
+# stable one; keep the glob from pulling them in
+dnf install -y --exclude "akmod-*-nightly*" \
+    akmod-xone-*"${DIST}.${ARCH}"
 akmods --force --kernels "${KERNEL}" --kmod xone
 modinfo /usr/lib/modules/"${KERNEL}"/extra/xone/xone_{dongle,gip,gip_gamepad,gip_headset,gip_chatpad,gip_madcatz_strat,gip_madcatz_glam,gip_pdp_jaguar}.ko.xz > /dev/null \
 || (find /var/cache/akmods/xone/ -name \*.log -print -exec cat {} \; && exit 1)

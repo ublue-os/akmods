@@ -10,7 +10,7 @@ DIST="$(rpm -E '%{dist}')"
 if [[ "${DIST}" == .el* ]]; then
     # EL: modules come from the distro-matched ublue akmods COPR; skip cleanly until packaged there
     cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo /etc/yum.repos.d/ 2>/dev/null || true
-    if [[ -z "$(dnf -q repoquery --available "akmod-wl-*${DIST}.${ARCH}" || true)" ]]; then
+    if [[ -z "$(dnf -q --assumeyes repoquery --available "akmod-wl-*${DIST}.${ARCH}" 2>/dev/null || true)" ]]; then
         echo "SKIPPED: wl (no package for ${DIST})"
         exit 0
     fi

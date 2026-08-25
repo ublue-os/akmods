@@ -2,6 +2,9 @@
 
 set ${CI:+-x} -euo pipefail
 
+# tolerate flavors with zero modules (nothing to verify)
+shopt -s nullglob
+
 #shellcheck disable=SC1091
 source /tmp/info.sh
 
