@@ -17,7 +17,7 @@ build_tag="${KERNEL_BUILD_TAG:-latest}"
 ARCH=$(uname -m)
 
 dnf install -y --setopt=install_weak_deps=False dnf-plugins-core openssl
-if [[ "$kernel_flavor" =~ "centos" ]]; then
+if [[ "$kernel_flavor" =~ centos|ogc-el10 ]]; then
     CENTOS_VER=$(rpm -E %centos)
     dnf config-manager --set-enabled crb
     dnf -y install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${CENTOS_VER}.noarch.rpm"
@@ -33,7 +33,7 @@ case "$kernel_flavor" in
     "longterm"*)
         dnf -y copr enable kwizart/kernel-"${kernel_flavor}"
         ;;
-    "ogc"|"ogc-lts")
+    "ogc"|"ogc-lts"|"ogc-el10")
         ;;
     *)
         echo "unexpected kernel_flavor ${kernel_flavor} for query" >&2
@@ -76,7 +76,12 @@ elif [[ "${kernel_flavor}" =~ "longterm" ]]; then
         kernel-longterm-devel-matched-"${kernel_version}"
 elif [[ "${kernel_flavor}" =~ ^ogc ]]; then
     ogc_image="${OGC_IMAGE:?OGC_IMAGE env var must be set}"
-    dnf install -y --setopt=install_weak_deps=False jq skopeo golang-oras
+    dnf install -y --setopt=install_weak_deps=False jq skopeo
+    if [[ "${kernel_flavor}" =~ centos|ogc-el10 ]] || ! dnf -y install --setopt=install_weak_deps=False golang-oras; then
+        # oras is not packaged for CentOS; install the upstream release binary
+        oras_arch=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
+        curl -#fL "https://github.com/oras-project/oras/releases/download/v1.3.3/oras_1.3.3_linux_${oras_arch}.tar.gz" | tar -xz -C /usr/local/bin oras
+    fi
 
     # Parse manifest for kernel RPM filenames
     manifest=$(skopeo inspect --raw "docker://${ogc_image}")

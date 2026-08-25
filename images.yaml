@@ -99,6 +99,28 @@ ogc-lts-desktop-build-group-only-x86: &ogc-lts-desktop-build-group-only-x86
       - *akmods-nvidia-lts
       - *arch-only-x86
 
+ogc-el10-build-group-only-x86: &ogc-el10-build-group-only-x86
+  common:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-common
+      - *arch-only-x86
+  extra:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-extra
+      - *arch-only-x86
+  nvidia-open:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-nvidia-open
+      - *arch-only-x86
+  zfs:
+    !!merge <<:
+      - *akmods-base
+      - *akmods-zfs
+      - *arch-only-x86
+
 desktop-build-group: &desktop-build-group
   common:
     !!merge <<:
@@ -155,6 +177,9 @@ images:
     centos:
       !!merge <<:
         - *server-build-group
+    ogc-el10:
+      !!merge <<:
+        - *ogc-el10-build-group-only-x86
   43:
     main:
       !!merge <<:

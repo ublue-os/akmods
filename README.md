@@ -26,6 +26,7 @@ Builds also run for different kernels:
 - `Centos` - Mainline Centos Kernel
 - `Longterm-6.18` - Fedora Kernel on Kernel 6.18 LTS
 - `ogc` - [Open Gaming Collective](https://github.com/OpenGamingCollective/kernel-packages-fedora) kernel
+- `ogc-el10` - [Open Gaming Collective](https://github.com/OpenGamingCollective/kernel-packages-fedora) kernel on CentOS Stream 10
 - `ogc-lts` - Open Gaming Collective kernel, LTS branch (`:lts` tag)
 
 See `images.yaml` for which akmods packages are built for each Kernel
@@ -71,6 +72,16 @@ The `nvidia` and `nvidia-open` images contains
 | nvidia-open | [nvidia](https://negativo17.org/nvidia-driver/) | nvidia-open GPU drivers | [negativo17 - fedora-nvidia](https://negativo17.org/) |
 | zfs | [zfs](https://github.com/openzfs/zfs) | OpenZFS advanced file system and volume manager | [zfs](https://github.com/openzfs/zfs) |
 
+#### EL10 package availability (`ogc-el10`)
+
+Fedora-flavored builds pull each module from the sources listed in the table above. On `ogc-el10` (CentOS Stream 10 userspace) most of those upstreams are consumed through their EL variants instead:
+
+- [Terra](https://github.com/terrapkg/packages) publishes an `el10` branch; its repo is enabled during prep and provides v4l2loopback, wl, xone, xpadneo, hid-fanatecff, hid-tmff2, new-lg4ff, sc0710 and t150-driver.
+- negativo17 provides `epel-multimedia`, staged under the same filename the Fedora build uses; it provides evdi (and is a secondary source for xpadneo/xone).
+- The remaining modules (`framework-laptop`, `openrazer`, `vhba`, `gcadapter_oc`, `ryzen-smu`, `kvmfr`, `system76-driver`, `system76-io`) have no EL10 packaging anywhere yet and are sourced from the `epel-10-x86_64` chroot of our [ublue-os/akmods COPR](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/) as they get packaged there. `nct6687d` and `zenergy` currently ship DKMS-only on Terra's el10 and wait on akmod packaging as well.
+
+Modules without an available EL10 package are skipped cleanly during image builds and start building automatically as soon as they appear in an enabled repository.
+
 ## Notes
 
 ### NVIDIA Hardware Support
@@ -115,6 +126,14 @@ To apply the pin:
 Downstream stable images keep the older kernel until the pin is cleared. That is intentional: operations continue, but new kernel CVEs in the unpinned CoreOS kernel wait.
 
 A `coreos-stable` ZFS job that fails for this unsupported-kernel reason prints a pointer to this section.
+
+### Pinning the ogc-el10 kernel
+
+`ogc_el10_kernel_pin` in the `Justfile` holds **every** `ogc-el10` target (`nvidia-open`, `zfs`) on a specific Open Gaming Collective kernel. It exists so publication can continue when the OGC `latest-el10` artifact ships a kernel that OpenZFS cannot yet build.
+
+Empty `''` means follow upstream `ghcr.io/opengamingcollective/kernel-packages-fedora:latest-el10`. A value like `'7.2-ogc6.1-el10'` selects that exact upstream image tag instead. Unlike `coreos_stable_kernel_pin` (a version cap, because CoreOS images only ever contain their current kernel), OGC keeps old kernels as immutable tags — so this is an exact selector and builds remain reproducible while pinned.
+
+Use the pin when OGC ZFS builds are reliably failing due to kernel-version incompatibility (OpenZFS `META` `Linux-Maximum` below the new OGC kernel), not for transient flakes. Clear it back to `''` as soon as OpenZFS supports the current OGC kernel.
 
 ## Usage
 

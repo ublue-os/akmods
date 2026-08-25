@@ -8,7 +8,7 @@ DRIVER_EVR="$(dnf repoquery --qf '%{EPOCH}:%{VERSION}-%{RELEASE}\n' akmod-nvidia
 DRIVER_VERSION="${DRIVER_EVR#*:}"
 DRIVER_VERSION="${DRIVER_VERSION%-*}"
 
-if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
+if [[ "${KERNEL_FLAVOR}" =~ centos|ogc-el10 ]]; then
     echo "Building for CentOS"
     NVIDIA_EXTRA_PKGS=()
 else
@@ -35,7 +35,7 @@ if dnf repoquery --qf '%{VERSION}\n' nvidia-driver-common | grep -qxF "${DRIVER_
     NVIDIA_DRIVER_COMMON_PKGS+=(
         "nvidia-driver-common"
     )
-    if [[ "${ARCH}" = "x86_64" && ! "${KERNEL_FLAVOR}" =~ "centos" ]] && \
+    if [[ "${ARCH}" = "x86_64" && ! "${KERNEL_FLAVOR}" =~ centos|ogc-el10 ]] && \
         dnf repoquery --qf '%{VERSION}\n' nvidia-driver-common.i686 | grep -qxF "${DRIVER_VERSION}"; then
         NVIDIA_EXTRA_PKGS+=(
             "nvidia-driver-common.i686"
@@ -48,7 +48,7 @@ else
         "libnvidia-gpucomp"
         "libnvidia-ml"
     )
-    if [[ "${ARCH}" = "x86_64" && ! "${KERNEL_FLAVOR}" =~ "centos" ]]; then
+    if [[ "${ARCH}" = "x86_64" && ! "${KERNEL_FLAVOR}" =~ centos|ogc-el10 ]]; then
         NVIDIA_EXTRA_PKGS+=(
             "libnvidia-gpucomp.i686"
             "libnvidia-ml.i686"

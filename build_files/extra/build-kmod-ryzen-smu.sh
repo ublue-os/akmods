@@ -5,15 +5,20 @@ set ${CI:+-x} -euo pipefail
 ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
+DIST="$(rpm -E '%{dist}')"
 
 cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/terra.repo /etc/yum.repos.d/
-curl -LsSf -o /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}" \
-    "https://raw.githubusercontent.com/terrapkg/packages/f${RELEASE}/anda/terra/gpg-keys/RPM-GPG-KEY-terra${RELEASE}"
-rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}"
+# Fedora: import the Terra key for this release; EL builds already have
+# the Terra EL key imported by build-prep.sh
+if [[ "${DIST}" != .el* ]]; then
+    curl -LsSf -o /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}" \
+        "https://raw.githubusercontent.com/terrapkg/packages/f${RELEASE}/anda/terra/gpg-keys/RPM-GPG-KEY-terra${RELEASE}"
+    rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}"
+fi
 
 ### BUILD ryzen-smu (succeed or fail-fast with debug output)
 dnf install -y \
-    akmod-ryzen_smu-*.fc"${RELEASE}"."${ARCH}"
+    akmod-ryzen_smu-*"${DIST}.${ARCH}"
 akmods --force --kernels "${KERNEL}" --kmod ryzen_smu
 modinfo /usr/lib/modules/"${KERNEL}"/extra/ryzen_smu/ryzen_smu.ko.xz > /dev/null \
 || (find /var/cache/akmods/ryzen_smu/ -name \*.log -print -exec cat {} \; && exit 1)

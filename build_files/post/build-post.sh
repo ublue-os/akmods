@@ -3,12 +3,14 @@
 set ${CI:+-x} -euo pipefail
 
 # Ensure packages get copied to /var/cache/rpms
-pushd /root/rpmbuild/RPMS/"$(uname -m)"
-mapfile -t RPMS < <(find /root/rpmbuild/RPMS/"$(uname -m)"/ -type f -name \*.rpm)
-for RPM in "${RPMS[@]}"; do
-    cp "${RPM}" /var/cache/rpms/kmods/
-done
-popd
+if compgen -G "/root/rpmbuild/RPMS/$(uname -m)/*.rpm" > /dev/null; then
+    pushd /root/rpmbuild/RPMS/"$(uname -m)"
+    mapfile -t RPMS < <(find /root/rpmbuild/RPMS/"$(uname -m)"/ -type f -name \*.rpm)
+    for RPM in "${RPMS[@]}"; do
+        cp "${RPM}" /var/cache/rpms/kmods/
+    done
+    popd
+fi
 
 # Remove kernel version from kmod package names
 # FIXME: The sed is a gross hack, maybe PR upstream?

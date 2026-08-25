@@ -10,13 +10,47 @@ pushd /tmp/kernel_cache
 KERNEL_VERSION=$(find "$KERNEL_NAME"-*.rpm | grep "$(uname -m)" | grep -P "$KERNEL_NAME-\d+\.\d+(\.\d+)?-\w+.*$(rpm -E '%{dist}')" | sed -E "s/$KERNEL_NAME-//;s/\.rpm//")
 popd
 
-if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
+if [[ "${KERNEL_FLAVOR}" =~ centos|ogc-el10 ]]; then
     echo "Building for CentOS"
     RELEASE="$(rpm -E '%centos')"
 
     mkdir -p /var/roothome
     PREP_RPMS+=("https://dl.fedoraproject.org/pub/epel/epel-release-latest-${RELEASE}.noarch.rpm")
     dnf config-manager --set-enabled crb
+
+    # stage a distro-matched ublue akmods COPR repo so the addons RPM and common
+    # kmods can consume EL packages as soon as they are published to the chroot
+    mkdir -p /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES
+    cat > /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo <<EOF
+[copr:copr.fedorainfracloud.org:ublue-os:akmods]
+name=COPR (ublue-os/akmods)
+baseurl=https://download.copr.fedorainfracloud.org/results/ublue-os/akmods/epel-${RELEASE}-$(rpm -E '%{_arch}')/
+type=rpm-md
+skip_if_unavailable=True
+gpgcheck=1
+gpgkey=https://download.copr.fedorainfracloud.org/results/ublue-os/akmods/pubkey.gpg
+repo_gpgcheck=0
+enabled=1
+enabled_metadata=1
+EOF
+
+    # stage the EL variant of negativo17 multimedia under the same filename the
+    # Fedora build ADDs; scripts and the addons spec consume it unmodified
+    curl -LsSf https://negativo17.org/repos/epel-multimedia.repo \
+        -o /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.repo
+
+    # enable Terra EL for modules it packages for CentOS Stream (gaming/peripherals)
+    # repo_gpgcheck=0: dnf5 cannot interactively confirm the repomd key in image
+    # builds; package integrity is still enforced via gpgcheck against the
+    # Terra EL key imported below
+    curl -LsSf "https://raw.githubusercontent.com/terrapkg/packages/el${RELEASE}/anda/terra/release/terra.repo" \
+    | sed 's/^repo_gpgcheck=1/repo_gpgcheck=0/' \
+        > /etc/yum.repos.d/terra.repo
+    curl -LsSf "https://raw.githubusercontent.com/terrapkg/packages/el${RELEASE}/anda/terra/gpg-keys/RPM-GPG-KEY-terrael${RELEASE}" \
+        -o "/etc/pki/rpm-gpg/RPM-GPG-KEY-terrael${RELEASE}"
+    rpmkeys --import "/etc/pki/rpm-gpg/RPM-GPG-KEY-terrael${RELEASE}"
+    # also stage it where extra kmod scripts copy their repo files from
+    cp /etc/yum.repos.d/terra.repo /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/terra.repo
 else
     echo "Building for Fedora"
     RELEASE="$(rpm -E '%fedora')"
@@ -79,7 +113,7 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
 fi
 
 # This is for ZFS more than CentOS|CoreOS
-if [[ "${KERNEL_FLAVOR}" =~ "centos" ]] || [[ "${KERNEL_FLAVOR}" =~ "coreos" ]] || [[ "${KERNEL_FLAVOR}" =~ "longterm" ]]; then
+if [[ "${KERNEL_FLAVOR}" =~ centos|ogc-el10|coreos|longterm ]]; then
     mkdir -p "$(dirname /lib/modules/"${KERNEL_VERSION}"/build/certs/signing_key.x509)"
     install -Dm644 /tmp/certs/public_key.der /lib/modules/"${KERNEL_VERSION}"/build/certs/signing_key.x509
     install -Dm644 /tmp/certs/private_key.priv /lib/modules/"${KERNEL_VERSION}"/build/certs/signing_key.pem
