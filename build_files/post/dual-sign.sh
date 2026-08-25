@@ -2,6 +2,10 @@
 
 set ${CI:+-x} -euo pipefail
 
+# flavors may legitimately have zero modules (e.g. EL before packages are published);
+# without nullglob the *.ko* loops would iterate over the literal pattern and fail
+shopt -s nullglob
+
 if [[ "${DUAL_SIGN}" != "true" ]]; then
     echo "Not Dual Signing..."
     exit 0
@@ -47,22 +51,24 @@ popd
 rm -rf /usr/lib/modules/"${KERNEL}"/extra
 
 # on CentOS, akmods/rpmbuild seems to mangle kernel version in the kmod package name
-pushd /root/rpmbuild/RPMS/"$(uname -m)"/
-mapfile -t RPMPATHS < <(find . -type f -name "\kmod-*.rpm")
-for RPMPATH in "${RPMPATHS[@]}"; do
-    RPM=$(basename "${RPMPATH/\.rpm/}")
-    if [[ ! "$RPM" =~ ${KERNEL} ]]; then
-        RENAME=${RPM%"$(rpm -q --queryformat="%{VERSION}" kernel)"*}
-        RENAME+=$KERNEL
-        RENAME+=${RPM#*"$(rpm -E %dist)"}
-        RPM_RENAME="$(dirname "$RPMPATH")/$RENAME.rpm"
-        mv "$RPMPATH" "$RPM_RENAME"
-    fi
-done
-# Reinstall KMODs for initial check that they were signed
-mapfile -t kmods < <(ls -1 ./kmod-*.rpm)
-dnf reinstall -y --allowerasing "${kmods[@]}"
-popd
+if compgen -G "/root/rpmbuild/RPMS/$(uname -m)/kmod-*.rpm" > /dev/null; then
+    pushd /root/rpmbuild/RPMS/"$(uname -m)"/
+    mapfile -t RPMPATHS < <(find . -type f -name "\kmod-*.rpm")
+    for RPMPATH in "${RPMPATHS[@]}"; do
+        RPM=$(basename "${RPMPATH/\.rpm/}")
+        if [[ ! "$RPM" =~ ${KERNEL} ]]; then
+            RENAME=${RPM%"$(rpm -q --queryformat="%{VERSION}" kernel)"*}
+            RENAME+=$KERNEL
+            RENAME+=${RPM#*"$(rpm -E %dist)"}
+            RPM_RENAME="$(dirname "$RPMPATH")/$RENAME.rpm"
+            mv "$RPMPATH" "$RPM_RENAME"
+        fi
+    done
+    # Reinstall KMODs for initial check that they were signed
+    mapfile -t kmods < <(ls -1 ./kmod-*.rpm)
+    dnf reinstall -y --allowerasing "${kmods[@]}"
+    popd
+fi
 for module in /usr/lib/modules/"${KERNEL}"/extra/*/*.ko*; do
     if ! modinfo "${module}" >/dev/null; then
         exit 1

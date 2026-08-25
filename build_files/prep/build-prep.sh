@@ -17,6 +17,22 @@ if [[ "${KERNEL_FLAVOR}" =~ centos|ogc-el10 ]]; then
     mkdir -p /var/roothome
     PREP_RPMS+=("https://dl.fedoraproject.org/pub/epel/epel-release-latest-${RELEASE}.noarch.rpm")
     dnf config-manager --set-enabled crb
+
+    # stage a distro-matched ublue akmods COPR repo so the addons RPM and common
+    # kmods can consume EL packages as soon as they are published to the chroot
+    mkdir -p /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES
+    cat > /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo <<EOF
+[copr:copr.fedorainfracloud.org:ublue-os:akmods]
+name=COPR (ublue-os/akmods)
+baseurl=https://download.copr.fedorainfracloud.org/results/ublue-os/akmods/epel-${RELEASE}-$(rpm -E '%{_arch}')/
+type=rpm-md
+skip_if_unavailable=True
+gpgcheck=1
+gpgkey=https://download.copr.fedorainfracloud.org/results/ublue-os/akmods/pubkey.gpg
+repo_gpgcheck=0
+enabled=1
+enabled_metadata=1
+EOF
 else
     echo "Building for Fedora"
     RELEASE="$(rpm -E '%fedora')"

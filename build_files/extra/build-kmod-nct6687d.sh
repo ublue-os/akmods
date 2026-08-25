@@ -4,6 +4,7 @@ set "${CI:+-x}" -euo pipefail
 ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
+DIST="$(rpm -E '%{dist}')"
 
 cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/terra.repo /etc/yum.repos.d/
 curl -LsSf -o /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}" \
@@ -12,7 +13,7 @@ rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}"
 
 ### BUILD nct6687d (succeed or fail-fast with debug output)
 dnf install -y \
-    akmod-nct6687d-*.fc"${RELEASE}"."${ARCH}"
+    akmod-nct6687d-*"${DIST}."${ARCH}"
 
 akmods --force --kernels "${KERNEL}" --kmod nct6687d
 

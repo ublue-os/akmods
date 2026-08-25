@@ -5,6 +5,7 @@ set ${CI:+-x} -euo pipefail
 ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
+DIST="$(rpm -E '%{dist}')"
 
 if [[ "${RELEASE}" -ge 45 ]]; then
     COPR_RELEASE="rawhide"

@@ -5,6 +5,7 @@ set ${CI:+-x} -euo pipefail
 ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
+DIST="$(rpm -E '%{dist}')"
 
 cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/terra.repo /etc/yum.repos.d/
 curl -LsSf -o /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}" \
@@ -13,7 +14,7 @@ rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}"
 
 ### BUILD hid-fanatecff (succeed or fail-fast with debug output)
 dnf install -y \
-    akmod-hid-fanatecff-*.fc"${RELEASE}"."${ARCH}"
+    akmod-hid-fanatecff-*"${DIST}."${ARCH}"
 akmods --force --kernels "${KERNEL}" --kmod hid-fanatecff
 modinfo /usr/lib/modules/"${KERNEL}"/extra/hid-fanatecff/hid-fanatec.ko.xz > /dev/null \
 || (find /var/cache/akmods/hid-fanatecff/ -name \*.log -print -exec cat {} \; && exit 1)

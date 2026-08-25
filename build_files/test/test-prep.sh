@@ -67,6 +67,7 @@ fi
 
 rm -f /tmp/certs/private_key_2.priv
 
+KMODS_TO_INSTALL=()
 if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm 2> /dev/null) ]]; then
     #shellcheck disable=SC1091
     source /tmp/akmods-rpms/kmods/nvidia-vars
@@ -84,12 +85,14 @@ elif [[ -d /tmp/akmods-rpms/extra ]]; then
         /tmp/akmods-rpms/extra/*.rpm
     )
 else
-    KMODS_TO_INSTALL+=(
-        /tmp/akmods-rpms/kmods/*.rpm
-        /tmp/akmods-rpms/common/*.rpm
-    )
+    # common target; EL flavors may have no kmod packages yet
+    #shellcheck disable=SC2035 # We want word splitting
+    mapfile -t COMMON_RPMS < <(find /tmp/akmods-rpms/kmods /tmp/akmods-rpms/common -maxdepth 1 -name "*.rpm" 2> /dev/null)
+    KMODS_TO_INSTALL+=("${COMMON_RPMS[@]}")
 fi
 
-dnf install -y --setopt=install_weak_deps=False --allowerasing "${KMODS_TO_INSTALL[@]}"
+if [[ "${#KMODS_TO_INSTALL[@]}" -gt 0 ]]; then
+    dnf install -y --setopt=install_weak_deps=False --allowerasing "${KMODS_TO_INSTALL[@]}"
+fi
 
 printf "KERNEL_NAME=%s" "$KERNEL_NAME" >> /tmp/info.sh

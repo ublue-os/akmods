@@ -5,6 +5,7 @@ set ${CI:+-x} -euo pipefail
 ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
+DIST="$(rpm -E '%{dist}')"
 
 cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/terra.repo /etc/yum.repos.d/
 curl -LsSf -o /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}" \
@@ -13,7 +14,7 @@ rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}"
 
 ### BUILD new-lg4ff (succeed or fail-fast with debug output)
 dnf install -y \
-    akmod-new-lg4ff-*.fc"${RELEASE}"."${ARCH}"
+    akmod-new-lg4ff-*"${DIST}."${ARCH}"
 akmods --force --kernels "${KERNEL}" --kmod new-lg4ff
 modinfo /usr/lib/modules/"${KERNEL}"/extra/new-lg4ff/hid-logitech-new.ko.xz > /dev/null \
 || (find /var/cache/akmods/new-lg4ff/ -name \*.log -print -exec cat {} \; && exit 1)

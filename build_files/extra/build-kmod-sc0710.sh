@@ -5,6 +5,7 @@ set ${CI:+-x} -euo pipefail
 ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
+DIST="$(rpm -E '%{dist}')"
 
 cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/terra.repo /etc/yum.repos.d/
 curl -LsSf -o /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}" \
@@ -13,7 +14,7 @@ rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}"
 
 ### BUILD sc0710 (succeed or fail-fast with debug output)
 dnf install -y \
-    akmod-sc0710-*.fc"${RELEASE}"."${ARCH}"
+    akmod-sc0710-*"${DIST}."${ARCH}"
 akmods --force --kernels "${KERNEL}" --kmod sc0710
 modinfo /usr/lib/modules/"${KERNEL}"/extra/sc0710/sc0710.ko.xz > /dev/null \
 || (find /var/cache/akmods/sc0710/ -name \*.log -print -exec cat {} \; && exit 1)
