@@ -12,7 +12,7 @@ cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/negativo17-fedora-multimedia.rep
 ### BUILD evdi (succeed or fail-fast with debug output)
 export CFLAGS="-fno-pie -no-pie"
 dnf install -y \
-    kmod-evdi*.fc"${RELEASE}.${ARCH}" akmod-evdi-*.fc"${RELEASE}.${ARCH}"
+    kmod-evdi*"${DIST}.${ARCH}" akmod-evdi-*"${DIST}.${ARCH}"
 akmods --force --kernels "${KERNEL}" --kmod evdi
 modinfo /usr/lib/modules/"${KERNEL}"/extra/evdi/evdi.ko.xz > /dev/null \
 || (find /var/cache/akmods/evdi/ -name \*.log -print -exec cat {} \; && exit 1)
