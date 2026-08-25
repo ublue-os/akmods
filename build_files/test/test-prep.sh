@@ -8,7 +8,7 @@ popd
 
 ### PREPARE REPOS
 RPM_PREP=(openssl)
-if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
+if [[ "${KERNEL_FLAVOR}" =~ centos|ogc-el10 ]]; then
     echo "Building for CentOS"
     RELEASE="$(rpm -E '%centos')"
     mkdir -p /var/roothome

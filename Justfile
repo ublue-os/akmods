@@ -343,6 +343,7 @@ build: (cache-kernel-version) (fetch-kernel)
         "--cpp-flag=-DVERSION_ARG=VERSION={{ version }}"
         "--cpp-flag=-D{{ replace_regex(uppercase(akmods_target), '-.*', '') }}"
         "--cpp-flag=-D{{ replace_regex(uppercase(kernel_flavor), '-.*', '') }}"
+        {{ if kernel_flavor =~ '(centos|ogc-el10)' { '"--cpp-flag=-DCENTOS"' } else { '' } }}
     )
     if [[ "{{ akmods_target }}" =~ nvidia ]]; then
         CPP_FLAGS+=(
@@ -394,6 +395,7 @@ test: (cache-kernel-version) (fetch-kernel)
         "--cpp-flag=-DVERSION_ARG=VERSION={{ version }}"
         "--cpp-flag=-D{{ replace_regex(uppercase(akmods_target), '-.*', '') }}"
         "--cpp-flag=-D{{ replace_regex(uppercase(kernel_flavor), '-.*', '') }}"
+        {{ if kernel_flavor =~ '(centos|ogc-el10)' { '"--cpp-flag=-DCENTOS"' } else { '' } }}
     )
     if [[ "{{ akmods_target }}" =~ nvidia ]]; then
         CPP_FLAGS+=(

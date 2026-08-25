@@ -8,7 +8,7 @@ KMOD_REPO="${1:-nvidia}"
 DIST="$(rpm -E '%dist')"
 DIST="${DIST#.}"
 VARS_KERNEL_VERSION="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
-if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
+if [[ "${KERNEL_FLAVOR}" =~ centos|ogc-el10 ]]; then
     # enable negativo17
     cp "/tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-epel-${KMOD_REPO}.repo" /etc/yum.repos.d/
 else
