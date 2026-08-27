@@ -85,7 +85,7 @@ jobs:
       actions: read
       contents: read
     needs: [build-ogc_43_common,build-ogc_43_extra,build-ogc_43_nvidia-open]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: always()
     steps:
       - name: Check for Build Failures
@@ -163,7 +163,7 @@ jobs:
       actions: read
       contents: read
     needs: [build-ogc_44_common,build-ogc_44_extra,build-ogc_44_nvidia-open]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: always()
     steps:
       - name: Check for Build Failures

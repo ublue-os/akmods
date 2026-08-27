@@ -85,7 +85,7 @@ jobs:
       actions: read
       contents: read
     needs: [build-main_44_common,build-main_44_nvidia-lts,build-main_44_nvidia-open]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: always()
     steps:
       - name: Check for Build Failures
@@ -163,7 +163,7 @@ jobs:
       actions: read
       contents: read
     needs: [build-main_43_common,build-main_43_nvidia-lts,build-main_43_nvidia-open]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: always()
     steps:
       - name: Check for Build Failures
