@@ -6,6 +6,11 @@ ARCH="$(rpm -E '%_arch')"
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
 RELEASE="$(rpm -E '%fedora')"
 
+# Skip for aarch64, vhba only ships for x86_64
+if [[ "${ARCH}" =~ aarch64 ]]; then
+    exit 0
+fi
+
 cp /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_rok-cdemu.repo /etc/yum.repos.d/
 
 ### BUILD vhba (succeed or fail-fast with debug output)
