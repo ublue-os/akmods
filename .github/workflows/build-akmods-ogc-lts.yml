@@ -85,7 +85,7 @@ jobs:
       actions: read
       contents: read
     needs: [build-ogc-lts_44_common,build-ogc-lts_44_extra,build-ogc-lts_44_nvidia-lts]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: always()
     steps:
       - name: Check for Build Failures
@@ -163,7 +163,7 @@ jobs:
       actions: read
       contents: read
     needs: [build-ogc-lts_43_common,build-ogc-lts_43_extra,build-ogc-lts_43_nvidia-lts]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: always()
     steps:
       - name: Check for Build Failures

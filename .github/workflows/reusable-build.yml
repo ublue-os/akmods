@@ -60,7 +60,7 @@ concurrency:
 jobs:
   build-akmods:
     name: Build ${{ matrix.architecture }}
-    runs-on: ${{ matrix.architecture == 'x86_64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
+    runs-on: ${{ matrix.architecture == 'x86_64' && 'ubuntu-26.04' || 'ubuntu-26.04-arm' }}
     permissions:
       actions: read
       contents: read
