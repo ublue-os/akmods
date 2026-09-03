@@ -85,6 +85,7 @@ RUNEOF
 RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
+set ${CI+-x} -euo pipefail
 /tmp/build-kmod-framework-laptop.sh
 /tmp/build-kmod-openrazer.sh
 /tmp/build-kmod-v4l2loopback.sh
@@ -127,17 +128,20 @@ COPY build_files/nvidia /tmp/
 RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
+set ${CI+-x} -euo pipefail
 /tmp/build-ublue-os-nvidia-addons.sh
 cp /tmp/ublue-os-nvidia-addons/rpmbuild/RPMS/noarch/ublue-os-nvidia-addons*.rpm /var/cache/rpms/ublue-os/
 RUNEOF
 RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
+set ${CI+-x} -euo pipefail
 /tmp/build-kmod-nvidia.sh "$KMOD_REPO"
 RUNEOF
 RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
+set ${CI+-x} -euo pipefail
 /tmp/download-nvidia-rpms.sh "$KMOD_REPO"
 install -m755 -t /var/cache/rpms/ublue-os /tmp/nvidia-install.sh
 RUNEOF
