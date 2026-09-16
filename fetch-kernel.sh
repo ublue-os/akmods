@@ -196,7 +196,7 @@ fi
 ln -s / /tmp/buildroot
 
 # Rebuild RPMs and Verify
-rpmrebuild --additional=--buildroot=/tmp/buildroot --batch "${kernel_name}-core-${kernel_version}"
+rpmrebuild --notest-install --additional=--buildroot=/tmp/buildroot --batch "${kernel_name}-core-${kernel_version}"
 rm -f /usr/lib/modules/"${kernel_version}"/vmlinuz
 find /tmp
 find /root
