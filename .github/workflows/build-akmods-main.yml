@@ -16,6 +16,84 @@ on:
     - cron: '01 0 * * *'  # staggered minute past 00:00 UTC, see Justfile generate-workflows
   workflow_dispatch:
 jobs:
+  cache_kernel_main_45:
+    name: Cache main (45)
+    uses: ./.github/workflows/reusable-cache-kernel.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    with:
+      architecture: '["x86_64"]'
+      kernel_flavor: main
+      version: 45
+  build-main_45_common:
+    name: Build common main (45)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      attestations: write
+      contents: read
+      id-token: write
+      packages: write
+    needs: cache_kernel_main_45
+    with:
+      akmods_target: common
+      architecture: '["x86_64"]'
+      kernel_cache_key: ${{ needs.cache_kernel_main_45.outputs.KCKEY }}
+      kernel_flavor: main
+      version: 45
+  build-main_45_nvidia-lts:
+    name: Build nvidia-lts main (45)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      attestations: write
+      contents: read
+      id-token: write
+      packages: write
+    needs: cache_kernel_main_45
+    with:
+      akmods_target: nvidia-lts
+      architecture: '["x86_64"]'
+      kernel_cache_key: ${{ needs.cache_kernel_main_45.outputs.KCKEY }}
+      kernel_flavor: main
+      version: 45
+  build-main_45_nvidia-open:
+    name: Build nvidia-open main (45)
+    uses: ./.github/workflows/reusable-build.yml
+    secrets: inherit
+    permissions:
+      actions: read
+      attestations: write
+      contents: read
+      id-token: write
+      packages: write
+    needs: cache_kernel_main_45
+    with:
+      akmods_target: nvidia-open
+      architecture: '["x86_64"]'
+      kernel_cache_key: ${{ needs.cache_kernel_main_45.outputs.KCKEY }}
+      kernel_flavor: main
+      version: 45
+  check-main_45:
+    name: Check main (45)
+    permissions:
+      actions: read
+      contents: read
+    needs: [build-main_45_common,build-main_45_nvidia-lts,build-main_45_nvidia-open]
+    runs-on: ubuntu-24.04
+    if: always()
+    steps:
+      - name: Check for Build Failures
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped')
+        run: exit 1
+
+      - name: Exit if Success
+        run: exit 0
   cache_kernel_main_44:
     name: Cache main (44)
     uses: ./.github/workflows/reusable-cache-kernel.yml

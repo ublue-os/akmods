@@ -40,7 +40,7 @@ for RPMPATH in "${RPMPATHS[@]}"; do
     RPM=$(basename "${RPMPATH/\.rpm/}")
     mkdir -p /tmp/buildroot
     cp -r /{usr,lib} /tmp/buildroot
-    rpmrebuild --additional=--buildroot=/tmp/buildroot --batch "$RPM"
+    rpmrebuild --notest-install --additional=--buildroot=/tmp/buildroot --batch "$RPM"
     rm -rf /tmp/buildroot
 done
 popd

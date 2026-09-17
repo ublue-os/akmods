@@ -39,7 +39,7 @@ done
 find /var/cache/rpms/kmods/zfs -type f -name "\kmod-*.rpm" | grep -v debug | grep -v devel
 RPMPATH=$(find /var/cache/rpms/kmods/zfs -type f -name "\kmod-*.rpm" | grep -v debug | grep -v devel)
 RPM=$(basename "${RPMPATH/\.rpm/}")
-rpmrebuild --additional=--buildroot=/tmp/buildroot --batch "${RPM}"
+rpmrebuild --notest-install --additional=--buildroot=/tmp/buildroot --batch "${RPM}"
 rm -rf /usr/lib/modules/"${KERNEL}"/extra
 pushd /root/rpmbuild/RPMS/"$(uname -m)"/
 mapfile -t RPMPATHS < <(find . -type f -name "\kmod-*.rpm")
