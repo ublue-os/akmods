@@ -17,8 +17,13 @@ curl -LsSf -o /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}" \
 rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}"
 
 ### BUILD openrazer (succeed or fail-fast with debug output)
+# REVERTME: Once terra has openrazer packages for F45
 if [[ "${RELEASE}" -ge 45 ]]; then
-    dnf install -y akmod-openrazer-*.fc"${RELEASE}"."${ARCH}" || { rm -f /etc/yum.repos.d/terra.repo; exit 0; }
+    dnf install -y akmod-openrazer-*.fc"${RELEASE}"."${ARCH}" || {
+        echo "SKIPPED: Openrazer gets skipped if Terra doesn't have package for F45."
+        rm -f /etc/yum.repos.d/terra.repo
+        exit 0
+    }
     akmods --force --kernels "${KERNEL}" --kmod openrazer || { rm -f /etc/yum.repos.d/terra.repo; exit 0; }
 else
     dnf install -y \
