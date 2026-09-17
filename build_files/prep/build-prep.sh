@@ -21,7 +21,7 @@ else
     echo "Building for Fedora"
     RELEASE="$(rpm -E '%fedora')"
 
-    sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/fedora-cisco-openh264.repo
+    dnf config-manager setopt fedora-cisco-openh264.enabled=0
 
     RPMFUSION_MIRROR_RPMS="https://mirrors.rpmfusion.org"
     if [ -n "${RPMFUSION_MIRROR}" ]; then
@@ -42,12 +42,12 @@ echo "Installing ${KERNEL_FLAVOR} kernel-cache RPMs..."
 #shellcheck disable=SC2046 #we want word splitting
 dnf install -y --allowerasing --setopt=install_weak_deps=False "${PREP_RPMS[@]}" $(find /tmp/kernel_cache/*.rpm -type f | grep "$(uname -m)" | grep -v uki | xargs)
 
-# after F46 launches, bump to 47
-if [[ "${VERSION}" -ge 46 && -f /etc/fedora-release ]]; then
+# after F45 launches, bump to 46
+if [[ "${VERSION}" -ge 45 && -f /etc/fedora-release ]]; then
     # pre-release rpmfusion is in a different location
     sed -i "s%free/fedora/releases%free/fedora/development%" /etc/yum.repos.d/rpmfusion-*.repo
     # pre-release rpmfusion needs to enable testing
-    sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/rpmfusion-*-updates-testing.repo
+    dnf config-manager enable rpmfusion-free-updates-testing rpmfusion-nonfree-updates-testing
 fi
 
 if [[ -n "${RPMFUSION_MIRROR}" && -f /etc/fedora-release ]]; then
