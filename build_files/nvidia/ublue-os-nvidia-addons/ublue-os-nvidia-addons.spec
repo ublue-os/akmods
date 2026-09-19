@@ -1,6 +1,6 @@
 Name:           ublue-os-nvidia-addons
 Version:        0.15
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Additional files for nvidia driver support
 
 License:        MIT
@@ -40,16 +40,27 @@ install -Dm0644 %{SOURCE5} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.r
 install -Dm0644 %{SOURCE9} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia-lts.repo
 sed -i 's@enabled=1@enabled=0@g' %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo
 sed -i 's@enabled=1@enabled=0@g' %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia-lts.repo
+%endif
+%if 0%{?fedora} && 0%{?fedora} <= 44
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo %{buildroot}%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia-lts.repo %{buildroot}%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia-lts.repo
 %endif
+%if 0%{?fedora} && 0%{?fedora} >= 45
+install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo %{buildroot}%{_datadir}/dnf5/repos.d/negativo17-fedora-nvidia.repo
+install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia-lts.repo %{buildroot}%{_datadir}/dnf5/repos.d/negativo17-fedora-nvidia-lts.repo
+%endif
 
 install -Dm0644 %{SOURCE0} %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
+sed -i 's@enabled=1@enabled=0@g' %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
+%if 0%{?fedora} && 0%{?fedora} <= 44 || 0%{?rhel}
+install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo     %{buildroot}%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
+%endif
+%if 0%{?fedora} && 0%{?fedora} >= 45
+install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo %{buildroot}%{_datadir}/dnf5/repos.d/nvidia-container-toolkit.repo
+%endif
 install -Dm0644 %{SOURCE1} %{buildroot}%{_datadir}/ublue-os/%{_datadir}/selinux/packages/nvidia-container.pp
 install -Dm0644 %{SOURCE2} %{buildroot}%{_presetdir}/70-nvidia-cdi-refresh.preset
 install -Dm0644 %{SOURCE3} %{buildroot}%{_unitdir}/nvidia-cdi-refresh.service.d/10-ublue-ordering.conf
-sed -i 's@enabled=1@enabled=0@g' %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
-install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo     %{buildroot}%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_datadir}/selinux/packages/nvidia-container.pp             %{buildroot}%{_datadir}/selinux/packages/nvidia-container.pp
 
 %files
@@ -62,17 +73,30 @@ install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_datadir}/selinux/packages/nv
 %if 0%{?fedora}
 %attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo
 %attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia-lts.repo
+%endif
+%if 0%{?fedora} && 0%{?fedora} <= 44
 %attr(0644,root,root) %{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo
 %attr(0644,root,root) %{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia-lts.repo
 %endif
+%if 0%{?fedora} && 0%{?fedora} >= 45
+%attr(0644,root,root) %{_datadir}/dnf5/repos.d/negativo17-fedora-nvidia.repo
+%attr(0644,root,root) %{_datadir}/dnf5/repos.d/negativo17-fedora-nvidia-lts.repo
+%attr(0644,root,root) %{_datadir}/dnf5/repos.d/nvidia-container-toolkit.repo
+%endif
+%if 0%{?fedora} && 0%{?fedora} <= 44 || 0%{?rhel}
+%attr(0644,root,root) %{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
+%endif
 %attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
 %attr(0644,root,root) %{_datadir}/ublue-os/%{_datadir}/selinux/packages/nvidia-container.pp
-%attr(0644,root,root) %{_sysconfdir}/yum.repos.d/nvidia-container-toolkit.repo
 %attr(0644,root,root) %{_datadir}/selinux/packages/nvidia-container.pp
 %attr(0644,root,root) %{_presetdir}/70-nvidia-cdi-refresh.preset
 %attr(0644,root,root) %{_unitdir}/nvidia-cdi-refresh.service.d/10-ublue-ordering.conf
 
 %changelog
+* Sun Sep 20 2026 renner <renner0@posteo.de> - 0.15-2
+- move nvidia repos from /etc/yum.repos.d for f45 and higher to /usr/share/dnf5/repos.d
+  as per https://fedoraproject.org/wiki/Changes/RelocateRpmRepoConfigsToUsr
+
 * Sat Aug 8 2026 Benjamin Sherman <benjamin@holyarmy.org> - 0.15
 - retire ublue-nvctk-cdi.service in favor of upstream nvidia-cdi-refresh.service
   (shipped by nvidia-container-toolkit-base >= 1.19.1)
