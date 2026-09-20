@@ -131,6 +131,7 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
 set ${CI+-x} -euo pipefail
 /tmp/build-ublue-os-nvidia-addons.sh
 cp /tmp/ublue-os-nvidia-addons/rpmbuild/RPMS/noarch/ublue-os-nvidia-addons*.rpm /var/cache/rpms/ublue-os/
+rpm -qlp /var/cache/rpms/ublue-os/ublue-os-nvidia-addons*.rpm
 RUNEOF
 RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
