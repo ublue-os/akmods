@@ -66,8 +66,8 @@ install -Dm0644 %{SOURCE3} %{buildroot}%{_unitdir}/nvidia-cdi-refresh.service.d/
 install -Dm0644 %{buildroot}%{_datadir}/ublue-os%{_datadir}/selinux/packages/nvidia-container.pp             %{buildroot}%{_datadir}/selinux/packages/nvidia-container.pp
 
 %check
-if grep -r -q "enabled=1" %{buildroot}/*.repo; then
-    exit 1
+if grep -r --include="*.repo" -H "^enabled=1" %{buildroot}; then
+    echo "found enabled repo"; exit 1
 fi
 
 %files
