@@ -60,10 +60,10 @@ sed -i 's@enabled=1@enabled=0@g' %{buildroot}%{_datadir}/dnf5/repos.d/negativo17
 sed -i 's@enabled=1@enabled=0@g' %{buildroot}%{_datadir}/dnf5/repos.d/nvidia-container-toolkit.repo
 %endif
 
-install -Dm0644 %{SOURCE1} %{buildroot}%{_datadir}/ublue-os/%{_datadir}/selinux/packages/nvidia-container.pp
+install -Dm0644 %{SOURCE1} %{buildroot}%{_datadir}/ublue-os%{_datadir}/selinux/packages/nvidia-container.pp
 install -Dm0644 %{SOURCE2} %{buildroot}%{_presetdir}/70-nvidia-cdi-refresh.preset
 install -Dm0644 %{SOURCE3} %{buildroot}%{_unitdir}/nvidia-cdi-refresh.service.d/10-ublue-ordering.conf
-install -Dm0644 %{buildroot}%{_datadir}/ublue-os/%{_datadir}/selinux/packages/nvidia-container.pp             %{buildroot}%{_datadir}/selinux/packages/nvidia-container.pp
+install -Dm0644 %{buildroot}%{_datadir}/ublue-os%{_datadir}/selinux/packages/nvidia-container.pp             %{buildroot}%{_datadir}/selinux/packages/nvidia-container.pp
 
 %check
 if grep -r -q "enabled=1" %{buildroot}/*.repo; then
@@ -72,15 +72,15 @@ fi
 
 %files
 %if 0%{?rhel}
-%attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia.repo
-%attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia-lts.repo
+%attr(0644,root,root) %{_datadir}/ublue-os%{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia.repo
+%attr(0644,root,root) %{_datadir}/ublue-os%{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia-lts.repo
 %attr(0644,root,root) %{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia.repo
 %attr(0644,root,root) %{_sysconfdir}/yum.repos.d/negativo17-epel-nvidia-lts.repo
 %endif
 
 %if 0%{?fedora} && 0%{?fedora} <= 44
-%attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo
-%attr(0644,root,root) %{_datadir}/ublue-os/%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia-lts.repo
+%attr(0644,root,root) %{_datadir}/ublue-os%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo
+%attr(0644,root,root) %{_datadir}/ublue-os%{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia-lts.repo
 %attr(0644,root,root) %{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia.repo
 %attr(0644,root,root) %{_sysconfdir}/yum.repos.d/negativo17-fedora-nvidia-lts.repo
 %endif
