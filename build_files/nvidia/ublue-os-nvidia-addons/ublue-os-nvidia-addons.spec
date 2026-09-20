@@ -105,6 +105,8 @@ fi
 * Sun Sep 20 2026 renner <renner0@posteo.de> - 0.15-2
 - move nvidia repos from /etc/yum.repos.d for f45 and higher to /usr/share/dnf5/repos.d
   as per https://fedoraproject.org/wiki/Changes/RelocateRpmRepoConfigsToUsr
+- remove /usr/share/ublue-os/etc/yum.repo.d for f45 and higher
+- add check to ensure repos are always disabled
 
 * Sat Aug 8 2026 Benjamin Sherman <benjamin@holyarmy.org> - 0.15
 - retire ublue-nvctk-cdi.service in favor of upstream nvidia-cdi-refresh.service
