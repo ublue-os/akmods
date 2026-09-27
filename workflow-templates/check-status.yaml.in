@@ -4,7 +4,7 @@
       actions: read
       contents: read
     needs: %%NEEDS%%
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: always()
     steps:
       - name: Check for Build Failures
