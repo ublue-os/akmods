@@ -50,7 +50,7 @@ jobs:
     outputs:
       KCKEY: ${{ inputs.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_major_minor_patch }}
     container:
-      image: "ghcr.io/ublue-os/devcontainer:latest@sha256:74af83ac3b3fa573bee61d6d2d5ea5ba59f92f44afc3833d57b05ace66eb98ca"
+      image: "ghcr.io/ublue-os/devcontainer:latest@sha256:ba4c0e51ddaa19417106c4bcea7b7245579703f64f8b55accaf9b1ac665e7e26"
       options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
     permissions:
       actions: read
