@@ -102,7 +102,7 @@ jobs:
       actions: read
       contents: read
     needs: [build-coreos-testing_44_common,build-coreos-testing_44_nvidia-lts,build-coreos-testing_44_nvidia-open,build-coreos-testing_44_zfs]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: always()
     steps:
       - name: Check for Build Failures
