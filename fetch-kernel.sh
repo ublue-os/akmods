@@ -76,27 +76,26 @@ elif [[ "${kernel_flavor}" =~ "longterm" ]]; then
         kernel-longterm-devel-matched-"${kernel_version}"
 elif [[ "${kernel_flavor}" =~ ^ogc ]]; then
     ogc_image="${OGC_IMAGE:?OGC_IMAGE env var must be set}"
-    dnf install -y --setopt=install_weak_deps=False jq skopeo golang-oras
+    dnf install -y --setopt=install_weak_deps=False jq skopeo
 
-    # Parse manifest for kernel RPM filenames
-    manifest=$(skopeo inspect --raw "docker://${ogc_image}")
+    # Fetch the OCI artifact and parse its manifest for kernel RPM filenames
+    tmpdir=$(mktemp -d)
+    skopeo copy "docker://${ogc_image}" "dir:${tmpdir}"
+    manifest=$(<"${tmpdir}/manifest.json")
     needed_prefixes="^kernel-[0-9]+\.[0-9]|^kernel-core-|^kernel-devel-|^kernel-devel-matched-|^kernel-modules-[0-9]"
 
-    # Fetch RPM blobs from OCI artifact
-    tmpdir=$(mktemp -d)
     while read -r layer; do
         title=$(echo "$layer" | jq -r '.annotations["org.opencontainers.image.title"]')
         digest=$(echo "$layer" | jq -r '.digest')
         if echo "$title" | grep -qE "$needed_prefixes"; then
             echo "Fetching ${title}..."
-            oras blob fetch "${ogc_image}@${digest}" --output "${tmpdir}/${title}"
+            blob_path="${tmpdir}/${digest#*:}"
             # Layer may be a tar wrapping the RPM, or the RPM itself
-            if file "${tmpdir}/${title}" | grep -q "POSIX tar"; then
-                tar xf "${tmpdir}/${title}" -C /
+            if file "$blob_path" | grep -q "POSIX tar"; then
+                tar xf "$blob_path" -C /
             else
-                mv "${tmpdir}/${title}" "/${title}"
+                mv "$blob_path" "/${title}"
             fi
-            rm -f "${tmpdir}/${title}"
         fi
     done < <(echo "$manifest" | jq -c '.layers[]')
     rm -rf "$tmpdir"
