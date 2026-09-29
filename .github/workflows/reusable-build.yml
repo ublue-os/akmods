@@ -60,7 +60,7 @@ concurrency:
 jobs:
   build-akmods:
     name: Build ${{ matrix.architecture }}
-    runs-on: ${{ matrix.architecture == 'x86_64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
+    runs-on: ${{ matrix.architecture == 'x86_64' && 'ubuntu-26.04' || 'ubuntu-26.04-arm' }}
     permissions:
       actions: read
       contents: read
@@ -137,7 +137,7 @@ jobs:
 
   manifest:
     name: "Generate ${{ inputs.akmods_target != 'common' && format('akmods-{0}', inputs.akmods_target) || 'akmods' }}:${{ inputs.kernel_flavor }}-${{ inputs.version }} Manifest"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs: [build-akmods]
     outputs:
       image_name: ${{ steps.digest.outputs.image_name }}
@@ -221,7 +221,7 @@ jobs:
 
   verify-publication:
     name: Verify Published Signatures and Provenance
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs: [manifest]
     if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
     permissions:

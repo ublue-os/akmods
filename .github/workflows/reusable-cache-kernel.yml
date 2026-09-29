@@ -46,7 +46,7 @@ concurrency:
 jobs:
   cache-kernel:
     name: Cache ${{ matrix.architecture }}
-    runs-on: ${{ matrix.architecture == 'x86_64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
+    runs-on: ${{ matrix.architecture == 'x86_64' && 'ubuntu-26.04' || 'ubuntu-26.04-arm' }}
     outputs:
       KCKEY: ${{ inputs.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_major_minor_patch }}
     container:
@@ -101,7 +101,7 @@ jobs:
         run: find ${{ steps.kernel-version.outputs.KCPATH }}
   check:
     name: Check all ${{ format('{0}-{1}', inputs.kernel_flavor, inputs.version) }} cache successful
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs: [cache-kernel]
     permissions:
       actions: read
