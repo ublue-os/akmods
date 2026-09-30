@@ -52,8 +52,9 @@ if dnf5 repolist --enabled | grep -q "fedora-multimedia"; then
 fi
 
 # Enable staging for supergfxctl if repo file exists
-if [[ -f /etc/yum.repos.d/_copr_ublue-os-staging.repo ]]; then
-    sed -i 's@enabled=0@enabled=1@g' /etc/yum.repos.d/_copr_ublue-os-staging.repo
+UBLUE_STAGING="copr:copr.fedorainfracloud.org:ublue-os:staging"
+if dnf5 repolist --all | grep -q "${UBLUE_STAGING}"; then
+    dnf5 config-manager setopt ${UBLUE_STAGING}.enabled=1
 else
     dnf5 -y copr enable ublue-os/staging
 fi
@@ -101,7 +102,7 @@ fi
 dnf5 config-manager setopt fedora-nvidia*.enabled=0 nvidia-container-toolkit.enabled=0
 
 # Disable staging
-dnf5 -y copr disable ublue-os/staging
+dnf5 config-manager setopt ${UBLUE_STAGING}.enabled=0
 
 systemctl enable nvidia-cdi-refresh.service nvidia-cdi-refresh.path nvidia-persistenced.service
 semodule --verbose --install /usr/share/selinux/packages/nvidia-container.pp

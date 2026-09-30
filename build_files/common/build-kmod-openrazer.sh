@@ -17,17 +17,27 @@ curl -LsSf -o /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}" \
 rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-terra"${RELEASE}"
 
 ### BUILD openrazer (succeed or fail-fast with debug output)
-dnf install -y \
-    akmod-openrazer-*.fc"${RELEASE}"."${ARCH}"
-akmods --force --kernels "${KERNEL}" --kmod openrazer
-modinfo /usr/lib/modules/"${KERNEL}"/extra/openrazer/razerkbd.ko.xz >/dev/null ||
-    (find /var/cache/akmods/openrazer/ -name \*.log -print -exec cat {} \; && exit 1)
-modinfo /usr/lib/modules/"${KERNEL}"/extra/openrazer/razermouse.ko.xz >/dev/null ||
-    (find /var/cache/akmods/openrazer/ -name \*.log -print -exec cat {} \; && exit 1)
-modinfo /usr/lib/modules/"${KERNEL}"/extra/openrazer/razerkraken.ko.xz >/dev/null ||
-    (find /var/cache/akmods/openrazer/ -name \*.log -print -exec cat {} \; && exit 1)
-modinfo /usr/lib/modules/"${KERNEL}"/extra/openrazer/razeraccessory.ko.xz >/dev/null ||
-    (find /var/cache/akmods/openrazer/ -name \*.log -print -exec cat {} \; && exit 1)
+# REVERTME: Once terra has openrazer packages for F45
+if [[ "${RELEASE}" -ge 45 ]]; then
+    dnf install -y akmod-openrazer-*.fc"${RELEASE}"."${ARCH}" || {
+        echo "SKIPPED: Openrazer gets skipped if Terra doesn't have package for F45."
+        rm -f /etc/yum.repos.d/terra.repo
+        exit 0
+    }
+    akmods --force --kernels "${KERNEL}" --kmod openrazer || { rm -f /etc/yum.repos.d/terra.repo; exit 0; }
+else
+    dnf install -y \
+        akmod-openrazer-*.fc"${RELEASE}"."${ARCH}"
+    akmods --force --kernels "${KERNEL}" --kmod openrazer
+    modinfo /usr/lib/modules/"${KERNEL}"/extra/openrazer/razerkbd.ko.xz >/dev/null ||
+        (find /var/cache/akmods/openrazer/ -name \*.log -print -exec cat {} \; && exit 1)
+    modinfo /usr/lib/modules/"${KERNEL}"/extra/openrazer/razermouse.ko.xz >/dev/null ||
+        (find /var/cache/akmods/openrazer/ -name \*.log -print -exec cat {} \; && exit 1)
+    modinfo /usr/lib/modules/"${KERNEL}"/extra/openrazer/razerkraken.ko.xz >/dev/null ||
+        (find /var/cache/akmods/openrazer/ -name \*.log -print -exec cat {} \; && exit 1)
+    modinfo /usr/lib/modules/"${KERNEL}"/extra/openrazer/razeraccessory.ko.xz >/dev/null ||
+        (find /var/cache/akmods/openrazer/ -name \*.log -print -exec cat {} \; && exit 1)
+fi
 
 mkdir -p /var/cache/rpms/common
 dnf download --destdir /var/cache/rpms/common \

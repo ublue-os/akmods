@@ -85,7 +85,7 @@ jobs:
       actions: read
       contents: read
     needs: [build-longterm-6-18_44_nvidia-lts,build-longterm-6-18_44_nvidia-open,build-longterm-6-18_44_zfs]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: always()
     steps:
       - name: Check for Build Failures

@@ -190,3 +190,13 @@ images:
     "longterm-6.18":
       !!merge <<:
         - *server-build-group
+  45:
+    main:
+      !!merge <<:
+        - *desktop-build-group-only-x86
+    ogc:
+      !!merge <<:
+        - *ogc-desktop-build-group-only-x86
+    ogc-lts:
+      !!merge <<:
+        - *ogc-lts-desktop-build-group-only-x86

@@ -18,8 +18,13 @@ fi
 
 cd /tmp
 
+# GitHub's unauthenticated API rate limit (and the occasional mirror hiccup) makes
+# these fetches flaky, so retry on any transient error and fail hard on a bad
+# response instead of feeding a rate-limit page into jq.
+CURL=(curl --fail --show-error --location --retry 5 --retry-delay 5 --retry-all-errors)
+
 # Use cURL to fetch the given URL, saving the response to `data.json`
-curl "https://api.github.com/repos/openzfs/zfs/releases" -o data.json
+"${CURL[@]}" "https://api.github.com/repos/openzfs/zfs/releases" -o data.json
 ZFS_VERSION=$(jq -r --arg ZMV "zfs-${ZFS_MINOR_VERSION}" '[ .[] | select(.prerelease==false and .draft==false) | select(.tag_name | startswith($ZMV))][0].tag_name' data.json|cut -f2- -d-)
 echo "ZFS_MINOR_VERSION==$ZFS_MINOR_VERSION"
 echo "ZFS_VERSION==$ZFS_VERSION"
@@ -32,9 +37,9 @@ dnf install -y libtirpc-devel libblkid-devel libuuid-devel libudev-devel openssl
 
 ### BUILD zfs
 echo "getting zfs-${ZFS_VERSION}.tar.gz"
-curl -L -O "https://github.com/openzfs/zfs/releases/download/zfs-${ZFS_VERSION}/zfs-${ZFS_VERSION}.tar.gz"
-curl -L -O "https://github.com/openzfs/zfs/releases/download/zfs-${ZFS_VERSION}/zfs-${ZFS_VERSION}.tar.gz.asc"
-curl -L -O "https://github.com/openzfs/zfs/releases/download/zfs-${ZFS_VERSION}/zfs-${ZFS_VERSION}.sha256.asc"
+"${CURL[@]}" -O "https://github.com/openzfs/zfs/releases/download/zfs-${ZFS_VERSION}/zfs-${ZFS_VERSION}.tar.gz"
+"${CURL[@]}" -O "https://github.com/openzfs/zfs/releases/download/zfs-${ZFS_VERSION}/zfs-${ZFS_VERSION}.tar.gz.asc"
+"${CURL[@]}" -O "https://github.com/openzfs/zfs/releases/download/zfs-${ZFS_VERSION}/zfs-${ZFS_VERSION}.sha256.asc"
 
 echo "Import key"
 # https://openzfs.github.io/openzfs-docs/Project%20and%20Community/Signing%20Keys.html
