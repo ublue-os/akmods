@@ -1,4 +1,5 @@
 set unstable := true
+set lists
 set dotenv-load := true
 
 podman := which('podman') || require('podman-remote')
