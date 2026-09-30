@@ -155,20 +155,6 @@ images:
     centos:
       !!merge <<:
         - *server-build-group
-  43:
-    main:
-      !!merge <<:
-        - *desktop-build-group-only-x86
-    ogc:
-      !!merge <<:
-        - *ogc-desktop-build-group-only-x86
-    ogc-lts:
-      !!merge <<:
-        - *ogc-lts-desktop-build-group-only-x86
-    coreos-stable:
-      !!merge <<:
-        - *desktop-build-group
-        - *server-build-group
   44:
     main:
       !!merge <<:
