@@ -85,6 +85,7 @@ RUNEOF
 RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
+set ${CI+-x} -euo pipefail
 /tmp/build-kmod-openrazer.sh
 /tmp/build-kmod-v4l2loopback.sh
 /tmp/build-kmod-vhba.sh
