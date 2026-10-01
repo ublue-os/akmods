@@ -155,6 +155,11 @@ images:
     centos:
       !!merge <<:
         - *server-build-group
+  43:
+    coreos-stable:
+      !!merge <<:
+        - *desktop-build-group
+        - *server-build-group
   44:
     main:
       !!merge <<:
