@@ -115,6 +115,7 @@ set ${CI+-x} -euo pipefail
 /tmp/build-kmod-t150-driver.sh || echo "SKIPPED: t150-driver"
 /tmp/build-kmod-hid-fanatecff.sh || echo "SKIPPED: hid-fanatecff"
 /tmp/build-kmod-sc0710.sh || echo "SKIPPED: sc0710"
+/tmp/build-kmod-ayaneo-leds.sh || echo "SKIPPED: ayaneo-leds"
 /tmp/build-kmod-kvmfr.sh || echo "SKIPPED: kvmfr"
 RUNEOF
 
