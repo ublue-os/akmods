@@ -163,7 +163,7 @@ cosign verify \
   ghcr.io/ublue-os/akmods@sha256:DIGEST
 ```
 
-The `ublue-os/main/cosign.pub` key is the Universal Blue image trust root. Mutable tags such as `main-44` or `coreos-stable-43` are convenient for discovery, but a digest is the preferred verification target.
+The `ublue-os/main/cosign.pub` key is the Universal Blue image trust root. Mutable tags such as `main-44` or `coreos-stable-44` are convenient for discovery, but a digest is the preferred verification target.
 
 ### Build Provenance
 
