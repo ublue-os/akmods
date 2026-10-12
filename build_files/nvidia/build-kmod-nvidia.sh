@@ -13,7 +13,7 @@ if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
     cp "/tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-epel-${KMOD_REPO}.repo" /etc/yum.repos.d/
 else
     # disable rpmfusion and enable negativo17
-    sed -i 's/enabled=1/enabled=0/' /etc/yum.repos.d/rpmfusion-*.repo
+    dnf config-manager setopt "rpmfusion*".enabled=0
     cp "/tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/negativo17-fedora-${KMOD_REPO}.repo" /etc/yum.repos.d/
 fi
 export KERNEL_MODULE_TYPE=open
