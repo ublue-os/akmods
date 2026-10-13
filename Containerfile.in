@@ -24,7 +24,9 @@ COPY files/usr/lib/systemd/system-preset/70-nvidia-cdi-refresh.preset /tmp/ublue
 COPY files/usr/lib/systemd/system/nvidia-cdi-refresh.service.d/10-ublue-ordering.conf /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/10-ublue-ordering.conf
 COPY files/etc/udev/rules.d/60-nvidia-extra-devices-pm.rules /tmp/ublue-os-nvidia-addons/rpmbuild/SOURCES/60-nvidia-extra-devices-pm.rules
 
-#ifndef CENTOS
+# /*
+# Fedora-specific repository configurations
+# */
 ADD https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/repo/fedora-${VERSION}/ublue-os-akmods-fedora-${VERSION}.repo \
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_ublue-os-akmods.repo
 ADD https://negativo17.org/repos/fedora-multimedia.repo \
@@ -35,7 +37,6 @@ ADD https://copr.fedorainfracloud.org/coprs/rok/cdemu/repo/fedora-${VERSION}/rok
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/_copr_rok-cdemu.repo
 ADD https://raw.githubusercontent.com/terrapkg/packages/f${VERSION}/anda/terra/gpg-keys/RPM-GPG-KEY-terra${VERSION} \
     /tmp/ublue-os-akmods-addons/rpmbuild/SOURCES/RPM-GPG-KEY-terra${VERSION}
-#endif
 
 # /*
 # Preperation

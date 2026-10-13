@@ -8,25 +8,20 @@ DRIVER_EVR="$(dnf repoquery --qf '%{EPOCH}:%{VERSION}-%{RELEASE}\n' akmod-nvidia
 DRIVER_VERSION="${DRIVER_EVR#*:}"
 DRIVER_VERSION="${DRIVER_VERSION%-*}"
 
-if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
-    echo "Building for CentOS"
-    NVIDIA_EXTRA_PKGS=()
-else
-    echo "Building for Fedora"
-    NVIDIA_EXTRA_PKGS=()
-    if [ "${ARCH}" = "x86_64" ]; then
-        NVIDIA_EXTRA_PKGS+=(
-                "libnvidia-fbc.i686"
-                "nvidia-driver-cuda-libs.i686"
-                "nvidia-driver-libs.i686"
-            )
-    fi
-    if [[ ! "${KMOD_REPO}" =~ "lts" ]]; then
-        NVIDIA_EXTRA_PKGS+=(
-            "xorg-x11-nvidia"
-            "nvidia-xconfig"
-        )
-    fi
+echo "Building for Fedora"
+NVIDIA_EXTRA_PKGS=()
+if [ "${ARCH}" = "x86_64" ]; then
+    NVIDIA_EXTRA_PKGS+=(
+        "libnvidia-fbc.i686"
+        "nvidia-driver-cuda-libs.i686"
+        "nvidia-driver-libs.i686"
+    )
+fi
+if [[ ! "${KMOD_REPO}" =~ "lts" ]]; then
+    NVIDIA_EXTRA_PKGS+=(
+        "xorg-x11-nvidia"
+        "nvidia-xconfig"
+    )
 fi
 
 NVIDIA_DRIVER_COMMON_PKGS=()
@@ -35,7 +30,7 @@ if dnf repoquery --qf '%{VERSION}\n' nvidia-driver-common | grep -qxF "${DRIVER_
     NVIDIA_DRIVER_COMMON_PKGS+=(
         "nvidia-driver-common"
     )
-    if [[ "${ARCH}" = "x86_64" && ! "${KERNEL_FLAVOR}" =~ "centos" ]] && \
+    if [[ "${ARCH}" = "x86_64" ]] && \
         dnf repoquery --qf '%{VERSION}\n' nvidia-driver-common.i686 | grep -qxF "${DRIVER_VERSION}"; then
         NVIDIA_EXTRA_PKGS+=(
             "nvidia-driver-common.i686"
@@ -48,7 +43,7 @@ else
         "libnvidia-gpucomp"
         "libnvidia-ml"
     )
-    if [[ "${ARCH}" = "x86_64" && ! "${KERNEL_FLAVOR}" =~ "centos" ]]; then
+    if [[ "${ARCH}" = "x86_64" ]]; then
         NVIDIA_EXTRA_PKGS+=(
             "libnvidia-gpucomp.i686"
             "libnvidia-ml.i686"

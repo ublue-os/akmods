@@ -10,7 +10,7 @@ version_cache := shell('mkdir -p $1 && echo $1', BUILDDIR / kernel_flavor + '-' 
 KCWD := shell('mkdir -p $1 && echo $1', version_cache / 'KCWD')
 KCPATH := shell('mkdir -p $1 && echo $1', env('KCPATH', KCWD / 'rpms'))
 version_json := KCPATH / 'cache.json'
-builder := if kernel_flavor =~ 'centos' { 'quay.io/centos/centos:' + version } else { 'quay.io/fedora/fedora:' + version }
+builder := 'quay.io/fedora/fedora:' + version
 ogc_tag := if kernel_flavor == 'ogc-lts' { 'lts' } else { 'latest' }
 ogc_image := "ghcr.io/opengamingcollective/kernel-packages-fedora:" + ogc_tag + "-fc" + version
 
@@ -18,8 +18,8 @@ ogc_image := "ghcr.io/opengamingcollective/kernel-packages-fedora:" + ogc_tag + 
 # Inputs
 
 kernel_flavor := env('AKMODS_KERNEL', shell(yq + ' ".defaults.kernel_flavor" images.yaml'))
-version := env('AKMODS_VERSION', if kernel_flavor =~ 'centos' { '10' } else { shell(yq + ' ".defaults.version" images.yaml') })
-akmods_target := env('AKMODS_TARGET', if kernel_flavor =~ '(centos|longterm)' { 'zfs' } else { shell(yq + ' ".defaults.akmods_target" images.yaml') })
+version := env('AKMODS_VERSION', shell(yq + ' ".defaults.version" images.yaml'))
+akmods_target := env('AKMODS_TARGET', if kernel_flavor =~ 'longterm' { 'zfs' } else { shell(yq + ' ".defaults.akmods_target" images.yaml') })
 zfs_minor_version := env(
     'ZFS_MINOR_VERSION',
     shell(yq + ' ".zfs[\"$1\"].minor_version // .zfs.default.minor_version" images.yaml', kernel_flavor)
@@ -76,7 +76,7 @@ clean:
 get-kernel-version:
     #!/usr/bin/env bash
     set ${CI:+-x} -euo pipefail
-    if [[ {{ kernel_flavor }} =~ centos|longterm ]]; then
+    if [[ {{ kernel_flavor }} =~ longterm ]]; then
         {{ podman }} pull --retry 3 "{{ builder }}" >&2
         builder=$({{ podman }} run --entrypoint /bin/bash -dt "{{ builder }}")
         dnf="{{ podman }} exec -t $builder dnf"
@@ -119,7 +119,7 @@ get-kernel-version:
         fi
 
         # This always provides kernel version from the upstream image as the resulting $coreos_linux variable
-        # It should be verified downloadable by verify_kernel_fedora() and verify_kernel_centos_kmodsig()
+        # It should be verified downloadable by verify_kernel_fedora()
     }
 
     verify_kernel_fedora() {
@@ -164,54 +164,8 @@ get-kernel-version:
         fi
     }
 
-    verify_kernel_centos_kmodsig() {
-        # using the kernel version from upstream image
-        # verify the expected version exist in koji packages for CentOS KMODSIG of the required version
-
-        # Get Variables
-        major_minor_patch="$(echo $coreos_linux | grep -oP '^\d+\.\d+\.\d+')"
-        arch="$(echo $coreos_linux | grep -oP 'fc\d+\.\K.*$')"
-        kernel_rel="1.el{{ version }}"
-        kernel_version="$major_minor_patch-$kernel_rel.$arch"
-        URL="https://cbs.centos.org/kojifiles/packages/kernel/${major_minor_patch}/${kernel_rel}/${arch}/kernel-${kernel_version}.rpm"
-
-        echo "Querying koji for CentOS Kmods SIG kernel: $kernel_version" >&2
-        echo "$URL" >&2
-        HTTP_RESP=$(curl -sI "$URL" | grep ^HTTP)
-        linux=""
-        if grep -qv "200 OK" <<< "${HTTP_RESP}"; then
-            echo "Koji failed to find CentOS Kmods SIG kernel: $kernel_version" >&2
-            # a naive fallback as this could only occur if the .2 release was built and .1 removed
-            # however, it provides an example for possible improvements to trying to use the latest release
-            kernel_rel="2.el{{ version }}"
-            kernel_version="$major_minor_patch-$kernel_rel.$arch"
-            URL="https://cbs.centos.org/kojifiles/packages/kernel/${major_minor_patch}/${kernel_rel}/${arch}/kernel-${kernel_version}.rpm"
-            echo "Re-querying koji for CentOS Kmods SIG kernel: $kernel_version" >&2
-            echo "$URL" >&2
-            HTTP_RESP=$(curl -sI "$URL" | grep ^HTTP)
-            if grep -qv "200 OK" <<< "${HTTP_RESP}"; then
-                echo "Koji re-query failed to find CentOS Kmods SIG kernel: $kernel_version" >&2
-            fi
-        fi
-        if grep -q "200 OK" <<< "${HTTP_RESP}"; then
-            linux=$kernel_version
-        fi
-    }
-
-
     kernel_name=kernel
     case {{ kernel_flavor }} in
-        "centos")
-            $dnf makecache >&2
-            linux=$($dnf repoquery --whatprovides kernel | sort -V | tail -n1 | sed 's/.*://')
-            ;;
-        "centos-kmodsig")
-            $dnf -y install centos-release-kmods-kernel >&2
-            $dnf makecache >&2
-            coreos_kernel stable
-            verify_kernel_centos_kmodsig
-            # '$linux' set by verify_kernel_kmodsig
-            ;;
         "coreos-stable")
             coreos_kernel stable
             verify_kernel_fedora stable
@@ -357,7 +311,7 @@ build: (cache-kernel-version) (fetch-kernel)
     fi
     LABELS=(
         "--label" "io.artifacthub.package.deprecated=false"
-        "--label" "io.artifacthub.package.keywords=bootc,fedora,bluefin,centos,cayo,aurora,ublue,universal-blue"
+        "--label" "io.artifacthub.package.keywords=bootc,fedora,bluefin,cayo,aurora,ublue,universal-blue"
         "--label" "io.artifacthub.package.logo-url=https://avatars.githubusercontent.com/u/120078124?s=200&v=4"
         "--label" "io.artifacthub.package.maintainers=[{\"name\": \"castrojo\", \"email\": \"jorge.castro@gmail.com\"}]"
         "--label" "io.artifacthub.package.readme-url=https://raw.githubusercontent.com/ublue-os/akmods/refs/heads/main/README.md"
@@ -454,7 +408,7 @@ manifest:
 
     LABELS=(
         "io.artifacthub.package.deprecated=false"
-        "io.artifacthub.package.keywords=bootc,fedora,bluefin,centos,cayo,aurora,ublue,universal-blue"
+        "io.artifacthub.package.keywords=bootc,fedora,bluefin,cayo,aurora,ublue,universal-blue"
         "io.artifacthub.package.logo-url=https://avatars.githubusercontent.com/u/120078124?s=200&v=4"
         "io.artifacthub.package.maintainers=[{\"name\": \"castrojo\", \"email\": \"jorge.castro@gmail.com\"}]"
         "io.artifacthub.package.readme-url=https://raw.githubusercontent.com/ublue-os/akmods/refs/heads/main/README.md"

@@ -46,7 +46,7 @@ done
 popd
 rm -rf /usr/lib/modules/"${KERNEL}"/extra
 
-# on CentOS, akmods/rpmbuild seems to mangle kernel version in the kmod package name
+# on some kernels, akmods/rpmbuild seems to mangle kernel version in the kmod package name
 pushd /root/rpmbuild/RPMS/"$(uname -m)"/
 mapfile -t RPMPATHS < <(find . -type f -name "\kmod-*.rpm")
 for RPMPATH in "${RPMPATHS[@]}"; do
