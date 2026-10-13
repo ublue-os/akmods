@@ -215,7 +215,7 @@ Since nothing additional was set. The following will occur. The build scripts wi
 - AKMODS_TARGET - The akmods package to build
 
 ```bash
-AKMODS_KERNEL=longterm-6.18 AKMODS_VERSION=43 AKMODS_TARGET=zfs just build
+AKMODS_KERNEL=longterm-6.18 AKMODS_VERSION=44 AKMODS_TARGET=zfs just build
 ```
 
 Will determine the current longterm kernel version, download the rpms and sign them, and will then build the zfs package.
