@@ -1,6 +1,6 @@
 # ublue-os akmods
 
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/ublue-os/akmods/badge)](https://scorecard.dev/viewer/?uri=github.com/ublue-os/akmods)[![Build CENTOS akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-centos.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-centos.yml)[![Build COREOS-STABLE akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-stable.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-stable.yml)[![Build COREOS-TESTING akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-testing.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-testing.yml)[![Build LONGTERM-6.18 akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-longterm-6.18.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-longterm-6.18.yml)[![Build OGC akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-ogc.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-ogc.yml)[![Build OGC-LTS akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-ogc-lts.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-ogc-lts.yml)[![Build MAIN akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-main.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-main.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/ublue-os/akmods/badge)](https://scorecard.dev/viewer/?uri=github.com/ublue-os/akmods)[![Build COREOS-STABLE akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-stable.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-stable.yml)[![Build COREOS-TESTING akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-testing.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-coreos-testing.yml)[![Build LONGTERM-6.18 akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-longterm-6.18.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-longterm-6.18.yml)[![Build OGC akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-ogc.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-ogc.yml)[![Build OGC-LTS akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-ogc-lts.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-ogc-lts.yml)[![Build MAIN akmods](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-main.yml/badge.svg)](https://github.com/ublue-os/akmods/actions/workflows/build-akmods-main.yml)
 
 OCI images providing a set of cached kernel RPMs and extra kernel modules to Universal Blue images. Used for better hardware support and consistent build process.
 
@@ -23,7 +23,6 @@ Builds also run for different kernels:
 - `main` - Mainline Fedora Kernel
 - `coreos-stable` - Current Fedora CoreOS stable kernel version
 - `coreos-testing` - Current Fedora CoreOS testing kernel version
-- `Centos` - Mainline Centos Kernel
 - `Longterm-6.18` - Fedora Kernel on Kernel 6.18 LTS
 - `ogc` - [Open Gaming Collective](https://github.com/OpenGamingCollective/kernel-packages-fedora) kernel
 - `ogc-lts` - Open Gaming Collective kernel, LTS branch (`:lts` tag)
@@ -216,10 +215,10 @@ Since nothing additional was set. The following will occur. The build scripts wi
 - AKMODS_TARGET - The akmods package to build
 
 ```bash
-AKMODS_KERNEL=centos AKMODS_VERSION=10 AKMODS_TARGET=zfs just build
+AKMODS_KERNEL=longterm-6.18 AKMODS_VERSION=43 AKMODS_TARGET=zfs just build
 ```
 
-Will determine the current centos kernel version, download the rpms and sign them, and will then build the zfs package.
+Will determine the current longterm kernel version, download the rpms and sign them, and will then build the zfs package.
 
 You can also populate a `.env` file to store your current settings.
 

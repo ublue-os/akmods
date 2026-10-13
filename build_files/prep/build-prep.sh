@@ -10,30 +10,20 @@ pushd /tmp/kernel_cache
 KERNEL_VERSION=$(find "$KERNEL_NAME"-*.rpm | grep "$(uname -m)" | grep -P "$KERNEL_NAME-\d+\.\d+(\.\d+)?-\w+.*$(rpm -E '%{dist}')" | sed -E "s/$KERNEL_NAME-//;s/\.rpm//")
 popd
 
-if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
-    echo "Building for CentOS"
-    RELEASE="$(rpm -E '%centos')"
+echo "Building for Fedora"
+RELEASE="$(rpm -E '%fedora')"
 
-    mkdir -p /var/roothome
-    PREP_RPMS+=("https://dl.fedoraproject.org/pub/epel/epel-release-latest-${RELEASE}.noarch.rpm")
-    dnf config-manager --set-enabled crb
-else
-    echo "Building for Fedora"
-    RELEASE="$(rpm -E '%fedora')"
+dnf config-manager setopt fedora-cisco-openh264.enabled=0
 
-    dnf config-manager setopt fedora-cisco-openh264.enabled=0
-
-    RPMFUSION_MIRROR_RPMS="https://mirrors.rpmfusion.org"
-    if [ -n "${RPMFUSION_MIRROR}" ]; then
-        RPMFUSION_MIRROR_RPMS=${RPMFUSION_MIRROR}
-    fi
-    PREP_RPMS+=(
-        "${RPMFUSION_MIRROR_RPMS}"/free/fedora/rpmfusion-free-release-"${RELEASE}".noarch.rpm \
-        "${RPMFUSION_MIRROR_RPMS}"/nonfree/fedora/rpmfusion-nonfree-release-"${RELEASE}".noarch.rpm \
-        fedora-repos-archive
-    )
-
+RPMFUSION_MIRROR_RPMS="https://mirrors.rpmfusion.org"
+if [ -n "${RPMFUSION_MIRROR}" ]; then
+    RPMFUSION_MIRROR_RPMS=${RPMFUSION_MIRROR}
 fi
+PREP_RPMS+=(
+    "${RPMFUSION_MIRROR_RPMS}"/free/fedora/rpmfusion-free-release-"${RELEASE}".noarch.rpm \
+    "${RPMFUSION_MIRROR_RPMS}"/nonfree/fedora/rpmfusion-nonfree-release-"${RELEASE}".noarch.rpm \
+    fedora-repos-archive
+)
 
 # install kernel_cache provided kernel
 echo "Installing ${KERNEL_FLAVOR} kernel-cache RPMs..."
@@ -78,8 +68,8 @@ if [[ "${DUAL_SIGN}" == "true" ]]; then
     RPMS_TO_INSTALL+=(rpmrebuild)
 fi
 
-# This is for ZFS more than CentOS|CoreOS
-if [[ "${KERNEL_FLAVOR}" =~ "centos" ]] || [[ "${KERNEL_FLAVOR}" =~ "coreos" ]] || [[ "${KERNEL_FLAVOR}" =~ "longterm" ]]; then
+# This is for ZFS more than CoreOS|Longterm
+if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]] || [[ "${KERNEL_FLAVOR}" =~ "longterm" ]]; then
     mkdir -p "$(dirname /lib/modules/"${KERNEL_VERSION}"/build/certs/signing_key.x509)"
     install -Dm644 /tmp/certs/public_key.der /lib/modules/"${KERNEL_VERSION}"/build/certs/signing_key.x509
     install -Dm644 /tmp/certs/private_key.priv /lib/modules/"${KERNEL_VERSION}"/build/certs/signing_key.pem

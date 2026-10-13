@@ -8,17 +8,10 @@ popd
 
 ### PREPARE REPOS
 RPM_PREP=(openssl)
-if [[ "${KERNEL_FLAVOR}" =~ "centos" ]]; then
-    echo "Building for CentOS"
-    RELEASE="$(rpm -E '%centos')"
-    mkdir -p /var/roothome
-    dnf config-manager --set-enabled crb
-else
-    echo "Building for Fedora"
-    RELEASE="$(rpm -E '%fedora')"
-    dnf config-manager setopt fedora-cisco-openh264.enabled=0
-    dnf config-manager addrepo --from-repofile=https://negativo17.org/repos/fedora-multimedia.repo
-fi
+echo "Building for Fedora"
+RELEASE="$(rpm -E '%fedora')"
+dnf config-manager setopt fedora-cisco-openh264.enabled=0
+dnf config-manager addrepo --from-repofile=https://negativo17.org/repos/fedora-multimedia.repo
 
 # enable RPMs with alternatives to create them in this image build
 mkdir -p /var/lib/alternatives

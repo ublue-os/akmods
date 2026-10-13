@@ -17,18 +17,10 @@ build_tag="${KERNEL_BUILD_TAG:-latest}"
 ARCH=$(uname -m)
 
 dnf install -y --setopt=install_weak_deps=False dnf-plugins-core openssl
-if [[ "$kernel_flavor" =~ "centos" ]]; then
-    CENTOS_VER=$(rpm -E %centos)
-    dnf config-manager --set-enabled crb
-    dnf -y install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${CENTOS_VER}.noarch.rpm"
-fi
 dnf -y install --setopt=install_weak_deps=False dracut rpmrebuild sbsigntools
 
 case "$kernel_flavor" in
-    "centos"|"coreos"*|"main")
-        ;;
-    "centos-kmodsig")
-        dnf -y install centos-release-kmods-kernel
+    "coreos"*|"main")
         ;;
     "longterm"*)
         dnf -y copr enable kwizart/kernel-"${kernel_flavor}"
@@ -41,31 +33,7 @@ case "$kernel_flavor" in
         ;;
 esac
 
-if [[ "${kernel_flavor}" == "centos" ]]; then
-    # Using curl instead of dnf download for https links
-    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-"$kernel_version".rpm
-    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-core-"$kernel_version".rpm
-    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-modules-"$kernel_version".rpm
-    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-modules-core-"$kernel_version".rpm
-    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-modules-extra-"$kernel_version".rpm
-    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/BaseOS/"$ARCH"/os/Packages/kernel-uki-virt-"$kernel_version".rpm
-    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/AppStream/"$ARCH"/os/Packages/kernel-devel-"$kernel_version".rpm
-    curl -#fLO https://mirror.stream.centos.org/"$CENTOS_VER"-stream/AppStream/"$ARCH"/os/Packages/kernel-devel-matched-"$kernel_version".rpm
-elif [[ "${kernel_flavor}" == "centos-kmodsig" ]]; then
-    KERNEL_MAJOR_MINOR_PATCH=$(echo "$kernel_version" | cut -d '-' -f 1)
-    KERNEL_RELEASE="$(echo "$kernel_version" | cut -d - -f 2 | rev | cut -d . -f 2- | rev)"
-    # https://cbs.centos.org/kojifiles/packages/kernel/6.15.10/1.el10/x86_64/kernel-6.15.10-1.el10.x86_64.rpm
-    BASE_URL="https://cbs.centos.org/kojifiles/packages/kernel/${KERNEL_MAJOR_MINOR_PATCH}/${KERNEL_RELEASE}/${ARCH}"
-    for pkg in \
-        kernel \
-        kernel-core \
-        kernel-devel \
-        kernel-devel-matched \
-        kernel-modules \
-        kernel-headers; do
-        curl -#fLO "${BASE_URL}/${pkg}-${kernel_version}.rpm"
-    done
-elif [[ "${kernel_flavor}" =~ "longterm" ]]; then
+if [[ "${kernel_flavor}" =~ "longterm" ]]; then
     dnf download -y --enablerepo="copr:copr.fedorainfracloud.org:kwizart:kernel-${kernel_flavor}" \
         kernel-longterm-"${kernel_version}" \
         kernel-longterm-core-"${kernel_version}" \
@@ -134,7 +102,7 @@ install -Dm644 "${KCWD}"/certs/public_key.crt "$PUBLIC_KEY_PATH"
 install -Dm644 "${KCWD}"/certs/private_key.priv "$PRIVATE_KEY_PATH"
 
 ls -la /
-if [[ "${kernel_flavor}" == "centos-kmodsig" ]] || [[ "${kernel_flavor}" =~ ^ogc ]]; then
+if [[ "${kernel_flavor}" =~ ^ogc ]]; then
   dnf install -y \
       /"${kernel_name}-$kernel_version.rpm" \
       /"${kernel_name}-core-$kernel_version.rpm" \
@@ -149,8 +117,8 @@ else
 fi
 
 # Strip Signatures from non-fedora Kernels
-if [[ ${kernel_flavor} =~ main|coreos|centos ]]; then
-    echo "Will not strip Fedora/CentOS signature(s) from ${kernel_flavor} kernel."
+if [[ ${kernel_flavor} =~ main|coreos ]]; then
+    echo "Will not strip Fedora signature(s) from ${kernel_flavor} kernel."
 else
     EXISTING_SIGNATURES="$(sbverify --list /usr/lib/modules/"$kernel_version"/vmlinuz | grep '^signature \([0-9]\+\)$' | sed 's/^signature \([0-9]\+\)$/\1/')" || true
     if [[ -n "$EXISTING_SIGNATURES" ]]; then
