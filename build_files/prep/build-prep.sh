@@ -15,7 +15,7 @@ RELEASE="$(rpm -E '%fedora')"
 
 dnf config-manager setopt fedora-cisco-openh264.enabled=0
 
-RPMFUSION_MIRROR_RPMS="https://mirrors.rpmfusion.org"
+RPMFUSION_MIRROR_RPMS="https://download1.rpmfusion.org"
 if [ -n "${RPMFUSION_MIRROR}" ]; then
     RPMFUSION_MIRROR_RPMS=${RPMFUSION_MIRROR}
 fi
