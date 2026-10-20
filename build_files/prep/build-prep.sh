@@ -92,6 +92,17 @@ fi
 # Install RPMs
 dnf install -y --allowerasing "${RPMS_TO_INSTALL[@]}"
 
+# Normalize random akmods build roots before linking
+original_build_pre="$(rpm --eval '%{macrobody:__spec_build_pre}')"
+
+{
+    printf '%%__spec_build_pre '
+    printf '%s\n' "$original_build_pre" | sed 's/$/\\/'
+    cat <<'EOF'
+export KCFLAGS="${KCFLAGS:+${KCFLAGS} }-ffile-prefix-map=%{_builddir}=/usr/src/akmods"
+EOF
+} > /etc/rpm/macros.akmods-reproducible
+
 # Configure Dual Signing
 if [[ "${DUAL_SIGN}" == 'true' ]]; then
     if [[ ! -s "/tmp/certs/private_key_2.priv" ]]; then
