@@ -99,7 +99,7 @@ original_build_pre="$(rpm --eval '%{macrobody:__spec_build_pre}')"
     printf '%%__spec_build_pre '
     printf '%s\n' "$original_build_pre" | sed 's/$/\\/'
     cat <<'EOF'
-export KCFLAGS="${KCFLAGS:+${KCFLAGS} }-ffile-prefix-map=%{_builddir}=/usr/src/akmods"
+export KCFLAGS="${KCFLAGS:+${KCFLAGS} }-ffile-prefix-map=$(realpath -m "%{_builddir}")=/usr/src/akmods"
 EOF
 } > /etc/rpm/macros.akmods-reproducible
 
