@@ -2,6 +2,10 @@
 
 set ${CI:+-x} -euo pipefail
 
+#shellcheck source-path=SCRIPTDIR
+#shellcheck source=dnf-retry.sh
+source /tmp/dnf-retry.sh
+
 ### PREPARE REPOS
 # enable RPMs with alternatives to create them in this image build
 mkdir -p /var/lib/alternatives
@@ -30,7 +34,7 @@ echo "Installing ${KERNEL_FLAVOR} kernel-cache RPMs..."
 
 # build image has no kernel so this needs nothing fancy, just install, but not UKIs
 #shellcheck disable=SC2046 #we want word splitting
-dnf install -y --allowerasing --setopt=install_weak_deps=False "${PREP_RPMS[@]}" $(find /tmp/kernel_cache/*.rpm -type f | grep "$(uname -m)" | grep -v uki | xargs)
+dnf_retry install -y --allowerasing --setopt=install_weak_deps=False "${PREP_RPMS[@]}" $(find /tmp/kernel_cache/*.rpm -type f | grep "$(uname -m)" | grep -v uki | xargs)
 
 # after F45 launches, bump to 46
 if [[ "${VERSION}" -ge 45 && -f /etc/fedora-release ]]; then
@@ -90,7 +94,7 @@ if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]] || [[ "${KERNEL_FLAVOR}" =~ "longterm" ]
 fi
 
 # Install RPMs
-dnf install -y --allowerasing "${RPMS_TO_INSTALL[@]}"
+dnf_retry install -y --allowerasing "${RPMS_TO_INSTALL[@]}"
 
 # Normalize random akmods build roots before linking
 original_build_pre="$(rpm --eval '%{macrobody:__spec_build_pre}')"

@@ -20,9 +20,9 @@ ogc_image := "ghcr.io/opengamingcollective/kernel-packages-fedora:" + ogc_tag + 
 kernel_flavor := env('AKMODS_KERNEL', shell(yq + ' ".defaults.kernel_flavor" images.yaml'))
 version := env('AKMODS_VERSION', shell(yq + ' ".defaults.version" images.yaml'))
 akmods_target := env('AKMODS_TARGET', if kernel_flavor =~ 'longterm' { 'zfs' } else { shell(yq + ' ".defaults.akmods_target" images.yaml') })
-zfs_minor_version := env(
-    'ZFS_MINOR_VERSION',
-    shell(yq + ' ".zfs[\"$1\"].minor_version // .zfs.default.minor_version" images.yaml', kernel_flavor)
+zfs_version := env(
+    'ZFS_VERSION',
+    shell(yq + ' ".zfs[\"$1\"].version // .zfs.default.version" images.yaml', kernel_flavor)
 )
 zfs_linux_experimental_overridden := shell(
     yq + ' ".zfs[\"$1\"] | has(\"linux_experimental\")" images.yaml',
@@ -85,16 +85,35 @@ get-kernel-version:
     fi
 
     coreos_kernel() {
-        # query the upstream coreos (stable or testing) image and provide the kernel version
+        # Read the kernel from CoreOS build metadata. Pulling the image just to run
+        # rpm -q kernel fails when the quay.io CDN drops the blob connection.
         local coreos_version=${1}
-        local coreos_image="quay.io/fedora/fedora-coreos:$coreos_version"
-        {{ podman }} pull --retry 3 "$coreos_image" >&2
-        kernelinspector=$({{ podman }} run --entrypoint /bin/bash -dt "$coreos_image")
-        local rpm="{{ podman }} exec -t $kernelinspector rpm"
-        trap '{{ podman }} rm -f -t 0 $kernelinspector &>/dev/null' EXIT SIGTERM
+        local arch="{{ arch() }}" oci_arch
+        case "$arch" in
+            x86_64)  oci_arch=amd64 ;;
+            aarch64) oci_arch=arm64 ;;
+            *) echo "unsupported arch ${arch}" >&2; exit 1 ;;
+        esac
+        local build
+        build=$(skopeo --override-arch "$oci_arch" inspect --retry-times 3 --no-tags \
+            "docker://quay.io/fedora/fedora-coreos:${coreos_version}" \
+            | jq -r '.Labels["org.opencontainers.image.version"] // empty')
+        [[ -n "$build" ]] || { echo "no CoreOS build id for ${coreos_version}/${arch}" >&2; exit 1; }
 
-        # as of Fedora 43, CoreOS image does not have the ostree.linux label; so query rpm within image
-        coreos_linux=$($rpm -q kernel | sed "s/^kernel-//" | tr -d '\r\n')
+        local meta
+        meta=$(curl --fail --silent --show-error --location --retry 5 --retry-all-errors \
+            "https://builds.coreos.fedoraproject.org/prod/streams/${coreos_version}/builds/${build}/${arch}/commitmeta.json")
+
+        coreos_linux=$(jq -r '.["ostree.linux"] // empty' <<< "$meta")
+        local kernels=()
+        mapfile -t kernels < <(jq -r --arg arch "$arch" \
+            '.["rpmostree.rpmdb.pkglist"][] | select(.[0] == "kernel" and .[4] == $arch) | "\(.[2])-\(.[3]).\(.[4])"' \
+            <<< "$meta")
+        if [[ -z "$coreos_linux" || "$coreos_linux" != *".${arch}" ]] \
+            || (( ${#kernels[@]} != 1 )) || [[ "${kernels[0]}" != "$coreos_linux" ]]; then
+            echo "CoreOS ${build}/${arch}: ostree.linux='${coreos_linux}', kernel entries: ${kernels[*]:-none}" >&2
+            exit 1
+        fi
 
         # This gives us a consistent place to handle pinning for coreos stable dependent usages
         # including: ucore stable, aurora stable and bluefin stable
@@ -122,6 +141,18 @@ get-kernel-version:
         # It should be verified downloadable by verify_kernel_fedora()
     }
 
+    # Prints the HTTP status for a successful request; returns 2 on transport failure.
+    koji_status() {
+        local url="$1" code rc=0
+        code=$(curl --silent --show-error --head --output /dev/null --write-out '%{http_code}' \
+            --retry 5 --retry-delay 5 --retry-connrefused "$url") || rc=$?
+        if (( rc != 0 )); then
+            echo "koji: request failed (curl exit ${rc}) for ${url}" >&2
+            return 2
+        fi
+        printf '%s\n' "$code"
+    }
+
     verify_kernel_fedora() {
         # using the kernel version from upstream image
         # verify the expected version exist in koji packages for Fedora of the required version
@@ -137,31 +168,31 @@ get-kernel-version:
 
         echo "Querying koji for ${coreos_version} kernel: $kernel_version" >&2
         echo "$URL" >&2
-        HTTP_RESP=$(curl -sI "$URL" | grep ^HTTP)
         linux=""
-        if grep -qv "200 OK" <<< "${HTTP_RESP}"; then
-            echo "Koji failed to find $coreos_version kernel: $kernel_version" >&2
-            case "$kernel_rel_part" in
-                30[0-9]|20[0-9])
-                    kernel_rel_part_new=$((10#$kernel_rel_part - 100))
-                    kernel_rel_part=$(printf "%03d" "$kernel_rel_part_new")   # zero pad to 3 digits
-                    ;;
-                10[0-9]) ;;
-                *) echo "unexpected kernel_rel_part ${kernel_rel_part}" >&2 ;;
-            esac
-            kernel_rel="$kernel_rel_part.fc{{ version }}"
-            kernel_version="$major_minor_patch-$kernel_rel.$arch"
-            URL="https://kojipkgs.fedoraproject.org/packages/kernel/"$major_minor_patch"/"$kernel_rel"/"$arch"/kernel-"$kernel_version".rpm"
-            echo "Re-querying koji for ${coreos_version} kernel: $kernel_version" >&2
-            echo "$URL" >&2
-            HTTP_RESP=$(curl -sI "$URL" | grep ^HTTP)
-            if grep -qv "200 OK" <<< "${HTTP_RESP}"; then
-                echo "Koji re-query failed to find $coreos_version kernel: $kernel_version" >&2
-            fi
-        fi
-        if grep -q "200 OK" <<< "${HTTP_RESP}"; then
-            linux=$kernel_version
-        fi
+        status=$(koji_status "$URL") || exit 1
+        case "$status" in
+            200) linux="$kernel_version" ;;
+            404)
+                echo "Koji failed to find $coreos_version kernel: $kernel_version" >&2
+                case "$kernel_rel_part" in
+                    30[0-9]|20[0-9])
+                        kernel_rel_part_new=$((10#$kernel_rel_part - 100))
+                        kernel_rel_part=$(printf "%03d" "$kernel_rel_part_new")   # zero pad to 3 digits
+                        ;;
+                    10[0-9]) ;;
+                    *) echo "unexpected kernel_rel_part ${kernel_rel_part}" >&2 ;;
+                esac
+                kernel_rel="$kernel_rel_part.fc{{ version }}"
+                kernel_version="$major_minor_patch-$kernel_rel.$arch"
+                URL="https://kojipkgs.fedoraproject.org/packages/kernel/"$major_minor_patch"/"$kernel_rel"/"$arch"/kernel-"$kernel_version".rpm"
+                echo "Re-querying koji for ${coreos_version} kernel: $kernel_version" >&2
+                echo "$URL" >&2
+                status=$(koji_status "$URL") || exit 1
+                [[ "$status" == 200 ]] && linux="$kernel_version" \
+                    || { echo "koji: ${status} for ${URL} after fallback" >&2; exit 1; }
+                ;;
+            *) echo "koji: unexpected HTTP ${status} for ${URL}" >&2; exit 1 ;;
+        esac
     }
 
     kernel_name=kernel
@@ -242,7 +273,31 @@ get-kernel-version:
 # Cache Version Json
 [group('Build')]
 @cache-kernel-version: && populate-github-output
-    [ ! -f {{ version_json }} ] && {{ just }} get-kernel-version > {{ version_json }} || :
+    #!/usr/bin/env bash
+    set ${CI:+-x} -euo pipefail
+    cache="{{ version_json }}"
+    valid() {
+        jq -e --arg flavor "{{ kernel_flavor }}" --arg kcpath "{{ KCPATH }}" '
+            def str: type == "string" and length > 0 and . != "null";
+            (.kernel_flavor == $flavor)
+            and (.kernel_release | str)
+            and (.kernel_name | str)
+            and (.kernel_major_minor_patch | str)
+            and (.KCPATH == $kcpath)
+            and (.KCWD | str)
+        ' "$1" > /dev/null 2>&1
+    }
+    if [[ -e "$cache" ]]; then
+        valid "$cache" && exit 0
+        echo "Discarding invalid ${cache}" >&2
+        rm -f "$cache"
+    fi
+    tmp="$(mktemp "${cache}.XXXXXX")"
+    trap 'rm -f "$tmp"' EXIT
+    {{ just }} get-kernel-version > "$tmp"
+    valid "$tmp" || { echo "get-kernel-version produced invalid output" >&2; exit 1; }
+    mv -f "$tmp" "$cache"
+    trap - EXIT
 
 # Populate Github Output
 [private]
@@ -261,7 +316,7 @@ fetch-kernel: (cache-kernel-version)
     {{ podman }} pull --retry 3 "{{ builder }}" >&2
 
     # Prep Environment
-    cp -a fetch-kernel.sh certs {{ KCWD }} >&2
+    cp -a fetch-kernel.sh build_files/prep/dnf-retry.sh certs {{ KCWD }} >&2
 
     # Fetch Kernels
     builder=$(podman run \
@@ -305,7 +360,7 @@ build: (cache-kernel-version) (fetch-kernel)
     fi
     if [[ "{{ akmods_target }}" == "zfs" ]]; then
         CPP_FLAGS+=(
-            "--cpp-flag=-DZFS_MINOR_VERSION_ARG=ZFS_MINOR_VERSION={{ zfs_minor_version }}"
+            "--cpp-flag=-DZFS_VERSION_ARG=ZFS_VERSION={{ zfs_version }}"
             "--cpp-flag=-DZFS_CONFIGURE_ARGS_ARG=ZFS_CONFIGURE_ARGS=\"{{ zfs_configure_args }}\""
         )
     fi
@@ -356,7 +411,7 @@ test: (cache-kernel-version) (fetch-kernel)
     fi
     if [[ "{{ akmods_target }}" == "zfs" ]]; then
         CPP_FLAGS+=(
-            "--cpp-flag=-DZFS_MINOR_VERSION_ARG=ZFS_MINOR_VERSION={{ zfs_minor_version }}"
+            "--cpp-flag=-DZFS_VERSION_ARG=ZFS_VERSION={{ zfs_version }}"
             "--cpp-flag=-DZFS_CONFIGURE_ARGS_ARG=ZFS_CONFIGURE_ARGS=\"{{ zfs_configure_args }}\""
         )
     fi
