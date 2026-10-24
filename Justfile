@@ -141,6 +141,18 @@ get-kernel-version:
         # It should be verified downloadable by verify_kernel_fedora()
     }
 
+    # Prints the HTTP status for a successful request; returns 2 on transport failure.
+    koji_status() {
+        local url="$1" code rc=0
+        code=$(curl --silent --show-error --head --output /dev/null --write-out '%{http_code}' \
+            --retry 5 --retry-delay 5 --retry-connrefused "$url") || rc=$?
+        if (( rc != 0 )); then
+            echo "koji: request failed (curl exit ${rc}) for ${url}" >&2
+            return 2
+        fi
+        printf '%s\n' "$code"
+    }
+
     verify_kernel_fedora() {
         # using the kernel version from upstream image
         # verify the expected version exist in koji packages for Fedora of the required version
@@ -156,31 +168,31 @@ get-kernel-version:
 
         echo "Querying koji for ${coreos_version} kernel: $kernel_version" >&2
         echo "$URL" >&2
-        HTTP_RESP=$(curl -sI "$URL" | grep ^HTTP)
         linux=""
-        if grep -qv "200 OK" <<< "${HTTP_RESP}"; then
-            echo "Koji failed to find $coreos_version kernel: $kernel_version" >&2
-            case "$kernel_rel_part" in
-                30[0-9]|20[0-9])
-                    kernel_rel_part_new=$((10#$kernel_rel_part - 100))
-                    kernel_rel_part=$(printf "%03d" "$kernel_rel_part_new")   # zero pad to 3 digits
-                    ;;
-                10[0-9]) ;;
-                *) echo "unexpected kernel_rel_part ${kernel_rel_part}" >&2 ;;
-            esac
-            kernel_rel="$kernel_rel_part.fc{{ version }}"
-            kernel_version="$major_minor_patch-$kernel_rel.$arch"
-            URL="https://kojipkgs.fedoraproject.org/packages/kernel/"$major_minor_patch"/"$kernel_rel"/"$arch"/kernel-"$kernel_version".rpm"
-            echo "Re-querying koji for ${coreos_version} kernel: $kernel_version" >&2
-            echo "$URL" >&2
-            HTTP_RESP=$(curl -sI "$URL" | grep ^HTTP)
-            if grep -qv "200 OK" <<< "${HTTP_RESP}"; then
-                echo "Koji re-query failed to find $coreos_version kernel: $kernel_version" >&2
-            fi
-        fi
-        if grep -q "200 OK" <<< "${HTTP_RESP}"; then
-            linux=$kernel_version
-        fi
+        status=$(koji_status "$URL") || exit 1
+        case "$status" in
+            200) linux="$kernel_version" ;;
+            404)
+                echo "Koji failed to find $coreos_version kernel: $kernel_version" >&2
+                case "$kernel_rel_part" in
+                    30[0-9]|20[0-9])
+                        kernel_rel_part_new=$((10#$kernel_rel_part - 100))
+                        kernel_rel_part=$(printf "%03d" "$kernel_rel_part_new")   # zero pad to 3 digits
+                        ;;
+                    10[0-9]) ;;
+                    *) echo "unexpected kernel_rel_part ${kernel_rel_part}" >&2 ;;
+                esac
+                kernel_rel="$kernel_rel_part.fc{{ version }}"
+                kernel_version="$major_minor_patch-$kernel_rel.$arch"
+                URL="https://kojipkgs.fedoraproject.org/packages/kernel/"$major_minor_patch"/"$kernel_rel"/"$arch"/kernel-"$kernel_version".rpm"
+                echo "Re-querying koji for ${coreos_version} kernel: $kernel_version" >&2
+                echo "$URL" >&2
+                status=$(koji_status "$URL") || exit 1
+                [[ "$status" == 200 ]] && linux="$kernel_version" \
+                    || { echo "koji: ${status} for ${URL} after fallback" >&2; exit 1; }
+                ;;
+            *) echo "koji: unexpected HTTP ${status} for ${URL}" >&2; exit 1 ;;
+        esac
     }
 
     kernel_name=kernel
