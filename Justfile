@@ -20,9 +20,9 @@ ogc_image := "ghcr.io/opengamingcollective/kernel-packages-fedora:" + ogc_tag + 
 kernel_flavor := env('AKMODS_KERNEL', shell(yq + ' ".defaults.kernel_flavor" images.yaml'))
 version := env('AKMODS_VERSION', shell(yq + ' ".defaults.version" images.yaml'))
 akmods_target := env('AKMODS_TARGET', if kernel_flavor =~ 'longterm' { 'zfs' } else { shell(yq + ' ".defaults.akmods_target" images.yaml') })
-zfs_minor_version := env(
-    'ZFS_MINOR_VERSION',
-    shell(yq + ' ".zfs[\"$1\"].minor_version // .zfs.default.minor_version" images.yaml', kernel_flavor)
+zfs_version := env(
+    'ZFS_VERSION',
+    shell(yq + ' ".zfs[\"$1\"].version // .zfs.default.version" images.yaml', kernel_flavor)
 )
 zfs_linux_experimental_overridden := shell(
     yq + ' ".zfs[\"$1\"] | has(\"linux_experimental\")" images.yaml',
@@ -305,7 +305,7 @@ build: (cache-kernel-version) (fetch-kernel)
     fi
     if [[ "{{ akmods_target }}" == "zfs" ]]; then
         CPP_FLAGS+=(
-            "--cpp-flag=-DZFS_MINOR_VERSION_ARG=ZFS_MINOR_VERSION={{ zfs_minor_version }}"
+            "--cpp-flag=-DZFS_VERSION_ARG=ZFS_VERSION={{ zfs_version }}"
             "--cpp-flag=-DZFS_CONFIGURE_ARGS_ARG=ZFS_CONFIGURE_ARGS=\"{{ zfs_configure_args }}\""
         )
     fi
@@ -356,7 +356,7 @@ test: (cache-kernel-version) (fetch-kernel)
     fi
     if [[ "{{ akmods_target }}" == "zfs" ]]; then
         CPP_FLAGS+=(
-            "--cpp-flag=-DZFS_MINOR_VERSION_ARG=ZFS_MINOR_VERSION={{ zfs_minor_version }}"
+            "--cpp-flag=-DZFS_VERSION_ARG=ZFS_VERSION={{ zfs_version }}"
             "--cpp-flag=-DZFS_CONFIGURE_ARGS_ARG=ZFS_CONFIGURE_ARGS=\"{{ zfs_configure_args }}\""
         )
     fi

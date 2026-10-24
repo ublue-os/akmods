@@ -215,6 +215,7 @@ Since nothing additional was set. The following will occur. The build scripts wi
 - AKMODS_KERNEL - The kernel flavor you are building
 - AKMODS_VERSION - The release version
 - AKMODS_TARGET - The akmods package to build
+- ZFS_VERSION - Overrides `zfs.*.version` from `images.yaml` (a full `X.Y.Z`). `ZFS_MINOR_VERSION` is no longer read. Renovate manages the pin.
 
 ```bash
 AKMODS_KERNEL=longterm-6.18 AKMODS_VERSION=44 AKMODS_TARGET=zfs just build

@@ -7,10 +7,12 @@ defaults:
 # ZFS defaults can be overridden per kernel flavor without affecting the build matrix.
 zfs:
   default:
-    minor_version: "2.4"
+    # renovate: datasource=github-releases depName=openzfs/zfs extractVersion=^zfs-(?<version>.+)$
+    version: "2.4.4"
     linux_experimental: false
   coreos-testing:
-    minor_version: "2.4"
+    # renovate: datasource=github-releases depName=openzfs/zfs extractVersion=^zfs-(?<version>.+)$
+    version: "2.4.4"
     linux_experimental: false
 
 arch-arm-x86: &arch-arm-x86

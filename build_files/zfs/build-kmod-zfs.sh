@@ -2,9 +2,15 @@
 
 set ${CI:+-x} -euo pipefail
 
+# Full X.Y.Z pin from images.yaml (or ZFS_VERSION). ZFS_MINOR_VERSION is not read.
+# Do not query api.github.com; unauthenticated runner IPs get rate-limited.
+ZFS_VERSION="${ZFS_VERSION:-}"
+if [[ ! "${ZFS_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "ZFS_VERSION must be a full X.Y.Z release (got '${ZFS_VERSION}')" >&2
+    exit 1
+fi
+
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
-# allow pinning to a specific release series (eg, 2.0.x or 2.1.x)
-ZFS_MINOR_VERSION="${ZFS_MINOR_VERSION:-}"
 # CoreOS testing may opt into the one experimental configure switch we support.
 ZFS_CONFIGURE_ARGS="${ZFS_CONFIGURE_ARGS:-}"
 ZFS_CONFIGURE_ARGS_ARRAY=()
@@ -18,15 +24,9 @@ fi
 
 cd /tmp
 
-# GitHub's unauthenticated API rate limit (and the occasional mirror hiccup) makes
-# these fetches flaky, so retry on any transient error and fail hard on a bad
-# response instead of feeding a rate-limit page into jq.
+# Release assets live on github.com, not the API. Retry transient mirror errors.
 CURL=(curl --fail --show-error --location --retry 5 --retry-delay 5 --retry-all-errors)
 
-# Use cURL to fetch the given URL, saving the response to `data.json`
-"${CURL[@]}" "https://api.github.com/repos/openzfs/zfs/releases" -o data.json
-ZFS_VERSION=$(jq -r --arg ZMV "zfs-${ZFS_MINOR_VERSION}" '[ .[] | select(.prerelease==false and .draft==false) | select(.tag_name | startswith($ZMV))][0].tag_name' data.json|cut -f2- -d-)
-echo "ZFS_MINOR_VERSION==$ZFS_MINOR_VERSION"
 echo "ZFS_VERSION==$ZFS_VERSION"
 echo "ZFS_CONFIGURE_ARGS==$ZFS_CONFIGURE_ARGS"
 
