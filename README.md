@@ -216,6 +216,7 @@ Since nothing additional was set. The following will occur. The build scripts wi
 - AKMODS_VERSION - The release version
 - AKMODS_TARGET - The akmods package to build
 - ZFS_VERSION - Overrides `zfs.*.version` from `images.yaml` (a full `X.Y.Z`). `ZFS_MINOR_VERSION` is no longer read. Renovate manages the pin.
+- RPMFUSION_MIRROR - Optional base URL for an RPM Fusion mirror (for example `https://mirrors.ocf.berkeley.edu/rpmfusion`). When set, the build installs the rpmfusion release RPMs from it and points the rpmfusion repos at it instead of the metalink. When unset, the build uses `https://download1.rpmfusion.org` and the normal metalink. It can go in `.env`.
 
 ```bash
 AKMODS_KERNEL=longterm-6.18 AKMODS_VERSION=44 AKMODS_TARGET=zfs just build
