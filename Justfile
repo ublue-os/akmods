@@ -85,16 +85,35 @@ get-kernel-version:
     fi
 
     coreos_kernel() {
-        # query the upstream coreos (stable or testing) image and provide the kernel version
+        # Read the kernel from CoreOS build metadata. Pulling the image just to run
+        # rpm -q kernel fails when the quay.io CDN drops the blob connection.
         local coreos_version=${1}
-        local coreos_image="quay.io/fedora/fedora-coreos:$coreos_version"
-        {{ podman }} pull --retry 3 "$coreos_image" >&2
-        kernelinspector=$({{ podman }} run --entrypoint /bin/bash -dt "$coreos_image")
-        local rpm="{{ podman }} exec -t $kernelinspector rpm"
-        trap '{{ podman }} rm -f -t 0 $kernelinspector &>/dev/null' EXIT SIGTERM
+        local arch="{{ arch() }}" oci_arch
+        case "$arch" in
+            x86_64)  oci_arch=amd64 ;;
+            aarch64) oci_arch=arm64 ;;
+            *) echo "unsupported arch ${arch}" >&2; exit 1 ;;
+        esac
+        local build
+        build=$(skopeo --override-arch "$oci_arch" inspect --retry-times 3 --no-tags \
+            "docker://quay.io/fedora/fedora-coreos:${coreos_version}" \
+            | jq -r '.Labels["org.opencontainers.image.version"] // empty')
+        [[ -n "$build" ]] || { echo "no CoreOS build id for ${coreos_version}/${arch}" >&2; exit 1; }
 
-        # as of Fedora 43, CoreOS image does not have the ostree.linux label; so query rpm within image
-        coreos_linux=$($rpm -q kernel | sed "s/^kernel-//" | tr -d '\r\n')
+        local meta
+        meta=$(curl --fail --silent --show-error --location --retry 5 --retry-all-errors \
+            "https://builds.coreos.fedoraproject.org/prod/streams/${coreos_version}/builds/${build}/${arch}/commitmeta.json")
+
+        coreos_linux=$(jq -r '.["ostree.linux"] // empty' <<< "$meta")
+        local kernels=()
+        mapfile -t kernels < <(jq -r --arg arch "$arch" \
+            '.["rpmostree.rpmdb.pkglist"][] | select(.[0] == "kernel" and .[4] == $arch) | "\(.[2])-\(.[3]).\(.[4])"' \
+            <<< "$meta")
+        if [[ -z "$coreos_linux" || "$coreos_linux" != *".${arch}" ]] \
+            || (( ${#kernels[@]} != 1 )) || [[ "${kernels[0]}" != "$coreos_linux" ]]; then
+            echo "CoreOS ${build}/${arch}: ostree.linux='${coreos_linux}', kernel entries: ${kernels[*]:-none}" >&2
+            exit 1
+        fi
 
         # This gives us a consistent place to handle pinning for coreos stable dependent usages
         # including: ucore stable, aurora stable and bluefin stable
@@ -242,7 +261,31 @@ get-kernel-version:
 # Cache Version Json
 [group('Build')]
 @cache-kernel-version: && populate-github-output
-    [ ! -f {{ version_json }} ] && {{ just }} get-kernel-version > {{ version_json }} || :
+    #!/usr/bin/env bash
+    set ${CI:+-x} -euo pipefail
+    cache="{{ version_json }}"
+    valid() {
+        jq -e --arg flavor "{{ kernel_flavor }}" --arg kcpath "{{ KCPATH }}" '
+            def str: type == "string" and length > 0 and . != "null";
+            (.kernel_flavor == $flavor)
+            and (.kernel_release | str)
+            and (.kernel_name | str)
+            and (.kernel_major_minor_patch | str)
+            and (.KCPATH == $kcpath)
+            and (.KCWD | str)
+        ' "$1" > /dev/null 2>&1
+    }
+    if [[ -e "$cache" ]]; then
+        valid "$cache" && exit 0
+        echo "Discarding invalid ${cache}" >&2
+        rm -f "$cache"
+    fi
+    tmp="$(mktemp "${cache}.XXXXXX")"
+    trap 'rm -f "$tmp"' EXIT
+    {{ just }} get-kernel-version > "$tmp"
+    valid "$tmp" || { echo "get-kernel-version produced invalid output" >&2; exit 1; }
+    mv -f "$tmp" "$cache"
+    trap - EXIT
 
 # Populate Github Output
 [private]
