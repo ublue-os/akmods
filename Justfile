@@ -261,7 +261,7 @@ fetch-kernel: (cache-kernel-version)
     {{ podman }} pull --retry 3 "{{ builder }}" >&2
 
     # Prep Environment
-    cp -a fetch-kernel.sh certs {{ KCWD }} >&2
+    cp -a fetch-kernel.sh build_files/prep/dnf-retry.sh certs {{ KCWD }} >&2
 
     # Fetch Kernels
     builder=$(podman run \

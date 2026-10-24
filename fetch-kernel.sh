@@ -2,6 +2,10 @@
 
 set ${CI:+-x} -euo pipefail
 
+#shellcheck source-path=SCRIPTDIR
+#shellcheck source=build_files/prep/dnf-retry.sh
+source /tmp/kernel-cache/dnf-retry.sh
+
 # ensures we pass a known dir for volume mount of output rpm files
 KCWD=/tmp/kernel-cache
 find "${KCWD}"
@@ -16,8 +20,8 @@ build_tag="${KERNEL_BUILD_TAG:-latest}"
 
 ARCH=$(uname -m)
 
-dnf install -y --setopt=install_weak_deps=False dnf-plugins-core openssl
-dnf -y install --setopt=install_weak_deps=False dracut rpmrebuild sbsigntools
+dnf_retry install -y --setopt=install_weak_deps=False dnf-plugins-core openssl
+dnf_retry -y install --setopt=install_weak_deps=False dracut rpmrebuild sbsigntools
 
 case "$kernel_flavor" in
     "coreos"*|"main")
@@ -34,7 +38,7 @@ case "$kernel_flavor" in
 esac
 
 if [[ "${kernel_flavor}" =~ "longterm" ]]; then
-    dnf download -y --enablerepo="copr:copr.fedorainfracloud.org:kwizart:kernel-${kernel_flavor}" \
+    dnf_retry download -y --enablerepo="copr:copr.fedorainfracloud.org:kwizart:kernel-${kernel_flavor}" \
         kernel-longterm-"${kernel_version}" \
         kernel-longterm-core-"${kernel_version}" \
         kernel-longterm-modules-"${kernel_version}" \
@@ -44,7 +48,7 @@ if [[ "${kernel_flavor}" =~ "longterm" ]]; then
         kernel-longterm-devel-matched-"${kernel_version}"
 elif [[ "${kernel_flavor}" =~ ^ogc ]]; then
     ogc_image="${OGC_IMAGE:?OGC_IMAGE env var must be set}"
-    dnf install -y --setopt=install_weak_deps=False jq skopeo
+    dnf_retry install -y --setopt=install_weak_deps=False jq skopeo
 
     # Fetch the OCI artifact and parse its manifest for kernel RPM filenames
     tmpdir=$(mktemp -d)
@@ -103,12 +107,12 @@ install -Dm644 "${KCWD}"/certs/private_key.priv "$PRIVATE_KEY_PATH"
 
 ls -la /
 if [[ "${kernel_flavor}" =~ ^ogc ]]; then
-  dnf install -y \
+  dnf_retry install -y \
       /"${kernel_name}-$kernel_version.rpm" \
       /"${kernel_name}-core-$kernel_version.rpm" \
       /"${kernel_name}-modules-$kernel_version.rpm"
 else
-  dnf install -y \
+  dnf_retry install -y \
       /"${kernel_name}-$kernel_version.rpm" \
       /"${kernel_name}-core-$kernel_version.rpm" \
       /"${kernel_name}-modules-$kernel_version.rpm" \
@@ -167,7 +171,7 @@ rpmrebuild --notest-install --additional=--buildroot=/tmp/buildroot --batch "${k
 rm -f /usr/lib/modules/"${kernel_version}"/vmlinuz
 find /tmp
 find /root
-dnf reinstall -y /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
+dnf_retry reinstall -y /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
 
 # Verify Again
 sbverify --list /usr/lib/modules/"${kernel_version}"/vmlinuz

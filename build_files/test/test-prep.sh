@@ -2,6 +2,10 @@
 
 set ${CI:+-x} -euo pipefail
 
+#shellcheck source-path=SCRIPTDIR
+#shellcheck source=../prep/dnf-retry.sh
+source /tmp/dnf-retry.sh
+
 pushd /tmp/kernel_cache
 KERNEL_VERSION=$(find "$KERNEL_NAME"-*.rpm | grep "$(uname -m)" | grep -P "$KERNEL_NAME-\d+\.\d+(\.\d+)?-\w+.*$(rpm -E '%{dist}')" | sed -E "s/$KERNEL_NAME-//;s/\.rpm//")
 popd
@@ -24,7 +28,7 @@ fi
 echo "Installing ${KERNEL_FLAVOR} kernel-cache RPMs..."
 # fedora image has no kernel so this needs nothing fancy, just install
 #shellcheck disable=SC2046 # We want word splitting
-dnf install -y --setopt=install_weak_deps=False "${RPM_PREP[@]}" $(find /tmp/kernel_cache/*.rpm -type f | grep "$(uname -m)" | grep -v uki)
+dnf_retry install -y --setopt=install_weak_deps=False "${RPM_PREP[@]}" $(find /tmp/kernel_cache/*.rpm -type f | grep "$(uname -m)" | grep -v uki)
 
 # after F45 launches, bump to 46
 if [[ "${RELEASE}" -ge 45 && -f /etc/fedora-release ]]; then
@@ -83,6 +87,6 @@ else
     )
 fi
 
-dnf install -y --setopt=install_weak_deps=False --allowerasing "${KMODS_TO_INSTALL[@]}"
+dnf_retry install -y --setopt=install_weak_deps=False --allowerasing "${KMODS_TO_INSTALL[@]}"
 
 printf "KERNEL_NAME=%s" "$KERNEL_NAME" >> /tmp/info.sh
