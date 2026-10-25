@@ -15,6 +15,11 @@ on:
   schedule:
     - cron: '16 0 * * *'  # staggered minute past 00:00 UTC, see Justfile generate-workflows
   workflow_dispatch:
+    inputs:
+      force:
+        description: "Force build all targets (ignore fingerprint guard)"
+        type: boolean
+        default: false
 jobs:
   cache_kernel_ogc-lts_45:
     name: Cache ogc-lts (45)
@@ -42,6 +47,7 @@ jobs:
     with:
       akmods_target: common
       architecture: '["x86_64"]'
+      force: ${{ inputs.force || false }}
       kernel_cache_key: ${{ needs.cache_kernel_ogc-lts_45.outputs.KCKEY }}
       kernel_flavor: ogc-lts
       version: 45
@@ -59,6 +65,7 @@ jobs:
     with:
       akmods_target: extra
       architecture: '["x86_64"]'
+      force: ${{ inputs.force || false }}
       kernel_cache_key: ${{ needs.cache_kernel_ogc-lts_45.outputs.KCKEY }}
       kernel_flavor: ogc-lts
       version: 45
@@ -76,6 +83,7 @@ jobs:
     with:
       akmods_target: nvidia-lts
       architecture: '["x86_64"]'
+      force: ${{ inputs.force || false }}
       kernel_cache_key: ${{ needs.cache_kernel_ogc-lts_45.outputs.KCKEY }}
       kernel_flavor: ogc-lts
       version: 45
@@ -120,6 +128,7 @@ jobs:
     with:
       akmods_target: common
       architecture: '["x86_64"]'
+      force: ${{ inputs.force || false }}
       kernel_cache_key: ${{ needs.cache_kernel_ogc-lts_44.outputs.KCKEY }}
       kernel_flavor: ogc-lts
       version: 44
@@ -137,6 +146,7 @@ jobs:
     with:
       akmods_target: extra
       architecture: '["x86_64"]'
+      force: ${{ inputs.force || false }}
       kernel_cache_key: ${{ needs.cache_kernel_ogc-lts_44.outputs.KCKEY }}
       kernel_flavor: ogc-lts
       version: 44
@@ -154,6 +164,7 @@ jobs:
     with:
       akmods_target: nvidia-lts
       architecture: '["x86_64"]'
+      force: ${{ inputs.force || false }}
       kernel_cache_key: ${{ needs.cache_kernel_ogc-lts_44.outputs.KCKEY }}
       kernel_flavor: ogc-lts
       version: 44

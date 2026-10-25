@@ -12,6 +12,7 @@
     with:
       akmods_target: %%AKMODS_TARGET%%
       architecture: '%%ARCHITECTURE%%'
+      force: ${{ inputs.force || false }}
       kernel_cache_key: ${{ needs.cache_kernel_%%KERNEL_FLAVOR_CLEAN%%_%%VERSION%%.outputs.KCKEY }}
       kernel_flavor: %%KERNEL_FLAVOR%%
       version: %%VERSION%%

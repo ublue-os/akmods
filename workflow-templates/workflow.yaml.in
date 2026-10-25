@@ -9,3 +9,8 @@ on:
   schedule:
     - cron: '%%CRON_MINUTE%% 0 * * *'  # staggered minute past 00:00 UTC, see Justfile generate-workflows
   workflow_dispatch:
+    inputs:
+      force:
+        description: "Force build all targets (ignore fingerprint guard)"
+        type: boolean
+        default: false

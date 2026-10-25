@@ -64,6 +64,7 @@ ARG CI=1
 
 #ifdef NVIDIA 
 ARG KMOD_REPO_ARG
+ARG NVIDIA_AKMOD_EVR_ARG
 #endif /* NVIDIA */
 
 #ifdef ZFS

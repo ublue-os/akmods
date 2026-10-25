@@ -24,6 +24,11 @@ on:
         description: "The Key for the Kernel Cache"
         required: true
         type: string
+      force:
+        description: "Force a build, ignoring the fingerprint guard"
+        default: false
+        required: false
+        type: boolean
   workflow_dispatch:
     inputs:
       akmods_target:
@@ -47,6 +52,11 @@ on:
         description: "The Key for the Kernel Cache"
         required: true
         type: string
+      force:
+        description: "Force a build, ignoring the fingerprint guard"
+        default: false
+        required: false
+        type: boolean
 env:
   AKMODS_KERNEL: ${{ inputs.kernel_flavor }}
   AKMODS_TARGET: ${{ inputs.akmods_target }}
@@ -73,20 +83,6 @@ jobs:
       matrix:
         architecture: ${{ fromJson(inputs.architecture) }}
     steps:
-      - name: Maximize build space
-        shell: bash
-        run: |
-          set -xeuo pipefail
-          df -h
-          # Remove host toolchains, browsers
-          shopt -s nullglob
-          printf '/host-sys%s\0' /opt/PyPy /opt/az /opt/node/ /opt/pipx /opt/go /opt/Ruby \
-              /usr/lib/llvm-* /usr/local/julia* /usr/local/lib/android /usr/share/dotnet \
-              /usr/share/swift /usr/local/.ghcup /usr/lib/firefox /opt/google/chrome \
-              /opt/microsoft/msedge \
-              | xargs -0 -n1 -P4 rm -rf
-          df -h
-
       - name: Checkout Repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -108,8 +104,42 @@ jobs:
             ${{ matrix.architecture }}-${{ env.KCKEY }}
             ${{ matrix.architecture }}-${{ env.AKMODS_KERNEL }}
 
+      - name: Install Cosign
+        continue-on-error: true
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+        with:
+          cosign-release: "v3.1.4"
+
+      # Every event prepares the snapshot, so test and build pin the same inputs
+      - name: Prepare Fingerprint
+        continue-on-error: true
+        run: just fingerprint || just fingerprint-clear
+
+      - name: Check if build needed
+        id: guard
+        continue-on-error: true
+        env:
+          AKMODS_FORCE_BUILD: ${{ inputs.force || github.event_name == 'pull_request' }}
+          AKMODS_MAX_AGE_DAYS: ${{ vars.AKMODS_MAX_AGE_DAYS }}
+        run: just build-needed
+
+      - name: Maximize build space
+        if: ${{ !(steps.guard.outcome == 'success' && steps.guard.outputs.skip == 'true') }}
+        shell: bash
+        run: |
+          set -xeuo pipefail
+          df -h
+          # Remove host toolchains, browsers
+          shopt -s nullglob
+          printf '/host-sys%s\0' /opt/PyPy /opt/az /opt/node/ /opt/pipx /opt/go /opt/Ruby \
+              /usr/lib/llvm-* /usr/local/julia* /usr/local/lib/android /usr/share/dotnet \
+              /usr/share/swift /usr/local/.ghcup /usr/lib/firefox /opt/google/chrome \
+              /opt/microsoft/msedge \
+              | xargs -0 -n1 -P4 rm -rf
+          df -h
+
       - name: Retrieve Signing Key
-        if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
+        if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && !(steps.guard.outcome == 'success' && steps.guard.outputs.skip == 'true')
         shell: bash
         run: |
           mkdir -p certs
@@ -120,13 +150,15 @@ jobs:
           wc -c certs/private_key_2.priv
 
       - name: Test Image
+        if: ${{ !(steps.guard.outcome == 'success' && steps.guard.outputs.skip == 'true') }}
         run: just test
         
       - name: Build Image
+        if: ${{ !(steps.guard.outcome == 'success' && steps.guard.outputs.skip == 'true') }}
         run: just build
 
       - name: Push and Sign Image
-        if: contains(fromJson('["schedule", "merge_group"]'), github.event_name) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+        if: (contains(fromJson('["schedule", "merge_group"]'), github.event_name) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')) && !(steps.guard.outcome == 'success' && steps.guard.outputs.skip == 'true')
         run: |
           just login
           just push
@@ -176,8 +208,22 @@ jobs:
           restore-keys: |
             ${{ env.KCKEY }}-aarch64
 
-      - name: Generate Manifest
+      - name: Install Cosign
         if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
+        continue-on-error: true
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+        with:
+          cosign-release: "v3.1.4"
+
+      # Attestations and digests always run, so provenance gets repaired even when this skips
+      - name: Check if manifest needed
+        id: manifest-guard
+        if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
+        continue-on-error: true
+        run: just manifest-needed
+
+      - name: Generate Manifest
+        if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && !(steps.manifest-guard.outcome == 'success' && steps.manifest-guard.outputs.skip == 'true')
         run: |
           just login
           just manifest

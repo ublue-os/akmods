@@ -72,13 +72,26 @@ cd /tmp
 
 ### BUILD nvidia
 
-# query latest available driver in repo
-DRIVER_VERSION=$(dnf info akmod-nvidia | grep -E '^Version|^Release' | awk '{print $3}' | xargs | sed 's/\ /-/')
+if [[ -n "${NVIDIA_AKMOD_EVR:-}" ]]; then
+    # install exactly the EVR recorded in the image fingerprint
+    #shellcheck source=../prep/dnf-retry.sh
+    source /tmp/dnf-retry.sh
+    dnf_retry install -y "akmod-nvidia-${NVIDIA_AKMOD_EVR}"
+    # rpm prints an unset epoch as (none); dnf, and so the pin, uses 0
+    INSTALLED_EVR="$(rpm -q --queryformat '%|EPOCH?{%{EPOCH}}:{0}|:%{VERSION}-%{RELEASE}' akmod-nvidia)"
+    if [[ "${INSTALLED_EVR}" != "${NVIDIA_AKMOD_EVR}" ]]; then
+        echo "ERROR: installed akmod-nvidia ${INSTALLED_EVR}, expected pinned ${NVIDIA_AKMOD_EVR}" >&2
+        exit 1
+    fi
+else
+    # query latest available driver in repo
+    DRIVER_VERSION=$(dnf info akmod-nvidia | grep -E '^Version|^Release' | awk '{print $3}' | xargs | sed 's/\ /-/')
 
-# only install the version of akmod-nviida which matches available nvidia-driver
-# this works around situations where a new version may be released but not for one arch
-dnf install -y \
-    "akmod-nvidia-${DRIVER_VERSION}"
+    # only install the version of akmod-nviida which matches available nvidia-driver
+    # this works around situations where a new version may be released but not for one arch
+    dnf install -y \
+        "akmod-nvidia-${DRIVER_VERSION}"
+fi
 
 # Either successfully build and install the kernel modules, or fail early with debug output
 rpm -qa |grep nvidia
