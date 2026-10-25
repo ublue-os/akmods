@@ -15,6 +15,11 @@ on:
   schedule:
     - cron: '19 0 * * *'  # staggered minute past 00:00 UTC, see Justfile generate-workflows
   workflow_dispatch:
+    inputs:
+      force:
+        description: "Force build all targets (ignore fingerprint guard)"
+        type: boolean
+        default: false
 jobs:
   cache_kernel_coreos-stable_43:
     name: Cache coreos-stable (43)
@@ -42,6 +47,7 @@ jobs:
     with:
       akmods_target: common
       architecture: '["aarch64","x86_64"]'
+      force: ${{ inputs.force || false }}
       kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_43.outputs.KCKEY }}
       kernel_flavor: coreos-stable
       version: 43
@@ -59,6 +65,7 @@ jobs:
     with:
       akmods_target: nvidia-lts
       architecture: '["aarch64","x86_64"]'
+      force: ${{ inputs.force || false }}
       kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_43.outputs.KCKEY }}
       kernel_flavor: coreos-stable
       version: 43
@@ -76,6 +83,7 @@ jobs:
     with:
       akmods_target: nvidia-open
       architecture: '["aarch64","x86_64"]'
+      force: ${{ inputs.force || false }}
       kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_43.outputs.KCKEY }}
       kernel_flavor: coreos-stable
       version: 43
@@ -93,6 +101,7 @@ jobs:
     with:
       akmods_target: zfs
       architecture: '["aarch64","x86_64"]'
+      force: ${{ inputs.force || false }}
       kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_43.outputs.KCKEY }}
       kernel_flavor: coreos-stable
       version: 43
@@ -137,6 +146,7 @@ jobs:
     with:
       akmods_target: common
       architecture: '["aarch64","x86_64"]'
+      force: ${{ inputs.force || false }}
       kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_44.outputs.KCKEY }}
       kernel_flavor: coreos-stable
       version: 44
@@ -154,6 +164,7 @@ jobs:
     with:
       akmods_target: nvidia-lts
       architecture: '["aarch64","x86_64"]'
+      force: ${{ inputs.force || false }}
       kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_44.outputs.KCKEY }}
       kernel_flavor: coreos-stable
       version: 44
@@ -171,6 +182,7 @@ jobs:
     with:
       akmods_target: nvidia-open
       architecture: '["aarch64","x86_64"]'
+      force: ${{ inputs.force || false }}
       kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_44.outputs.KCKEY }}
       kernel_flavor: coreos-stable
       version: 44
@@ -188,6 +200,7 @@ jobs:
     with:
       akmods_target: zfs
       architecture: '["aarch64","x86_64"]'
+      force: ${{ inputs.force || false }}
       kernel_cache_key: ${{ needs.cache_kernel_coreos-stable_44.outputs.KCKEY }}
       kernel_flavor: coreos-stable
       version: 44

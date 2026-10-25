@@ -260,6 +260,24 @@ Never hand-edit files under `.github/workflows/build-akmods-*.yml` directly — 
 
 Each flavor's daily build is scheduled at a staggered UTC minute assigned once and preserved across regenerations, so an unrelated `images.yaml` edit shouldn't produce cron diffs unless that flavor's generated file was missing beforehand.
 
+### Skipping Unchanged Builds
+
+Each image has an `io.github.ublue-os.akmods.fingerprint` label with a sha256 of the build inputs and an `io.github.ublue-os.akmods.fingerprint-inputs` label with the inputs themselves as JSON. An image labeled `fingerprint=unavailable` was built without a fingerprint and never matches.
+
+The inputs are the target, version, architecture, and kernel release. They also include the git hashes of `build_files/`, `files/`, `Containerfile.in`, `Justfile`, `fetch-kernel.sh`, the committed public and test keys, `reusable-build.yml`, and `reusable-cache-kernel.yml`. The target's `images.yaml` entry, the ZFS version, any `RPMFUSION_MIRROR` override, and for NVIDIA targets the `akmod-nvidia` EVR are in there too. Local uncommitted edits add a random nonce, so a dirty build never matches. The fingerprint logic lives in the `Justfile`, which is itself an input, so changing how the fingerprint is computed changes every hash. Keep it in a file that's an input.
+
+Some inputs are left out on purpose: the builder image digest, akmod versions from rpmfusion, copr, and terra, NVIDIA userspace package releases, and signing key rotation. A rebuild after 7 days picks those up. To pick them up sooner, run a forced build.
+
+Before testing, CI runs `just fingerprint` once per target and arch. That writes `build/<flavor>-<version>/fingerprint-<target>-<arch>.json`, and both `just test` and `just build` read that same file. For NVIDIA targets, the file pins the `akmod-nvidia` EVR, and the build installs exactly that version and the driver packages for that version. Without a valid file, the build runs unpinned and the image is labeled `unavailable`. For a labeled local build, run:
+
+```bash
+just fingerprint && just test && just build
+```
+
+`just build-needed` compares the local fingerprint with the published per-arch image. It skips test, build, and push only when the hashes match, the published image's signature verifies, and the image is no older than `AKMODS_MAX_AGE_DAYS` (default 7, settable as a repository variable). Any error or missing value means build. `just manifest-needed` skips regenerating the manifests when both indexes already point at the current per-arch digests and are signed. Attestations are created on every run either way.
+
+Pull requests always build. Scheduled, merge-queue, and manual runs are guarded. In the merge queue, a change to the reusable build workflows still rebuilds. Changes that only touch other workflows, docs, or cron minutes don't rebuild there, since their pull request run already built. To force every target in a flavor, run the workflow manually with `force` checked.
+
 ### Adding Kernels and KMODs
 
 Generally speaking, Kernels are only added if they will be used internally to Universal Blue.
