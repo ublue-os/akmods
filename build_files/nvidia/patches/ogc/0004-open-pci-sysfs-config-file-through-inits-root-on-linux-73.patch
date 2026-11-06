@@ -30,7 +30,7 @@ diff --git a/kernel-open/nvidia/nv-pci.c b/kernel-open/nvidia/nv-pci.c
 index 48d8b78899..34ec85559b 100644
 --- a/kernel-open/nvidia/nv-pci.c
 +++ b/kernel-open/nvidia/nv-pci.c
-@@ -37,6 +37,10 @@
+@@ -46,6 +46,10 @@
  #include <linux/iommu.h>
  #include <linux/kthread.h>
  
@@ -38,10 +38,10 @@ index 48d8b78899..34ec85559b 100644
 +#include <linux/fs_struct.h>
 +#endif
 +
- #include <linux/clk.h>
- #include <linux/device.h>
- #include <linux/jiffies.h>
-@@ -439,7 +443,19 @@ static void nv_get_pci_sysfs_config
+ #if defined(NV_SEQ_READ_ITER_PRESENT)
+ #include <linux/seq_file.h>
+ #include <linux/kernfs.h>
+@@ -481,7 +485,19 @@ static void nv_get_pci_sysfs_config
                     NV_PCI_SLOT_NUMBER(pci_dev));
      if (ret > 0 && ret < sizeof(filename))
      {
@@ -62,7 +62,7 @@ index 48d8b78899..34ec85559b 100644
          if (!IS_ERR(file))
          {
  #if defined(NV_SEQ_READ_ITER_PRESENT)
-@@ -2691,8 +2707,15 @@ nv_pci_probe
+@@ -1682,8 +1698,15 @@ nv_pci_probe
       * run concurrently via the async worker pool. Later bind/unbind from
       * sysfs or hotplug is synchronous, so the kthread overhead is not
       * worthwhile.
@@ -83,7 +83,7 @@ diff --git a/kernel-open/nvidia/nvidia.Kbuild b/kernel-open/nvidia/nvidia.Kbuild
 index bfef6718dd..b25d02232b 100644
 --- a/kernel-open/nvidia/nvidia.Kbuild
 +++ b/kernel-open/nvidia/nvidia.Kbuild
-@@ -237,6 +237,8 @@ NV_CONFTEST_SYMBOL_COMPILE_TESTS += is_export_symbol_gpl_pci_find_dvsec_capabili
+@@ -240,6 +240,8 @@ NV_CONFTEST_SYMBOL_COMPILE_TESTS += is_export_symbol_gpl_pci_find_dvsec_capabili
  NV_CONFTEST_SYMBOL_COMPILE_TESTS += is_export_symbol_present_wait_for_device_probe
  NV_CONFTEST_SYMBOL_COMPILE_TESTS += is_export_symbol_gpl_dma_iova_try_alloc
  NV_CONFTEST_SYMBOL_COMPILE_TESTS += is_export_symbol_present_shmem_kernel_file_setup

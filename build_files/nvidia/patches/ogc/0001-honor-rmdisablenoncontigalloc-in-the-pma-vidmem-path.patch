@@ -23,7 +23,7 @@ diff --git a/src/nvidia/src/kernel/mem_mgr/video_mem.c b/src/nvidia/src/kernel/m
 index b8098d3df0..1c1e0decc5 100644
 --- a/src/nvidia/src/kernel/mem_mgr/video_mem.c
 +++ b/src/nvidia/src/kernel/mem_mgr/video_mem.c
-@@ -161,6 +161,12 @@ _vidmemPmaAllocate
+@@ -159,6 +159,12 @@ _vidmemPmaAllocate
                                  pAllocData->attr);
      }
  
@@ -36,9 +36,9 @@ index b8098d3df0..1c1e0decc5 100644
      NV_PRINTF(LEVEL_INFO, "PMA input\n");
      NV_PRINTF(LEVEL_INFO, "          Owner: 0x%x\n", pAllocData->owner);
      NV_PRINTF(LEVEL_INFO, "        hMemory: 0x%x\n", pAllocRequest->hMemory);
-@@ -324,7 +330,7 @@ _vidmemPmaAllocate
-         portMemFree(pAllocRequest->pPmaAllocInfo[subdevInst]);
-         pAllocRequest->pPmaAllocInfo[subdevInst] = NULL;
+@@ -322,7 +328,7 @@ _vidmemPmaAllocate
+         portMemFree(pAllocRequest->pPmaAllocInfo);
+         pAllocRequest->pPmaAllocInfo = NULL;
  
 -        if (bContig)
 +        if (bContig && pMemoryManager->bAllowNoncontiguousAllocation)
