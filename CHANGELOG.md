@@ -1,5 +1,85 @@
 # Changelog
 
+## [1.1.0](https://github.com/ublue-os/akmods/compare/v1.0.0...v1.1.0) (2025-09-04)
+
+
+### Features
+
+* add centos 10 support ([#322](https://github.com/ublue-os/akmods/issues/322)) ([2b68d72](https://github.com/ublue-os/akmods/commit/2b68d72f37510c7e487b9f4953c46d8128cd170c))
+* add CentOS/EPEL nvidia support ([#344](https://github.com/ublue-os/akmods/issues/344)) ([7bb06e0](https://github.com/ublue-os/akmods/commit/7bb06e0528b3293c3e45b5dcd2fc8e55df91cead))
+* Add gpd fan driver ([#285](https://github.com/ublue-os/akmods/issues/285)) ([502cef6](https://github.com/ublue-os/akmods/commit/502cef6655e4936a8d466d13fcb8ea24a2c344ad))
+* add kernel-bazzite ([#251](https://github.com/ublue-os/akmods/issues/251)) ([c4bc224](https://github.com/ublue-os/akmods/commit/c4bc2245075dad8a0b15af8677e911ff028611ee))
+* add signature verification to zfs modules ([#315](https://github.com/ublue-os/akmods/issues/315)) ([c160dec](https://github.com/ublue-os/akmods/commit/c160dec0804a2bcf4f1170b3cefd9e9b0f910aec))
+* Add support for fsync-ba, an "LTS" version of fsync ([#231](https://github.com/ublue-os/akmods/issues/231)) ([76e2da8](https://github.com/ublue-os/akmods/commit/76e2da89fe2dc219e1d9bd19b04ca37e22a307b0))
+* add support for kernel-longterm-6.12 ([#353](https://github.com/ublue-os/akmods/issues/353)) ([8dcc14d](https://github.com/ublue-os/akmods/commit/8dcc14db8dd2b688cd904873593697b0b2a2331a))
+* add system76 driver ([#290](https://github.com/ublue-os/akmods/issues/290)) ([adc4bb6](https://github.com/ublue-os/akmods/commit/adc4bb648c87051d1b52414468a61372362ef66e))
+* add system76-io driver ([#284](https://github.com/ublue-os/akmods/issues/284)) ([68b1eda](https://github.com/ublue-os/akmods/commit/68b1eda49b5474d79721f17001e2494b25027d0b))
+* add udev rules for nvidia extra device PM ([#263](https://github.com/ublue-os/akmods/issues/263)) ([a99434a](https://github.com/ublue-os/akmods/commit/a99434a1c6bb63406551f8561cfcb31ba9137339))
+* **bazzite:** add webhook for bazzite kernel and update url ([#310](https://github.com/ublue-os/akmods/issues/310)) ([4227f0e](https://github.com/ublue-os/akmods/commit/4227f0edede4c97d7bffc1ea49fc53efd48825ec))
+* build both stable and testing CoreOS streams ([#212](https://github.com/ublue-os/akmods/issues/212)) ([d0e7b95](https://github.com/ublue-os/akmods/commit/d0e7b9587fac843eae894af498bc55bbf4503ca2))
+* build nvidia open source kernel module ([#220](https://github.com/ublue-os/akmods/issues/220)) ([ab12663](https://github.com/ublue-os/akmods/commit/ab12663f64e47022f3e13dce6c5b17dcd7692f9b))
+* **ci:** clean up images older than 90 days ([#278](https://github.com/ublue-os/akmods/issues/278)) ([fdc8993](https://github.com/ublue-os/akmods/commit/fdc89938c2e080b098da202d05c7b8e01fa1c2b0))
+* **ci:** Use kernel_version as a build tag ([#230](https://github.com/ublue-os/akmods/issues/230)) ([62e3bba](https://github.com/ublue-os/akmods/commit/62e3bbaa0a9892bcd74610816c45c9134d3cbab1))
+* enable coreos-stable for F41 ([#271](https://github.com/ublue-os/akmods/issues/271)) ([0f236b6](https://github.com/ublue-os/akmods/commit/0f236b66a933858e482a9ab2ed07e1bd0aed3f4b))
+* Enable Dual Signing for akmods ([#215](https://github.com/ublue-os/akmods/issues/215)) ([20fce9f](https://github.com/ublue-os/akmods/commit/20fce9fe76de494ff901f017a50d6f4dfc1661e0))
+* enable xpadneo for F41 ([#260](https://github.com/ublue-os/akmods/issues/260)) ([32d3b29](https://github.com/ublue-os/akmods/commit/32d3b293de54dc1f081f6ceb2ed2e310ec4d3ede))
+* gated fsync kernel (matches coreos-stable) ([#234](https://github.com/ublue-os/akmods/issues/234)) ([b82bf6d](https://github.com/ublue-os/akmods/commit/b82bf6d212dfcac15063f15ae9a70add07d93795))
+* Re-enable vhba for F41 ([5ec92fc](https://github.com/ublue-os/akmods/commit/5ec92fca98102c7e7d79560fb8b97d17097a661b))
+* Remove kernel version from kmod name ([#257](https://github.com/ublue-os/akmods/issues/257)) ([3516e7b](https://github.com/ublue-os/akmods/commit/3516e7be078d75c4e58daaaf1fa1a21d3145a985))
+* remove kmod-openrgb ([#249](https://github.com/ublue-os/akmods/issues/249)) ([697e9e5](https://github.com/ublue-os/akmods/commit/697e9e5f13600e31882c344945a83b5613dddf37))
+* remove xpadneo ([#339](https://github.com/ublue-os/akmods/issues/339)) ([16e3f98](https://github.com/ublue-os/akmods/commit/16e3f98df90a189b683d76a6f9a383df6971bee3))
+* replace centos-hsk kernel with centos-kmodsig ([#391](https://github.com/ublue-os/akmods/issues/391)) ([ad13f2b](https://github.com/ublue-os/akmods/commit/ad13f2b0bdafe8a664b1eb60d4f431e8b837fe1e))
+* Restore evdi to extra ([#229](https://github.com/ublue-os/akmods/issues/229)) ([5f9eb44](https://github.com/ublue-os/akmods/commit/5f9eb445ae3ed267b89ef144f953c51bab9a5c01))
+* Restore framework akmod ([#265](https://github.com/ublue-os/akmods/issues/265)) ([6dd9c30](https://github.com/ublue-os/akmods/commit/6dd9c300f0ebe7fd9f20641c3e98c12e68c41854))
+* revert gated fsync kernel (matches coreos-stable) ([#234](https://github.com/ublue-os/akmods/issues/234)) ([3c5cbed](https://github.com/ublue-os/akmods/commit/3c5cbed4dc63ac88eca318c2b8788bf173764ae5)), closes [#237](https://github.com/ublue-os/akmods/issues/237)
+* support CoreOS Kernel ([#206](https://github.com/ublue-os/akmods/issues/206)) ([782ea95](https://github.com/ublue-os/akmods/commit/782ea952f97283ac05785f3990c8fba100ba4bdf))
+* swap to negativo17 as nvidia driver source, again ([#173](https://github.com/ublue-os/akmods/issues/173)) ([4c124d8](https://github.com/ublue-os/akmods/commit/4c124d84f6a080c0d18d0a6a64d4fa2d915fdcc1))
+* update kernel download method for centos-kmodsig to allow for older kernel verisons ([#400](https://github.com/ublue-os/akmods/issues/400)) ([797e35e](https://github.com/ublue-os/akmods/commit/797e35e2dcde2ec94f13a9902cfe96b05a8fe2b0))
+* use kernel-cache images and fedora for builds ([#214](https://github.com/ublue-os/akmods/issues/214)) ([0c3223e](https://github.com/ublue-os/akmods/commit/0c3223e39b8753ed11ddb9142135fea11bf44226))
+* verify kmod signatures for dual-sign ([#218](https://github.com/ublue-os/akmods/issues/218)) ([7c3a5d8](https://github.com/ublue-os/akmods/commit/7c3a5d804af81a6ac84eb8e4f54b1d0e9feaebc0))
+* ZFS for coreos, GTS version coreos ([#207](https://github.com/ublue-os/akmods/issues/207)) ([cbf9ff7](https://github.com/ublue-os/akmods/commit/cbf9ff754d6583abdbd4835ce4167c73d9484821))
+
+
+### Bug Fixes
+
+* add dist to manifest ([#376](https://github.com/ublue-os/akmods/issues/376)) ([c6b0ae3](https://github.com/ublue-os/akmods/commit/c6b0ae3e0be5b032253c2711dd5da53b2aefdc49)), closes [#373](https://github.com/ublue-os/akmods/issues/373)
+* adjust build schedule based on adjustments to main and hwe ([#205](https://github.com/ublue-os/akmods/issues/205)) ([6286c23](https://github.com/ublue-os/akmods/commit/6286c23804af9117a98a838b26624c820799a6de))
+* allow varied coreos kernel release matching ([#401](https://github.com/ublue-os/akmods/issues/401)) ([853d434](https://github.com/ublue-os/akmods/commit/853d43457d17cac6dc0738505493c84daa54cfe4))
+* change inputs to rpmrebuild ([#292](https://github.com/ublue-os/akmods/issues/292)) ([c4214d4](https://github.com/ublue-os/akmods/commit/c4214d4375cf0d2d97ad9b959b30c2e2b13d3c51))
+* **common:** restore xonedo build for asus ([#246](https://github.com/ublue-os/akmods/issues/246)) ([1827d4b](https://github.com/ublue-os/akmods/commit/1827d4ba7f37538fc043acba19b533d65e33c3d9))
+* **common:** skip xonedo build for asus ([#241](https://github.com/ublue-os/akmods/issues/241)) ([eac75ae](https://github.com/ublue-os/akmods/commit/eac75aef1942630013e39c94b517b72c11a2b0ac))
+* Correct typo causing modules not to build ([a1bc1ea](https://github.com/ublue-os/akmods/commit/a1bc1ea7fe68f4f69479f58b01fa615733fe2286))
+* Ensure that kernel flavor matches and is not a substring for workflow generation ([#368](https://github.com/ublue-os/akmods/issues/368)) ([e55304b](https://github.com/ublue-os/akmods/commit/e55304bd78ef601dfb57e32acc50b648d5c3e148))
+* **framework-laptop:** ensure only in one kmod stream ([#201](https://github.com/ublue-os/akmods/issues/201)) ([0c44cbf](https://github.com/ublue-os/akmods/commit/0c44cbfed53c148a002352f03b58a62731ab1655))
+* import all openzfs keys ([#352](https://github.com/ublue-os/akmods/issues/352)) ([7e3252f](https://github.com/ublue-os/akmods/commit/7e3252f27a57321d154ea50fb24fd009a33f5fa4))
+* keys not in place for dkms ([#208](https://github.com/ublue-os/akmods/issues/208)) ([e9f7514](https://github.com/ublue-os/akmods/commit/e9f7514c13f13bc13e0a70d671608fa83c526ec6))
+* label org.opencontainers.image.version had bad jq ([#367](https://github.com/ublue-os/akmods/issues/367)) ([18be38f](https://github.com/ublue-os/akmods/commit/18be38f3842fb9820593e8c193b0207b02f84124))
+* make sure justfile is available for manifest step ([#365](https://github.com/ublue-os/akmods/issues/365)) ([8285562](https://github.com/ublue-os/akmods/commit/8285562d548c4ec4abdd25255290b40a29989689))
+* name of login recipe ([#361](https://github.com/ublue-os/akmods/issues/361)) ([b5b4962](https://github.com/ublue-os/akmods/commit/b5b49629a5426539694ec90382481fe63ed9fc6b))
+* **nvidia:** use vulkan renderer by default to mitigate flickering ([#211](https://github.com/ublue-os/akmods/issues/211)) ([6787c65](https://github.com/ublue-os/akmods/commit/6787c6555f929de13b0cbedb6c7ec70e8b4e3826))
+* only copy dkms keys for coreos ([#209](https://github.com/ublue-os/akmods/issues/209)) ([c470982](https://github.com/ublue-os/akmods/commit/c4709825208a67986673e9b454e3acee2a3313d4))
+* only use testing/rawhide for F43+ ([#342](https://github.com/ublue-os/akmods/issues/342)) ([5c9321e](https://github.com/ublue-os/akmods/commit/5c9321e07958f462df0d2ab45ac6406899bf0361))
+* remove coreos-stable kernel pin, unleash Fedora 42 ([#338](https://github.com/ublue-os/akmods/issues/338)) ([9b4d436](https://github.com/ublue-os/akmods/commit/9b4d436da97808abab62fab87972f665e5452d76))
+* Remove displaylink check, this fails despite it being present ([6405185](https://github.com/ublue-os/akmods/commit/640518539dade2eeb72b4825dde52981e721772f))
+* Remove displaylink package check ([#387](https://github.com/ublue-os/akmods/issues/387)) ([6405185](https://github.com/ublue-os/akmods/commit/640518539dade2eeb72b4825dde52981e721772f))
+* Remove evdi from common ([#228](https://github.com/ublue-os/akmods/issues/228)) ([3f6635a](https://github.com/ublue-os/akmods/commit/3f6635a88a3e2116b4e2ab0134f221a2ab12232f))
+* Remove some unneeded kernel modules from the Bazzite kernel ([e66cb9b](https://github.com/ublue-os/akmods/commit/e66cb9b9b952c8ed43e36895e05da8c885ac4397))
+* restore removed extra kmods ([#371](https://github.com/ublue-os/akmods/issues/371)) ([12a8ffe](https://github.com/ublue-os/akmods/commit/12a8ffe6dc9b822c0bacc9886b7b626fe96fbd44))
+* rhel macro in nvidia-addons ([#345](https://github.com/ublue-os/akmods/issues/345)) ([5ef45bf](https://github.com/ublue-os/akmods/commit/5ef45bf60e99044b1f2a0ec2edfbe8fa27f9134c))
+* specify crc32 integrity check when recompressing kmods ([#323](https://github.com/ublue-os/akmods/issues/323)) ([432f723](https://github.com/ublue-os/akmods/commit/432f723d1666ba60dbffd5448a731f1312fd7630))
+* squash RPMs to one layer ([#375](https://github.com/ublue-os/akmods/issues/375)) ([3637ee1](https://github.com/ublue-os/akmods/commit/3637ee17ff30e88ad1b5fe123ae282c60c39190b)), closes [#374](https://github.com/ublue-os/akmods/issues/374)
+* stop building framework akmod ([#239](https://github.com/ublue-os/akmods/issues/239)) ([9a29cff](https://github.com/ublue-os/akmods/commit/9a29cff2d5ccb55d7c6208d222b8979387abd890))
+* temporary pin of coreos-stable to 6.13.8-200.fc41.x86_64 ([#334](https://github.com/ublue-os/akmods/issues/334)) ([f930dd1](https://github.com/ublue-os/akmods/commit/f930dd136e662281870b6349b1a95221ddd0dc66))
+* These are now underscores ([#395](https://github.com/ublue-os/akmods/issues/395)) ([4d11b9e](https://github.com/ublue-os/akmods/commit/4d11b9e11168f7670987500df4247d627afd13f9))
+* Workflow multiline string ([#364](https://github.com/ublue-os/akmods/issues/364)) ([33db280](https://github.com/ublue-os/akmods/commit/33db280bad1c093f904b4f018dd20e053d7319e4))
+* **zenergy:** remove from ASUS build to fix builder ([#199](https://github.com/ublue-os/akmods/issues/199)) ([2ead2b3](https://github.com/ublue-os/akmods/commit/2ead2b3b120739c2603fb9f51504bc57f7b9805e))
+
+
+### Reverts
+
+* Revert lint cleanup for fpm kmod renaming for now. ([#372](https://github.com/ublue-os/akmods/issues/372)) ([4cdd325](https://github.com/ublue-os/akmods/commit/4cdd325128c45c6b70e22e40c5e693b2887f1233))
+* zfs bump ([b388446](https://github.com/ublue-os/akmods/commit/b38844645e4785a2d3f490bec531a6003da078be))
+
 ## 1.0.0 (2024-04-27)
 
 
