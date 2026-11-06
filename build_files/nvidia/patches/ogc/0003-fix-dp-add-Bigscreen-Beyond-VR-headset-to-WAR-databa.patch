@@ -21,7 +21,7 @@ diff --git a/src/common/displayport/src/dp_wardatabase.cpp b/src/common/displayp
 index a205fab..04f1c62 100644
 --- a/src/common/displayport/src/dp_wardatabase.cpp
 +++ b/src/common/displayport/src/dp_wardatabase.cpp
-@@ -542,6 +542,19 @@ void Edid::applyEdidWorkArounds(NvU32 warFlag, const DpMonitorDenylistData *pDen
+@@ -567,6 +567,19 @@ void Edid::applyEdidWorkArounds(NvU32 warFlag, const DpMonitorDenylistData *pDen
              }
              break;
  
@@ -43,4 +43,3 @@ index a205fab..04f1c62 100644
              if (ProductID == 0x1747)
 -- 
 2.53.0
-
