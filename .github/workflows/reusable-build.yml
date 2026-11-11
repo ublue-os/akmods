@@ -64,11 +64,25 @@ env:
   KCKEY: ${{ inputs.kernel_cache_key }}
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}-${{ inputs.version }}-${{ inputs.kernel_flavor }}-${{ inputs.akmods_target }}
-  cancel-in-progress: true
+  group: akmods-${{ github.ref || github.run_id }}-${{ inputs.version }}-${{ inputs.kernel_flavor }}-${{ inputs.akmods_target }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
+  policy:
+    runs-on: ubuntu-latest
+    outputs:
+      publish: ${{ steps.decision.outputs.publish }}
+    steps:
+      - id: decision
+        run: echo "publish=${{ github.ref == 'refs/heads/main' && contains(fromJSON('["push","schedule","workflow_dispatch"]'), github.event_name) }}" >> "$GITHUB_OUTPUT"
+
   build-akmods:
+    needs: policy
+    environment:
+      name: ${{ needs.policy.outputs.publish == 'true' && 'ksign' || '' }}
+      deployment: false
+    env:
+      KSIGN_MODE: ${{ needs.policy.outputs.publish == 'true' && 'production' || 'test' }}
     name: Build ${{ matrix.architecture }}
     runs-on: ${{ matrix.architecture == 'x86_64' && 'ubuntu-26.04' || 'ubuntu-26.04-arm' }}
     permissions:
@@ -99,10 +113,7 @@ jobs:
         with:
           path: ${{ steps.gh-workspace.outputs.GITHUB_WORKSPACE }}/build/${{ env.AKMODS_KERNEL }}-${{ env.AKMODS_VERSION }}/KCWD/rpms
           fail-on-cache-miss: true
-          key: ${{ env.KCKEY }}-${{ matrix.architecture }}
-          restore-keys: |
-            ${{ matrix.architecture }}-${{ env.KCKEY }}
-            ${{ matrix.architecture }}-${{ env.AKMODS_KERNEL }}
+          key: ${{ matrix.architecture }}-${{ env.KCKEY }}
 
       - name: Install Cosign
         continue-on-error: true
@@ -138,16 +149,12 @@ jobs:
               | xargs -0 -n1 -P4 rm -rf
           df -h
 
-      - name: Retrieve Signing Key
-        if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && !(steps.guard.outcome == 'success' && steps.guard.outputs.skip == 'true')
+      - name: Retrieve Signing Keys
+        if: needs.policy.outputs.publish == 'true' && !(steps.guard.outcome == 'success' && steps.guard.outputs.skip == 'true')
+        env:
+          KSIGN_20240711: ${{ secrets.KSIGN_20240711 }}
         shell: bash
-        run: |
-          mkdir -p certs
-          echo "${{ secrets.KERNEL_PRIVKEY }}" > certs/private_key.priv
-          echo "${{ secrets.AKMOD_PRIVKEY_20230518 }}" > certs/private_key_2.priv
-          # DEBUG: get character count of key
-          wc -c certs/private_key.priv
-          wc -c certs/private_key_2.priv
+        run: just write-signing-keys
 
       - name: Test Image
         if: ${{ !(steps.guard.outcome == 'success' && steps.guard.outputs.skip == 'true') }}
@@ -158,7 +165,7 @@ jobs:
         run: just build
 
       - name: Push and Sign Image
-        if: (contains(fromJson('["schedule", "merge_group"]'), github.event_name) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')) && !(steps.guard.outcome == 'success' && steps.guard.outputs.skip == 'true')
+        if: needs.policy.outputs.publish == 'true' && !(steps.guard.outcome == 'success' && steps.guard.outputs.skip == 'true')
         run: |
           just login
           just push
@@ -167,10 +174,14 @@ jobs:
           REGISTRY_ACTOR: ${{ github.actor }}
           REGISTRY_TOKEN: ${{ github.token }}
 
+      - name: Remove Signing Keys
+        if: always()
+        run: just remove-signing-keys
+
   manifest:
     name: "Generate ${{ inputs.akmods_target != 'common' && format('akmods-{0}', inputs.akmods_target) || 'akmods' }}:${{ inputs.kernel_flavor }}-${{ inputs.version }} Manifest"
     runs-on: ubuntu-26.04
-    needs: [build-akmods]
+    needs: [policy, build-akmods]
     outputs:
       image_name: ${{ steps.digest.outputs.image_name }}
       manifest: ${{ steps.digest.outputs.manifest }}
@@ -204,12 +215,12 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ steps.gh-workspace.outputs.GITHUB_WORKSPACE }}/build/${{ env.AKMODS_KERNEL }}-${{ env.AKMODS_VERSION }}/KCWD/rpms
-          key: ${{ env.KCKEY }}-x86_64
+          key: x86_64-${{ env.KCKEY }}
           restore-keys: |
-            ${{ env.KCKEY }}-aarch64
+            aarch64-${{ env.KCKEY }}
 
       - name: Install Cosign
-        if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
+        if: needs.policy.outputs.publish == 'true'
         continue-on-error: true
         uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
         with:
@@ -218,12 +229,12 @@ jobs:
       # Attestations and digests always run, so provenance gets repaired even when this skips
       - name: Check if manifest needed
         id: manifest-guard
-        if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
+        if: needs.policy.outputs.publish == 'true'
         continue-on-error: true
         run: just manifest-needed
 
       - name: Generate Manifest
-        if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && !(steps.manifest-guard.outcome == 'success' && steps.manifest-guard.outputs.skip == 'true')
+        if: needs.policy.outputs.publish == 'true' && !(steps.manifest-guard.outcome == 'success' && steps.manifest-guard.outputs.skip == 'true')
         run: |
           just login
           just manifest
@@ -234,7 +245,7 @@ jobs:
 
       - name: Get Manifest Digests
         id: digest
-        if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
+        if: needs.policy.outputs.publish == 'true'
         run: |
           IMAGE_NAME="${{ inputs.akmods_target != 'common' && format('akmods-{0}', inputs.akmods_target) || 'akmods' }}"
           MANIFEST_TAG="${{ inputs.kernel_flavor }}-${{ inputs.version }}"
@@ -250,7 +261,7 @@ jobs:
           echo "image_name=${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
 
       - name: Attest Manifest Image
-        if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
+        if: needs.policy.outputs.publish == 'true'
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
         with:
           subject-name: ghcr.io/${{ github.repository_owner }}/${{ steps.digest.outputs.image_name }}
@@ -258,7 +269,7 @@ jobs:
           push-to-registry: false
 
       - name: Attest Manifest Kernel Image
-        if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
+        if: needs.policy.outputs.publish == 'true'
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
         with:
           subject-name: ghcr.io/${{ github.repository_owner }}/${{ steps.digest.outputs.image_name }}
@@ -268,8 +279,8 @@ jobs:
   verify-publication:
     name: Verify Published Signatures and Provenance
     runs-on: ubuntu-26.04
-    needs: [manifest]
-    if: contains(fromJson('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name)
+    needs: [policy, manifest]
+    if: needs.policy.outputs.publish == 'true'
     permissions:
       actions: read
       attestations: write

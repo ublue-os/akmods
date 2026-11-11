@@ -2,15 +2,13 @@
 
 set ${CI:+-x} -euo pipefail
 
-if [[ "${DUAL_SIGN}" != "true" ]]; then
-    echo "Not Dual Signing..."
-    exit 0
-fi
-
 KERNEL="$(rpm -q "${KERNEL_NAME}" --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')"
-SIGNING_KEY_1="/tmp/certs/signing_key_1.pem"
-SIGNING_KEY_2="/tmp/certs/signing_key_2.pem"
-PUBLIC_CHAIN="/tmp/certs/public_key_chain.pem"
+mapfile -t KSIGN_IDS < /tmp/certs/active-signing-keys
+signers=()
+for id in "${KSIGN_IDS[@]}"; do
+    signers+=(-signer "/tmp/certs/$id.pem")
+done
+PUBLIC_CHAIN="/tmp/certs/signing-chain.pem"
 
 ln -s / /tmp/buildroot
 dnf install -y /var/cache/rpms/kmods/zfs/*.rpm pv
@@ -20,20 +18,20 @@ for module in /usr/lib/modules/"${KERNEL}"/extra/zfs/*.ko*; do
     module_suffix=${module: -3}
     if [[ "$module_suffix" == ".xz" ]]; then
         xz --decompress "$module"
-        openssl cms -sign -signer "${SIGNING_KEY_1}" -signer "${SIGNING_KEY_2}" -binary -in "$module_basename" -outform DER -out "${module_basename}.cms" -nocerts -noattr -nosmimecap
+        openssl cms -sign "${signers[@]}" -binary -in "$module_basename" -outform DER -out "${module_basename}.cms" -nocerts -noattr -nosmimecap
         /usr/src/kernels/"${KERNEL}"/scripts/sign-file -s "${module_basename}.cms" sha256 "${PUBLIC_CHAIN}" "${module_basename}"
-        /tmp/dual-sign-check.sh "${KERNEL}" "${module_basename}" "${PUBLIC_CHAIN}"
+        /tmp/check-module-signature.sh "${KERNEL}" "${module_basename}" "${PUBLIC_CHAIN}"
         xz -C crc32 -f "${module_basename}"
     elif [[ "$module_suffix" == ".gz" ]]; then
         gzip -d "$module"
-        openssl cms -sign -signer "${SIGNING_KEY_1}" -signer "${SIGNING_KEY_2}" -binary -in "$module_basename" -outform DER -out "${module_basename}.cms" -nocerts -noattr -nosmimecap
+        openssl cms -sign "${signers[@]}" -binary -in "$module_basename" -outform DER -out "${module_basename}.cms" -nocerts -noattr -nosmimecap
         /usr/src/kernels/"${KERNEL}"/scripts/sign-file -s "${module_basename}.cms" sha256 "${PUBLIC_CHAIN}" "${module_basename}"
-        /tmp/dual-sign-check.sh "${KERNEL}" "${module_basename}" "${PUBLIC_CHAIN}"
+        /tmp/check-module-signature.sh "${KERNEL}" "${module_basename}" "${PUBLIC_CHAIN}"
         gzip -9f "${module_basename}"
     else
-        openssl cms -sign -signer "${SIGNING_KEY_1}" -signer "${SIGNING_KEY_2}" -binary -in "$module" -outform DER -out "${module}.cms" -nocerts -noattr -nosmimecap
+        openssl cms -sign "${signers[@]}" -binary -in "$module" -outform DER -out "${module}.cms" -nocerts -noattr -nosmimecap
         /usr/src/kernels/"${KERNEL}"/scripts/sign-file -s "${module}.cms" sha256 "${PUBLIC_CHAIN}" "${module}"
-        /tmp/dual-sign-check.sh "${KERNEL}" "${module}" "${PUBLIC_CHAIN}"
+        /tmp/check-module-signature.sh "${KERNEL}" "${module}" "${PUBLIC_CHAIN}"
     fi
 done
 find /var/cache/rpms/kmods/zfs -type f -name "\kmod-*.rpm" | grep -v debug | grep -v devel

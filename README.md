@@ -260,13 +260,68 @@ Never hand-edit files under `.github/workflows/build-akmods-*.yml` directly — 
 
 Each flavor's daily build is scheduled at a staggered UTC minute assigned once and preserved across regenerations, so an unrelated `images.yaml` edit shouldn't produce cron diffs unless that flavor's generated file was missing beforehand.
 
+### Kernel and module signing keys
+
+Kernels and kmods are signed for Secure Boot and MOK enrollment. Each production
+key has one ID, `KSIGN_YYYYMMDD`, taken from its certificate's `notBefore` date.
+The same ID names the 1Password item, GitHub secret and files below.
+
+| Path | Contents |
+|---|---|
+| `certs/production/signing-keys` | Active production key IDs, one per line |
+| `certs/production/<ID>.der` | Public certificate for each production key |
+| `certs/production/compat-key` | ID of the certificate copied to `certs/public_key.der` |
+| `certs/test/signing-keys` | Test key IDs |
+| `certs/test/<ID>.der`, `certs/test/<ID>.key` | Committed test certificates and private keys |
+
+Every active key signs every kernel and module. Verification requires all
+expected signers.
+
+**Production.** Pushes, scheduled runs and manual runs on `main` use
+`KSIGN_MODE=production`. Private keys are secrets in the `ksign` environment,
+which only `main` can use. `just write-signing-keys` writes each listed key from
+the environment variable of the same name and checks it against its certificate.
+A missing or mismatched key fails the build; production never falls back to
+test keys. Workflows run `just remove-signing-keys` during cleanup, even after
+a failure, to delete local production `.key` files and key-writer temporary files.
+This does not remove copies in container storage.
+
+**Tests and local builds.** Pull requests and local builds default to the keys
+in `certs/test/`. Their private keys are public, so never enroll these
+certificates as MOKs with `mokutil`. To load locally built modules under Secure
+Boot, sign them with your own trusted key instead.
+
+**Compatibility copy.** Downstream images use `certs/public_key.der` to verify
+kernels and enroll our key. It must stay byte-identical to the certificate
+named in `compat-key`; `just test-signing-key` checks this. Adding an active
+key does not change the compatibility copy.
+
+**Adding a key.**
+
+1. Run `just generate-signing-key <validity-days>`. This creates
+   `certs/production/<ID>.der` and `<ID>.key` but does not activate the key.
+2. Store the private key in the project 1Password vault under its ID, verify
+   the backup, then run `just remove-signing-keys`. This removes all local
+   production `.key` files, not just the newly generated one.
+3. Add the secret to the `ksign` environment under the same ID.
+4. Map it into the `Retrieve Signing Keys` step in both reusable workflows,
+   using `<ID>: ${{ secrets.<ID> }}` with the actual key ID substituted.
+5. Add the ID to `certs/production/signing-keys`, commit the certificate and
+   merge. The certificate digest changes the kernel cache key, so the next
+   production build re-signs kernels automatically.
+
+**Retiring a key.** Users must enroll its replacement first, and downstream
+images must stop requiring the old signature. Update `compat-key` and
+`certs/public_key.der` if needed, then remove the retired key's ID, certificate,
+workflow mappings and environment secret after validating the new signing path.
+
 ### Skipping Unchanged Builds
 
 Each image has an `io.github.ublue-os.akmods.fingerprint` label with a sha256 of the build inputs and an `io.github.ublue-os.akmods.fingerprint-inputs` label with the inputs themselves as JSON. An image labeled `fingerprint=unavailable` was built without a fingerprint and never matches.
 
 The inputs are the target, version, architecture, and kernel release. They also include the git hashes of `build_files/`, `files/`, `Containerfile.in`, `Justfile`, `fetch-kernel.sh`, the committed public and test keys, `reusable-build.yml`, and `reusable-cache-kernel.yml`. The target's `images.yaml` entry, the ZFS version, any `RPMFUSION_MIRROR` override, and for NVIDIA targets the `akmod-nvidia` EVR are in there too. Local uncommitted edits add a random nonce, so a dirty build never matches. The fingerprint logic lives in the `Justfile`, which is itself an input, so changing how the fingerprint is computed changes every hash. Keep it in a file that's an input.
 
-Some inputs are left out on purpose: the builder image digest, akmod versions from rpmfusion, copr, and terra, NVIDIA userspace package releases, and signing key rotation. A rebuild after 7 days picks those up. To pick them up sooner, run a forced build.
+Some inputs are left out on purpose: the builder image digest, akmod versions from rpmfusion, copr, and terra, and NVIDIA userspace package releases. A rebuild after 7 days picks those up. To pick them up sooner, run a forced build. Committed signing certificates and key lists are fingerprinted; kernel caches also include the selected signing certificates, signing mode, Fedora version, full kernel release and architecture.
 
 Before testing, CI runs `just fingerprint` once per target and arch. That writes `build/<flavor>-<version>/fingerprint-<target>-<arch>.json`, and both `just test` and `just build` read that same file. For NVIDIA targets, the file pins the `akmod-nvidia` EVR, and the build installs exactly that version and the driver packages for that version. Without a valid file, the build runs unpinned and the image is labeled `unavailable`. For a labeled local build, run:
 
@@ -276,7 +331,7 @@ just fingerprint && just test && just build
 
 `just build-needed` compares the local fingerprint with the published per-arch image. It skips test, build, and push only when the hashes match, the published image's signature verifies, and the image is no older than `AKMODS_MAX_AGE_DAYS` (default 7, settable as a repository variable). Any error or missing value means build. `just manifest-needed` skips regenerating the manifests when both indexes already point at the current per-arch digests and are signed. Attestations are created on every run either way.
 
-Pull requests always build. Scheduled, merge-queue, and manual runs are guarded. In the merge queue, a change to the reusable build workflows still rebuilds. Changes that only touch other workflows, docs, or cron minutes don't rebuild there, since their pull request run already built. To force every target in a flavor, run the workflow manually with `force` checked.
+Pull requests always build with test keys and never publish. Pushes, scheduled runs, and manual runs on `main` use the build guard and publish with production keys from the `ksign` environment. Manual runs on other branches use test keys and do not publish. Merge queues are no longer used. To force every target in a flavor, run the workflow manually with `force` checked.
 
 ### Adding Kernels and KMODs
 

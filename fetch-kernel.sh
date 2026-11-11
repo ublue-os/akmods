@@ -6,6 +6,9 @@ set ${CI:+-x} -euo pipefail
 #shellcheck source=build_files/prep/dnf-retry.sh
 source /tmp/kernel-cache/dnf-retry.sh
 
+#shellcheck source=build_files/prep/check-signing-key.sh
+source /tmp/kernel-cache/check-signing-key.sh
+
 # ensures we pass a known dir for volume mount of output rpm files
 KCWD=/tmp/kernel-cache
 find "${KCWD}"
@@ -89,21 +92,12 @@ else
     done
 fi
 
-if [[ ! -s "${KCWD}"/certs/private_key.priv ]]; then
-    echo "WARNING: Using test signing key."
-    cp "${KCWD}"/certs/private_key.priv{.test,}
-    cp "${KCWD}"/certs/public_key.der{.test,}
-fi
-
-trap 'rm -rf "${KCWD}/certs" /etc/pki/kernel/private/private_key*.priv /etc/pki/kernel/public/public_key*.crt' EXIT SIGINT
-
-PUBLIC_KEY_PATH="/etc/pki/kernel/public/public_key.crt"
-PRIVATE_KEY_PATH="/etc/pki/kernel/private/private_key.priv"
-
-openssl x509 -in "${KCWD}"/certs/public_key.der -out "${KCWD}"/certs/public_key.crt
-
-install -Dm644 "${KCWD}"/certs/public_key.crt "$PUBLIC_KEY_PATH"
-install -Dm644 "${KCWD}"/certs/private_key.priv "$PRIVATE_KEY_PATH"
+trap 'rm -rf "${KCWD}/certs"' EXIT SIGINT
+load_signing_keys "${KCWD}/certs" "${KSIGN_MODE:-test}"
+for id in "${KSIGN_IDS[@]}"; do
+    check_signing_key "$KSIGN_DIR/$id.key" "$KSIGN_DIR/$id.der"
+    openssl x509 -in "$KSIGN_DIR/$id.der" -out "${KCWD}/certs/$id.crt"
+done
 
 ls -la /
 if [[ "${kernel_flavor}" =~ ^ogc ]]; then
@@ -133,36 +127,14 @@ else
     fi
 fi
 
-# Sign Kernel with Key
-sbsign --cert "$PUBLIC_KEY_PATH" --key "$PRIVATE_KEY_PATH" /usr/lib/modules/"${kernel_version}"/vmlinuz --output /usr/lib/modules/"${kernel_version}"/vmlinuz
-
-# Verify Signatures
+# Sign and verify the kernel against each active certificate.
+for id in "${KSIGN_IDS[@]}"; do
+    sbsign --cert "${KCWD}/certs/$id.crt" --key "$KSIGN_DIR/$id.key" /usr/lib/modules/"${kernel_version}"/vmlinuz --output /usr/lib/modules/"${kernel_version}"/vmlinuz
+done
 sbverify --list /usr/lib/modules/"${kernel_version}"/vmlinuz
-if ! sbverify --cert "$PUBLIC_KEY_PATH" /usr/lib/modules/"${kernel_version}"/vmlinuz; then
-    exit 1
-fi
-
-rm -f "$PRIVATE_KEY_PATH"
-
-if [[ ${DUAL_SIGN:-} == "true" ]]; then
-    SECOND_PUBLIC_KEY_PATH="/etc/pki/kernel/public/public_key_2.crt"
-    SECOND_PRIVATE_KEY_PATH="/etc/pki/kernel/private/public_key_2.priv"
-    if [[ ! -s "${KCWD}"/certs/private_key_2.priv ]]; then
-        echo "WARNING: Using test signing key."
-        cp "${KCWD}"/certs/private_key_2.priv{.test,}
-        cp "${KCWD}"/certs/public_key_2.der{.test,}
-        find "${KCWD}"/certs/
-    fi
-    openssl x509 -in "${KCWD}"/certs/public_key_2.der -out "${KCWD}"/certs/public_key_2.crt
-    install -Dm644 "${KCWD}"/certs/public_key_2.crt "$SECOND_PUBLIC_KEY_PATH"
-    install -Dm644 "${KCWD}"/certs/private_key_2.priv "$SECOND_PRIVATE_KEY_PATH"
-    sbsign --cert "$SECOND_PUBLIC_KEY_PATH" --key "$SECOND_PRIVATE_KEY_PATH" /usr/lib/modules/"${kernel_version}"/vmlinuz --output /usr/lib/modules/"${kernel_version}"/vmlinuz
-    sbverify --list /usr/lib/modules/"${kernel_version}"/vmlinuz
-    if ! sbverify --cert "$SECOND_PUBLIC_KEY_PATH" /usr/lib/modules/"${kernel_version}"/vmlinuz; then
-        exit 1
-    fi
-    rm -f "$SECOND_PRIVATE_KEY_PATH"
-fi
+for id in "${KSIGN_IDS[@]}"; do
+    sbverify --cert "${KCWD}/certs/$id.crt" /usr/lib/modules/"${kernel_version}"/vmlinuz
+done
 
 ln -s / /tmp/buildroot
 
@@ -173,14 +145,11 @@ find /tmp
 find /root
 dnf_retry reinstall -y /root/rpmbuild/RPMS/"$(uname -m)"/kernel-*.rpm
 
-# Verify Again
+# Verify the rebuilt RPM still carries every signature.
 sbverify --list /usr/lib/modules/"${kernel_version}"/vmlinuz
-if ! sbverify --cert "$PUBLIC_KEY_PATH" /usr/lib/modules/"${kernel_version}"/vmlinuz; then
-    exit 1
-fi
-if [[ "${DUAL_SIGN:-}" == "true" ]] && ! sbverify --cert "${SECOND_PUBLIC_KEY_PATH:-}" /usr/lib/modules/"${kernel_version}"/vmlinuz; then
-    exit 1
-fi
+for id in "${KSIGN_IDS[@]}"; do
+    sbverify --cert "${KCWD}/certs/$id.crt" /usr/lib/modules/"${kernel_version}"/vmlinuz
+done
 
 # Make Temp Dir
 mkdir -p "${KCWD}"/rpms

@@ -6,7 +6,9 @@
 # Modify the inputs in workflow-templates
 name: Build LONGTERM-6.18 akmods
 on:
-  merge_group:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
