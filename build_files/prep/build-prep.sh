@@ -62,6 +62,8 @@ RPMS_TO_INSTALL+=(
     ruby-devel
 )
 
+# The minimal Fedora builder has openssl-libs, but not the openssl executable.
+dnf_retry install -y --setopt=install_weak_deps=False openssl
 load_signing_keys /tmp/certs "${KSIGN_MODE:-test}"
 for id in "${KSIGN_IDS[@]}"; do
     check_signing_key "$KSIGN_DIR/$id.key" "$KSIGN_DIR/$id.der"

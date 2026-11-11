@@ -692,7 +692,7 @@ build: (cache-kernel-version) (fetch-kernel)
         "--tag" "{{ akmods_name + ':' + kernel_flavor + '-' + version + '-' + shell("jq -r '.kernel_release' < $1", version_json) }}"
     )
 
-    {{ podman }} build -f Containerfile.in --volume {{ KCPATH }}:/tmp/kernel_cache:ro "${CPP_FLAGS[@]}" "${LABELS[@]}" "${TAGS[@]}" --target RPMS {{ justfile_dir () }}
+    {{ podman }} build -f Containerfile.in --volume {{ KCPATH }}:/tmp/kernel_cache:ro,z "${CPP_FLAGS[@]}" "${LABELS[@]}" "${TAGS[@]}" --target RPMS {{ justfile_dir () }}
 
 # Test Cached Akmod RPMs
 [group('Build')]
@@ -735,7 +735,7 @@ test: (cache-kernel-version) (fetch-kernel)
         echo "WARNING: no valid fingerprint snapshot, building unpinned (run 'just fingerprint' first)" >&2
     fi
 
-    {{ podman }} build -f Containerfile.in --volume {{ KCPATH }}:/tmp/kernel_cache:ro "${CPP_FLAGS[@]}" --target test --tag akmods-test:latest {{ justfile_dir () }}
+    {{ podman }} build -f Containerfile.in --volume {{ KCPATH }}:/tmp/kernel_cache:ro,z "${CPP_FLAGS[@]}" --target test --tag akmods-test:latest {{ justfile_dir () }}
     if ! podman run --rm akmods-test:latest; then
         echo "Signatures Failed" >&2
         exit 1
