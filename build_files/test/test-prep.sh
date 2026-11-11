@@ -43,26 +43,16 @@ if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm) ]]; then
         "https://raw.githubusercontent.com/NVIDIA/dgx-selinux/master/bin/RHEL9/nvidia-container.pp"
 fi
 
-if [[ ! -s "/tmp/certs/private_key.priv" ]]; then
-    echo "WARNING: Using test signing key."
-    cp /tmp/certs/public_key.der{.test,}
-fi
-
-openssl x509 -in /tmp/certs/public_key.der -out /tmp/certs/public_key.crt
-cat /tmp/certs/public_key.crt > /tmp/certs/public_key_chain.pem
-rm -f /tmp/certs/private_key.priv
-
-if [[ "${DUAL_SIGN}" == "true" ]]; then
-    if [[ ! -s "/tmp/certs/private_key_2.priv" ]]; then
-        echo "WARNING: Using test signing key. Run './generate-akmods-key' for production builds."
-        cp /tmp/certs/public_key_2.der{.test,}
-    fi
-    openssl x509 -in /tmp/certs/public_key_2.der -out /tmp/certs/public_key_2.crt
-    rm -f /tmp/certs/public_key_chain.pem
-    cat /tmp/certs/public_key.crt <(echo) /tmp/certs/public_key_2.crt >> /tmp/certs/public_key_chain.pem
-fi
-
-rm -f /tmp/certs/private_key_2.priv
+# Select the same certificates used by the builder.
+#shellcheck source=../prep/check-signing-key.sh
+source /tmp/check-signing-key.sh
+load_signing_keys /tmp/certs "${KSIGN_MODE:-test}"
+: > /tmp/certs/signing-chain.pem
+for id in "${KSIGN_IDS[@]}"; do
+    openssl x509 -in "$KSIGN_DIR/$id.der" -out "/tmp/certs/$id.crt"
+    cat "/tmp/certs/$id.crt" >> /tmp/certs/signing-chain.pem
+done
+rm -f /tmp/certs/production/*.key /tmp/certs/test/*.key
 
 if [[ -f $(find /tmp/akmods-rpms/kmods/kmod-nvidia-*.rpm 2> /dev/null) ]]; then
     #shellcheck disable=SC1091

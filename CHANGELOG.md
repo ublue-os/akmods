@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Breaking changes
+
+* Stop signing kernels and modules with the legacy 2023 `ublue akmods` key.
+  Systems that enrolled only that key must enroll `certs/public_key.der`, the
+  current 2024 key. To remove the legacy MOK, use `mokutil --delete` with its
+  [certificate from the last pre-retirement revision](https://github.com/ublue-os/akmods/blob/16e5137ab2abf193d10578b6d4fbf9f8c590fde9/certs/public_key_2.der).
+
 ## 1.0.0 (2024-04-27)
 
 

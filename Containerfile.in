@@ -1,6 +1,6 @@
 FROM BUILDER AS build_prep
 
-ARG DUAL_SIGN="true"
+ARG KSIGN_MODE_ARG
 ARG KERNEL_FLAVOR_ARG
 ARG KERNEL_NAME_ARG
 ARG RPMFUSION_MIRROR_ARG
@@ -52,7 +52,7 @@ RUNEOF
 
 FROM build_prep AS builder
 
-ARG DUAL_SIGN="true"
+ARG KSIGN_MODE_ARG
 ARG KERNEL_FLAVOR_ARG
 ARG KERNEL_NAME_ARG
 ARG RPMFUSION_MIRROR_ARG
@@ -181,9 +181,9 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     bash <<'RUNEOF'
 set ${CI+-x} -euo pipefail
 #ifdef ZFS
-/tmp/dual-sign-zfs.sh
+/tmp/sign-zfs-modules.sh
 #else
-/tmp/dual-sign.sh
+/tmp/sign-modules.sh
 #endif /* ZFS */
 /tmp/build-post.sh
 RUNEOF
@@ -195,7 +195,7 @@ COPY --from=builder /var/cache/rpms /rpms
 
 FROM build_prep AS test
 
-ARG DUAL_SIGN="true"
+ARG KSIGN_MODE_ARG
 ARG KERNEL_FLAVOR_ARG
 ARG KERNEL_NAME_ARG
 ARG RPMFUSION_MIRROR_ARG

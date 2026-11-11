@@ -6,6 +6,9 @@ set ${CI:+-x} -euo pipefail
 #shellcheck source=dnf-retry.sh
 source /tmp/dnf-retry.sh
 
+#shellcheck source=check-signing-key.sh
+source /tmp/check-signing-key.sh
+
 ### PREPARE REPOS
 # enable RPMs with alternatives to create them in this image build
 mkdir -p /var/lib/alternatives
@@ -59,24 +62,20 @@ RPMS_TO_INSTALL+=(
     ruby-devel
 )
 
-if [[ ! -s "/tmp/certs/private_key.priv" ]]; then
-    echo "WARNING: Using test signing key. Run './generate-akmods-key' for production builds."
-    cp /tmp/certs/private_key.priv{.test,}
-    cp /tmp/certs/public_key.der{.test,}
-fi
-
-install -Dm644 /tmp/certs/public_key.der   /etc/pki/akmods/certs/public_key.der
-install -Dm644 /tmp/certs/private_key.priv /etc/pki/akmods/private/private_key.priv
-
-if [[ "${DUAL_SIGN}" == "true" ]]; then
-    RPMS_TO_INSTALL+=(rpmrebuild)
-fi
+load_signing_keys /tmp/certs "${KSIGN_MODE:-test}"
+for id in "${KSIGN_IDS[@]}"; do
+    check_signing_key "$KSIGN_DIR/$id.key" "$KSIGN_DIR/$id.der"
+done
+primary="${KSIGN_IDS[0]}"
+install -Dm644 "$KSIGN_DIR/$primary.der" /etc/pki/akmods/certs/public_key.der
+install -Dm600 "$KSIGN_DIR/$primary.key" /etc/pki/akmods/private/private_key.priv
+RPMS_TO_INSTALL+=(rpmrebuild)
 
 # This is for ZFS more than CoreOS|Longterm
 if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]] || [[ "${KERNEL_FLAVOR}" =~ "longterm" ]]; then
     mkdir -p "$(dirname /lib/modules/"${KERNEL_VERSION}"/build/certs/signing_key.x509)"
-    install -Dm644 /tmp/certs/public_key.der /lib/modules/"${KERNEL_VERSION}"/build/certs/signing_key.x509
-    install -Dm644 /tmp/certs/private_key.priv /lib/modules/"${KERNEL_VERSION}"/build/certs/signing_key.pem
+    install -Dm644 "$KSIGN_DIR/$primary.der" /lib/modules/"${KERNEL_VERSION}"/build/certs/signing_key.x509
+    install -Dm600 "$KSIGN_DIR/$primary.key" /lib/modules/"${KERNEL_VERSION}"/build/certs/signing_key.pem
     RPMS_TO_INSTALL+=(
         autoconf
         automake
@@ -107,19 +106,16 @@ export KCFLAGS="${KCFLAGS:+${KCFLAGS} }-ffile-prefix-map=$(realpath -m "%{_build
 EOF
 } > /etc/rpm/macros.akmods-reproducible
 
-# Configure Dual Signing
-if [[ "${DUAL_SIGN}" == 'true' ]]; then
-    if [[ ! -s "/tmp/certs/private_key_2.priv" ]]; then
-        echo "WARNING: Using test signing key. Run './generate-akmods-key' for production builds."
-        cp /tmp/certs/private_key_2.priv{.test,}
-        cp /tmp/certs/public_key_2.der{.test,}
-    fi
-    openssl x509 -in /tmp/certs/public_key_2.der -out /tmp/certs/public_key_2.crt
-    openssl x509 -in /tmp/certs/public_key.der -out /tmp/certs/public_key.crt
-    cat /tmp/certs/private_key.priv <(echo) /tmp/certs/public_key.crt >> /tmp/certs/signing_key_1.pem
-    cat /tmp/certs/private_key_2.priv <(echo) /tmp/certs/public_key_2.crt >> /tmp/certs/signing_key_2.pem
-    cat /tmp/certs/public_key.crt <(echo) /tmp/certs/public_key_2.crt >> /tmp/certs/public_key_chain.pem
-fi
+# Prepare signer identities and the certificate bundle for module signing.
+umask 077
+: > /tmp/certs/signing-chain.pem
+for id in "${KSIGN_IDS[@]}"; do
+    openssl x509 -in "$KSIGN_DIR/$id.der" -out "/tmp/certs/$id.crt"
+    cat "$KSIGN_DIR/$id.key" "/tmp/certs/$id.crt" > "/tmp/certs/$id.pem"
+    cat "/tmp/certs/$id.crt" >> /tmp/certs/signing-chain.pem
+done
+printf '%s\n' "${KSIGN_IDS[@]}" > /tmp/certs/active-signing-keys
+umask 022
 
 # Install FPM
 gem install fpm

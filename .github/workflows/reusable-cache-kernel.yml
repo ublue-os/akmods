@@ -41,14 +41,26 @@ env:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}-${{ inputs.version }}-${{ inputs.kernel_flavor }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
+  policy:
+    runs-on: ubuntu-latest
+    outputs:
+      publish: ${{ steps.decision.outputs.publish }}
+    steps:
+      - id: decision
+        run: echo "publish=${{ github.ref == 'refs/heads/main' && contains(fromJSON('["push","schedule","workflow_dispatch"]'), github.event_name) }}" >> "$GITHUB_OUTPUT"
+
   cache-kernel:
+    needs: policy
+    environment:
+      name: ${{ needs.policy.outputs.publish == 'true' && 'ksign' || '' }}
+      deployment: false
     name: Cache ${{ matrix.architecture }}
     runs-on: ${{ matrix.architecture == 'x86_64' && 'ubuntu-26.04' || 'ubuntu-26.04-arm' }}
     outputs:
-      KCKEY: ${{ inputs.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_major_minor_patch }}
+      KCKEY: ${{ steps.cache-key.outputs.key }}
     container:
       image: "ghcr.io/ublue-os/devcontainer:latest@sha256:ec1046d2cb7d16e3cefaaae0915764f9ed4d4d74eabc25d1931923ce6670858d"
       options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
@@ -63,6 +75,7 @@ jobs:
     env:
       AKMODS_KERNEL: ${{ inputs.kernel_flavor }}
       AKMODS_VERSION: ${{ inputs.version }}
+      KSIGN_MODE: ${{ needs.policy.outputs.publish == 'true' && 'production' || 'test' }}
     
     steps:
       - name: Checkout
@@ -75,23 +88,36 @@ jobs:
         id: kernel-version
         run: just cache-kernel-version
 
+      - name: Check Signing Helpers
+        run: just test-signing-key
+
+      - name: Determine signing cache key
+        id: cache-key
+        env:
+          KERNEL_RELEASE: ${{ steps.kernel-version.outputs.kernel_release }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          source build_files/prep/check-signing-key.sh
+          digest=$(signing_key_digest certs "$KSIGN_MODE")
+          # Architecture is prepended by each cache consumer, so matrix outputs
+          # must agree regardless of which architecture finishes last.
+          release=${KERNEL_RELEASE%.*}
+          echo "key=fc${{ inputs.version }}-${{ inputs.kernel_flavor }}-$release-$KSIGN_MODE-$digest" >> "$GITHUB_OUTPUT"
+
       - name: Cache Kernel RPMs
         id: cache-kernel
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ${{ steps.kernel-version.outputs.KCPATH }}
-          key: ${{ matrix.architecture }}-${{ inputs.kernel_flavor }}-${{ steps.kernel-version.outputs.kernel_major_minor_patch }} # job outputs KCKEY
+          key: ${{ matrix.architecture }}-${{ steps.cache-key.outputs.key }}
 
-      - name: Retrieve Signing Key
-        if: contains(fromJSON('["schedule", "workflow_dispatch", "merge_group"]'), github.event_name) && steps.cache-kernel.outputs.cache-hit != 'true'
+      - name: Retrieve Signing Keys
+        if: needs.policy.outputs.publish == 'true' && steps.cache-kernel.outputs.cache-hit != 'true'
+        env:
+          KSIGN_20240711: ${{ secrets.KSIGN_20240711 }}
         shell: bash
-        run: |
-          mkdir -p certs
-          echo "${{ secrets.KERNEL_PRIVKEY }}" > certs/private_key.priv
-          echo "${{ secrets.AKMOD_PRIVKEY_20230518 }}" > certs/private_key_2.priv
-          # DEBUG: get character count of key
-          wc -c certs/private_key.priv
-          wc -c certs/private_key_2.priv
+        run: just write-signing-keys
 
       - name: Fetch Kernel
         if: steps.cache-kernel.outputs.cache-hit != 'true'
@@ -99,6 +125,17 @@ jobs:
 
       - name: List Cached Kernel RPMs
         run: find ${{ steps.kernel-version.outputs.KCPATH }}
+
+      - name: Validate Kernel Cache
+        env:
+          CACHE_DIR: ${{ steps.kernel-version.outputs.KCPATH }}
+          KERNEL_NAME: ${{ steps.kernel-version.outputs.kernel_name }}
+          KERNEL_RELEASE: ${{ steps.kernel-version.outputs.kernel_release }}
+        run: bash build_files/test/check-kernel-cache.sh "$CACHE_DIR" "$KERNEL_NAME" "$KERNEL_RELEASE"
+
+      - name: Remove Signing Keys
+        if: always()
+        run: just remove-signing-keys
   check:
     name: Check all ${{ format('{0}-{1}', inputs.kernel_flavor, inputs.version) }} cache successful
     runs-on: ubuntu-26.04

@@ -331,13 +331,8 @@ fingerprint-inputs:
 
     trees=(build_files files)
     blobs=(Containerfile.in Justfile fetch-kernel.sh)
-    # Committed public and test keys only. certs/private_key*.priv are placeholders
-    # that CI overwrites with secrets, so they must never be hashed or labeled.
-    certs=(
-        certs/public_key.der certs/public_key_2.der
-        certs/public_key.der.test certs/public_key_2.der.test
-        certs/private_key.priv.test certs/private_key_2.priv.test
-    )
+    # Hash only committed public certificates, lists, and test fixtures, never production keys.
+    mapfile -t certs < <(git ls-files -- certs | grep -E '(\.der$|/signing-keys$|/compat-key$|^certs/test/.*\.key$)')
     workflows=(.github/workflows/reusable-build.yml .github/workflows/reusable-cache-kernel.yml)
 
     objects() {
@@ -551,25 +546,69 @@ build-needed:
 
     finish true unchanged
 
+# Test signing key and certificate matching
+[group('Test')]
+test-signing-key:
+    bash build_files/test/check-signing-key-test.sh
+    bash build_files/test/check-kernel-cache-test.sh
+    bash build_files/test/check-module-signature-test.sh
+    bash build_files/test/write-signing-keys-test.sh
+
+# Write production keys supplied through environment variables
+[group('Build')]
+write-signing-keys:
+    bash build_files/prep/write-signing-keys.sh
+
+# Remove production private keys and interrupted key-writer temporary files
+[group('Build')]
+remove-signing-keys:
+    rm -f certs/production/*.key certs/production/.KSIGN_*
+
+# Generate a future signing key without activating it
+[group('Utility')]
+generate-signing-key days:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    [[ "{{ days }}" =~ ^[1-9][0-9]*$ ]]
+    id="KSIGN_$(date -u +%Y%m%d)"
+    [[ ! -e "certs/production/$id.key" && ! -e "certs/production/$id.der" ]]
+    umask 077
+    openssl req -new -x509 -newkey rsa:4096 -sha256 -nodes \
+        -days "{{ days }}" -subj "/O=Universal Blue/CN=Universal Blue $id/emailAddress=security@universal-blue.org" \
+        -addext 'basicConstraints=critical,CA:FALSE' -addext 'keyUsage=digitalSignature' \
+        -keyout "certs/production/$id.key" -outform DER -out "certs/production/$id.der"
+    echo "Created $id. Back up the private key securely before configuring production signing."
+
 # Fetch and Sign Kernel RPMs
 [group('Build')]
 fetch-kernel: (cache-kernel-version)
     #!/usr/bin/env bash
     {{ if path_exists(version_json) != 'true' { error('Need to run just cache-kernel-version first for dry-run') } else { '' } }}
-    {{ if path_exists( KCPATH / shell("jq -r '.kernel_name + \"-\" + .kernel_release + \".rpm\"' < $1", version_json)) == 'true' { 'exit 0' } else { '' } }}
     set ${CI:+-x} -euo pipefail
+
+    source build_files/prep/check-signing-key.sh
+    mode="{{ env('KSIGN_MODE', 'test') }}"
+    digest=$(signing_key_digest certs "$mode")
+    stamp="{{ KCPATH }}/signing-digest"
+    expected="$mode-$digest"
+    if [[ -s "$stamp" && "$(cat "$stamp")" == "$expected" ]] && \
+        bash build_files/test/check-kernel-cache.sh "{{ KCPATH }}" "{{ shell('jq -r .kernel_name < $1', version_json) }}" "{{ shell('jq -r .kernel_release < $1', version_json) }}"; then
+        exit 0
+    fi
+    # Old RPMs must not survive a signing-mode or kernel-release change.
+    rm -f "{{ KCPATH }}"/*.rpm "$stamp"
 
     # Pull Build Image
     {{ podman }} pull --retry 3 "{{ builder }}" >&2
 
     # Prep Environment
-    cp -a fetch-kernel.sh build_files/prep/dnf-retry.sh certs {{ KCWD }} >&2
+    cp -a fetch-kernel.sh build_files/prep/dnf-retry.sh build_files/prep/check-signing-key.sh certs {{ KCWD }} >&2
 
     # Fetch Kernels
     builder=$(podman run \
         --security-opt label=disable \
         {{ if env('CI', '') != '' { '--env CI=1' } else { '' } }} \
-        --env DUAL_SIGN=true \
+        --env KSIGN_MODE={{ env('KSIGN_MODE', 'test') }} \
         --env KERNEL_BUILD_TAG="{{ shell('jq -r .kernel_build_tag < $1', version_json) }}" \
         --env KERNEL_FLAVOR="{{ kernel_flavor }}" \
         --env KERNEL_NAME="{{ shell('jq -r .kernel_name < $1', version_json) }}" \
@@ -580,6 +619,7 @@ fetch-kernel: (cache-kernel-version)
         -dt "{{ builder }}")
     trap '{{ podman }} rm -f -t 0 $builder &>/dev/null' EXIT SIGINT
     podman exec $builder bash /tmp/kernel-cache/fetch-kernel.sh >&2
+    printf '%s\n' "$expected" > "$stamp"
     echo "{{ datetime_utc('%Y%m%d') }}" > "{{ KCPATH / 'kernel-cache-date' }}"
     find "{{ KCPATH }}"
 
@@ -593,6 +633,7 @@ build: (cache-kernel-version) (fetch-kernel)
     CPP_FLAGS=(
         {{ if env('CI', '') != '' { "--cpp-flag=-DCI_SETX" } else { '' } }}
         "--cpp-flag=-DBUILDER={{ builder }}"
+        "--cpp-flag=-DKSIGN_MODE_ARG=KSIGN_MODE={{ env('KSIGN_MODE', 'test') }}"
         "--cpp-flag=-DKERNEL_FLAVOR_ARG=KERNEL_FLAVOR={{ kernel_flavor }}"
         "--cpp-flag=-DKERNEL_NAME_ARG=KERNEL_NAME={{ shell("jq -r '.kernel_name' < $1", version_json) }}"
         "--cpp-flag=-DRPMFUSION_MIRROR_ARG=RPMFUSION_MIRROR={{ env('RPMFUSION_MIRROR', '') }}"
@@ -663,6 +704,7 @@ test: (cache-kernel-version) (fetch-kernel)
     CPP_FLAGS=(
         {{ if env('CI', '') != '' { "--cpp-flag=-DCI_SETX" } else { '' } }}
         "--cpp-flag=-DBUILDER={{ builder }}"
+        "--cpp-flag=-DKSIGN_MODE_ARG=KSIGN_MODE={{ env('KSIGN_MODE', 'test') }}"
         "--cpp-flag=-DKERNEL_FLAVOR_ARG=KERNEL_FLAVOR={{ kernel_flavor }}"
         "--cpp-flag=-DKERNEL_NAME_ARG=KERNEL_NAME={{ shell("jq -r '.kernel_name' < $1", version_json) }}"
         "--cpp-flag=-DRPMFUSION_MIRROR_ARG=RPMFUSION_MIRROR={{ env('RPMFUSION_MIRROR', '') }}"
