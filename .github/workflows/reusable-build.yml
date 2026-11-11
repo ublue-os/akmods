@@ -90,7 +90,7 @@ jobs:
       contents: read
       packages: write
     container:
-      image: "ghcr.io/ublue-os/devcontainer:latest@sha256:ec1046d2cb7d16e3cefaaae0915764f9ed4d4d74eabc25d1931923ce6670858d"
+      image: "ghcr.io/ublue-os/devcontainer:latest@sha256:1c42755a3ab617139cc68e65248609eb2033de0e9ab5219746082ea192a182d8"
       options: "--privileged --volume /:/host-sys --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
     strategy:
       fail-fast: false
@@ -187,7 +187,7 @@ jobs:
       manifest: ${{ steps.digest.outputs.manifest }}
       manifest_kernel: ${{ steps.digest.outputs.manifest_kernel }}
     container:
-      image: "ghcr.io/ublue-os/devcontainer:latest@sha256:ec1046d2cb7d16e3cefaaae0915764f9ed4d4d74eabc25d1931923ce6670858d"
+      image: "ghcr.io/ublue-os/devcontainer:latest@sha256:1c42755a3ab617139cc68e65248609eb2033de0e9ab5219746082ea192a182d8"
       options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
     permissions:
       actions: read
