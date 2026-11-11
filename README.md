@@ -93,6 +93,19 @@ We build both the open and closed drivers from NVIDIA. The open driver is the on
 - NVIDIA Pascal: Quadro: P2000, P4000, P5000, P6000, GP100; Tesla: P100, P40, P4
 - NVIDIA Maxwell: Quadro: K2200, M2000, M4000, M5000, M6000, M6000 24GB; - - Tesla: M60, M40, M6, M4
 
+### OpenZFS release signing keys
+
+ZFS release signatures are verified with the pinned public keys in
+`build_files/zfs/openzfs-release-keys.asc`. Renovate tracks the ZFS version in
+`images.yaml`, but does not update the trusted keys. If a release uses a new or
+rotated key, independently verify its full fingerprint against the official
+[OpenZFS signing keys](https://openzfs.github.io/openzfs-docs/Project%20and%20Community/Signing%20Keys.html)
+and review the change before adding it. Obtain the public key by full fingerprint,
+inspect it with `gpg --show-keys --with-fingerprint`, and update both the armored
+keyring and the sorted fingerprint list in `build_files/zfs/build-kmod-zfs.sh`.
+Also refresh existing key material when appropriate to pick up revocations or
+updated signing subkeys; do not automatically trust a changed fingerprint.
+
 ### Pinning the coreos-stable kernel
 
 `coreos_stable_kernel_pin` in the `Justfile` is a temporary ceiling on the kernel used for **every** `coreos-stable` target (`common`, `nvidia-lts`, `nvidia-open`, `zfs`). It exists so publication can continue when Fedora CoreOS stable ships a kernel that OpenZFS cannot yet build.

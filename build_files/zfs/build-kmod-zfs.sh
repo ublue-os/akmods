@@ -41,21 +41,31 @@ echo "getting zfs-${ZFS_VERSION}.tar.gz"
 "${CURL[@]}" -O "https://github.com/openzfs/zfs/releases/download/zfs-${ZFS_VERSION}/zfs-${ZFS_VERSION}.tar.gz.asc"
 "${CURL[@]}" -O "https://github.com/openzfs/zfs/releases/download/zfs-${ZFS_VERSION}/zfs-${ZFS_VERSION}.sha256.asc"
 
-echo "Import key"
+echo "Import pinned OpenZFS release keys"
 # https://openzfs.github.io/openzfs-docs/Project%20and%20Community/Signing%20Keys.html
-gpg --yes --keyserver keyserver.ubuntu.com --recv D4598027
-gpg --yes --keyserver keyserver.ubuntu.com --recv C77B9667
-gpg --yes --keyserver keyserver.ubuntu.com --recv C6AF658B
+export GNUPGHOME
+GNUPGHOME="$(mktemp -d)"
+trap 'rm -rf "${GNUPGHOME}"' EXIT
+printf '%s\n' no-auto-key-retrieve disable-dirmngr > "${GNUPGHOME}/gpg.conf"
+gpg --batch --import /tmp/openzfs-release-keys.asc
+if ! diff -u <(printf '%s\n' \
+    29D5610EAE2941E355A2FE8AB97467AAC77B9667 \
+    4F3BA9AB6D1F8D683DC2DFB56AD860EED4598027 \
+    C33DF142657ED1F7C328A2960AB9E991C6AF658B) \
+    <(gpg --batch --with-colons --list-keys | awk -F: '$1 == "pub" { primary = 1; next } primary && $1 == "fpr" { print $10; primary = 0 }' | LC_ALL=C sort); then
+    echo "OpenZFS key fingerprints differ from the pinned list; see README.md" >&2
+    exit 1
+fi
 
 echo "Verifying tar.gz signature"
 if ! gpg --verify "zfs-${ZFS_VERSION}.tar.gz.asc" "zfs-${ZFS_VERSION}.tar.gz"; then
-    echo "ZFS tarball signature verification FAILED! Exiting..."
+    echo "ZFS tarball signature verification FAILED! See README.md for OpenZFS key updates." >&2
     exit 1
 fi
 
 echo "Verifying checksum signature"
 if ! gpg --verify "zfs-${ZFS_VERSION}.sha256.asc"; then
-    echo "Checksum signature verification FAILED! Exiting..."
+    echo "Checksum signature verification FAILED! See README.md for OpenZFS key updates." >&2
     exit 1
 fi
 
