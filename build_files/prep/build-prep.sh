@@ -70,14 +70,14 @@ for id in "${KSIGN_IDS[@]}"; do
 done
 primary="${KSIGN_IDS[0]}"
 install -Dm644 "$KSIGN_DIR/$primary.der" /etc/pki/akmods/certs/public_key.der
-install -Dm600 "$KSIGN_DIR/$primary.key" /etc/pki/akmods/private/private_key.priv
+install -Dm644 "$KSIGN_DIR/$primary.key" /etc/pki/akmods/private/private_key.priv
 RPMS_TO_INSTALL+=(rpmrebuild)
 
 # This is for ZFS more than CoreOS|Longterm
 if [[ "${KERNEL_FLAVOR}" =~ "coreos" ]] || [[ "${KERNEL_FLAVOR}" =~ "longterm" ]]; then
     mkdir -p "$(dirname /lib/modules/"${KERNEL_VERSION}"/build/certs/signing_key.x509)"
     install -Dm644 "$KSIGN_DIR/$primary.der" /lib/modules/"${KERNEL_VERSION}"/build/certs/signing_key.x509
-    install -Dm600 "$KSIGN_DIR/$primary.key" /lib/modules/"${KERNEL_VERSION}"/build/certs/signing_key.pem
+    install -Dm644 "$KSIGN_DIR/$primary.key" /lib/modules/"${KERNEL_VERSION}"/build/certs/signing_key.pem
     RPMS_TO_INSTALL+=(
         autoconf
         automake
