@@ -68,7 +68,7 @@ The `nvidia` and `nvidia-open` images contains
 | extra | [system76](https://github.com/pop-os/system76-driver) | System76 laptop hardware support | [![badge](https://copr.fedorainfracloud.org/coprs/ssweeny/system76-hwe/package/system76-driver-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ssweeny/system76-hwe/package/system76-driver-kmod) |
 | extra | [system76-io](https://github.com/pop-os/system76-io-dkms) | System76 Thelio I/O board driver | [![badge](https://copr.fedorainfracloud.org/coprs/ssweeny/system76-io/package/system76-io-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ssweeny/system76-io/package/system76-io-kmod) |
 | extra | [t150-driver](https://github.com/scarburato/t150_driver) | Thrustmaster T150 steering wheel | [Terra](https://github.com/terrapkg/packages) |
-| extra | [zenergy](https://github.com/BoukeHaarsma23/zenern) | AMD Zen energy monitoring driver | [Terra](https://github.com/terrapkg/packages) |
+| extra | [zenergy](https://github.com/BoukeHaarsma23/zenergy) | AMD Zen energy monitoring driver | [Terra](https://github.com/terrapkg/packages) |
 | nvidia-open | [nvidia](https://negativo17.org/nvidia-driver/) | nvidia-open GPU drivers | [negativo17 - fedora-nvidia](https://negativo17.org/) |
 | zfs | [zfs](https://github.com/openzfs/zfs) | OpenZFS advanced file system and volume manager | [zfs](https://github.com/openzfs/zfs) |
 
