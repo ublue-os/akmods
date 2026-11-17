@@ -88,11 +88,13 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
 set ${CI+-x} -euo pipefail
+/tmp/build-kmod-nct6687d.sh
 /tmp/build-kmod-openrazer.sh
 /tmp/build-kmod-v4l2loopback.sh
 /tmp/build-kmod-wl.sh
 /tmp/build-kmod-xpadneo.sh
 /tmp/build-kmod-xone.sh
+/tmp/build-kmod-zenergy.sh
 RUNEOF
 
 #elif defined EXTRA
@@ -105,8 +107,6 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     bash <<'RUNEOF'
 set ${CI+-x} -euo pipefail
 /tmp/build-kmod-gcadapter_oc.sh || echo "SKIPPED: gcadapter_oc"
-/tmp/build-kmod-nct6687d.sh || echo "SKIPPED: nct6687d"
-/tmp/build-kmod-zenergy.sh || echo "SKIPPED: zenergy"
 /tmp/build-kmod-ryzen-smu.sh || echo "SKIPPED: ryzen-smu"
 /tmp/build-kmod-evdi.sh || echo "SKIPPED: evdi"
 /tmp/build-kmod-system76.sh || echo "SKIPPED: system76"
