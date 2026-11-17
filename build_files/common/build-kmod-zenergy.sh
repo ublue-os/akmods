@@ -18,11 +18,11 @@ akmods --force --kernels "${KERNEL}" --kmod zenergy
 modinfo /usr/lib/modules/"${KERNEL}"/extra/zenergy/zenergy.ko.xz > /dev/null \
 || (find /var/cache/akmods/zenergy/ -name \*.log -print -exec cat {} \; && exit 1)
 
-mkdir -p /var/cache/rpms/extra
-dnf download --destdir /var/cache/rpms/extra \
+mkdir -p /var/cache/rpms/common
+dnf download --destdir /var/cache/rpms/common \
     zenergy \
     zenergy-akmod-modules
 
-rm -f /var/cache/rpms/extra/*.src.rpm
+rm -f /var/cache/rpms/common/*.src.rpm
 
 rm -f /etc/yum.repos.d/terra.repo
