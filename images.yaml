@@ -153,11 +153,6 @@ server-build-group: &server-build-group
       - *arch-arm-x86
 
 images:
-  43:
-    coreos-stable:
-      !!merge <<:
-        - *desktop-build-group
-        - *server-build-group
   44:
     main:
       !!merge <<:
