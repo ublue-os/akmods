@@ -176,6 +176,10 @@ images:
       !!merge <<:
         - *server-build-group
   45:
+    coreos-stable:
+      !!merge <<:
+        - *desktop-build-group
+        - *server-build-group
     coreos-testing:
       !!merge <<:
         - *desktop-build-group
