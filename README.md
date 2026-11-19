@@ -48,13 +48,13 @@ The `nvidia` and `nvidia-open` images contains
 
 | Group | Package | Description | Source |
 |-------|---------|-------------|--------|
-| common | [nct6687d](https://github.com/Fred78290/nct6687d) | Linux kernel module for Nuvoton NCT6687D/NCT6687-R motherboard fan control | [Terra](https://github.com/terrapkg/packages) |
+| common (ogc and ogc-lts only) | [nct6687d](https://github.com/Fred78290/nct6687d) | Linux kernel module for Nuvoton NCT6687D/NCT6687-R motherboard fan control | [Terra](https://github.com/terrapkg/packages) |
 | common | [openrazer](https://openrazer.github.io/) | kernel module adding additional features to Razer hardware | [Terra](https://github.com/terrapkg/packages) |
 | common | [v4l2loopback](https://github.com/umlaeute/v4l2loopback) | allows creating "virtual video devices" | [RPMFusion - free](https://rpmfusion.org/) |
 | common | [wl](https://github.com/rpmfusion/broadcom-wl/) | support for some legacy broadcom wifi devices | [RPMFusion - nonfree](https://rpmfusion.org/) |
 | common | [xone](https://github.com/dlundqvist/xone) | xbox one controller USB wired/RF driver modified to work along-side xpad (built from [xonedo](https://github.com/OpenGamingCollective/xonedo) fork) | [![badge](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/xone-kmod/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ublue-os/akmods/package/xone-kmod) |
 | common | [xpadneo](https://github.com/atar-axis/xpadneo) | xbox one controller bluetooth driver | [negativo17 - fedora-multimedia](https://negativo17.org/) |
-| common | [zenergy](https://github.com/BoukeHaarsma23/zenergy) | AMD Zen energy monitoring driver | [Terra](https://github.com/terrapkg/packages) |
+| common (ogc and ogc-lts only) | [zenergy](https://github.com/BoukeHaarsma23/zenergy) | AMD Zen energy monitoring driver | [Terra](https://github.com/terrapkg/packages) |
 | extra | [ayaneo-leds](https://github.com/TiPSilva/ayaneo-leds) | AYANEO joystick ring RGB LEDs (legacy EC models) | [Terra](https://github.com/terrapkg/packages) |
 | extra | [ayaneo-platform](https://github.com/ShadowBlip/ayaneo-platform) | AYANEO x86 handheld RGB LED control and bypass charging | [Terra](https://github.com/terrapkg/packages) |
 | extra | [evdi](https://github.com/DisplayLink/evdi) | DisplayLink USB graphics adapter support | [negativo17 - fedora-multimedia](https://negativo17.org/) |
