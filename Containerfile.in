@@ -88,13 +88,17 @@ RUN --mount=type=cache,dst=/var/cache/dnf \
     --mount=type=cache,dst=/var/cache/libdnf5 \
     bash <<'RUNEOF'
 set ${CI+-x} -euo pipefail
+#ifdef OGC
 /tmp/build-kmod-nct6687d.sh
+#endif /* OGC */
 /tmp/build-kmod-openrazer.sh
 /tmp/build-kmod-v4l2loopback.sh
 /tmp/build-kmod-wl.sh
 /tmp/build-kmod-xpadneo.sh
 /tmp/build-kmod-xone.sh
+#ifdef OGC
 /tmp/build-kmod-zenergy.sh
+#endif /* OGC */
 RUNEOF
 
 #elif defined EXTRA
