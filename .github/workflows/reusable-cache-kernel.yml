@@ -19,7 +19,7 @@ on:
     outputs:
       KCKEY:
         description: Cache Key
-        value: ${{ jobs.cache-kernel.outputs.KCKEY }}
+        value: ${{ jobs.check.outputs.KCKEY }}
   workflow_dispatch:
     inputs:
       architecture:
@@ -59,8 +59,6 @@ jobs:
       deployment: false
     name: Cache ${{ matrix.architecture }}
     runs-on: ${{ matrix.architecture == 'x86_64' && 'ubuntu-26.04' || 'ubuntu-26.04-arm' }}
-    outputs:
-      KCKEY: ${{ steps.cache-key.outputs.key }}
     container:
       image: "ghcr.io/ublue-os/devcontainer:latest@sha256:1c42755a3ab617139cc68e65248609eb2033de0e9ab5219746082ea192a182d8"
       options: "--privileged --volume /var/lib/containers:/var/lib/containers --security-opt seccomp=unconfined --security-opt label=disable --user 0:0"
@@ -95,13 +93,14 @@ jobs:
         id: cache-key
         env:
           KERNEL_RELEASE: ${{ steps.kernel-version.outputs.kernel_release }}
+          ARCH: ${{ matrix.architecture }}
         shell: bash
         run: |
           set -euo pipefail
           source build_files/prep/check-signing-key.sh
           digest=$(signing_key_digest certs "$KSIGN_MODE")
-          # Architecture is prepended by each cache consumer, so matrix outputs
-          # must agree regardless of which architecture finishes last.
+          [[ "$KERNEL_RELEASE" == *."$ARCH" ]] || { echo "Kernel release '$KERNEL_RELEASE' does not match $ARCH" >&2; exit 1; }
+          # Architecture is prepended by each cache consumer.
           release=${KERNEL_RELEASE%.*}
           echo "key=fc${{ inputs.version }}-${{ inputs.kernel_flavor }}-$release-$KSIGN_MODE-$digest" >> "$GITHUB_OUTPUT"
 
@@ -133,6 +132,22 @@ jobs:
           KERNEL_RELEASE: ${{ steps.kernel-version.outputs.kernel_release }}
         run: bash build_files/test/check-kernel-cache.sh "$CACHE_DIR" "$KERNEL_NAME" "$KERNEL_RELEASE"
 
+      - name: Record architecture cache key
+        env:
+          CACHE_KEY: ${{ steps.cache-key.outputs.key }}
+          ARCH: ${{ matrix.architecture }}
+        shell: bash
+        run: echo "$CACHE_KEY" > "cache-key-$ARCH.txt"
+
+      - name: Upload architecture cache key
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: kernel-cache-key-${{ inputs.kernel_flavor }}-${{ inputs.version }}-${{ matrix.architecture }}
+          path: cache-key-${{ matrix.architecture }}.txt
+          retention-days: 1
+          if-no-files-found: error
+          overwrite: true
+
       - name: Remove Signing Keys
         if: always()
         run: just remove-signing-keys
@@ -140,11 +155,40 @@ jobs:
     name: Check all ${{ format('{0}-{1}', inputs.kernel_flavor, inputs.version) }} cache successful
     runs-on: ubuntu-26.04
     needs: [cache-kernel]
+    outputs:
+      KCKEY: ${{ steps.agreement.outputs.key }}
     permissions:
       actions: read
     steps:
-      - name: Exit on failure
-        if: ${{ needs.cache-kernel.result == 'failure' }}
-        run: exit 1
-      - name: Exit
-        run: exit 0
+      - name: Download architecture cache keys
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: kernel-cache-key-${{ inputs.kernel_flavor }}-${{ inputs.version }}-*
+          path: cache-keys
+          merge-multiple: true
+      - name: Verify architecture agreement
+        id: agreement
+        env:
+          ARCHITECTURES: ${{ inputs.architecture }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Every architecture must have cached the same kernel, because the
+          # build jobs receive a single cache key.
+          shared_key=""
+          for arch in $(jq -r '.[]' <<< "$ARCHITECTURES"); do
+            key_file="cache-keys/cache-key-$arch.txt"
+            if [[ ! -s "$key_file" ]]; then
+              echo "::error::No cache key was recorded for $arch"
+              exit 1
+            fi
+            key=$(cat "$key_file")
+            echo "$arch: $key"
+            if [[ -z "$shared_key" ]]; then
+              shared_key="$key"
+            elif [[ "$key" != "$shared_key" ]]; then
+              echo "::error::Architectures cached different kernels; see the keys above"
+              exit 1
+            fi
+          done
+          echo "key=$shared_key" >> "$GITHUB_OUTPUT"
