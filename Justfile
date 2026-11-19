@@ -212,8 +212,57 @@ get-kernel-version:
             ;;
         "longterm"*)
             $dnf copr enable -y kwizart/kernel-{{ kernel_flavor }} >&2
-            $dnf makecache >&2
-            linux=$($dnf repoquery --whatprovides kernel-longterm | sort -V | tail -n1 | sed 's/.*://')
+            copr_repo="copr:copr.fedorainfracloud.org:kwizart:kernel-{{ kernel_flavor }}"
+
+            # COPR builds each architecture separately, and one can fail while
+            # another succeeds. Every architecture must use the same kernel, so
+            # pick the newest version that COPR has for all of them.
+            target_arches=$({{ yq }} '[explode(.).images.{{ version }}["{{ kernel_flavor }}"][].architecture[]] | unique | .[]' images.yaml)
+
+            list_longterm_versions() {
+                # 'podman exec -t' mixes dnf warnings into stdout, so keep only version lines
+                $dnf repoquery -q --forcearch="$1" --arch="$1" --repo="$copr_repo" \
+                    --setopt="$copr_repo.skip_if_unavailable=0" \
+                    --qf '%{version}-%{release}\n' kernel-longterm \
+                    | tr -d '\r' \
+                    | grep -E '^[0-9]+\.[0-9]+\.[0-9]+-[^[:space:]]+$' \
+                    | sort -V
+            }
+
+            declare -A versions_for=()
+            for target_arch in $target_arches; do
+                versions_for[$target_arch]=$(list_longterm_versions "$target_arch" || true)
+                if [[ -z "${versions_for[$target_arch]}" ]]; then
+                    echo "longterm: no kernel versions found for $target_arch" >&2
+                    exit 1
+                fi
+                echo "longterm: newest for $target_arch is $(tail -n1 <<< "${versions_for[$target_arch]}")" >&2
+            done
+
+            # Walk one architecture's versions from newest to oldest and stop
+            # at the first one that every other architecture also has.
+            first_arch=$(head -n1 <<< "$target_arches")
+            shared_version=""
+            for candidate in $(tac <<< "${versions_for[$first_arch]}"); do
+                on_every_arch=true
+                for target_arch in $target_arches; do
+                    if ! grep -qxF "$candidate" <<< "${versions_for[$target_arch]}"; then
+                        on_every_arch=false
+                        break
+                    fi
+                done
+                if [[ "$on_every_arch" == true ]]; then
+                    shared_version="$candidate"
+                    break
+                fi
+            done
+            if [[ -z "$shared_version" ]]; then
+                echo "longterm: no kernel version is available for every architecture" >&2
+                exit 1
+            fi
+            echo "longterm: using $shared_version" >&2
+
+            linux="${shared_version}.{{ arch() }}"
             kernel_name=kernel-longterm
             ;;
         "ogc"|"ogc-lts")
