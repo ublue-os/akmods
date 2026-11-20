@@ -232,7 +232,7 @@ Since nothing additional was set. The following will occur. The build scripts wi
 - RPMFUSION_MIRROR - Optional base URL for an RPM Fusion mirror (for example `https://mirrors.ocf.berkeley.edu/rpmfusion`). When set, the build installs the rpmfusion release RPMs from it and points the rpmfusion repos at it instead of the metalink. When unset, the build uses `https://download1.rpmfusion.org` and the normal metalink. It can go in `.env`.
 
 ```bash
-AKMODS_KERNEL=longterm-6.18 AKMODS_VERSION=44 AKMODS_TARGET=zfs just build
+AKMODS_KERNEL=longterm-6.18 AKMODS_VERSION=45 AKMODS_TARGET=zfs just build
 ```
 
 Will determine the current longterm kernel version, download the rpms and sign them, and will then build the zfs package.
