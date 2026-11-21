@@ -92,6 +92,7 @@ set ${CI+-x} -euo pipefail
 /tmp/build-kmod-nct6687d.sh
 #endif /* OGC */
 /tmp/build-kmod-openrazer.sh
+/tmp/build-kmod-tuxedo-laptop.sh
 /tmp/build-kmod-v4l2loopback.sh
 /tmp/build-kmod-wl.sh
 /tmp/build-kmod-xpadneo.sh
