@@ -1,0 +1,61 @@
+From ea4e58b2eb6070393a6e31322c175ddadb319933 Mon Sep 17 00:00:00 2001
+From: Rouan <rouan@netron.dev>
+Date: Mon, 27 Jul 2026 16:52:14 +0200
+Subject: [PATCH] nvkms: honour mergeHeadSection in the modeset viewport origin
+
+Under 2Heads1OR the api head's frame is split horizontally across two
+hardware heads, and each head must scan out its own section of the
+surface. That section is selected by a viewport origin offset of
+viewPort.in.width * mergeHeadSection.
+
+Two of the three paths that set the viewport origin apply the offset:
+nvApiHeadSetViewportPointIn() when panning (nvkms-flip.c), and
+nvUpdateFlipEvoHwState() on flip (nvkms-hw-flip.c) -- but the latter only
+inside "if (pParams->viewPortIn.specified)", and nvidia-drm never
+specifies viewPortIn, so on the DRM/KMS path it does not run.
+
+nvSetViewPortsEvo() hardcoded the origin to 0 for every head. With
+nothing else setting it, both merge heads scanned out from x=0 under
+2Heads1OR, so the leftmost section was repeated across the output and the
+right-hand half of the framebuffer was never displayed.
+
+Observed with an HTC Vive Pro 2 at 4896x2448@120 over DisplayPort: the
+pixel clock (1543470 kHz) exceeds a single head's maximum, so the mode is
+split across two heads (raster 4996x2574 -> 2498x2574, viewport in width
+4896 -> 2448 each). The headset showed the left half of the framebuffer
+on both eyes. With this change head 0 gets origin x=0 and head 1 x=2448,
+and the image is correct.
+
+mergeHeadSection is 0 whenever 2Heads1OR is not in use, so this is a
+no-op for single-head configurations.
+---
+ src/nvidia-modeset/src/nvkms-evo.c | 15 ++++++++++++---
+ 1 file changed, 12 insertions(+), 3 deletions(-)
+
+diff --git a/src/nvidia-modeset/src/nvkms-evo.c b/src/nvidia-modeset/src/nvkms-evo.c
+index 82fa6fe719..068af73099 100644
+--- a/src/nvidia-modeset/src/nvkms-evo.c
++++ b/src/nvidia-modeset/src/nvkms-evo.c
+@@ -4584,10 +4584,19 @@ void nvSetViewPortsEvo(NVDispEvoPtr pDispEvo,
+     pDevEvo->hal->SetOutputScaler(pDispEvo, head, updateState);
+ 
+     /*
+-     * Specify safe default values of 0 for viewPortPointIn x and y; these
+-     * may be changed when panning out of band of a modeset.
++     * Specify safe default values for viewPortPointIn x and y; these may be
++     * changed when panning out of band of a modeset.
++     *
++     * Under 2Heads1OR the api head's frame is split horizontally across the
++     * hardware heads, so each head has to start at its own section of the
++     * surface: the same offset nvApiHeadSetViewportPointIn() applies when
++     * panning. Otherwise every merge head scans out from x=0 and the leftmost
++     * section is repeated across the whole output. mergeHeadSection is 0 when
++     * 2Heads1OR is not in use, leaving the default of 0,0.
+      */
+-    EvoSetViewportPointIn(pDispEvo, head, 0 /* x */, 0 /* y */, updateState);
++    EvoSetViewportPointIn(pDispEvo, head,
++                          pViewPort->in.width * pHeadState->mergeHeadSection,
++                          0 /* y */, updateState);
+ }
+ 
+ 
