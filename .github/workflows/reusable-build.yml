@@ -119,7 +119,7 @@ jobs:
         continue-on-error: true
         uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
         with:
-          cosign-release: "v3.1.4"
+          cosign-release: "v3.1.6"
 
       # Every event prepares the snapshot, so test and build pin the same inputs
       - name: Prepare Fingerprint
@@ -224,7 +224,7 @@ jobs:
         continue-on-error: true
         uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
         with:
-          cosign-release: "v3.1.4"
+          cosign-release: "v3.1.6"
 
       # Attestations and digests always run, so provenance gets repaired even when this skips
       - name: Check if manifest needed
@@ -302,7 +302,7 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
         with:
-          cosign-release: "v3.1.4"
+          cosign-release: "v3.1.6"
 
       - name: Verify Published Subjects
         env:
